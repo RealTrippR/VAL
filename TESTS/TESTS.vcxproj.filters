@@ -75,6 +75,12 @@
     <None Include="shaders\particleShader.comp">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\particleShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\particleShader.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\viking_room.png">

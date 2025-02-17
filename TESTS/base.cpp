@@ -209,8 +209,6 @@ int main() {
 	VkBuffer indexBuffer = NULL;
 	VkDeviceMemory indexBufferMem = NULL;
 	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
-	//mainProc.render();
-	//mainProc.display(window.getHandleGLFW());
 
 
 

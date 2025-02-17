@@ -97,13 +97,13 @@ namespace val {
 		}
 
 		if (_SSBO_Handles.size() > 0) {
-			VkDescriptorSetLayoutBinding uboLayoutBinding{};
-			uboLayoutBinding.binding = currentBindingIdx; currentBindingIdx++;
-			uboLayoutBinding.descriptorCount = _SSBO_Handles.size();
-			uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			uboLayoutBinding.pImmutableSamplers = nullptr;
-			uboLayoutBinding.stageFlags = getStageFlags();
-			_layoutBindings.push_back(uboLayoutBinding);
+			VkDescriptorSetLayoutBinding ssboLayoutBinding{};
+			ssboLayoutBinding.binding = currentBindingIdx; currentBindingIdx++;
+			ssboLayoutBinding.descriptorCount = _SSBO_Handles.size();
+			ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			ssboLayoutBinding.pImmutableSamplers = nullptr;
+			ssboLayoutBinding.stageFlags = getStageFlags();
+			_layoutBindings.push_back(ssboLayoutBinding);
 		}
 
 		if (_imageSamplersCreateInfos.has_value()) {

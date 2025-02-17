@@ -4,8 +4,9 @@
 #include <VAL/lib/system/system_utils.hpp>
 namespace val {
 	class SSBO_Handle {
+	public:
 		SSBO_Handle() = default;
-		SSBO_Handle(uint16_t sizeOfSSBO) {
+		SSBO_Handle(uint64_t sizeOfSSBO) {
 			_size = sizeOfSSBO;
 		}
 	public:

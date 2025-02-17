@@ -28,9 +28,13 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 	Write a test to ensure that VAL supports more than just .jpg and .png images.
 	OpenImageIO might be a good alternative. (https://github.com/AcademySoftwareFoundation/OpenImageIO)
 
+[!] Use Vulkan Memory Allocator to simplify the process of allocating data. (https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
+
 [~] Simplify the process of creating uniform buffers, push constants, etc, etc, and
 	simplify the process of uploading data to shaders
 
+[ ] Add dedicated compute and transfer queues.
+ 
 [ ] create shaderTest.cpp to test uploading UBOs, push constants, and SSBOs.
 
 [ ] Optimize buffers. Create a chunked or packed buffer class for this purpose.

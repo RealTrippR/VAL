@@ -1,8 +1,8 @@
-#include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
+#include <VAL/lib/system/pipelineCreateInfo.hpp>
 #include <VAL/lib/graphics/shader.hpp>
 
 namespace val {
-	std::vector<UBO_Handle*> graphicsPipelineCreateInfo::getUniqueUBOs() {
+	std::vector<UBO_Handle*> pipelineCreateInfo::getUniqueUBOs() {
 		std::vector<UBO_Handle*> UBO_Handles;
 		for (shader* shdr : shaders) {
 			for (UBO_Handle* UBO_Hdl : shdr->_UBOs) {
@@ -16,7 +16,7 @@ namespace val {
 		return UBO_Handles;
 	}
 
-	std::vector<pushConstantHandle*> graphicsPipelineCreateInfo::getUniquePushConstants() {
+	std::vector<pushConstantHandle*> pipelineCreateInfo::getUniquePushConstants() {
 		std::vector<pushConstantHandle*> PC_Handles;
 		for (shader* shdr : shaders) {
 			for (pushConstantHandle* PC_Hdl : shdr->_pushConstants) {
@@ -30,7 +30,7 @@ namespace val {
 		return PC_Handles;
 	}
 
-	std::vector<SSBO_Handle*> graphicsPipelineCreateInfo::getUniqueSSBOs() {
+	std::vector<SSBO_Handle*> pipelineCreateInfo::getUniqueSSBOs() {
 		std::vector<SSBO_Handle*> SSBO_Handles;
 		for (shader* shdr : shaders) {
 			for (SSBO_Handle* SSBO_HDL : shdr->_SSBO_Handles) {

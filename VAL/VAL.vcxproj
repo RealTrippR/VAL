@@ -144,7 +144,9 @@
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
+    <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
+    <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
@@ -159,7 +161,7 @@
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
-    <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp" />
+    <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />

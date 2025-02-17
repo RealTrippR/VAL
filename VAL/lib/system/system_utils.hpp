@@ -41,7 +41,8 @@ namespace val {
 	{
 		std::optional<unsigned int> graphicsFamily;
 		std::optional<unsigned int> presentFamily;
-
+		std::optional<unsigned int> computeFamily;
+		std::optional<unsigned int> computeAndGraphicsFamily;
 		/*bool isComplete()
 		{
 			return graphicsFamily.has_value() && presentFamily.has_value();

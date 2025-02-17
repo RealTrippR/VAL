@@ -173,9 +173,10 @@
     </ClCompile>
     <ClCompile Include="SSBOtest.cpp">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </ClCompile>
+    <ClCompile Include="WindowResizing.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="WindowResizing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="polygonVertex.hpp" />
@@ -193,6 +194,8 @@
     <None Include="shaders\imageshader.frag" />
     <None Include="shaders\multimeshRenderer.vert" />
     <None Include="shaders\particleShader.comp" />
+    <None Include="shaders\particleShader.frag" />
+    <None Include="shaders\particleShader.vert" />
     <None Include="shaders\polygon.frag" />
     <None Include="shaders\polygon.vert" />
     <None Include="shaders\shader.vert" />

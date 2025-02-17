@@ -86,6 +86,12 @@
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\computePipelineCreateInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\pipelineCreateInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -118,7 +124,7 @@
     <ClCompile Include="src\system\pushConstantHandle.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp">
+    <ClCompile Include="src\system\pipelineCreateInfo.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
