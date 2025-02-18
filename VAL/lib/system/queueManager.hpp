@@ -10,16 +10,28 @@
 
 namespace val
 {
+
+	class VAL_PROC; // forward declaration
+
 	class queueManager {
 	public:
-		uint32_t findQueueFamilyFromQueueFlags(VkPhysicalDevice physicalDevice);
-		void create(const uint32_t queueFamily, const uint16_t framesInFlight, bool semaphoresNeeded, bool fencesNeeded);
+		uint32_t findQueueFamilyFromQueueFlags(VkPhysicalDevice physicalDevice,
+			bool isPresentQueue=false, VkSurfaceKHR surface=VK_NULL_HANDLE);
+
+		void create(VAL_PROC& proc, bool semaphoresNeeded, bool fencesNeeded);
+
+		void destroy(VAL_PROC& proc);
+	public:
+		VkDeviceQueueCreateInfo getQueueCreateInfo();
 	public:
 		VkQueue _queue;
 		VkQueueFlags _queueFlags;
 		uint32_t _queueFamily;
-		std::optional<std::vector<VkSemaphore>> _semaphores;
-		std::optional<std::vector<VkSemaphore>> _inFlightFences;
+
+		std::vector<VkCommandBuffer> _commandBuffers;
+
+		std::vector<VkSemaphore> _semaphores;
+		std::vector<VkFence> _fences;
 
 	};
 }

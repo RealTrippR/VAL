@@ -5,7 +5,7 @@ namespace val {
 	void pushConstantHandle::update(VAL_PROC& proc, void* data, const uint16_t& pipelineIdx) {
 		//VkCommandBuffer cmdBuffer = proc.beginSingleTimeCommands();
 		vkCmdPushConstants(
-			proc._commandBuffers[proc._currentFrame],
+			proc._graphicsQueue._commandBuffers[proc._currentFrame],
 			proc._pipelineLayouts[pipelineIdx],
 			_stageFlags,
 			0,

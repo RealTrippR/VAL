@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
+#include <VAL/lib/system/queueManager.hpp>
 #include <vector>
 
 
@@ -68,7 +69,8 @@ namespace val {
 
 		VkColorSpaceKHR _colorSpace;
 
-		VkQueue _presentQueue;
+		queueManager _presentQueue;
+		//VkQueue _presentQueue;
 
 		VkSurfaceKHR _surface;
 		////////////////// SWAPCHAIN //////////////////
@@ -91,10 +93,10 @@ namespace val {
 
 		////////////////// SYNC OBJECTS //////////////////
 
-		std::vector<VkSemaphore> _imageAvailableSemaphores;
-		std::vector<VkSemaphore> _renderFinishedSemaphores;
+		//std::vector<VkSemaphore> _imageAvailableSemaphores;
+		//std::vector<VkSemaphore> _renderFinishedSemaphores;
 
-		std::vector<VkFence> _inFlightFences;
+		//std::vector<VkFence> _inFlightFences;
 
 		///////////////////////////////////////////////
 	};
