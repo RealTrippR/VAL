@@ -1,13 +1,17 @@
-#ifndef VAL_COMPUTE_PIPELINE_CREATE_INFO
-#define VAL_COMPUTE_PIPELINE_CREATE_INFO
+#ifndef FML_COMPUTE_PIPELINE_CREATE_INFO_HPP
+#define FML_COMPUTE_PIPELINE_CREATE_INFO_HPP
 
-#include <VAL/lib/system/system_utils.hpp>
+#define GLFW_INCLUDE_VULKAN
 
-namespace val
-{
-	class computePipelineCreateInfo : pipelineCreateInfo {
+
+#include <VAL/lib/system/pipelineCreateInfo.hpp>
+namespace val {
+	class shader;
+
+	class computePipelineCreateInfo : public pipelineCreateInfo {
 	public:
+
 	};
 }
 
-#endif // !VAL_COMPUTE_PIPELINE_CREATE_INFO
+#endif // !FML_COMPUTE_PIPELINE_CREATE_INFO_HPP

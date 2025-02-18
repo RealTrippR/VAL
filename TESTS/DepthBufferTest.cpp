@@ -83,7 +83,7 @@ void setImageSamplerInfo(VkSamplerCreateInfo* info) {
 	info->maxAnisotropy = 1.0f;
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
 	// RASTERIZER
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;

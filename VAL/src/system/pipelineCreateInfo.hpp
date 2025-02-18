@@ -15,7 +15,7 @@
 namespace val {
 	class shader;
 
-	class pipelineCreateInfo {
+	class computePipelineCreateInfo {
 	public:
 		std::vector<shader*> shaders;
 

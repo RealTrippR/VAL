@@ -74,7 +74,7 @@ void updateUniformBuffer2(int shaderIndex, val::VAL_PROC& proc) {
 	memcpy(proc._uniformBuffersMapped[proc._currentFrame][shaderIndex], &ubo, sizeof(ubo));
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -249,7 +249,7 @@ int main() {
 	fragShaderImage.setImageView({ &renderTargImgView });
 	// fragShader.setDescript
 	// configure pipeline create info
-	val::graphicsPipelineCreateInfo pipelineInfo1;
+	val::pipelineCreateInfo pipelineInfo1;
 	pipelineInfo1.shaders = { &vertShader,&fragShaderImage };
 
 	setGraphicsPipelineInfo(pipelineInfo1);
@@ -266,7 +266,7 @@ int main() {
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	val::graphicsPipelineCreateInfo pipelineInfo2;
+	val::pipelineCreateInfo pipelineInfo2;
 
 	uniformBufferObject ubo2;
 	val::shader vertShader2("shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");

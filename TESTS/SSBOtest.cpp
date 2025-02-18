@@ -190,12 +190,12 @@ int main() {
 
 	// load and configure shaders
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/particleShadervert.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
+	val::shader vertShader("shaders-compiled/particleShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setBindingDescription(Particle::getBindingDescription());
 	vertShader.setVertexAttributes(Particle::getAttributeDescriptions().data(), Particle::getAttributeDescriptions().size());
 
 	// load and configure vert shader
-	val::shader fragShaders("shaders-compiled/particleShaderfrag.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
+	val::shader fragShader("shaders-compiled/particleShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	val::shader computeShader("shaders-compiled/particleShadercomp.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
 	computeShader._SSBO_Handles = {&ssboHdl};
@@ -206,7 +206,10 @@ int main() {
 	//////////////////////////////////////////////////////////////
 
 	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders = { &computeShader };
+	pipelineInfo.shaders = { &vertShader, &fragShader };
+
+	val::computePipelineCreateInfo computePipelineInfo;
+	computePipelineInfo.shaders = { &computeShader };
 
 	setGraphicsPipelineInfo(pipelineInfo);
 
@@ -222,7 +225,7 @@ int main() {
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
 
-	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses);
+	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses, { &computePipelineInfo });
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], mainProc._device);
 

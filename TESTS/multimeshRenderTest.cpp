@@ -108,7 +108,7 @@ void setImageSamplerInfo(VkSamplerCreateInfo* info) {
 	info->maxAnisotropy = 1.0f;
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, VkSampleCountFlagBits msaaSamples) {
+void setGraphicsPipelineInfo(val::pipelineCreateInfo& info, VkSampleCountFlagBits msaaSamples) {
 	// RASTERIZER
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -314,7 +314,7 @@ int main() {
 	fragShader.setImageView({ &imgView });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipelineInfo;
+	val::pipelineCreateInfo pipelineInfo;
 
 	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
 	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function

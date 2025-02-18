@@ -57,7 +57,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -170,7 +170,7 @@ int main() {
 
 	//////////////////////////////////////////////////////////////
 
-	val::graphicsPipelineCreateInfo pipelineInfo;
+	val::pipelineCreateInfo pipelineInfo;
 	pipelineInfo.shaders = { &vertShader,&fragShader };
 
 	setGraphicsPipelineInfo(pipelineInfo);

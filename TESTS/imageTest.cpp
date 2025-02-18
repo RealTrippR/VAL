@@ -72,7 +72,7 @@ void updateImages(val::VAL_PROC& proc, VkSampler* imageSampler, VkImageView* new
 	vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -212,7 +212,7 @@ int main() {
 	fragShader.setImageView({&currentImgView});
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipelineInfo;
+	val::pipelineCreateInfo pipelineInfo;
 	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
 
 	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function

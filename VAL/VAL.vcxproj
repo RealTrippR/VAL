@@ -146,13 +146,13 @@
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
-    <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
+    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
+    <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Handle.hpp" />
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
-    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\renderPassInfo.hpp" />
     <ClInclude Include="lib\system\resourceManager.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
@@ -164,8 +164,9 @@
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
+    <ClCompile Include="src\system\queueManager.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />
-    <ClCompile Include="src\system\pipeline.cpp" />
+    <ClInclude Include="src\system\pipelineCreateInfo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\UBO_Handle.cpp" />

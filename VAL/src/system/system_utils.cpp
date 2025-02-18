@@ -43,17 +43,17 @@ namespace val {
 		int i = 0;
 		for (const auto& queueFamily : queueFamilies) {
 			// Check for graphics queue support
-			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 				indices.graphicsFamily = i;
 			}
 
-			if (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			/*if (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT) {
 				indices.computeFamily = i;
 			}
 
 			if (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 				indices.computeAndGraphicsFamily = i;
-			}
+			}*/
 
 			// Check for presentation queue support only if surface is provided
 			if (surface != NULL) {
