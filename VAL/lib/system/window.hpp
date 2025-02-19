@@ -46,9 +46,6 @@ namespace val {
 
 		void createSwapChainFrameBuffers(const VkExtent2D& extent, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
-		/*void drawFrameExperimental(VkRenderPass renderPass, const VkBuffer& vertexBuffer, const VkBuffer& indexBuffer,
-			const uint16_t* indices, const uint64_t& indicesCount, const VkFormat& imageFormat);*/
-
 		void updateSwapChain(const VkFormat& imageFormat);
 
 		void waitForFences();

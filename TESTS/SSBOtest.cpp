@@ -29,11 +29,19 @@ const bool enableValidationLayers = true;
 
 #include <random>
 
+//////////////////////////////////////////////
+// vars for the particle sim //
 const uint32_t PARTICLE_COUNT = 8192;
-
+float lastFrameTime = 0.0f;
+double lastTime = 0.0f;
+//////////////////////////////////////////////
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
+};
+
+struct UniformBufferObject {
+	float deltaTime = 1.0f;
 };
 
 struct Particle {
@@ -66,6 +74,12 @@ struct Particle {
         return attributeDescriptions;
     }
 };
+
+void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& UBO_HDL) {
+	static UniformBufferObject ubo{};
+	ubo.deltaTime = lastFrameTime * 2.0f;
+	UBO_HDL.update(proc, &ubo);
+}
 
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
@@ -184,9 +198,10 @@ int main() {
 	std::vector<Particle> particles;
 	initParticles(particles, { 800,800 });
 
-	val::SSBO_Handle ssboHdl(particles.size()*sizeof(Particle));
+	val::SSBO_Handle ssboHdl(particles.size()*sizeof(Particle), GPU_ONLY);
+	ssboHdl._additionalUsageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-
+	val::UBO_Handle uboHDL(sizeof(UniformBufferObject));
 
 	// load and configure shaders
 	// load and configure vert shader
@@ -198,8 +213,8 @@ int main() {
 	val::shader fragShader("shaders-compiled/particleShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	val::shader computeShader("shaders-compiled/particleShadercomp.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
-	computeShader._SSBO_Handles = {&ssboHdl};
-	
+	computeShader._SSBO_Handles = { &ssboHdl, &ssboHdl };
+	computeShader._UBO_Handles = { &uboHDL };
 
 
 
@@ -230,50 +245,65 @@ int main() {
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], mainProc._device);
 
 
-	const std::vector<res::vertex> vertices = {
-		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-
-	VkBuffer vertexBuffer = NULL;
-	VkDeviceMemory vertexBufferMem = NULL;
-	mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(res::vertex), &vertexBuffer, &vertexBufferMem,
-	VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-
-
-	std::vector<uint32_t> indices = {
-		0, 1, 2, 2, 3, 0 };
-	VkBuffer indexBuffer = NULL;
-	VkDeviceMemory indexBufferMem = NULL;
-	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
-
-
-
-	mainProc.createDescriptorSets(&pipelineInfo, 0u);
+	mainProc.createDescriptorSets(&pipelineInfo, 0u); // this should be handled in the VAL_PROC class
+	mainProc.createDescriptorSets(&computePipelineInfo, 1u); // this should be handled in the VAL_PROC class
 
 	VkClearValue clearValues[1];
 	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
 
 	uint32_t currentSC_ImageIdx = 0;
 
+	ssboHdl.updateFromTempStagingBuffer(mainProc, particles.data()); // load particles into SSBO
+
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		glfwPollEvents();
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+
+		// Compute submission        
+		vkWaitForFences(mainProc._device, 1, &mainProc._computeQueue._fences[mainProc._currentFrame], VK_TRUE, UINT64_MAX);
+
+		updateUniformBuffer(mainProc, uboHDL);
+		
 		mainProc.beginDraw(imageFormat);
 
-		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, vertexBuffer, indexBuffer, indices.data(),
-			indices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, ssboHdl.getBuffer(mainProc), VK_NULL_HANDLE, 0,
+			PARTICLE_COUNT, 0, imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+
+		/////////////////////////////////////
+		///// compute buffer submission /////
+		
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(mainProc._computeQueue._commandBuffers[mainProc._currentFrame], &beginInfo) != VK_SUCCESS) {
+			throw std::runtime_error("failed to begin recording compute command buffer!");
+		}
+
+		vkCmdBindPipeline(mainProc._computeQueue._commandBuffers[mainProc._currentFrame], VK_PIPELINE_BIND_POINT_COMPUTE, mainProc._computePipelines[0]);
+
+		vkCmdBindDescriptorSets(mainProc._computeQueue._commandBuffers[mainProc._currentFrame], VK_PIPELINE_BIND_POINT_COMPUTE, mainProc._computePipelineLayouts[0], 0, 1, &mainProc._descriptorSets[1][0], 0, nullptr);
+
+		vkCmdDispatch(mainProc._computeQueue._commandBuffers[mainProc._currentFrame], PARTICLE_COUNT / 256, 1, 1);
+
+		if (vkEndCommandBuffer(mainProc._computeQueue._commandBuffers[mainProc._currentFrame]) != VK_SUCCESS) {
+			throw std::runtime_error("failed to record compute command buffer!");
+		}
+
+		/////////////////////////////////////
+
 
 		mainProc.endDraw(imageFormat);
 
 		window.waitForFences();
+
+		double currentTime = glfwGetTime();
+		lastFrameTime = (currentTime - lastTime) * 1000.0;
+		lastTime = currentTime;
 	}
 
 	window.cleanupSwapChain();
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }

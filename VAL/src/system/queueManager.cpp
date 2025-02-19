@@ -25,7 +25,7 @@ namespace val
 				return _queueFamily;
 			}
 
-			if (queueFamily.queueFlags == _queueFlags) {
+			if (queueFamily.queueFlags & _queueFlags) {
 				_queueFamily = i;
 				return _queueFamily;
 			}
@@ -78,6 +78,14 @@ namespace val
 				}
 			}
 		}
+	}
+
+	VkDeviceQueueCreateInfo queueManager::getQueueCreateInfo() {
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = _queueFamily;
+		queueCreateInfo.queueCount = 1;
+		return queueCreateInfo;
 	}
 
 	void queueManager::destroy(VAL_PROC& proc) {

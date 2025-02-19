@@ -7,9 +7,7 @@ namespace val {
 	class shader;
 
 	class graphicsPipelineCreateInfo : public pipelineCreateInfo {
-	public:
-		std::vector<shader*> shaders;
-		
+	public:		
 		std::vector<VkDynamicState> dynamicStates;
 		renderPassInfo* renderPassInfo;
 		VkPipelineDynamicStateCreateInfo dynamicState{};

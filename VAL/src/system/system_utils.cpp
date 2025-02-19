@@ -289,7 +289,7 @@ namespace val {
 		VkDeviceSize imageSize = texWidth * texHeight * (texChannels + 1);
 
 		if (!pixelsOut) {
-			printf("VAL: FAILED TO LOAD TEXTURE IMAGE, IMAGE AT FILEPATH: %s IS OF AN UNSUPPORTED TYPE OR DOES NOT EXIST!\n", imgFilepath);
+			printf("VAL: FAILED TO LOAD TEXTURE IMAGE, IMAGE AT FILEPATH: %s IS OF AN UNSUPPORTED TYPE OR DOES NOT EXIST!\n", imgFilepath.c_str());
 			throw std::runtime_error("FML: FAILED TO LOAD TEXTURE IMAGE");
 		}
 

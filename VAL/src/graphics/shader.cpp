@@ -24,7 +24,7 @@ namespace val {
 	}
 
 	void shader::setUniformBuffers(const std::vector<UBO_Handle*> UBOs) {
-		_UBOs = UBOs;
+		_UBO_Handles = UBOs;
 	}
 
 	/*void shader::setUniformBufferData(void* UBO, const size_t& sizeOfUBO, const uint32_t UBO_Count) {
@@ -41,8 +41,7 @@ namespace val {
 		if (_imageSamplersCreateInfos.has_value()) {
 			_imageSamplers.resize(_imageSamplersCreateInfos.value().size());
 
-			VkPhysicalDeviceProperties properties{};
-			vkGetPhysicalDeviceProperties(procFML->_physicalDevice, &properties);
+			const VkPhysicalDeviceProperties& properties = procFML->_physicalDeviceProperties;
 
 			for (int i = 0; i < _imageSamplersCreateInfos.value().size(); ++i) {
 				float& ans = _imageSamplersCreateInfos.value()[i].maxAnisotropy;
@@ -86,10 +85,10 @@ namespace val {
 
 		uint32_t currentBindingIdx = 0;
 
-		if (_UBOs.size() > 0) {
+		if (_UBO_Handles.size() > 0) {
 			VkDescriptorSetLayoutBinding uboLayoutBinding{};
 			uboLayoutBinding.binding = currentBindingIdx; currentBindingIdx++;
-			uboLayoutBinding.descriptorCount = _UBOs.size();
+			uboLayoutBinding.descriptorCount = _UBO_Handles.size();
 			uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			uboLayoutBinding.pImmutableSamplers = nullptr;
 			uboLayoutBinding.stageFlags = getStageFlags();
@@ -125,10 +124,10 @@ namespace val {
 		_descriptorWrites.clear();
 
 		uint32_t idx = 0;
-		if (_UBOs.size() > 0) {
-			_descriptorWrites.resize(_descriptorWrites.size() + _UBOs.size());
+		if (_UBO_Handles.size() > 0) {
+			_descriptorWrites.resize(_descriptorWrites.size() + _UBO_Handles.size());
 			//idx = _descriptorWrites.size() - 1;
-			for (size_t i = 0; i < _UBOs.size(); ++i) {
+			for (size_t i = 0; i < _UBO_Handles.size(); ++i) {
 				VkWriteDescriptorSet& descWrite = _descriptorWrites[i];
 				
 				memset(&descWrite, 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem

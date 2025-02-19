@@ -130,6 +130,9 @@
     <ClCompile Include="src\system\queueManager.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
+    <ClCompile Include="src\system\SSBO_Handle.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="notes\to-do-list.txt">

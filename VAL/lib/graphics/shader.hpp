@@ -97,12 +97,12 @@ namespace val {
 		std::vector<char> _byteCode;
 		fs::path _filepath;
 
-		std::vector<UBO_Handle*> _UBOs;
-		std::vector<pushConstantHandle*> _pushConstants;
-		std::vector<SSBO_Handle*> _SSBO_Handles;
+		std::vector< std::pair<UBO_Handle*, uint16_t>> _UBO_Handles;
+		std::vector<std::pair<pushConstantHandle*, uint16_t>> _pushConstants;
+		std::vector<std::pair<SSBO_Handle*, uint16_t>> _SSBO_Handles;
 		std::optional<std::vector<VkSamplerCreateInfo>> _imageSamplersCreateInfos;
-		std::vector<VkSampler> _imageSamplers;
-		std::vector<VkImageView*> _imageViews;
+		std::vector<std::pair<VkSampler*, uint16_t>> _imageSamplers;
+		std::vector<std::pair<VkImageView*, uint16_t>> _imageViews;
 
 		std::vector< VkDescriptorSetLayoutBinding> _layoutBindings;
 		std::vector<VkWriteDescriptorSet> _descriptorWrites; // stored as part of the class for optimization (avoids excess copying)

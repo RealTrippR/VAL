@@ -5,7 +5,7 @@ namespace val {
 	std::vector<UBO_Handle*> pipelineCreateInfo::getUniqueUBOs() {
 		std::vector<UBO_Handle*> UBO_Handles;
 		for (shader* shdr : shaders) {
-			for (UBO_Handle* UBO_Hdl : shdr->_UBOs) {
+			for (UBO_Handle* UBO_Hdl : shdr->_UBO_Handles) {
 				if (std::find(UBO_Handles.begin(), UBO_Handles.end(), UBO_Hdl) == UBO_Handles.end()) {
 					UBO_Hdl->stageFlags = VkShaderStageFlagBits(UBO_Hdl->stageFlags | shdr->getStageFlags());
 					UBO_Handles.push_back(UBO_Hdl);

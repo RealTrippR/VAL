@@ -9,6 +9,9 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [✓] Rename to VAL (Vulkan Abstraction Library)
 
+[!] It is imperative that the binding index of descriptorBindings (i.e. ubo, push constant, and ssbo handles) can be specificied,
+	in val::shaders, not in the actual handles themselves, because some handles are shared across shaders.
+
 [!] Give developers more control of the render passes created/submitted to the pipeline creation process.
     Currently their extent cannot be specified.
 
@@ -107,6 +110,6 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [ ] Consider purchasing https://www.oreilly.com/library/view/vulkantm-programming-guide/9780134464701/ch13.html
 
-[ ] Change the name of the graphicsPipelineCreateInfo to just graphicsCreateInfo because now it is responsible for more than just pipeline creation
-
 [ ] Add support for dynamic rendering. See: https://docs.vulkan.org/samples/latest/samples/extensions/dynamic_rendering/README.html
+
+[ ] Optimize the createUBOs and createSSBO functions

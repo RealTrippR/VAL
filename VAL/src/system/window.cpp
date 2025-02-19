@@ -139,7 +139,7 @@ namespace val {
 		createSwapChainImageViews(swapchainFormat);
 		createSwapChainFrameBuffers(_swapChainExtent, _swapChainAttachments, _swapChainAttachmentCount, _swapChainRenderPass, _procVAL->_device);
 		//_procFML->createFrameBuffers(_swapChainExtent);
-		createSyncObjects();
+		//createSyncObjects();
 	}
 
 	void window::createSwapChainImageViews(const VkFormat swapchainFormat) {

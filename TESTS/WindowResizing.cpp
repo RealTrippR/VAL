@@ -57,7 +57,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -170,10 +170,10 @@ int main() {
 
 	//////////////////////////////////////////////////////////////
 
-	val::pipelineCreateInfo pipelineInfo;
+	val::graphicsPipelineCreateInfo pipelineInfo;
+	setGraphicsPipelineInfo(pipelineInfo);
 	pipelineInfo.shaders = { &vertShader,&fragShader };
 
-	setGraphicsPipelineInfo(pipelineInfo);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
@@ -237,7 +237,7 @@ int main() {
 	}
 
 	window.cleanupSwapChain();
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }

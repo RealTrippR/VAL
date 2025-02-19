@@ -20,9 +20,10 @@ namespace val
 
 		void create(VAL_PROC& proc, bool semaphoresNeeded, bool fencesNeeded);
 
-		void destroy(VAL_PROC& proc);
-	public:
 		VkDeviceQueueCreateInfo getQueueCreateInfo();
+
+		void destroy(VAL_PROC& proc);
+
 	public:
 		VkQueue _queue;
 		VkQueueFlags _queueFlags;
