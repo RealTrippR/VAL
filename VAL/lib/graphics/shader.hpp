@@ -51,19 +51,11 @@ namespace val {
 
 		const std::string& getEntryPoint();
 
-		//void setUniformBufferData(void* UBO, const size_t& sizeOfUBO, const uint32_t UBO_Count);
-
-		void setUniformBuffers(const std::vector<UBO_Handle*> UBOs);
-
 		// change to allow for multiple image samplers (only one allowed per image view)
-		void setImageSamplers(const std::vector<VkSamplerCreateInfo> sampler);
+		void setImageSamplers(const std::vector< std::pair<VkSamplerCreateInfo, uint16_t>> sampler);
 
 		void createImageSamplers(VAL_PROC* procFML);
 
-		// change to allow for multiple image views (only one allowed per image sampler)
-		void setImageView(const std::vector<VkImageView*> imageView);
-
-		//void setPushConstants();
 		const fs::path& getFilepath() noexcept;
 
 		const std::vector<char>& getByteCode() noexcept;
@@ -74,7 +66,10 @@ namespace val {
 
 		virtual std::vector<VkDescriptorSetLayoutBinding>* getLayoutBindings() noexcept;
 
-		virtual std::vector<VkWriteDescriptorSet>* getDescriptorWrites() noexcept;
+		virtual std::vector<VkWriteDescriptorSet>* getDescriptorWrites();
+
+		// outer vector is for each frame in flight, second is for the buffer info for that frame
+		virtual std::vector<std::vector<VkDescriptorBufferInfo>>* getDescriptorBufferInfos(VAL_PROC& proc);
 
 		void setVertexAttributes(VkVertexInputAttributeDescription* attributes, const uint32_t& attribCount);
 
@@ -86,9 +81,9 @@ namespace val {
 
 		const uint32_t& getVertexAttributesCount() noexcept;
 
-		void setPushConstants(const std::vector<pushConstantHandle*>& pushConstants);
+		void setPushConstants(const std::vector<std::pair<pushConstantHandle*, uint16_t>>& pushConstants);
 
-		const std::vector<pushConstantHandle*>& getPushConstants() noexcept;
+		const std::vector<std::pair<pushConstantHandle*, uint16_t>>& getPushConstants() noexcept;
 
 	public:
 		VkShaderStageFlags _shaderStageFlags;
@@ -97,15 +92,17 @@ namespace val {
 		std::vector<char> _byteCode;
 		fs::path _filepath;
 
-		std::vector< std::pair<UBO_Handle*, uint16_t>> _UBO_Handles;
 		std::vector<std::pair<pushConstantHandle*, uint16_t>> _pushConstants;
+		std::vector< std::pair<UBO_Handle*, uint16_t>> _UBO_Handles;
 		std::vector<std::pair<SSBO_Handle*, uint16_t>> _SSBO_Handles;
-		std::optional<std::vector<VkSamplerCreateInfo>> _imageSamplersCreateInfos;
-		std::vector<std::pair<VkSampler*, uint16_t>> _imageSamplers;
-		std::vector<std::pair<VkImageView*, uint16_t>> _imageViews;
+		std::vector< std::pair<VkSamplerCreateInfo, uint16_t>> _imageSamplersCreateInfos;
+		std::vector<VkSampler> _imageSamplers;
+		std::vector<VkImageView> _imageViews;
 
 		std::vector< VkDescriptorSetLayoutBinding> _layoutBindings;
-		std::vector<VkWriteDescriptorSet> _descriptorWrites; // stored as part of the class for optimization (avoids excess copying)
+		std::vector<VkWriteDescriptorSet> _descriptorWrites; // stored as part of the class for optimization (avoids excess copying), as well as scope
+		// outer vector is for each frame in flight, second is for the buffer info for that frame
+		std::vector<std::vector<VkDescriptorBufferInfo>> _descriptorWriteBufferInfos; // stored as part of the class for optimization (avoids excess copying), as well as scope
 
 		VkVertexInputAttributeDescription* _attributes = NULL;
 		uint32_t _attribCount = 0;

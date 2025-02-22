@@ -300,7 +300,7 @@ int main() {
 	val::image img(mainProc, "testImage.jpg", imageFormat);
 	mainProc.createImageView(img.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &imgView);
 
-	fragShader._imageViews[0] = &imgView;
+	fragShader._imageViews[0] = imgView;
 
 
 

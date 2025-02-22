@@ -147,6 +147,7 @@
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
+    <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />

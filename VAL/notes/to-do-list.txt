@@ -12,6 +12,11 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 [!] It is imperative that the binding index of descriptorBindings (i.e. ubo, push constant, and ssbo handles) can be specificied,
 	in val::shaders, not in the actual handles themselves, because some handles are shared across shaders.
 
+[ ] Ensure that shaders can use shaders can use multiple image samplers and multiple image views. Also, allow for layout bindings of samplers.
+
+[ ] reform storage and uniform buffers in the VAL_PROC from [currentFrame][bufferIdx] to [bufferIdx][currentFrame]
+	because it allows for simpler and faster access and writing of data.
+
 [!] Give developers more control of the render passes created/submitted to the pipeline creation process.
     Currently their extent cannot be specified.
 

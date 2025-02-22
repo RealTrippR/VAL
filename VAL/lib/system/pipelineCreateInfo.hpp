@@ -18,13 +18,15 @@ namespace val {
 	class pipelineCreateInfo {
 	public:
 		std::vector<shader*> shaders;
-
+		uint32_t pipelineIdx;
 	public:
 		virtual std::vector<UBO_Handle*> getUniqueUBOs();
 
 		virtual std::vector<pushConstantHandle*> getUniquePushConstants();
 
 		virtual std::vector<SSBO_Handle*> getUniqueSSBOs();
+
+		virtual std::vector<VkDescriptorSet> getDescriptorSets(VAL_PROC& proc);
 
 	};
 }

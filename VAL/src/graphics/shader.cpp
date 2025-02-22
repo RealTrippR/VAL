@@ -23,32 +23,21 @@ namespace val {
 		return _entryPoint;
 	}
 
-	void shader::setUniformBuffers(const std::vector<UBO_Handle*> UBOs) {
-		_UBO_Handles = UBOs;
-	}
 
-	/*void shader::setUniformBufferData(void* UBO, const size_t& sizeOfUBO, const uint32_t UBO_Count) {
-		_UBO = UBO;
-		_sizeOfUBO = sizeOfUBO;
-		_UBO_Count = UBO_Count;
-	}*/
-
-	void shader::setImageSamplers(const std::vector<VkSamplerCreateInfo> samplerInfo) {
+	void shader::setImageSamplers(std::vector< std::pair<VkSamplerCreateInfo, uint16_t>> samplerInfo) {
 		_imageSamplersCreateInfos = samplerInfo;
 	}
 
 	void shader::createImageSamplers(VAL_PROC* procFML) {
-		if (_imageSamplersCreateInfos.has_value()) {
-			_imageSamplers.resize(_imageSamplersCreateInfos.value().size());
+		_imageSamplers.resize(_imageSamplersCreateInfos.size());
 
-			const VkPhysicalDeviceProperties& properties = procFML->_physicalDeviceProperties;
+		const VkPhysicalDeviceProperties& properties = procFML->_physicalDeviceProperties;
 
-			for (int i = 0; i < _imageSamplersCreateInfos.value().size(); ++i) {
-				float& ans = _imageSamplersCreateInfos.value()[i].maxAnisotropy;
-				ans = std::clamp(ans, 0.f, properties.limits.maxSamplerAnisotropy);
-				if (vkCreateSampler(procFML->_device, &_imageSamplersCreateInfos.value()[i], nullptr, &_imageSamplers[i]) != VK_SUCCESS) {
-					throw std::runtime_error("FAILED TO CREATE TEXTURE SAMPLER!");
-				}
+		for (int i = 0; i < _imageSamplersCreateInfos.size(); ++i) {
+			float& ans = _imageSamplersCreateInfos[i].first.maxAnisotropy;
+			ans = std::clamp(ans, 0.f, properties.limits.maxSamplerAnisotropy);
+			if (vkCreateSampler(procFML->_device, &_imageSamplersCreateInfos[i].first, nullptr, &_imageSamplers[i]) != VK_SUCCESS) {
+				throw std::runtime_error("FAILED TO CREATE TEXTURE SAMPLER!");
 			}
 		}
 		/* some shaders don't use image samplers
@@ -58,10 +47,6 @@ namespace val {
 		}
 #endif // !NDEBUG
 		*/
-	}
-
-	void shader::setImageView(const std::vector<VkImageView*> imageView) {
-		_imageViews = imageView;
 	}
 
 	const std::vector<char>& shader::getByteCode() noexcept {
@@ -85,72 +70,73 @@ namespace val {
 
 		uint32_t currentBindingIdx = 0;
 
-		if (_UBO_Handles.size() > 0) {
+		for (uint32_t i = 0; i < _UBO_Handles.size(); ++i) {
 			VkDescriptorSetLayoutBinding uboLayoutBinding{};
-			uboLayoutBinding.binding = currentBindingIdx; currentBindingIdx++;
-			uboLayoutBinding.descriptorCount = _UBO_Handles.size();
+			uboLayoutBinding.binding = _UBO_Handles[i].second;
+			uboLayoutBinding.descriptorCount = 1;
 			uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			uboLayoutBinding.pImmutableSamplers = nullptr;
 			uboLayoutBinding.stageFlags = getStageFlags();
 			_layoutBindings.push_back(uboLayoutBinding);
 		}
 
-		if (_SSBO_Handles.size() > 0) {
+		for (uint32_t i = 0; i < _SSBO_Handles.size(); ++i) {
 			VkDescriptorSetLayoutBinding ssboLayoutBinding{};
-			ssboLayoutBinding.binding = currentBindingIdx; currentBindingIdx++;
-			ssboLayoutBinding.descriptorCount = _SSBO_Handles.size();
+			ssboLayoutBinding.binding = _SSBO_Handles[i].second;
+			ssboLayoutBinding.descriptorCount = 1;
 			ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			ssboLayoutBinding.pImmutableSamplers = nullptr;
 			ssboLayoutBinding.stageFlags = getStageFlags();
 			_layoutBindings.push_back(ssboLayoutBinding);
 		}
 
-		if (_imageSamplersCreateInfos.has_value()) {
-			if (_imageSamplersCreateInfos.value().size() > 0) {
-				VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-				samplerLayoutBinding.binding = currentBindingIdx; currentBindingIdx++;
-				samplerLayoutBinding.descriptorCount = 1;
-				samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				samplerLayoutBinding.pImmutableSamplers = nullptr;
-				samplerLayoutBinding.stageFlags = getStageFlags();
-				_layoutBindings.push_back(samplerLayoutBinding);
-			}
+		for (uint32_t i = 0; i < _imageSamplersCreateInfos.size(); ++i) {
+			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+			samplerLayoutBinding.binding = _imageSamplersCreateInfos[i].second;
+			samplerLayoutBinding.descriptorCount = 1;
+			samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			samplerLayoutBinding.pImmutableSamplers = nullptr;
+			samplerLayoutBinding.stageFlags = getStageFlags();
+			_layoutBindings.push_back(samplerLayoutBinding);
 		}
+
 		return &_layoutBindings;
 	}
 
 	// THE DESCRIPTOR WRITE IS INCOMPLETE, MUST BE FURTHER CONFIGURED IN FML_PROC
-	std::vector<VkWriteDescriptorSet>* val::shader::getDescriptorWrites() noexcept {
+	std::vector<VkWriteDescriptorSet>* val::shader::getDescriptorWrites() {
 		_descriptorWrites.clear();
 
 		uint32_t idx = 0;
-		if (_UBO_Handles.size() > 0) {
-			_descriptorWrites.resize(_descriptorWrites.size() + _UBO_Handles.size());
-			//idx = _descriptorWrites.size() - 1;
-			for (size_t i = 0; i < _UBO_Handles.size(); ++i) {
-				VkWriteDescriptorSet& descWrite = _descriptorWrites[i];
+		_descriptorWrites.resize(_descriptorWrites.size() + _UBO_Handles.size());
+		for (size_t i = 0; i < _UBO_Handles.size(); ++i) {
+			VkWriteDescriptorSet& descWrite = _descriptorWrites[i+idx];
 				
-				memset(&descWrite, 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem
-
-				descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descWrite.dstBinding = i;
-				descWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				descWrite.descriptorCount = 1;
-				descWrite.pBufferInfo = VK_NULL_HANDLE;
-			}
-			// memset to VkWriteDescriptorSet 0
-			//memset(&_descriptorWrites[0], 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem
-
-
-			/*_descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			_descriptorWrites[0].dstBinding = 0;
-			_descriptorWrites[0].dstArrayElement = 0;
-			_descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			_descriptorWrites[0].descriptorCount = _UBOs.size();
-			_descriptorWrites[0].pTexelBufferView = VK_NULL_HANDLE;
-			_descriptorWrites[0].pImageInfo = VK_NULL_HANDLE;
-			_descriptorWrites[0].pBufferInfo = VK_NULL_HANDLE;*/
+			memset(&descWrite, 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem
+			// pack the value index into the puffer info, it will be used later to update descriptor sets
+			descWrite.pBufferInfo = (VkDescriptorBufferInfo*)(_UBO_Handles[i].first->_index);
+			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descWrite.dstBinding = _UBO_Handles[i].second;
+			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descWrite.descriptorCount = 1;
+			descWrite.pBufferInfo = VK_NULL_HANDLE;
 		}
+		idx = _descriptorWrites.size();
+
+		_descriptorWrites.resize(_descriptorWrites.size() + _SSBO_Handles.size());
+		for (size_t i = 0; i < _SSBO_Handles.size(); ++i) {
+			VkWriteDescriptorSet& descWrite = _descriptorWrites[i+ idx];
+
+			memset(&descWrite, 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem
+			// pack the value index into the puffer info, it will be used later to update descriptor sets
+			descWrite.pBufferInfo = (VkDescriptorBufferInfo*)(_SSBO_Handles[i].first->_index);
+			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descWrite.dstBinding = _SSBO_Handles[i].second;
+			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			descWrite.descriptorCount = 1;
+			descWrite.pBufferInfo = VK_NULL_HANDLE;
+		}
+		idx = _descriptorWrites.size();
 
 #ifndef NDEBUG
 		if ((_imageSamplers.size() != _imageViews.size())) {
@@ -173,7 +159,7 @@ namespace val {
 			// this could be optimized by directly loading it to the descriptor writes
 			for (int i = 0; i < imageInfos.size(); ++i) {
 				imageInfos[i].sampler = _imageSamplers[i];
-				imageInfos[i].imageView = *_imageViews[i];
+				imageInfos[i].imageView = _imageViews[i];
 				imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 
@@ -194,6 +180,35 @@ namespace val {
 		}
 
 		return &_descriptorWrites;
+	}
+
+	std::vector<std::vector<VkDescriptorBufferInfo>>* shader::getDescriptorBufferInfos(VAL_PROC& proc) {
+		auto& bufferWrites = _descriptorWriteBufferInfos;
+		bufferWrites.clear();
+		bufferWrites.resize(proc._MAX_FRAMES_IN_FLIGHT);
+		for (uint8_t frame = 0; frame < proc._MAX_FRAMES_IN_FLIGHT; frame++) {
+			for (size_t i = 0; i < _UBO_Handles.size(); ++i) {
+				auto& uboHDL = _UBO_Handles[i];
+				bufferWrites[frame].emplace_back();
+				VkDescriptorBufferInfo& buffInfo = bufferWrites[frame].back();
+				memset(&buffInfo, 0, sizeof(VkDescriptorBufferInfo)); // 0 out memory
+				buffInfo.buffer = uboHDL.first->getBuffers(proc)[frame];
+				buffInfo.range = uboHDL.first->_size;
+				buffInfo.offset = 0;
+			}
+
+			for (size_t i = 0; i < _SSBO_Handles.size(); ++i) {
+				auto& ssboHDL = _SSBO_Handles[i];
+				bufferWrites[frame].emplace_back();
+				VkDescriptorBufferInfo& buffInfo = bufferWrites[frame].back();
+				memset(&buffInfo, 0, sizeof(VkDescriptorBufferInfo)); // 0 out memory
+				buffInfo.buffer = ssboHDL.first->getBuffers(proc)[frame];
+				buffInfo.range = ssboHDL.first->_size;
+				buffInfo.offset = 0;
+			}
+		}
+
+		return &_descriptorWriteBufferInfos;
 	}
 
 	void shader::setVertexAttributes(VkVertexInputAttributeDescription* attributes, const uint32_t& attribCount) {
@@ -217,14 +232,14 @@ namespace val {
 		return _attribCount;
 	}
 
-	void shader::setPushConstants(const std::vector<pushConstantHandle*>& pushConstants) {
+	void shader::setPushConstants(const std::vector<std::pair<pushConstantHandle*, uint16_t>>& pushConstants) {
 		_pushConstants = pushConstants;
 		for (auto& PC_Hdl : _pushConstants) {
-			PC_Hdl->_stageFlags = VkShaderStageFlagBits(PC_Hdl->_stageFlags | _shaderStageFlags);
+			PC_Hdl.first->_stageFlags = VkShaderStageFlagBits(PC_Hdl.first->_stageFlags | _shaderStageFlags);
 		}
 	}
 
-	const std::vector<pushConstantHandle*>& shader::getPushConstants() noexcept {
+	const std::vector<std::pair<pushConstantHandle*, uint16_t>>& shader::getPushConstants() noexcept {
 		return _pushConstants;
 	}
 }

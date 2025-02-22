@@ -213,16 +213,20 @@ namespace val {
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = {_presentQueue._semaphores[_procVAL->_currentFrame] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
+		auto& computeQueue = _procVAL->_computeQueue;
+		auto& currentFrame = _procVAL->_currentFrame;
+
+		VkSemaphore waitSemaphores[] = {_presentQueue._semaphores[currentFrame], computeQueue._semaphores[currentFrame]};
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+		submitInfo.waitSemaphoreCount = sizeof(waitSemaphores)/sizeof(VkSemaphore);
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &_procVAL->_graphicsQueue._commandBuffers[_procVAL->_currentFrame];
 
-		VkSemaphore signalSemaphores[] = { _presentQueue._semaphores[_procVAL->_currentFrame] };
+		VkSemaphore signalSemaphores[] = { _procVAL->_graphicsQueue._semaphores[_procVAL->_currentFrame] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -252,8 +256,6 @@ namespace val {
 			printf("VAL: FAILED TO PRESENT SWAPCHAIN IMAGE\n");
 			throw std::runtime_error("VAL: FAILED TO PRESENT SWAPCHAIN IMAGE");
 		}
-
-		//_currentSwapChainImageIndex = (_currentSwapChainImageIndex + 1) % _swapChainFrameBuffers.size();
 	}
 
 	void window::waitForFences() {
@@ -266,6 +268,8 @@ namespace val {
 		//uint32_t imageIndex;
 		VkResult result = vkAcquireNextImageKHR(_procVAL->_device, _swapChain, UINT64_MAX,
 			_presentQueue._semaphores[_procVAL->_currentFrame], VK_NULL_HANDLE, &_currentSwapChainImageIndex);
+
+		vkResetFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame]);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			vkDeviceWaitIdle(_procVAL->_device);

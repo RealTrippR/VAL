@@ -57,7 +57,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::pipelineCreateInfo&info) {
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo&info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -161,7 +161,7 @@ int main() {
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions().data(),
 		res::vertex::getAttributeDescriptions().size());
 	vertShader.setBindingDescription(res::vertex::getBindingDescription());
-	vertShader.setUniformBuffers({&uboHdl});
+	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 
 	// load and configure frag shader
@@ -170,7 +170,7 @@ int main() {
 
 	//////////////////////////////////////////////////////////////
 
-	val::pipelineCreateInfo pipelineInfo;
+	val::graphicsPipelineCreateInfo pipelineInfo;
 	pipelineInfo.shaders = { &vertShader,&fragShader };
 
 	setGraphicsPipelineInfo(pipelineInfo);
@@ -227,7 +227,7 @@ int main() {
 		mainProc.beginDraw(imageFormat);
 
 		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, vertexBuffer, indexBuffer, indices.data(),
-			indices.size(),imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+			indices.size(), vertices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
 
 		mainProc.endDraw(imageFormat);
 
@@ -235,7 +235,7 @@ int main() {
 	}
 
 	window.cleanupSwapChain();
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }
