@@ -98,6 +98,15 @@
     <ClInclude Include="lib\system\pipelineCreateInfo.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\renderTarget.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\computeTarget.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\syncInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -134,6 +143,15 @@
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\system\SSBO_Handle.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\renderTarget.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\syncInfo.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\computeTarget.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>

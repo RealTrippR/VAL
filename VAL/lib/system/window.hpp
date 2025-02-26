@@ -32,6 +32,8 @@ namespace val {
 
 	public:
 
+		void display(const VkFormat& imgFormat, syncInfo& waitOn);
+
 		void createWindowSurface(VkInstance instance);
 
 		void createSyncObjects();
@@ -46,7 +48,7 @@ namespace val {
 
 		void createSwapChainFrameBuffers(const VkExtent2D& extent, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
-		void updateSwapChain(const VkFormat& imageFormat);
+		void updateSwapChain(const VkFormat& imageFormat, syncInfo& syncInfo);
 
 		void waitForFences();
 

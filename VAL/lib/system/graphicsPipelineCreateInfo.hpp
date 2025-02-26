@@ -16,6 +16,7 @@ namespace val {
 		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
 		VkPipelineColorBlendStateCreateInfo colorBlending{};
 		VkPipelineDepthStencilStateCreateInfo* depthStencil = NULL;
+		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	};
 }
 

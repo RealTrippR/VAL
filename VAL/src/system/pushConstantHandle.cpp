@@ -12,7 +12,7 @@ namespace val {
 			_size,
 			data
 		);
-		memcpy(((char*)proc._pushConstantData)+_procMemoryOffset, data, _size);
+		memcpy(((char*)proc._pushConstantData) + _procMemoryOffset, data, _size);
 		//proc.endSingleTimeCommands(cmdBuffer);
 	}
 

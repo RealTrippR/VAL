@@ -9,12 +9,24 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [✓] Rename to VAL (Vulkan Abstraction Library)
 
+[ ] Optimize pipelineCreateInfo functions (cache and pass by reference instead of value)
+
+[ ] Add support for instances
+
+[!] Use Vulkan Memory Allocator to simplify the process of allocating data. (https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
+
+[!] Implement Z-prepass support for performance gains. (see: https://www.youtube.com/watch?v=2ZK527cQbeo)
+
+[ ] create a val::graphicsPipeline and val::computePipeline class to manage and simplify the handling of pipelines
+
 [!] It is imperative that the binding index of descriptorBindings (i.e. ubo, push constant, and ssbo handles) can be specificied,
 	in val::shaders, not in the actual handles themselves, because some handles are shared across shaders.
 
 [ ] Ensure that shaders can use shaders can use multiple image samplers and multiple image views. Also, allow for layout bindings of samplers.
 
-[ ] reform storage and uniform buffers in the VAL_PROC from [currentFrame][bufferIdx] to [bufferIdx][currentFrame]
+[!] pack uniform buffer vectors into a single vector for optimization
+
+[!] reform storage and uniform buffers in the VAL_PROC from [currentFrame][bufferIdx] to [bufferIdx][currentFrame]
 	because it allows for simpler and faster access and writing of data.
 
 [!] Give developers more control of the render passes created/submitted to the pipeline creation process.
@@ -36,18 +48,14 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 	Write a test to ensure that VAL supports more than just .jpg and .png images.
 	OpenImageIO might be a good alternative. (https://github.com/AcademySoftwareFoundation/OpenImageIO)
 
-[!] Use Vulkan Memory Allocator to simplify the process of allocating data. (https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
-
-[~] Simplify the process of creating uniform buffers, push constants, etc, etc, and
+[✓] Simplify the process of creating uniform buffers, push constants, etc, etc, and
 	simplify the process of uploading data to shaders
 
-[ ] Add dedicated compute and transfer queues.
+[✓] Add dedicated compute and transfer queues.
  
 [ ] create shaderTest.cpp to test uploading UBOs, push constants, and SSBOs.
 
 [ ] Optimize buffers. Create a chunked or packed buffer class for this purpose.
-
-[ ] Implement Z-prepass for performance gains. (see: https://www.youtube.com/watch?v=2ZK527cQbeo)
 
 [ ] Change the mipmap value passed through function from uint32_t to uint8_t.
 	Using 32 bits for such a value is absurd, as even an image a million by a million pixels across will only need a mipmap level of 20.
@@ -69,7 +77,7 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [ ] Add multiple command pools for multithreading, as command pools are not thread safe.
 
-[ ] add a recreateGraphicsPipeline function, but only if nessecary
+[ ] add a recreateGraphicsPipeline function; might not be nessecary
 
 [~] Update the descriptor set and graphicsPipelineCreateInfo: the descriptor set currently only supports vertex shaders for UBO binding, 
 	and the descriptor set has no way to access all of the shaders in a single vector from the graphicsPipelineCreateInfo
@@ -78,7 +86,7 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [ ] Consider making a VAL_FAIL and VAL_SUCCESS for failures and successes of functions
 
-[ ] Add the ability to set the MAX_FRAMES_IN_FLIGHT upon initialization of VAL_PROC
+[✓] Add the ability to set the MAX_FRAMES_IN_FLIGHT upon initialization of VAL_PROC
 
 [ ] Allow framebuffers to take more than 1 color input from frag shaders
 
@@ -91,9 +99,7 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 	See also: https://open.gl/depthstencils
 	recreateSwapChain will have to be modified as well.
 
-[!] Ensure that window resizing works properly.
-
-[ ] Add more tests.
+[✓] Ensure that window resizing works properly.
 
 [!] Complete Shader Input Test.
 
@@ -111,7 +117,7 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [ ] Implement support for multi-pass rendering. See:https://developer.samsung.com/galaxy-gamedev/resources/articles/renderpasses.html
 
-[~] Implement the Depth Buffer Test. See https://vulkan-tutorial.com/Depth_buffering for reference.
+[✓] Implement the Depth Buffer Test. See https://vulkan-tutorial.com/Depth_buffering for reference.
 
 [ ] Consider purchasing https://www.oreilly.com/library/view/vulkantm-programming-guide/9780134464701/ch13.html
 

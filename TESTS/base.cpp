@@ -211,27 +211,44 @@ int main() {
 	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
 
 
-
+	//////////////////////////////////////////////////////////////
+	// create descriptor sets - this should be merged into the
+	// pipeline creation function
 	mainProc.createDescriptorSets(&pipelineInfo,0u);
+	//////////////////////////////////////////////////////////////
+	
 
-	VkClearValue clearValues[1];
-	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	// configure the render target, setting vertex buffers, scissors, area, etc
+	val::renderTarget renderTarget;
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setArea(window._swapChainExtent);
+	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setClearValues({{ 0.0f, 0.0f, 0.0f, 1.0f }});
+	renderTarget.setIndexBuffer(indexBuffer, indices.size());
+	renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
 
-	uint32_t currentSC_ImageIdx = 0;
+	// config viewport, covers the entire size of the window
+	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+
+	// Sync info, handles semaphores and fences.
+	val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue }, {}, &pipelineInfo);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[mainProc._currentFrame];
 		glfwPollEvents();
-
 		updateUniformBuffer(mainProc, uboHdl);
+
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+
 		mainProc.beginDraw(imageFormat);
+		renderTarget.update(mainProc, cmdBuffer, pipelineInfo.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, cmdBuffer, renderPasses[pipelineInfo.pipelineIdx],
+			framebuffer);
+		mainProc.endDraw();
 
-		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, vertexBuffer, indexBuffer, indices.data(),
-			indices.size(), vertices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+		window.display(imageFormat, syncInfo);
 
-		mainProc.endDraw(imageFormat);
-
-		window.waitForFences();
+		mainProc.nextFrame();
 	}
 
 	window.cleanupSwapChain();

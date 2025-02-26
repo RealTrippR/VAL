@@ -15,6 +15,11 @@ namespace val {
 		}
 	}
 
+	void window::display(const VkFormat& imageFormat, syncInfo& waitOn) {
+		vkResetFences(_procVAL->_device, 1, &(_presentQueue._fences[_procVAL->_currentFrame]));
+		updateSwapChain(imageFormat, waitOn);
+	}
+
 	void window::createSyncObjects() {
 
 		_presentQueue.findQueueFamilyFromQueueFlags(_procVAL->_physicalDevice, true, _surface);
@@ -206,29 +211,42 @@ namespace val {
 	{
 	}*/
 
-	void window::updateSwapChain(const VkFormat& imageFormat) {
-		//uint32_t imageIndex; // Swap chain image index
-		//VkResult result = vkAcquireNextImageKHR(_procVAL->_device, _swapChain, UINT64_MAX, _imageAvailableSemaphores[_procVAL->_currentFrame], VK_NULL_HANDLE, &imageIndex);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	void window::updateSwapChain(const VkFormat& imageFormat, syncInfo& syncInfo) {
 
 		auto& computeQueue = _procVAL->_computeQueue;
 		auto& currentFrame = _procVAL->_currentFrame;
 
-		VkSemaphore waitSemaphores[] = {_presentQueue._semaphores[currentFrame], computeQueue._semaphores[currentFrame]};
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+#ifndef NDEBUG
+		// check if the present queue is included in the sync info, warn dev if so.
+		for (VkSemaphore semaphore : syncInfo.waitSemaphores[currentFrame]) {
+			if (semaphore == _presentQueue._semaphores[currentFrame]) {
+				printf("VAL: THE PRESENT QUEUE SHOULD NEVER BE INCLUDED IN A VAL::SYNCINFO!\n");
+			}
+		}
+#endif // !NDEBUG
 
-		submitInfo.waitSemaphoreCount = sizeof(waitSemaphores)/sizeof(VkSemaphore);
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+
+		// wait on the image available semaphore to ensure the graphicsQueue doesn't use a swap chain image before it's ready.
+		submitInfo.waitSemaphoreCount = syncInfo.waitSemaphores.size();
+		submitInfo.pWaitSemaphores = &_presentQueue._semaphores[currentFrame];
+		submitInfo.pWaitDstStageMask = syncInfo.waitStages.data();
+		// the length of pWaitDstStageMask should be that of waitSemaphoreCount
+#ifndef NDEBUG
+		if (submitInfo.waitSemaphoreCount != syncInfo.waitStages.size()) {
+			printf("VAL: WARNING: val::syncInfo wait semaphore count and syncInfo.waitStages.size() do not match!\n");
+		}
+#endif // !NDEBUG
+
 
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &_procVAL->_graphicsQueue._commandBuffers[_procVAL->_currentFrame];
 
-		VkSemaphore signalSemaphores[] = { _procVAL->_graphicsQueue._semaphores[_procVAL->_currentFrame] };
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
+		submitInfo.signalSemaphoreCount = syncInfo.waitSemaphores[currentFrame].size();
+		submitInfo.pSignalSemaphores = syncInfo.waitSemaphores[currentFrame].data();
 
 		if (vkQueueSubmit(_procVAL->_graphicsQueue._queue, 1, &submitInfo, _presentQueue._fences[_procVAL->_currentFrame]) != VK_SUCCESS) {
 			throw std::runtime_error("FAILED TO SUBMIT DRAW COMMAND BUFFER");
@@ -238,7 +256,7 @@ namespace val {
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
+		presentInfo.pWaitSemaphores = syncInfo.waitSemaphores[currentFrame].data();
 
 		VkSwapchainKHR swapChains[] = { _swapChain };
 		presentInfo.swapchainCount = 1;
