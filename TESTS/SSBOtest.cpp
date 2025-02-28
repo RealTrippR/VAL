@@ -302,7 +302,7 @@ int main() {
 
 	uint32_t currentSC_ImageIdx = 0;
 
-	// configure the render target, setting vertex buffers, scissors, area, etc
+	// create & configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setArea(window._swapChainExtent);
@@ -312,43 +312,54 @@ int main() {
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
+	// create & configure the compute target
+	val::computeTarget computeTarget;
 
 	// Sync info, handles semaphores and fences.
-	val::syncInfo computeSyncInfo(mainProc, { &mainProc._computeQueue }, { }, &computePipelineInfo);
-	val::syncInfo graphicsSyncInfo(mainProc, { &mainProc._graphicsQueue }, { &mainProc._computeQueue }, &pipelineInfo);
+	val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue,&mainProc._computeQueue }, , &computePipelineInfo);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		glfwPollEvents();
 
-		auto& computeQueue = mainProc._computeQueue;
+		val::queueManager& computeQueue = mainProc._computeQueue;
 		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = mainProc._currentFrame;
 
-		vkResetFences(mainProc._device, 1, &computeQueue._fences[currentFrame]);
-		vkResetCommandBuffer(computeQueue._commandBuffers[currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
+		VkCommandBuffer cmdBuffer = VK_NULL_HANDLE;
+		cmdBuffer = computeQueue._commandBuffers[currentFrame];
+
+		
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
+		computeTarget.update(mainProc, computeQueue, computePipelineInfo);
+		computeTarget.compute(mainProc, computeQueue/*BE SURE THAT THIS QUEUE IS IN THE SIGNAL LIST IN THIS FUNCTION*/, PARTICLE_COUNT / 256, 1, 1);
+		computeTarget.submit({ computeQueue }, {});
+		
+		
+		/*vkResetFences(mainProc._device, 1, &computeQueue._fences[currentFrame]);
+		vkResetCommandBuffer(cmdBuffer,  0);
 
-		if (vkBeginCommandBuffer(mainProc._computeQueue._commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS) {
+		if (vkBeginCommandBuffer(cmdBuffer, &beginInfo) != VK_SUCCESS) {
 			throw std::runtime_error("failed to begin recording compute command buffer!");
 		}
 
-		vkCmdBindPipeline(mainProc._computeQueue._commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_COMPUTE, mainProc._computePipelines[0]);
+		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, mainProc._computePipelines[computePipelineInfo.pipelineIdx]);
 
-		vkCmdBindDescriptorSets(mainProc._computeQueue._commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_COMPUTE,
-			mainProc._computePipelineLayouts[0], 0, 1, &mainProc._descriptorSets[computePipelineInfo.pipelineIdx][currentFrame], 0, nullptr);
+		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
+			mainProc._computePipelineLayouts[0], 0, 1, &mainProc._descriptorSets[computePipelineInfo.descriptorsIdx][currentFrame], 0, nullptr);
 
-		vkCmdDispatch(mainProc._computeQueue._commandBuffers[currentFrame], PARTICLE_COUNT / 256, 1, 1);
+		vkCmdDispatch(cmdBuffer, PARTICLE_COUNT / 256, 1, 1);
 
-		if (vkEndCommandBuffer(mainProc._computeQueue._commandBuffers[currentFrame]) != VK_SUCCESS) {
+		if (vkEndCommandBuffer(cmdBuffer) != VK_SUCCESS) {
 			throw std::runtime_error("failed to record compute command buffer!");
-		}
+		}*/
 
 		//////////////////////////////////////////////////////////////
 		/////  Compute submission /////
-		VkSubmitInfo submitInfo{};
+		/*VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &computeQueue._commandBuffers[currentFrame];
@@ -357,12 +368,12 @@ int main() {
 
 		if (vkQueueSubmit(computeQueue._queue, 1, &submitInfo, computeQueue._fences[currentFrame]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit compute command buffer!");
-		};
-
+		};*/
+		
 
 
 		//////////////////////////////////////////////////////////////
-		VkCommandBuffer cmdBuffer = graphicsQueue._commandBuffers[mainProc._currentFrame];
+		cmdBuffer = graphicsQueue._commandBuffers[mainProc._currentFrame];
 		updateUniformBuffer(mainProc, uboHDL);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
@@ -371,12 +382,14 @@ int main() {
 		renderTarget.setVertexBuffer(ssboHdl.getBuffers(mainProc)[mainProc._currentFrame], PARTICLE_COUNT);
 		// the renderTarget must be updated after any changes are made 
 		mainProc.beginDraw(imageFormat);
+		renderTarget.begin(mainProc, imageFormat);
 		renderTarget.update(mainProc, cmdBuffer, pipelineInfo.pipelineIdx);
 		renderTarget.render(mainProc, { viewport }, cmdBuffer, renderPasses[pipelineInfo.pipelineIdx],
 			framebuffer);
-		mainProc.endDraw();
 
-		window.display(imageFormat, graphicsSyncInfo);
+		renderTarget.submit(mainProc, { computeQueue._semaphores[currentFrame] }, window.getPresentFence());
+
+		window.display(imageFormat, { &window._presentQueue._semaphores[currentFrame]});
 		mainProc.nextFrame();
 
 		vkQueueWaitIdle(mainProc._computeQueue._queue);

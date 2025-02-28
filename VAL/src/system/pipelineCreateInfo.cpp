@@ -46,37 +46,37 @@ namespace val {
 	}
 
 	std::vector<VkDescriptorSet> pipelineCreateInfo::getDescriptorSets(VAL_PROC& proc) {
-		return proc._descriptorSets[pipelineIdx];
+		return proc._descriptorSets[descriptorsIdx];
 	}
 
-	 std::vector<VkPipelineStageFlags> pipelineCreateInfo::getPipelineShaderStages() {
-		 std::vector<VkPipelineStageFlags> stages;
+	// std::vector<VkPipelineStageFlags> pipelineCreateInfo::getPipelineStages() {
+	//	 std::vector<VkPipelineStageFlags> stages;
 
-		 for (auto shdr : shaders) {
-			 VkPipelineStageFlags pipelineStage = 0;
-			 VkShaderStageFlags shaderStage = shdr->getStageFlags();
-			 if (shaderStage & VK_SHADER_STAGE_VERTEX_BIT)
-				 pipelineStage |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
-			 if (shaderStage & VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT)
-				 pipelineStage |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
-			 if (shaderStage & VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)
-				 pipelineStage |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
-			 if (shaderStage & VK_SHADER_STAGE_GEOMETRY_BIT)
-				 pipelineStage |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
-			 if (shaderStage & VK_SHADER_STAGE_FRAGMENT_BIT)
-				 pipelineStage |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-			 if (shaderStage & VK_SHADER_STAGE_COMPUTE_BIT)
-				 pipelineStage |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-			 if (shaderStage & VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT)
-				 pipelineStage |= VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
-		     if (shaderStage & VK_SHADER_STAGE_ALL)
-				 pipelineStage |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+	//	 for (auto shdr : shaders) {
+	//		 VkPipelineStageFlags pipelineStage = 0;
+	//		 VkShaderStageFlags shaderStage = shdr->getStageFlags();
+	//		 if (shaderStage & VK_SHADER_STAGE_VERTEX_BIT)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+	//		 if (shaderStage & VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
+	//		 if (shaderStage & VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
+	//		 if (shaderStage & VK_SHADER_STAGE_GEOMETRY_BIT)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
+	//		 if (shaderStage & VK_SHADER_STAGE_FRAGMENT_BIT)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	//		 if (shaderStage & VK_SHADER_STAGE_COMPUTE_BIT)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+	//		 if (shaderStage & VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+	//	     if (shaderStage & VK_SHADER_STAGE_ALL)
+	//			 pipelineStage |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
-			stages.push_back(pipelineStage);
-		 }
+	//		stages.push_back(pipelineStage);
+	//	 }
 
-		return stages;
-	};
+	//	return stages;
+	//};
 	const std::vector<VkShaderStageFlags> pipelineCreateInfo::getShaderStages() {
 		std::vector<VkShaderStageFlags> stages;
 		for (auto shdr : shaders) {

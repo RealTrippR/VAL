@@ -15,9 +15,10 @@ namespace val {
 		}
 	}
 
-	void window::display(const VkFormat& imageFormat, syncInfo& waitOn) {
-		vkResetFences(_procVAL->_device, 1, &(_presentQueue._fences[_procVAL->_currentFrame]));
+	void window::display(const VkFormat& imageFormat, std::vector<VkSemaphore> waitOn) {
+		vkWaitForFences(_procVAL->_device, 1, &(_presentQueue._fences[_procVAL->_currentFrame]), VK_TRUE, UINT64_MAX);
 		updateSwapChain(imageFormat, waitOn);
+		//vkResetFences(_procVAL->_device, 1, &(_presentQueue._fences[_procVAL->_currentFrame]));
 	}
 
 	void window::createSyncObjects() {
@@ -211,52 +212,16 @@ namespace val {
 	{
 	}*/
 
-	void window::updateSwapChain(const VkFormat& imageFormat, syncInfo& syncInfo) {
+	void window::updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn) {
 
-		auto& computeQueue = _procVAL->_computeQueue;
-		auto& currentFrame = _procVAL->_currentFrame;
-
-#ifndef NDEBUG
-		// check if the present queue is included in the sync info, warn dev if so.
-		for (VkSemaphore semaphore : syncInfo.waitSemaphores[currentFrame]) {
-			if (semaphore == _presentQueue._semaphores[currentFrame]) {
-				printf("VAL: THE PRESENT QUEUE SHOULD NEVER BE INCLUDED IN A VAL::SYNCINFO!\n");
-			}
-		}
-#endif // !NDEBUG
-
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-
-		// wait on the image available semaphore to ensure the graphicsQueue doesn't use a swap chain image before it's ready.
-		submitInfo.waitSemaphoreCount = syncInfo.waitSemaphores.size();
-		submitInfo.pWaitSemaphores = &_presentQueue._semaphores[currentFrame];
-		submitInfo.pWaitDstStageMask = syncInfo.waitStages.data();
-		// the length of pWaitDstStageMask should be that of waitSemaphoreCount
-#ifndef NDEBUG
-		if (submitInfo.waitSemaphoreCount != syncInfo.waitStages.size()) {
-			printf("VAL: WARNING: val::syncInfo wait semaphore count and syncInfo.waitStages.size() do not match!\n");
-		}
-#endif // !NDEBUG
-
-
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &_procVAL->_graphicsQueue._commandBuffers[_procVAL->_currentFrame];
-
-		submitInfo.signalSemaphoreCount = syncInfo.waitSemaphores[currentFrame].size();
-		submitInfo.pSignalSemaphores = syncInfo.waitSemaphores[currentFrame].data();
-
-		if (vkQueueSubmit(_procVAL->_graphicsQueue._queue, 1, &submitInfo, _presentQueue._fences[_procVAL->_currentFrame]) != VK_SUCCESS) {
-			throw std::runtime_error("FAILED TO SUBMIT DRAW COMMAND BUFFER");
-		}
+		const auto& currentFrame = _procVAL->_currentFrame;
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = syncInfo.waitSemaphores[currentFrame].data();
+		// wait on the signalSemaphores to signaled
+		presentInfo.waitSemaphoreCount = waitOn.size();
+		presentInfo.pWaitSemaphores = waitOn.data();
 
 		VkSwapchainKHR swapChains[] = { _swapChain };
 		presentInfo.swapchainCount = 1;
@@ -281,13 +246,11 @@ namespace val {
 	}
 
 	VkFramebuffer& window::getSwapchainFramebuffer(const VkFormat& imageFormat) {
-		vkWaitForFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame], VK_TRUE, UINT64_MAX);
+		//vkWaitForFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame], VK_TRUE, UINT64_MAX);
 
 		//uint32_t imageIndex;
 		VkResult result = vkAcquireNextImageKHR(_procVAL->_device, _swapChain, UINT64_MAX,
 			_presentQueue._semaphores[_procVAL->_currentFrame], VK_NULL_HANDLE, &_currentSwapChainImageIndex);
-
-		vkResetFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame]);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			vkDeviceWaitIdle(_procVAL->_device);
@@ -303,7 +266,12 @@ namespace val {
 
 	// returns a swapchain frame buffer to use
 	VkFramebuffer& window::beginDraw(const VkFormat& imageFormat) {
+		vkResetFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame]);
 		VkFramebuffer& framebuffer = getSwapchainFramebuffer(imageFormat); // gets the swapchain framebuffer to be rendered to
 		return framebuffer;
+	}
+
+	VkFence window::getPresentFence() {
+		return _presentQueue._fences[_procVAL->_currentFrame];
 	}
 }

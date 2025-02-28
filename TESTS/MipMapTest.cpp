@@ -279,7 +279,7 @@ int main() {
 		// Wait idle for the GPU to finish executing the command buffer
 		vkDeviceWaitIdle(mainProc._device);
 
-		mainProc.endDraw(imageFormat);
+		mainProc.submit(imageFormat);
 
 		window.waitForFences();
 	}

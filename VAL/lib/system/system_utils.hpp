@@ -28,6 +28,7 @@ enum bufferUsage {
 	GPU_ONLY,
 	CPU_GPU
 };
+
 namespace val {
 	class VAL_PROC; // forward declaration
 

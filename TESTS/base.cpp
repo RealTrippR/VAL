@@ -231,22 +231,26 @@ int main() {
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	// Sync info, handles semaphores and fences.
-	val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue }, {}, &pipelineInfo);
+	val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue }, { &window._presentQueue }, &pipelineInfo);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
-		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[mainProc._currentFrame];
+		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
+		auto& currentFrame = mainProc._currentFrame;
+
+		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
 		updateUniformBuffer(mainProc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		mainProc.beginDraw(imageFormat);
+		renderTarget.begin(mainProc);
 		renderTarget.update(mainProc, cmdBuffer, pipelineInfo.pipelineIdx);
 		renderTarget.render(mainProc, { viewport }, cmdBuffer, renderPasses[pipelineInfo.pipelineIdx],
 			framebuffer);
-		mainProc.endDraw();
+		renderTarget.submit(mainProc, {presentQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);
 
-		window.display(imageFormat, syncInfo);
+		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
 		mainProc.nextFrame();
 	}

@@ -11,6 +11,8 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [ ] Optimize pipelineCreateInfo functions (cache and pass by reference instead of value)
 
+[ ] Change the updateSwapChain function to use the optimal VK_PIPELINE_STAGE_FLAGS
+
 [ ] Add support for instances
 
 [!] Use Vulkan Memory Allocator to simplify the process of allocating data. (https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)

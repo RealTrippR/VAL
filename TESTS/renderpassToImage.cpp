@@ -407,7 +407,7 @@ int main() {
 			vertexBuffer1, indexBuffer1, indices1.data(), indices1.size(),imageFormat, clearValues, 1u);
 
 
-		mainProc.endDraw(imageFormat);
+		mainProc.submit(imageFormat);
 	}
 
 	mainProc.cleanup(windowHDL_GLFW);

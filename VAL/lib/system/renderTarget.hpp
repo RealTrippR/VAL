@@ -4,6 +4,7 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
+	class queueManager; // forward declaration
 	class renderTarget {
 	public:
 		renderTarget() = default;
@@ -15,6 +16,10 @@ namespace val {
 			VkFramebuffer& frameBuffer);
 
 		void update(VAL_PROC& proc, VkCommandBuffer& commandBuffer, const uint16_t& pipelineIdx);
+
+		void begin(VAL_PROC& proc);
+
+		void submit(VAL_PROC& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence = VK_NULL_HANDLE);
 	public:
 		void setVertexBuffer(const VkBuffer& vertexBuffer, const uint32_t& vertexCount) {
 			_vertexBuffer = vertexBuffer;

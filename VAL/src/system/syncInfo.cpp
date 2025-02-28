@@ -4,7 +4,9 @@
 namespace val {
 	void syncInfo::init(const VAL_PROC& proc, const std::vector<queueManager*>& signal, const std::vector<queueManager*>& waitFor, pipelineCreateInfo* waitPipelineInfo) {
 
-		waitStages = waitPipelineInfo->getShaderStages();
+
+		// this should be optimized to use the proper VK_PIPELINE_STAGE_FLAGS, but currently there are more important things to work
+		waitStages.assign(waitFor.size(), VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
 
 		waitSemaphores.clear();

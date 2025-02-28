@@ -11,6 +11,9 @@ namespace val {
 		void compute(VAL_PROC& proc, queueManager& queue, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ);
 
 		void update(VAL_PROC& proc, queueManager& queue, computePipelineCreateInfo& computePipeline);
+
+		
+		void submit(VAL_PROC& proc, const std::vector<queueManager&>& signalQueues, const std::vector<queueManager&>& waitQueues, VkFence fence = VK_NULL_HANDLE);
 	public:
 
 	};

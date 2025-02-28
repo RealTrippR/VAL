@@ -19,6 +19,7 @@ namespace val {
 	public:
 		std::vector<shader*> shaders;
 		uint32_t pipelineIdx;
+		uint32_t descriptorsIdx; // index of descriptor sets and layouts
 	public:
 		virtual std::vector<UBO_Handle*> getUniqueUBOs();
 
@@ -28,7 +29,7 @@ namespace val {
 
 		virtual std::vector<VkDescriptorSet> getDescriptorSets(VAL_PROC& proc);
 
-		std::vector<VkPipelineStageFlags> getPipelineShaderStages();
+		//std::vector<VkPipelineStageFlags> getPipelineStages();
 
 		virtual const std::vector<VkShaderStageFlags> getShaderStages();
 

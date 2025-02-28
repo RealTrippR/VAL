@@ -317,7 +317,7 @@ int main() {
 		// Wait idle for the GPU to finish executing the command buffer
 		vkDeviceWaitIdle(mainProc._device);
 
-		mainProc.endDraw(imageFormat);
+		mainProc.submit(imageFormat);
 
 		window.waitForFences(); // this is required because the update images function modifies the descriptor sets,
 								// and in Vulkan we have to wait for the current command buffer to finish before we can modify or destroy them.

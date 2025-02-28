@@ -32,7 +32,7 @@ namespace val {
 
 	public:
 
-		void display(const VkFormat& imgFormat, syncInfo& waitOn);
+		void display(const VkFormat& imgFormat, std::vector<VkSemaphore> waitOn);
 
 		void createWindowSurface(VkInstance instance);
 
@@ -48,7 +48,7 @@ namespace val {
 
 		void createSwapChainFrameBuffers(const VkExtent2D& extent, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
-		void updateSwapChain(const VkFormat& imageFormat, syncInfo& syncInfo);
+		void updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn);
 
 		void waitForFences();
 
@@ -58,6 +58,7 @@ namespace val {
 
 		VkFramebuffer& beginDraw(const VkFormat& imageFormat);
 
+		VkFence getPresentFence();
 	public:
 
 		uint32_t _currentSwapChainImageIndex = 0;

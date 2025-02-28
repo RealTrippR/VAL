@@ -390,7 +390,7 @@ int main() {
 
 		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, mesh._vertexBuffer, mesh._indexBuffer, mesh._indices.data(),
 			mesh._indices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
-		mainProc.endDraw(imageFormat);
+		mainProc.submit(imageFormat);
 
 		window.waitForFences();
 	}

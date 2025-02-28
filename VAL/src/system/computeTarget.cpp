@@ -39,7 +39,7 @@ namespace val {
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, proc._computePipelines[computePipeline.pipelineIdx]);
 		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, proc._computePipelineLayouts[computePipeline.pipelineIdx],
-			0, 1, &proc._descriptorSets[computePipeline.pipelineIdx][currentFrame], 0, nullptr);
+			0, 1, &proc._descriptorSets[computePipeline.descriptorsIdx][currentFrame], 0, nullptr);
 
 
 		VkCommandBufferBeginInfo beginInfo{};
@@ -49,5 +49,38 @@ namespace val {
 		if (vkBeginCommandBuffer(queue._commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS) {
 			throw std::runtime_error("failed to begin recording compute command buffer!");
 		}
+	}
+
+	void computeTarget::submit(VAL_PROC& proc, const std::vector<queueManager&>& signalQueues,
+		const std::vector<queueManager&>& waitQueues, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/) {
+		auto& currentFrame = proc._currentFrame;
+
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+
+		// wait on the image available semaphore to ensure the graphicsQueue doesn't use a swap chain image before it's ready.
+		//submitInfo.waitSemaphoreCount = syncInfo.waitSemaphores[currentFrame].size();
+		//submitInfo.pWaitSemaphores = syncInfo.waitSemaphores[currentFrame].data();
+		//pWaitDstStageMask = syncInfo.waitStages.data();
+		// the length of pWaitDstStageMask should be that of waitSemaphoreCount
+#ifndef NDEBUG
+		/*if (submitInfo.waitSemaphoreCount != syncInfo.waitStages.size()) {
+			printf("VAL: WARNING: val::syncInfo wait semaphore count and syncInfo.waitStages.size() do not match!\n");
+		}*/
+#endif // !NDEBUG
+
+		/*
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &proc->_graphicsQueue._commandBuffers[_procVAL->_currentFrame];
+
+		submitInfo.signalSemaphoreCount = signalSemaphores[currentFrame].size();
+		submitInfo.pSignalSemaphores = signalSemaphores[currentFrame].data();
+
+		if (vkQueueSubmit(_procVAL->_graphicsQueue._queue, 1, &submitInfo, fence) != VK_SUCCESS) {
+			throw std::runtime_error("FAILED TO SUBMIT DRAW COMMAND BUFFER");
+		}
+		*/
 	}
 }
