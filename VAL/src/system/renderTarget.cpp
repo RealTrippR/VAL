@@ -3,9 +3,10 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	void renderTarget::render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkCommandBuffer& commandBuffer, VkRenderPass& renderPass,
-		VkFramebuffer& frameBuffer) {
-		
+	void renderTarget::render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer)
+	{
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
+
 		// this would make more sense to have in the update function
 		_renderPassBeginInfo.renderPass = renderPass;
 		_renderPassBeginInfo.framebuffer = frameBuffer;
@@ -24,7 +25,9 @@ namespace val {
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void renderTarget::update(VAL_PROC& proc, VkCommandBuffer& commandBuffer, const uint16_t& pipelineIdx) {		
+	void renderTarget::update(VAL_PROC& proc, const uint16_t& pipelineIdx) {		
+
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
 		vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
 

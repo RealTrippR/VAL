@@ -8,12 +8,13 @@ namespace val {
 	class queueManager; // forward declaration
 	class computeTarget {
 	public:
-		void compute(VAL_PROC& proc, queueManager& queue, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ);
+		void compute(VAL_PROC& proc, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ);
 
-		void update(VAL_PROC& proc, queueManager& queue, computePipelineCreateInfo& computePipeline);
+		void update(VAL_PROC& proc, computePipelineCreateInfo& computePipeline);
 
+		void begin(VAL_PROC& proc);
 		
-		void submit(VAL_PROC& proc, const std::vector<queueManager&>& signalQueues, const std::vector<queueManager&>& waitQueues, VkFence fence = VK_NULL_HANDLE);
+		void submit(VAL_PROC& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence = VK_NULL_HANDLE);
 	public:
 
 	};

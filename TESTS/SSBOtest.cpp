@@ -316,7 +316,7 @@ int main() {
 	val::computeTarget computeTarget;
 
 	// Sync info, handles semaphores and fences.
-	val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue,&mainProc._computeQueue }, , &computePipelineInfo);
+	//val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue,&mainProc._computeQueue }, , &computePipelineInfo);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		glfwPollEvents();
@@ -325,74 +325,35 @@ int main() {
 		auto& graphicsQueue = mainProc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = mainProc._currentFrame;
-
-		VkCommandBuffer cmdBuffer = VK_NULL_HANDLE;
-		cmdBuffer = computeQueue._commandBuffers[currentFrame];
-
 		
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-		computeTarget.update(mainProc, computeQueue, computePipelineInfo);
-		computeTarget.compute(mainProc, computeQueue/*BE SURE THAT THIS QUEUE IS IN THE SIGNAL LIST IN THIS FUNCTION*/, PARTICLE_COUNT / 256, 1, 1);
-		computeTarget.submit({ computeQueue }, {});
-		
-		
-		/*vkResetFences(mainProc._device, 1, &computeQueue._fences[currentFrame]);
-		vkResetCommandBuffer(cmdBuffer,  0);
-
-		if (vkBeginCommandBuffer(cmdBuffer, &beginInfo) != VK_SUCCESS) {
-			throw std::runtime_error("failed to begin recording compute command buffer!");
-		}
-
-		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, mainProc._computePipelines[computePipelineInfo.pipelineIdx]);
-
-		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-			mainProc._computePipelineLayouts[0], 0, 1, &mainProc._descriptorSets[computePipelineInfo.descriptorsIdx][currentFrame], 0, nullptr);
-
-		vkCmdDispatch(cmdBuffer, PARTICLE_COUNT / 256, 1, 1);
-
-		if (vkEndCommandBuffer(cmdBuffer) != VK_SUCCESS) {
-			throw std::runtime_error("failed to record compute command buffer!");
-		}*/
+		computeTarget.begin(mainProc);
+		computeTarget.update(mainProc, computePipelineInfo);
+		computeTarget.compute(mainProc, PARTICLE_COUNT / 256, 1, 1);
+		computeTarget.submit(mainProc, {}, computeQueue._fences[currentFrame]);
 
 		//////////////////////////////////////////////////////////////
-		/////  Compute submission /////
-		/*VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &computeQueue._commandBuffers[currentFrame];
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &computeQueue._semaphores[currentFrame];
-
-		if (vkQueueSubmit(computeQueue._queue, 1, &submitInfo, computeQueue._fences[currentFrame]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to submit compute command buffer!");
-		};*/
-		
-
-
-		//////////////////////////////////////////////////////////////
-		cmdBuffer = graphicsQueue._commandBuffers[mainProc._currentFrame];
 		updateUniformBuffer(mainProc, uboHDL);
 
-		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
 		// note: the getBuffers function is very ineffecient, it should be omptimized.
 		renderTarget.setVertexBuffer(ssboHdl.getBuffers(mainProc)[mainProc._currentFrame], PARTICLE_COUNT);
 		// the renderTarget must be updated after any changes are made 
-		mainProc.beginDraw(imageFormat);
-		renderTarget.begin(mainProc, imageFormat);
-		renderTarget.update(mainProc, cmdBuffer, pipelineInfo.pipelineIdx);
-		renderTarget.render(mainProc, { viewport }, cmdBuffer, renderPasses[pipelineInfo.pipelineIdx],
-			framebuffer);
+		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.submit(mainProc, { computeQueue._semaphores[currentFrame] }, window.getPresentFence());
+		renderTarget.begin(mainProc);
+		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame], computeQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);
 
-		window.display(imageFormat, { &window._presentQueue._semaphores[currentFrame]});
+		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+
 		mainProc.nextFrame();
 
-		vkQueueWaitIdle(mainProc._computeQueue._queue);
+		//vkQueueWaitIdle(mainProc._computeQueue._queue);
 
 		double currentTime = glfwGetTime();
 		lastFrameTime = (currentTime - lastTime) * 1000.0;

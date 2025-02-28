@@ -12,10 +12,9 @@ namespace val {
 		renderTarget(renderTarget&& other) = delete;
 
 	public:
-		void render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkCommandBuffer& commandBuffer, VkRenderPass& renderPass,
-			VkFramebuffer& frameBuffer);
+		void render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer);
 
-		void update(VAL_PROC& proc, VkCommandBuffer& commandBuffer, const uint16_t& pipelineIdx);
+		void update(VAL_PROC& proc, const uint16_t& pipelineIdx);
 
 		void begin(VAL_PROC& proc);
 

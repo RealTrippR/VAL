@@ -226,7 +226,8 @@ int main() {
 	renderTarget.setClearValues({{ 0.0f, 0.0f, 0.0f, 1.0f }});
 	renderTarget.setIndexBuffer(indexBuffer, indices.size());
 	renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
-
+	//renderTarget.setThreadID(THREAD_1_ID) -- just an idea of how to implement multi-threading
+	
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
@@ -245,9 +246,8 @@ int main() {
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
 		renderTarget.begin(mainProc);
-		renderTarget.update(mainProc, cmdBuffer, pipelineInfo.pipelineIdx);
-		renderTarget.render(mainProc, { viewport }, cmdBuffer, renderPasses[pipelineInfo.pipelineIdx],
-			framebuffer);
+		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.submit(mainProc, {presentQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);
 
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
