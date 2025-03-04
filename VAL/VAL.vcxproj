@@ -144,8 +144,10 @@
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
+    <ClInclude Include="lib\system\buffer.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />
+    <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
@@ -153,7 +155,6 @@
     <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\renderTarget.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
-    <ClInclude Include="lib\system\syncInfo.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Handle.hpp" />
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
@@ -165,14 +166,15 @@
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
+    <ClCompile Include="src\system\buffer.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
+    <ClCompile Include="src\system\depthBuffer.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
     <ClCompile Include="src\system\renderTarget.cpp" />
     <ClCompile Include="src\system\SSBO_Handle.cpp" />
-    <ClCompile Include="src\system\syncInfo.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />
     <ClInclude Include="src\system\pipelineCreateInfo.hpp" />
   </ItemGroup>

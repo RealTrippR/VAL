@@ -211,25 +211,20 @@ namespace val {
 		return &_descriptorWriteBufferInfos;
 	}
 
-	void shader::setVertexAttributes(VkVertexInputAttributeDescription* attributes, const uint32_t& attribCount) {
+	void shader::setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes) {
 		_attributes = attributes;
-		_attribCount = attribCount;
 	}
 
-	VkVertexInputAttributeDescription* shader::getVertexAttributes() noexcept {
+	const std::vector<VkVertexInputAttributeDescription>& shader::getVertexAttributes() noexcept {
 		return _attributes;
 	}
 
-	void shader::setBindingDescription(const VkVertexInputBindingDescription& bindingDescription) {
-		_bindingDescription = bindingDescription;
+	void shader::setBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions) {
+		_bindings = bindingDescriptions;
 	}
 
-	const VkVertexInputBindingDescription& shader::getBindingDescription() noexcept {
-		return _bindingDescription;
-	}
-
-	const uint32_t& shader::getVertexAttributesCount() noexcept {
-		return _attribCount;
+	const std::vector<VkVertexInputBindingDescription>& shader::getBindingDescriptions() noexcept {
+		return _bindings;
 	}
 
 	void shader::setPushConstants(const std::vector<std::pair<pushConstantHandle*, uint16_t>>& pushConstants) {

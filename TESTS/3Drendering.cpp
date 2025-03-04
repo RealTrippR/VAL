@@ -49,7 +49,7 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
+void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -63,7 +63,7 @@ void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
-	memcpy(proc._uniformBuffersMapped[proc._currentFrame][shaderIndex], &ubo, sizeof(ubo));
+	hdl.update(proc, &ubo);
 }
 
 void setImageSamplerInfo(VkSamplerCreateInfo* info) {
@@ -89,7 +89,7 @@ void setImageSamplerInfo(VkSamplerCreateInfo* info) {
 	info->maxAnisotropy = 1.0f;
 }
 
-void setGraphicsPipelineInfo(val::pipelineCreateInfo& info, VkSampleCountFlagBits msaaSamples) {
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, VkSampleCountFlagBits msaaSamples) {
 	// RASTERIZER
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -149,16 +149,6 @@ void setGraphicsPipelineInfo(val::pipelineCreateInfo& info, VkSampleCountFlagBit
 
 void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat, VkSampleCountFlagBits msaaSamples) {
 
-	// attachments - ALL MUST BE STATIC IN MEMORY
-	static VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = colorAttachmentFormat;
-	colorAttachment.samples = msaaSamples;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 	// MUST BE STATIC IN MEMORY
 	static VkAttachmentDescription depthAttachment{};
@@ -171,6 +161,17 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+	// attachments - ALL MUST BE STATIC IN MEMORY
+	static VkAttachmentDescription colorAttachment{};
+	colorAttachment.format = colorAttachmentFormat;
+	colorAttachment.samples = msaaSamples;
+	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
 	static VkAttachmentDescription colorAttachmentResolve{};
 	colorAttachmentResolve.format = colorAttachmentFormat;
 	colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -182,16 +183,15 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 	// MUST BE STATIC IN MEMORY
-	static VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	// MUST BE STATIC IN MEMORY
 	static VkAttachmentReference depthAttachmentRef{};
-	depthAttachmentRef.attachment = 1;
+	depthAttachmentRef.attachment = 0;
 	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	// THE FINAL COLOR ATTACHMENT REFERENCE MUST ALWAYS BE THE LAST ATTACHMENT 	// MUST BE STATIC IN MEMORY
+	static VkAttachmentReference colorAttachmentRef{};
+	colorAttachmentRef.attachment = 1;
+	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	// THE FINAL COLOR ATTACHMENT REFERENCE MUST ALWAYS BE THE LAST ATTACHMENT
 	static VkAttachmentReference colorAttachmentResolveRef{};
 	colorAttachmentResolveRef.attachment = 2;
 	colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -214,10 +214,9 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-
 	renderPassInfo.subpasses = { subpass };
 	renderPassInfo.subpassDependencies = { dependency };
-	renderPassInfo.attachments = {colorAttachment, depthAttachment, colorAttachmentResolve };
+	renderPassInfo.attachments = {depthAttachment, colorAttachment, colorAttachmentResolve};
 }
 
 
@@ -238,7 +237,7 @@ int main() {
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-	uniformBufferObject ubo;
+	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
 	// FML uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -259,6 +258,8 @@ int main() {
 
 	printf("\n>-- MSAA Sample count: %d\n\n", msaaSamples);
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	// CREATES COLOR RESOLVE IMAGE FOR MULTI-SAMPLING
 	// THIS PROCESS MUST BE SIMPLIFIED
 	VkImage colorImage;
 	VkDeviceMemory colorImageMemory;
@@ -267,14 +268,16 @@ int main() {
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory, 1u, msaaSamples);
 	// this function should be changed to image colorImageView in the front
 	mainProc.createImageView(colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &colorImageView, 1u);
-
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	// The shader class is poorly optimized and fucking retarded at the moment
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::shader vertShader("shaders-compiled/instancedShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions().data(),
 		val::vertex3D::getAttributeDescriptions().size());
 	vertShader.setBindingDescription(val::vertex3D::getBindingDescription());
-	vertShader.setUniformBufferData(&ubo, sizeof(ubo), 1);
+	
+	vertShader._UBO_Handles = { { &uboHdl, 0 } };
 
 
 	// load and configure frag shader
@@ -283,18 +286,15 @@ int main() {
 
 	VkSamplerCreateInfo samplerInfo{};
 	setImageSamplerInfo(&samplerInfo);
-	fragShader.setImageSamplers({ samplerInfo });
+	fragShader._imageSamplersCreateInfos = { { samplerInfo,1 } };
 
-	VkImageView imgView;
-	fragShader.setImageView({ &imgView });
+	VkImageView imgView = VK_NULL_HANDLE;
+	fragShader._imageViews = { imgView };
 
 	// config grahics pipeline
-	val::pipelineCreateInfo pipelineInfo;
-
+	val::graphicsPipelineCreateInfo pipelineInfo;
 	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
-
 	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function
-
 	setGraphicsPipelineInfo(pipelineInfo, msaaSamples);
 
 	// FML uses the image format requirements to pick the best image format
@@ -319,66 +319,75 @@ int main() {
 	pipelineInfo.renderPassInfo = &renderPassInfo;
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
-
-
 	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses);
 
-	VkImage depthImage;
-	VkDeviceMemory depthImageMemory;
-	VkImageView depthImageView;
-	mainProc.createImage(window._swapChainExtent.width, window._swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory, 1u, msaaSamples);
-	mainProc.createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, &depthImageView);
+	// Create depth buffer
+	val::depthBuffer depthBuffer;
+	depthBuffer.create(mainProc, window._swapChainExtent, depthFormat, 1u, 1u, msaaSamples);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	std::vector<VkImageView> attachments = { colorImageView, depthImageView };
+	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front(), colorImageView };
 	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], mainProc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER FML_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
-
 	// Create mesh and texture, load object and apply texture to the image
 	val::image textureImg(mainProc, TEXTURE_PATH, imageFormat);
 	val::meshTextured mesh;
 	mesh.loadFromDiskObj(mainProc, MODEL_PATH, true);
 	mesh.setTexture(mainProc, &textureImg);
-	fragShader._imageViews[0] = &mesh._textureImageView;
+	fragShader._imageViews[0] = mesh._textureImageView;
 
 	
 	//////////////////////////////////////////////////////////////////
 
 	mainProc.createDescriptorSets(&pipelineInfo, 0u);
 
-	VkClearValue clearValues[2];
-
-	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
-	clearValues[1].depthStencil = { 1.0f, 0 };
+	val::renderTarget renderTarget;
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setArea(window._swapChainExtent);
+	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setClearValues({
+		{.depthStencil { 1.0f, 0 } },
+		{.color { 0.0f, 0.0f, 0.0f, 1.0f } }
+		});
+	renderTarget.setIndexBuffer(mesh._indexBuffer, mesh._indices.size());
+	renderTarget.setVertexBuffer(mesh._vertexBuffer, mesh._vertices.size());
+	
+	// config viewport, covers the entire size of the window
+	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		glfwPollEvents();
 		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
 		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
-		updateUniformBuffer(0/*the vert shader is the first to be created, so it's index is 0*/, mainProc); // maybe updateDescriptorSet(s)?
+
+		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
+		auto& currentFrame = mainProc._currentFrame;
+
+		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
+		glfwPollEvents();
+		updateUniformBuffer(mainProc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		mainProc.beginDraw(imageFormat);
 
-		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, mesh._vertexBuffer, mesh._indexBuffer, mesh._indices.data(), mesh._indices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+		renderTarget.begin(mainProc);
+		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 
-		// Wait idle for the GPU to finish executing the command buffer
-		vkDeviceWaitIdle(mainProc._device);
-
-		mainProc.submit(imageFormat);
+		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+		mainProc.nextFrame();
 
 		window.waitForFences();
 	}
 
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	vkDestroyImageView(mainProc._device, imgView, NULL);
 
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }

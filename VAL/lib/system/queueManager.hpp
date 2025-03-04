@@ -1,8 +1,6 @@
 #ifndef VAL_QUEUE_HANDLER_HPP
 #define VAL_QUEUE_HANDLER_HPP
 
-#include <VAL/lib/system/syncInfo.hpp>
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 

@@ -16,6 +16,7 @@
     <ClCompile Include="instancingTest.cpp" />
     <ClCompile Include="multimeshRenderTest.cpp" />
     <ClCompile Include="SSBOtest.cpp" />
+    <ClCompile Include="specializationConstantsTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
@@ -73,12 +74,6 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\particleShader.comp">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\particleShader.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\particleShader.frag">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

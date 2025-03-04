@@ -104,7 +104,10 @@
     <ClInclude Include="lib\system\computeTarget.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\syncInfo.hpp">
+    <ClInclude Include="lib\system\depthBuffer.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\buffer.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
   </ItemGroup>
@@ -148,10 +151,13 @@
     <ClCompile Include="src\system\renderTarget.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\syncInfo.cpp">
+    <ClCompile Include="src\system\computeTarget.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\computeTarget.cpp">
+    <ClCompile Include="src\system\depthBuffer.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\buffer.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>

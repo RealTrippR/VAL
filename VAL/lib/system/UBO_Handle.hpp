@@ -12,7 +12,7 @@ namespace val {
 		UBO_Handle(uint16_t sizeOfUBO) : UBO_Handle() {
 			_size = sizeOfUBO;
 		}
-		UBO_Handle(uint16_t sizeOfUBO, bufferUsage usage) : UBO_Handle() {
+		UBO_Handle(uint16_t sizeOfUBO, bufferSpace usage) : UBO_Handle() {
 			_size = sizeOfUBO;
 			_usage = usage;
 		}
@@ -25,7 +25,7 @@ namespace val {
 
 		//void* getMappedData(VAL_PROC& pro);
 
-		VkMemoryPropertyFlagBits getMemoryPropertyFlagBits();
+		VkMemoryPropertyFlags getMemoryPropertyFlags();
 
 	public:
 		uint16_t _size = 0; // Vulkan allows for 16000 as the max size in bytes of a UBO buffer
@@ -35,7 +35,7 @@ namespace val {
 
 		// IF GPU ONLY: DOES NOT NEED TO BE MAPPED TO MEMORY
 		// IF GPU-CPU: MUST BE MAPPED TO MEMORY
-		bufferUsage _usage = CPU_GPU;
+		bufferSpace _usage = CPU_GPU;
 
 		VkShaderStageFlagBits stageFlags = VK_SHADER_STAGE_ALL;
 	};

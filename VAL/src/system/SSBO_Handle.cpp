@@ -45,14 +45,7 @@ namespace val {
 	}
 
 
-	VkMemoryPropertyFlagBits SSBO_Handle::getMemoryPropertyFlagBits() {
-		switch (_usage) {
-		case GPU_ONLY:
-			return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		case CPU_GPU:
-			return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-			// this can be optimized, some GPUs support VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-			// it would be smart to use this memory property whenever supported.
-		}
+	VkMemoryPropertyFlags SSBO_Handle::getMemoryPropertyFlags() {
+		return bufferSpaceToVkMemoryProperty(_usage);
 	}
 }

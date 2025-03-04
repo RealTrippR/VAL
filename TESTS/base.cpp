@@ -153,20 +153,17 @@ int main() {
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
 
-	uniformBufferObject ubo;
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions().data(),
-		res::vertex::getAttributeDescriptions().size());
-	vertShader.setBindingDescription(res::vertex::getBindingDescription());
+	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 
 	// load and configure frag shader
 	val::shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
-
 
 	//////////////////////////////////////////////////////////////
 
@@ -199,16 +196,14 @@ int main() {
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
 
-	VkBuffer vertexBuffer = NULL;
-	VkDeviceMemory vertexBufferMem = NULL;
-	mainProc.createVertexBuffer(vertices.data(),vertices.size(),sizeof(res::vertex), &vertexBuffer, &vertexBufferMem);
-
+	// buffer wrapper for vertex Buffer
+	val::buffer vertexBuffer(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	VkBuffer indexBuffer = NULL;
-	VkDeviceMemory indexBufferMem = NULL;
-	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
+	val::buffer indexBuffer(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
 	//////////////////////////////////////////////////////////////
@@ -224,15 +219,12 @@ int main() {
 	renderTarget.setArea(window._swapChainExtent);
 	renderTarget.setScissorExtent(window._swapChainExtent);
 	renderTarget.setClearValues({{ 0.0f, 0.0f, 0.0f, 1.0f }});
-	renderTarget.setIndexBuffer(indexBuffer, indices.size());
-	renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
+	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
+	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer()}, vertices.size());
 	//renderTarget.setThreadID(THREAD_1_ID) -- just an idea of how to implement multi-threading
 	
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
-
-	// Sync info, handles semaphores and fences.
-	val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue }, { &window._presentQueue }, &pipelineInfo);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		auto& graphicsQueue = mainProc._graphicsQueue;

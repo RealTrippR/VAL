@@ -219,8 +219,8 @@ int main() {
 	// load and configure shaders
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/particleShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setBindingDescription(Particle::getBindingDescription());
-	vertShader.setVertexAttributes(Particle::getAttributeDescriptions().data(), Particle::getAttributeDescriptions().size());
+	vertShader.setBindingDescriptions({ Particle::getBindingDescription() });
+	vertShader.setVertexAttributes(Particle::getAttributeDescriptions());
 
 	// load and configure vert shader
 	val::shader fragShader("shaders-compiled/particleShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
@@ -340,7 +340,7 @@ int main() {
 
 
 		// note: the getBuffers function is very ineffecient, it should be omptimized.
-		renderTarget.setVertexBuffer(ssboHdl.getBuffers(mainProc)[mainProc._currentFrame], PARTICLE_COUNT);
+		renderTarget.setVertexBuffers({ ssboHdl.getBuffers(mainProc)[mainProc._currentFrame] }, PARTICLE_COUNT);
 		// the renderTarget must be updated after any changes are made 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 

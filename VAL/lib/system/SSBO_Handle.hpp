@@ -13,7 +13,7 @@ namespace val {
 		SSBO_Handle(uint64_t sizeOfSSBO) : SSBO_Handle() {
 			_size = sizeOfSSBO;
 		}
-		SSBO_Handle(uint64_t sizeOfSSBO, bufferUsage usage) : SSBO_Handle() {
+		SSBO_Handle(uint64_t sizeOfSSBO, bufferSpace usage) : SSBO_Handle() {
 			_size = sizeOfSSBO;
 			_usage = usage;
 		}
@@ -28,7 +28,7 @@ namespace val {
 
 		std::vector<VkBuffer> getBuffers(VAL_PROC& proc);
 
-		VkMemoryPropertyFlagBits getMemoryPropertyFlagBits();
+		VkMemoryPropertyFlags getMemoryPropertyFlags();
 	public:
 		uint64_t _size = 0;
 		int _index = 0;
@@ -37,7 +37,7 @@ namespace val {
 
 		// IF GPU ONLY: DOES NOT NEED TO BE MAPPED TO MEMORY
 		// IF GPU-CPU: MUST BE MAPPED TO MEMORY
-		bufferUsage _usage = CPU_GPU;
+		bufferSpace _usage = CPU_GPU;
 
 		VkShaderStageFlags _stageFlags = VK_SHADER_STAGE_ALL;
 	};

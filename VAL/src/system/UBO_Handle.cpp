@@ -25,7 +25,7 @@ namespace val {
 	}
 
 
-	VkMemoryPropertyFlagBits UBO_Handle::getMemoryPropertyFlagBits() {
+	VkMemoryPropertyFlags UBO_Handle::getMemoryPropertyFlags() {
 		if (GPU_ONLY) {
 			return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		}

@@ -24,7 +24,7 @@
 #include <math.h>
 
 
-enum bufferUsage {
+enum bufferSpace {
 	GPU_ONLY,
 	CPU_GPU
 };
@@ -99,6 +99,8 @@ namespace val {
 	bool readByteFile(const std::string& filename, std::vector<char>* dst);
 
 	uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+	VkMemoryPropertyFlags bufferSpaceToVkMemoryProperty(const bufferSpace& bufferSpace);
 }
 
 #endif // !VAl_SYSTEM_UTILS

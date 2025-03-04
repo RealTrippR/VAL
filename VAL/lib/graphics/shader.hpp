@@ -42,7 +42,7 @@ namespace val {
 			_entryPoint = entryPoint;
 			_shaderStageFlags = shaderStageFlags;
 		}
-
+		
 	public:
 		// returns true if the shader was succesfully loaded
 		bool loadFromFile(fs::path filepath);
@@ -71,15 +71,13 @@ namespace val {
 		// outer vector is for each frame in flight, second is for the buffer info for that frame
 		virtual std::vector<std::vector<VkDescriptorBufferInfo>>* getDescriptorBufferInfos(VAL_PROC& proc);
 
-		void setVertexAttributes(VkVertexInputAttributeDescription* attributes, const uint32_t& attribCount);
+		void setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes);
 
-		VkVertexInputAttributeDescription* getVertexAttributes() noexcept;
+		const std::vector<VkVertexInputAttributeDescription>& getVertexAttributes() noexcept;
 
-		void setBindingDescription(const VkVertexInputBindingDescription& bindingDescription);
+		void setBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
 
-		const VkVertexInputBindingDescription& getBindingDescription() noexcept;
-
-		const uint32_t& getVertexAttributesCount() noexcept;
+		const std::vector<VkVertexInputBindingDescription>& getBindingDescriptions() noexcept;
 
 		void setPushConstants(const std::vector<std::pair<pushConstantHandle*, uint16_t>>& pushConstants);
 
@@ -104,9 +102,12 @@ namespace val {
 		// outer vector is for each frame in flight, second is for the buffer info for that frame
 		std::vector<std::vector<VkDescriptorBufferInfo>> _descriptorWriteBufferInfos; // stored as part of the class for optimization (avoids excess copying), as well as scope
 
-		VkVertexInputAttributeDescription* _attributes = NULL;
+		std::vector<VkVertexInputAttributeDescription> _attributes;
+		std::vector< VkVertexInputBindingDescription> _bindings;
+		/*VkVertexInputAttributeDescription* _attributes = NULL;
 		uint32_t _attribCount = 0;
-		VkVertexInputBindingDescription _bindingDescription{};
+		VkVertexInputBindingDescription* _bindingDescription = NULL;
+		uint32_t _bindingCount = 0;*/
 	};
 }
 

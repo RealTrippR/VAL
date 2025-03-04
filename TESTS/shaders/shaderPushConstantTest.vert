@@ -6,9 +6,20 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 proj;
 } ubo;
 
+
+struct transformation {
+	vec3 translation;
+	vec3 rotation;
+    vec3 scale;
+};
+
+layout(std140, binding = 1) readonly buffer transformsIn {
+   transformation transformDataIn[ ];
+};
+
 layout( push_constant ) uniform constants
 {
-	vec3 pos_offset;
+	uint instanceCount; //uint is equal to uint32_t
 } pushConstants;
 
 layout(location = 0) in vec3 inPosition;

@@ -3,7 +3,7 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	void renderTarget::render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer)
+	void renderTarget::render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer, const uint32_t& instanceCount /*DEFAULT = 1U*/)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
@@ -15,11 +15,11 @@ namespace val {
 		vkCmdBeginRenderPass(commandBuffer, &_renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 
-		if (_indexBuffer) {
-			vkCmdDrawIndexed(commandBuffer, (uint32_t)(_indexCount), 1, 0, 0, 0); // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdDrawIndexed.html
+		if (_indexCount>0) {
+			vkCmdDrawIndexed(commandBuffer, (uint32_t)(_indexCount), instanceCount, 0, 0, 0); // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdDrawIndexed.html
 		}
 		else {
-			vkCmdDraw(commandBuffer, _vertexCount, 1, 0, 0); // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdDraw.html
+			vkCmdDraw(commandBuffer, _vertexCount, instanceCount, 0, 0); // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdDraw.html
 		}
 
 		vkCmdEndRenderPass(commandBuffer);
@@ -36,10 +36,9 @@ namespace val {
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._pipelineLayouts[pipelineIdx],
 			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 
-		VkDeviceSize offsets[] = { 0 };
 		// bind buffers
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &_vertexBuffer, offsets);
-		if (_indexBuffer) {
+		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		if (_indexCount>0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
 	}

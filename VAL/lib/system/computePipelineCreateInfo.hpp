@@ -3,14 +3,12 @@
 
 #define GLFW_INCLUDE_VULKAN
 
-
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
 namespace val {
 	class shader;
 
 	class computePipelineCreateInfo : public pipelineCreateInfo {
 	public:
-
 	};
 }
 

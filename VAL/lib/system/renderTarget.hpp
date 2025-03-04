@@ -12,7 +12,7 @@ namespace val {
 		renderTarget(renderTarget&& other) = delete;
 
 	public:
-		void render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer);
+		void render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer, const uint32_t& instanceCount = 1u);
 
 		void update(VAL_PROC& proc, const uint16_t& pipelineIdx);
 
@@ -20,13 +20,17 @@ namespace val {
 
 		void submit(VAL_PROC& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence = VK_NULL_HANDLE);
 	public:
-		void setVertexBuffer(const VkBuffer& vertexBuffer, const uint32_t& vertexCount) {
-			_vertexBuffer = vertexBuffer;
+		void setVertexBuffers(const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount) {
+			_vertexBuffers = vertexBuffers;
 			_vertexCount = vertexCount;
+
+
+			_vertexBufferOffsets.resize(vertexBuffers.size());
+			memset(_vertexBufferOffsets.data(), 0u, sizeof(VkDeviceSize) * vertexBuffers.size());
 		}
 
-		const VkBuffer& getVertexBuffer() const {
-			return _vertexBuffer;
+		const std::vector<VkBuffer>& getVertexBuffer() const {
+			return _vertexBuffers;
 		}
 
 		void setIndexBuffer(const VkBuffer& indexBuffer, const uint32_t& indexCount) {
@@ -127,9 +131,10 @@ namespace val {
 		std::vector<VkClearValue> _clearValues;
 
 		VkFormat _imgFormat;
-		VkBuffer _vertexBuffer = VK_NULL_HANDLE;
+		std::vector<VkBuffer> _vertexBuffers;
+		std::vector<VkDeviceSize> _vertexBufferOffsets;
 		uint32_t _vertexCount = 0;
-		VkBuffer _indexBuffer = VK_NULL_HANDLE;
+		VkBuffer _indexBuffer;
 		uint32_t _indexCount = 0;
 		VkRenderPassBeginInfo _renderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO, NULL, VK_NULL_HANDLE, VK_NULL_HANDLE, {0u,0u}, 0u, VK_NULL_HANDLE};
 		VkRect2D _scissor{};

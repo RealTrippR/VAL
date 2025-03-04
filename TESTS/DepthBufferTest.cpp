@@ -24,7 +24,7 @@ const bool enableValidationLayers = true;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "imageVertex3D.hpp"
+#include <VAL\lib\meshes&vertices\vertex3Dtextured.hpp>;
 
 // it is important that this is the last include
 #define STB_IMAGE_IMPLEMENTATION
@@ -42,8 +42,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 
-
-void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
+void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -57,7 +56,7 @@ void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
-	memcpy(proc._uniformBuffersMapped[proc._currentFrame][shaderIndex], &ubo, sizeof(ubo));
+	hdl.update(proc, &ubo);
 }
 
 void setImageSamplerInfo(VkSamplerCreateInfo* info) {
@@ -83,7 +82,7 @@ void setImageSamplerInfo(VkSamplerCreateInfo* info) {
 	info->maxAnisotropy = 1.0f;
 }
 
-void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	// RASTERIZER
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -141,8 +140,8 @@ void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
 
 
 
-void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat) {
-
+void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
+{
 	// attachments - ALL MUST BE STATIC IN MEMORY
 	static VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = colorAttachmentFormat;
@@ -193,9 +192,9 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-	renderPassInfo.subpasses = { subpass };
+	renderPassInfo.subpasses = {subpass};
 	renderPassInfo.subpassDependencies = { dependency };
-	renderPassInfo.attachments = {depthAttachment, colorAttachment };
+	renderPassInfo.attachments = {depthAttachment, colorAttachment};
 }
 
 
@@ -215,8 +214,6 @@ int main() {
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-	uniformBufferObject ubo;
-
 	// VAL uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
 	val::imageFormatRequirements formatReqs;
@@ -230,31 +227,29 @@ int main() {
 
 	// The shader class is poorly optimized and fucking retarded at the moment
 	// load and configure vert shader
-	val::shader vertShader("shaders/image3D.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setVertexAttributes(res::vertex3D::getAttributeDescriptions().data(),
-		res::vertex3D::getAttributeDescriptions().size());
-	vertShader.setBindingDescription(res::vertex3D::getBindingDescription());
-	vertShader.setUniformBufferData(&ubo, sizeof(ubo), 1);
+	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions().data(),
+		val::vertex3D::getAttributeDescriptions().size());
+	vertShader.setBindingDescription(val::vertex3D::getBindingDescription());
 
+	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::shader fragShader("shaders/imagefrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	VkSamplerCreateInfo samplerInfo{};
 	setImageSamplerInfo(&samplerInfo);
-	fragShader.setImageSamplers({ samplerInfo });
+	fragShader._imageSamplersCreateInfos = { { samplerInfo,1 } };
 
-	VkImageView imgView;
-	fragShader.setImageView({ &imgView });
+	VkImageView imgView = VK_NULL_HANDLE;
+	fragShader._imageViews = { imgView };
 
 	// config grahics pipeline
 	val::graphicsPipelineCreateInfo pipelineInfo;
-
 	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
-
 	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function
-
 	setGraphicsPipelineInfo(pipelineInfo);
 
 	// creates Vulkan logical and physical devices
@@ -277,19 +272,13 @@ int main() {
 	pipelineInfo.renderPassInfo = &renderPassInfo;
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
-
-
 	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses);
 
-	VkImage depthImage;
-	VkDeviceMemory depthImageMemory;
-	VkImageView depthImageView;
-	mainProc.createImage(window._swapChainExtent.width, window._swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
-	mainProc.createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, &depthImageView);
-	//////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<VkImageView> attachments = { depthImageView };
+	// Create depth buffer
+	val::depthBuffer depthBuffer(mainProc, window._swapChainExtent, depthFormat, 1u);
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front()};
 	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], mainProc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,13 +287,10 @@ int main() {
 
 	// CREATE IMAGE & IMAGE VIEW //
 	val::image img(mainProc, "testImage.jpg", imageFormat);
-	mainProc.createImageView(img.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &imgView);
-
-	fragShader._imageViews[0] = imgView;
+	mainProc.createImageView(img.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &fragShader._imageViews[0]);
 
 
-
-	std::vector<res::vertex3D> vertices = {
+	std::vector<val::vertex3D> vertices = {
 		{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
@@ -318,7 +304,7 @@ int main() {
 
 	VkBuffer vertexBuffer = NULL;
 	VkDeviceMemory vertexBufferMem = NULL;
-	mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(res::vertex3D), &vertexBuffer, &vertexBufferMem);
+	mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(val::vertex3D), &vertexBuffer, &vertexBufferMem);
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0,
@@ -327,40 +313,54 @@ int main() {
 
 	VkBuffer indexBuffer = NULL;
 	VkDeviceMemory indexBufferMem = NULL;
-
 	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
 
 	mainProc.createDescriptorSets(&pipelineInfo, 0u);
 
-	VkClearValue clearValues[2];
+	val::renderTarget renderTarget;
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setArea(window._swapChainExtent);
+	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setClearValues({ 
+		{.depthStencil { 1.0f, 0 } },
+		{.color { 0.0f, 0.0f, 0.0f, 1.0f } }
+	});
+	renderTarget.setIndexBuffer(indexBuffer, indices.size());
+	renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
 
-	clearValues[0].depthStencil = { 1.0f, 0 };
-	clearValues[1].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	// config viewport, covers the entire size of the window
+	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		glfwPollEvents();
 		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
 		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
-		updateUniformBuffer(0/*the vert shader is the first to be created, so it's index is 0*/, mainProc); // maybe updateDescriptorSet(s)?
+
+		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
+		auto& currentFrame = mainProc._currentFrame;
+
+		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
+		glfwPollEvents();
+		updateUniformBuffer(mainProc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		mainProc.beginDraw(imageFormat);
 
-		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, vertexBuffer, indexBuffer, indices.data(), indices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+		renderTarget.begin(mainProc);
+		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 
-		// Wait idle for the GPU to finish executing the command buffer
-		vkDeviceWaitIdle(mainProc._device);
-
-		mainProc.submit(imageFormat);
+		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+		mainProc.nextFrame();
 
 		window.waitForFences();
 	}
 
-	mainProc.cleanup(windowHDL_GLFW);
 
 	vkDestroyImageView(mainProc._device, imgView, NULL);
 
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }
