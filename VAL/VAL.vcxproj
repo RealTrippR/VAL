@@ -154,6 +154,7 @@
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\renderTarget.hpp" />
+    <ClInclude Include="lib\system\specializationConstant.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Handle.hpp" />

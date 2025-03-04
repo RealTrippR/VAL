@@ -8,6 +8,7 @@
 #include <VAL/lib/system/UBO_Handle.hpp>
 #include <VAL/lib/system/pushConstantHandle.hpp>
 #include <VAL/lib/system/SSBO_Handle.hpp>
+#include <VAL/lib/system/specializationConstant.hpp>
 
 #include <optional>
 #include <string.h>
@@ -34,7 +35,6 @@ namespace val {
 
 	class shader {
 	public:
-
 		shader() = default;
 
 		shader(fs::path filepath, VkShaderStageFlags shaderStageFlags, std::string entryPoint) {
@@ -90,6 +90,7 @@ namespace val {
 		std::vector<char> _byteCode;
 		fs::path _filepath;
 
+		std::vector<std::pair<specializationConstant*, uint16_t>> specializationConstants;
 		std::vector<std::pair<pushConstantHandle*, uint16_t>> _pushConstants;
 		std::vector< std::pair<UBO_Handle*, uint16_t>> _UBO_Handles;
 		std::vector<std::pair<SSBO_Handle*, uint16_t>> _SSBO_Handles;

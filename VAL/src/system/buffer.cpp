@@ -3,8 +3,8 @@
 
 namespace val
 {
-	void buffer::create(VAL_PROC& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage) {
-		proc.createBuffer(size, bufferUsage, bufferSpaceToVkMemoryProperty(space), _buffer, _memory);
+	void buffer::create(const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage) {
+		_proc.createBuffer(size, bufferUsage, bufferSpaceToVkMemoryProperty(space), _buffer, _memory);
 		_size = size;
 		_space = space;
 		_usage = bufferUsage;
@@ -12,13 +12,17 @@ namespace val
 		// create mapped data memory
 		if (CPU_GPU == space) {
 			_dataMapped = malloc(size);
-			vkMapMemory(proc._device, _memory, 0u, size, 0u, &_dataMapped);
+			vkMapMemory(_proc._device, _memory, 0u, size, 0u, &_dataMapped);
 		}
 	}
 
-	void buffer::overwriteFromStagingBuffer(VAL_PROC& proc, void* data, uint32_t dataSize) {
+	void buffer::overwriteFromStagingBuffer(void* data, uint64_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
 #ifndef NDEBUG
-		if (dataSize > _size) {
+		if (srcOffset > _size) {
+			printf("VAL: ERROR: Cannot write out of bounds to a VkBuffer. srcOffset is greater than the size of the buffer.\n Src offset: %llu, buffer size: %llu", srcOffset, _size);
+			throw std::logic_error("VAL: ERROR: Cannot write out of bounds to a VkBuffer.srcOffset is greater than the size of the buffer.");
+		}
+		if (dataSize+dstOffset > _size) {
 			printf("VAL: WARNING: the size argument val::buffer::overwriteFromStagingBuffer cannot be greater than the size of the val::buffer.\n Size of val::buffer: %d, size of data: %d", _size, dataSize);
 		}
 		else if (dataSize != _size) {
@@ -29,36 +33,50 @@ namespace val
 		// create staging buffer
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
-		proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+		_proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 		void* stagingData;
-		vkMapMemory(proc._device, stagingBufferMemory, 0, dataSize, 0, &stagingData);
+		vkMapMemory(_proc._device, stagingBufferMemory, 0, dataSize, 0, &stagingData);
 		memcpy(stagingData, data, (size_t)dataSize);
-		vkUnmapMemory(proc._device, stagingBufferMemory);
+		vkUnmapMemory(_proc._device, stagingBufferMemory);
 
-		proc.copyBuffer(stagingBuffer, _buffer, (VkDeviceSize)dataSize, 0u);
+		_proc.copyBuffer(stagingBuffer, _buffer, (VkDeviceSize)dataSize, srcOffset, dstOffset);
 
-		vkDestroyBuffer(proc._device, stagingBuffer, VK_NULL_HANDLE);
-		vkFreeMemory(proc._device, stagingBufferMemory, VK_NULL_HANDLE);
+		vkDestroyBuffer(_proc._device, stagingBuffer, VK_NULL_HANDLE);
+		vkFreeMemory(_proc._device, stagingBufferMemory, VK_NULL_HANDLE);
 	}
 
-	void buffer::overwriteFromBuffer(VAL_PROC& proc, buffer buffer) {
-		proc.copyBuffer(_buffer, buffer._buffer, 0u, 0u);
+	void buffer::overwriteFromBuffer(buffer buffer, VkDeviceSize bufferSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
+#ifndef NDEBUG
+		if (srcOffset > _size) {
+			printf("VAL: ERROR: Cannot write out of bounds to a VkBuffer. srcOffset is greater than the size of the buffer.\n Src offset: %llu, buffer size: %llu", srcOffset, _size);
+			throw std::logic_error("VAL: ERROR: Cannot write out of bounds to a VkBuffer.srcOffset is greater than the size of the buffer.");
+		}
+		if (bufferSize + dstOffset > _size) {
+			printf("VAL: ERROR: A dst buffer cannot be filled with a src buffer that is greater than the size of the dst buffer.\n Size of dst buffer : %llu, Size of src buffer: %llu\n", _size, bufferSize);
+			throw std::logic_error("VAL: ERROR: A dst buffer cannot be filled with a src buffer that is greater than the size of the dst buffer.");
+		}
+		else if (bufferSize < _size) {
+			printf("VAL: Warning: if a buffer is overwitten from a src buffer that has a smaller size than the dst buffer, part of the dst buffer will not be overwritten.");
+		}
+#endif // !NDEBUG
+
+		_proc.copyBuffer(_buffer, buffer._buffer, bufferSize, srcOffset, dstOffset);
 	}
 
-	void buffer::resize(VAL_PROC& proc, uint32_t newSize) {
+	void buffer::resize(uint32_t newSize) {
 		// only resize if needed
 		if (newSize != _size) {
 			VkBuffer tmpBuffer;
 			VkDeviceMemory tmpMem;
 
 			// create new buffer and copy the old one into it
-			proc.createBuffer(newSize, _usage, bufferSpaceToVkMemoryProperty(_space), tmpBuffer, tmpMem);
-			proc.copyBuffer(tmpBuffer, _buffer, 0u, 0u);
+			_proc.createBuffer(newSize, _usage, bufferSpaceToVkMemoryProperty(_space), tmpBuffer, tmpMem);
+			_proc.copyBuffer(tmpBuffer, _buffer, 0u, 0u);
 
 			// destroy the old buffer
-			vkDestroyBuffer(proc._device, tmpBuffer, VK_NULL_HANDLE);
-			vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
+			vkDestroyBuffer(_proc._device, tmpBuffer, VK_NULL_HANDLE);
+			vkFreeMemory(_proc._device, _memory, VK_NULL_HANDLE);
 
 			if (_dataMapped != NULL) {
 				void* tmp;// tmp var to prevent memory leak
@@ -67,10 +85,10 @@ namespace val
 					_dataMapped = tmp;
 				}
 				else {
-					vkUnmapMemory(proc._device, _memory);
+					vkUnmapMemory(_proc._device, _memory);
 					free(_dataMapped);
 					_dataMapped = malloc(newSize);
-					vkMapMemory(proc._device, _memory, 0u, _size, 0u, &_dataMapped);
+					vkMapMemory(_proc._device, _memory, 0u, _size, 0u, &_dataMapped);
 				}
 			}
 
@@ -80,10 +98,10 @@ namespace val
 		}
 	}
 
-	void buffer::destroy(VAL_PROC& proc) {
+	void buffer::destroy() {
 		free(_dataMapped);
-		vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
-		vkDestroyBuffer(proc._device, _buffer, VK_NULL_HANDLE);
+		vkFreeMemory(_proc._device, _memory, VK_NULL_HANDLE);
+		vkDestroyBuffer(_proc._device, _buffer, VK_NULL_HANDLE);
 	}
 
 	const bufferSpace& buffer::getBufferSpace() {

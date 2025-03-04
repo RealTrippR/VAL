@@ -8,29 +8,30 @@ namespace val
 	class buffer
 	{
 	public:
-		buffer() = default;
-		buffer(VAL_PROC& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage) {
-			create(proc, size, usage, bufferUsage);
+		buffer(VAL_PROC& proc) : _proc(proc) {}
+
+		buffer(VAL_PROC& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage)
+			: _proc(proc) {
+			create(size, usage, bufferUsage);
 		}
-		buffer(const buffer& other) {
-			create(proc, size, usage, bufferUsage);
+		~buffer() {
+			destroy();
 		}
 
-		buffer operator=(buffer const& other)
-		{
-			create(proc, size, usage, bufferUsage);
-		}
+		buffer(const buffer&) = delete;
+		buffer& operator=(const buffer&) = delete;
+
 	public:
-		void create(VAL_PROC& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage);
+		void create(const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage);
 
-		void overwriteFromStagingBuffer(VAL_PROC& proc, void* data, uint32_t size);
+		void overwriteFromStagingBuffer(void* data, uint64_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
-		void overwriteFromBuffer(VAL_PROC& proc, buffer buffer);
+		void overwriteFromBuffer(buffer buffer, VkDeviceSize bufferSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
-		void resize(VAL_PROC& proc, uint32_t newSize);
+		void resize(uint32_t newSize);
 
 		//void update(void* data);
-		void destroy(VAL_PROC& proc);
+		void destroy();
 
 	public:
 		const bufferSpace& getBufferSpace();
@@ -42,6 +43,7 @@ namespace val
 		void* getDataMapped();
 
 	protected:
+		VAL_PROC& _proc;  // Store a reference
 		uint32_t _size;
 		bufferSpace _space;
 		VkBufferUsageFlags _usage;
