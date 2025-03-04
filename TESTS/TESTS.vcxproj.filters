@@ -40,16 +40,7 @@
     <None Include="tools\compileShaders.py">
       <Filter>tools</Filter>
     </None>
-    <None Include="shaders\colorfrag.spv">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="shaders\colorshader.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\vert.spv">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\imagefrag.spv">
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\imageshader.frag">
@@ -74,6 +65,18 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\particleShader.comp">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\instancedShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\particleShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\particleShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\specializationConstants.frag">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

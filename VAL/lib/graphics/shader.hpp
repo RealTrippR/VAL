@@ -90,7 +90,7 @@ namespace val {
 		std::vector<char> _byteCode;
 		fs::path _filepath;
 
-		std::vector<std::pair<specializationConstant*, uint16_t>> specializationConstants;
+		std::vector<std::pair<specializationConstant*/*Constant*/, uint16_t/*constant_id*/>> _specializationConstants;
 		std::vector<std::pair<pushConstantHandle*, uint16_t>> _pushConstants;
 		std::vector< std::pair<UBO_Handle*, uint16_t>> _UBO_Handles;
 		std::vector<std::pair<SSBO_Handle*, uint16_t>> _SSBO_Handles;

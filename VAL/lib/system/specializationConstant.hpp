@@ -12,7 +12,6 @@ namespace val {
 			_data = data;
 			_dataSize = dataSize;
 			_dataOffset = dataOffset;
-			_id = id;
 #ifndef NDEBUG
 			if (dataOffset > dataSize) {
 				printf("VAL: ERROR: The offset of a specializationConstant cannot be greater than it's size!\n");
