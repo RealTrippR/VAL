@@ -246,8 +246,15 @@ int main() {
 
 	pipelineInfo2.shaders = { &vertShader2,&fragShaderColor };
 
+
+	//////////////////////////////////////////////////////////////////
+	///// SECONDARY RENDER PASS //////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
+
+	val::renderPassInfo secondaryRenderPassInfo{};
+	setupRenderPass2(secondaryRenderPassInfo, imageFormat);
 	setGraphicsPipelineInfo(pipelineInfo2);
-	pipelineInfo2.renderPassInfo = &mainRenderPassInfo;
+	pipelineInfo2.renderPassInfo = &secondaryRenderPassInfo;
 
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
@@ -286,15 +293,6 @@ int main() {
 	val::buffer indexBuffer2(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer2.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
-	//////////////////////////////////////////////////////////////////
-	///// SECONDARY RENDER PASS //////////////////////////////////////
-	//////////////////////////////////////////////////////////////////
-
-	val::renderPassInfo renderPassInfo{};
-	setupRenderPass2(renderPassInfo, imageFormat);
-
-	VkRenderPass renderPass = mainProc.createRenderPass(&renderPassInfo);
-
 	VkFramebufferCreateInfo framebufferInfo {};
 	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	framebufferInfo.renderPass = renderPasses[1];
@@ -328,6 +326,7 @@ int main() {
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	mainProc.transitionImageLayout(renderTargetImg, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//mainProc.transitionImageLayout(renderTargetImg, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		auto& graphicsQueue = mainProc._graphicsQueue;
@@ -346,9 +345,6 @@ int main() {
 		renderTarget.update(mainProc, pipelineInfo1.pipelineIdx);
 		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo1.pipelineIdx], framebuffer);
 
-		mainProc.transitionImageLayout(renderTargetImg, imageFormat,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, graphicsQueue._commandBuffers[mainProc._currentFrame]);
-
 		renderTarget.setIndexBuffer(indexBuffer2.getVkBuffer(), indices.size());
 		renderTarget.setVertexBuffers({ vertexBuffer2.getVkBuffer() }, vertices.size());
 		renderTarget.setClearValues({ { 0.0f, 0.2f, 0.5f, 1.0f } });
@@ -356,7 +352,7 @@ int main() {
 		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo2.pipelineIdx], renderTargetFramebuffer);
 	
 		mainProc.transitionImageLayout(renderTargetImg, imageFormat,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, graphicsQueue._commandBuffers[mainProc._currentFrame]);
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, graphicsQueue._commandBuffers[mainProc._currentFrame]);
 
 		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });

@@ -13,6 +13,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TOOLS", "TOOLS\TOOLS.pyproj
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SAMPLES", "SAMPLES", "{5BF2F103-E0FB-4939-8BE4-0F832D2C0B63}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GravitySimulation", "SAMPLES\GravitySimulation\GravitySimulation.vcxproj", "{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,8 +67,23 @@ Global
 		{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}.Release|x64.ActiveCfg = Release|Any CPU
 		{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}.Release|x86.ActiveCfg = Release|Any CPU
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Debug|Any CPU.Build.0 = Debug|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Debug|x64.ActiveCfg = Debug|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Debug|x64.Build.0 = Debug|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Debug|x86.ActiveCfg = Debug|Win32
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Debug|x86.Build.0 = Debug|Win32
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Release|Any CPU.ActiveCfg = Release|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Release|Any CPU.Build.0 = Release|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Release|x64.ActiveCfg = Release|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Release|x64.Build.0 = Release|x64
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Release|x86.ActiveCfg = Release|Win32
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A76D1032-5BD3-4405-8E0D-5D3444ECB0A0} = {5BF2F103-E0FB-4939-8BE4-0F832D2C0B63}
 	EndGlobalSection
 EndGlobal
