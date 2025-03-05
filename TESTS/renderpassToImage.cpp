@@ -365,10 +365,8 @@ int main() {
 	}
 
 	vkDestroyImageView(mainProc._device, renderTargImgView, NULL);
-
 	vertexBuffer.destroy();
 	indexBuffer.destroy();
-
 	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
