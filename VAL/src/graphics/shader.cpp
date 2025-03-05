@@ -159,7 +159,7 @@ namespace val {
 			// this could be optimized by directly loading it to the descriptor writes
 			for (int i = 0; i < imageInfos.size(); ++i) {
 				imageInfos[i].sampler = _imageSamplers[i];
-				imageInfos[i].imageView = _imageViews[i];
+				imageInfos[i].imageView = *_imageViews[i];
 				imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 

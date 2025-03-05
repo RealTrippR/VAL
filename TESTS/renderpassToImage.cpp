@@ -21,11 +21,9 @@ const bool enableValidationLayers = true;
 
 #include "vertex.hpp"
 
-
 // it is important that this comes last
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
-
 
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
@@ -33,13 +31,11 @@ struct uniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-
-void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
+void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -53,28 +49,10 @@ void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
-	memcpy(proc._uniformBuffersMapped[proc._currentFrame][shaderIndex], &ubo, sizeof(ubo));
+	hdl.update(proc, &ubo);
 }
 
-
-void updateUniformBuffer2(int shaderIndex, val::VAL_PROC& proc) {
-	using namespace val;
-	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-	static uniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
-	ubo.proj[1][1] *= -1;
-
-	memcpy(proc._uniformBuffersMapped[proc._currentFrame][shaderIndex], &ubo, sizeof(ubo));
-}
-
-void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -107,7 +85,6 @@ void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
 }
 
 void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentImageFormat) {
-
 	// attachments
 	static VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = colorAttachmentImageFormat;
@@ -118,9 +95,7 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
 	renderPassInfo.attachments = { colorAttachment };
-	renderPassInfo.attachmentImageLayouts = { VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*This second value is the layout of the corresponding VkAttachmentReference*/ };
 
 	static VkAttachmentReference colorAttachmentRef{};
 	colorAttachmentRef.attachment = 0;
@@ -131,7 +106,6 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments = &colorAttachmentRef;
-
 	renderPassInfo.subpasses = { subpass };
 
 	static VkSubpassDependency dependency{};
@@ -169,7 +143,6 @@ void setImageSamplerInfo(VkSamplerCreateInfo* info) {
 }
 
 void setupRenderPass2(val::renderPassInfo& passInfo, const VkFormat imageFormat) {
-
 	static VkAttachmentDescription colorAttachment = {};
 	colorAttachment.format = imageFormat;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -179,9 +152,6 @@ void setupRenderPass2(val::renderPassInfo& passInfo, const VkFormat imageFormat)
 	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	passInfo.attachmentImageLayouts = { VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*This second value is the layout of the corresponding VkAttachmentReference*/ };
-
 
 	static VkAttachmentReference colorAttachmentRef = {};
 	colorAttachmentRef.attachment = 0;
@@ -229,27 +199,26 @@ int main() {
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	uniformBufferObject ubo;
+	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::shader vertShader("shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions().data(),
-		res::vertex::getAttributeDescriptions().size());
-	vertShader.setBindingDescription(res::vertex::getBindingDescription());
-	vertShader.setUniformBufferData(&ubo, sizeof(ubo), 1);
+	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
+	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::shader fragShaderImage("shaders/imagefrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	VkSamplerCreateInfo samplerInfo{};
 	setImageSamplerInfo(&samplerInfo);
-	fragShaderImage.setImageSamplers({ samplerInfo });
+	fragShaderImage.setImageSamplers({ { samplerInfo,1 } });
 
 	VkImageView renderTargImgView;
-	fragShaderImage.setImageView({ &renderTargImgView });
+	fragShaderImage._imageViews = { &renderTargImgView };
 	// fragShader.setDescript
 	// configure pipeline create info
-	val::pipelineCreateInfo pipelineInfo1;
+	val::graphicsPipelineCreateInfo pipelineInfo1;
 	pipelineInfo1.shaders = { &vertShader,&fragShaderImage };
 
 	setGraphicsPipelineInfo(pipelineInfo1);
@@ -265,54 +234,26 @@ int main() {
 	pipelineInfo1.renderPassInfo = &mainRenderPassInfo;
 
 	//////////////////////////////////////////////////////////////////////////////
+	val::graphicsPipelineCreateInfo pipelineInfo2;
 
-	val::pipelineCreateInfo pipelineInfo2;
+	val::UBO_Handle uboHdl2(sizeof(uniformBufferObject));
+	val::shader vertShader2("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions());
+	vertShader2.setBindingDescriptions({ res::vertex::getBindingDescription() });
+	vertShader2._UBO_Handles = {{ &uboHdl2,0 }};
 
-	uniformBufferObject ubo2;
-	val::shader vertShader2("shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions().data(),
-		res::vertex::getAttributeDescriptions().size());
-	vertShader2.setBindingDescription(res::vertex::getBindingDescription());
-	vertShader2.setUniformBufferData(&ubo, sizeof(ubo), 1);
-
-	val::shader fragShaderColor("shaders/colorfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	pipelineInfo2.shaders = { &vertShader2,&fragShaderColor };
 
 	setGraphicsPipelineInfo(pipelineInfo2);
-
 	pipelineInfo2.renderPassInfo = &mainRenderPassInfo;
-
-
 
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
 
-	//mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo1/*, &pipelineInfo2*/}, &renderPasses);
 	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo1, &pipelineInfo2 }, &renderPasses);
-
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], mainProc._device);
-
-
-	const std::vector<res::vertex> vertices1 = {
-		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-
-	VkBuffer vertexBuffer1 = NULL;
-	VkDeviceMemory vertexBufferMem1 = NULL;
-	mainProc.createVertexBuffer(vertices1.data(), vertices1.size(), sizeof(res::vertex), &vertexBuffer1, &vertexBufferMem1);
-
-
-	std::vector<uint32_t> indices1 = {
-		0, 1, 2, 2, 3, 0 };
-	VkBuffer indexBuffer1 = NULL;
-	VkDeviceMemory indexBufferMem1 = NULL;
-	mainProc.createIndexBuffer(indices1.data(), indices1.size(), &indexBuffer1, &indexBufferMem1);
-	//mainProc.render();
-	//mainProc.display(window.getHandleGLFW());
 
 	VkImage renderTargetImg;
 	VkDeviceMemory renderTargImgMem;
@@ -320,25 +261,30 @@ int main() {
 	mainProc.createImage(secondaryRenderTargetExtent.width, secondaryRenderTargetExtent.height,imageFormat,VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, renderTargetImg, renderTargImgMem);
 	mainProc.createImageView(renderTargetImg, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &renderTargImgView);
-	//mainProc.transitionImageLayout(renderTargetImg, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	const std::vector<res::vertex> vertices2 = {
+	const std::vector<res::vertex> vertices = {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
+	// buffer wrapper for vertex Buffer
+	val::buffer vertexBuffer(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
-	VkBuffer vertexBuffer2 = NULL;
-	VkDeviceMemory vertexBufferMem2 = NULL;
-	mainProc.createVertexBuffer(vertices2.data(), vertices2.size(), sizeof(res::vertex), &vertexBuffer2, &vertexBufferMem2);
-
-
-	std::vector<uint16_t> indices2 = {
+	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	VkBuffer indexBuffer2 = NULL;
-	VkDeviceMemory indexBufferMem2 = NULL;
-	mainProc.createIndexBuffer(indices2.data(), indices2.size(), &indexBuffer2, &indexBufferMem2);
+	val::buffer indexBuffer(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
+
+	//////////////////////////////////////////////////////////////////
+	// create secondary vertex and index buffers
+	// buffer wrapper for vertex Buffer
+	val::buffer vertexBuffer2(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	memcpy(vertexBuffer2.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
+
+	val::buffer indexBuffer2(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	memcpy(indexBuffer2.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 	//////////////////////////////////////////////////////////////////
 	///// SECONDARY RENDER PASS //////////////////////////////////////
@@ -362,55 +308,68 @@ int main() {
 	vkCreateFramebuffer(mainProc._device, &framebufferInfo, nullptr, &renderTargetFramebuffer);
 
 	////////////////////////////////////////////////////////////
-
 	fragShaderImage._imageViews[0] = &renderTargImgView;
 
 	////////////////// CREATE DESCRIPTOR SETS //////////////////
-	mainProc.createDescriptorSets(&pipelineInfo1,0u);
-	mainProc.createDescriptorSets(&pipelineInfo2,1u);
+	mainProc.createDescriptorSets(&pipelineInfo1);
+	mainProc.createDescriptorSets(&pipelineInfo2);
 	////////////////////////////////////////////////////////////
 
+	// configure the render target, setting vertex buffers, scissors, area, etc
+	val::renderTarget renderTarget;
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setArea(window._swapChainExtent);
+	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
+	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
 
+	// config viewport, covers the entire size of the window
+	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
-	VkClearValue clearValues[1];
-	clearValues[0].color = { {0.0f, 0.2f, 1.0f, 1.0f} };
-
-	VkClearValue clearValues2[1];
-	clearValues2[0].color = { {1.0f, 1.0f, 0.0f, 1.0f} };
-
-
-	uint32_t currentSC_ImageIdx = 0;
-
-	mainProc.transitionImageLayout(renderTargetImg, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+	mainProc.transitionImageLayout(renderTargetImg, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
+		auto& currentFrame = mainProc._currentFrame;
+
+		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		updateUniformBuffer(0 /*the vert shader is the first to be created, so it's index is 0*/, mainProc); // maybe updateDescriptorSet(s)?
-		//updateUniformBuffer2(0/*the vert shader is the first to be created, so it's index is 0*/, mainProc); // maybe updateDescriptorSet(s)?
-		////////////////////////////////////////////////////////////////////////////////////////////////////
+		updateUniformBuffer(mainProc, uboHdl);
+		updateUniformBuffer(mainProc, uboHdl2);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		window.waitForFences();
-		mainProc.beginDraw(imageFormat);
 
-
-		mainProc.drawFrameExperimental(1u, renderPasses[1], renderTargetFramebuffer,
-			vertexBuffer2, indexBuffer2, indices2.data(), indices2.size(), imageFormat, clearValues2, 1u);
-
-		// this needed because the render pass automatically transitions images into the final layout specified in its config
-		// this is also needed to ensure that the renderTargetFramebuffer has finished rendering.
+		renderTarget.begin(mainProc);
+		renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+		renderTarget.update(mainProc, pipelineInfo1.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo1.pipelineIdx], framebuffer);
 
 		mainProc.transitionImageLayout(renderTargetImg, imageFormat,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mainProc._commandBuffers[mainProc._currentFrame]);
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, graphicsQueue._commandBuffers[mainProc._currentFrame]);
 
-		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, 
-			vertexBuffer1, indexBuffer1, indices1.data(), indices1.size(),imageFormat, clearValues, 1u);
+		renderTarget.setIndexBuffer(indexBuffer2.getVkBuffer(), indices.size());
+		renderTarget.setVertexBuffers({ vertexBuffer2.getVkBuffer() }, vertices.size());
+		renderTarget.setClearValues({ { 0.0f, 0.2f, 0.5f, 1.0f } });
+		renderTarget.update(mainProc, pipelineInfo2.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo2.pipelineIdx], renderTargetFramebuffer);
+	
+		mainProc.transitionImageLayout(renderTargetImg, imageFormat,
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, graphicsQueue._commandBuffers[mainProc._currentFrame]);
 
+		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
+		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
-		mainProc.submit(imageFormat);
+		mainProc.nextFrame();
 	}
 
-	mainProc.cleanup(windowHDL_GLFW);
+	vkDestroyImageView(mainProc._device, renderTargImgView, NULL);
+
+	vertexBuffer.destroy();
+	indexBuffer.destroy();
+
+	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }

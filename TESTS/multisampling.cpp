@@ -36,8 +36,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 
-
-void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
+void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -51,10 +50,10 @@ void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
-	memcpy(proc._uniformBuffersMapped[proc._currentFrame][shaderIndex], &ubo, sizeof(ubo));
+	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::pipelineCreateInfo& info, const VkSampleCountFlagBits& msaaSamples) {
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, const VkSampleCountFlagBits& msaaSamples) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -221,28 +220,26 @@ int main() {
 	mainProc.createImageView(colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &colorImageView, 1u);
 
 
-	uniformBufferObject ubo;
-
+	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::shader vertShader("shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions().data(),
-		res::vertex::getAttributeDescriptions().size());
-	vertShader.setBindingDescription(res::vertex::getBindingDescription());
-	vertShader.setUniformBufferData(&ubo, sizeof(ubo), 1);
-
+	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
+	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
-	val::shader fragShader("shaders/imagefrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	VkSamplerCreateInfo samplerInfo{};
 	setImageSamplerInfo(&samplerInfo, mipLevels);
-	fragShader.setImageSamplers({ samplerInfo });
+	fragShader.setImageSamplers({ { samplerInfo,1 } });
 
-	VkImageView imgView;
-	fragShader.setImageView({ &imgView });
+
+	VkImageView imgView = VK_NULL_HANDLE;
+	fragShader._imageViews = { &imgView };
 
 	// config grahics pipeline
-	val::pipelineCreateInfo pipelineInfo;
+	val::graphicsPipelineCreateInfo pipelineInfo;
 	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
 	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function
 
@@ -263,7 +260,6 @@ int main() {
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 
-
 	// CREATE IMAGE & IMAGE VIEW //
 	val::image img(mainProc, "testImage.jpg", imageFormat, mipLevels);
 	mainProc.createImageView(img.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &imgView, mipLevels);
@@ -274,58 +270,60 @@ int main() {
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
-
-	VkBuffer vertexBuffer = NULL;
-	VkDeviceMemory vertexBufferMem = NULL;
-	mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(res::vertex), &vertexBuffer, &vertexBufferMem);
+	// buffer wrapper for vertex Buffer
+	val::buffer vertexBuffer(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	VkBuffer indexBuffer = NULL;
-	VkDeviceMemory indexBufferMem = NULL;
-
-	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
-
-
-
-	// sets the image view for the frag shader.
-	fragShader._imageViews[0] = &imgView;
-
-	int timer = 0;
-	bool imgNum = 0;
-
-	VkClearValue clearValues[1];
-	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
-
+	val::buffer indexBuffer(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
 	// this needs to be called only after the frag shader's image view has been set
 	mainProc.createDescriptorSets(&pipelineInfo, 0u);
 
+	// configure the render target, setting vertex buffers, scissors, area, etc
+	val::renderTarget renderTarget;
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setArea(window._swapChainExtent);
+	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
+	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
+	//renderTarget.setThreadID(THREAD_1_ID) -- just an idea of how to implement multi-threading
+
+	// config viewport, covers the entire size of the window
+	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
+		auto& currentFrame = mainProc._currentFrame;
+
+		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
-		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
-		updateUniformBuffer(0/*the vert shader is the first to be created, so it's index is 0*/, mainProc); // maybe updateDescriptorSet(s)?
+		updateUniformBuffer(mainProc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		mainProc.beginDraw(imageFormat);
 
-		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, vertexBuffer, indexBuffer, indices.data(), indices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+		renderTarget.begin(mainProc);
+		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 
-		// Wait idle for the GPU to finish executing the command buffer
-		vkDeviceWaitIdle(mainProc._device);
+		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
-		mainProc.submit(imageFormat);
-
-		window.waitForFences();
+		mainProc.nextFrame();
 	}
 
 	vkDestroyImageView(mainProc._device, imgView, NULL);
 
-	img.~image();
+	img.destroy();
+	vertexBuffer.destroy();
+	indexBuffer.destroy();
 
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }

@@ -258,8 +258,8 @@ int main() {
 	//////////////////////////////////////////////////////////////
 	// create descriptor sets - this should be merged into the
 	// pipeline creation function
-	mainProc.createDescriptorSets(&pipelineInfo, 0u);
-	mainProc.createDescriptorSets(&computePipelineInfo, 1u);
+	mainProc.createDescriptorSets(&pipelineInfo);
+	mainProc.createDescriptorSets(&computePipelineInfo);
 
 	//////////////////////////////////////////////////////////////
 	

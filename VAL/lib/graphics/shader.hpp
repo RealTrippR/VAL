@@ -96,7 +96,7 @@ namespace val {
 		std::vector<std::pair<SSBO_Handle*, uint16_t>> _SSBO_Handles;
 		std::vector< std::pair<VkSamplerCreateInfo, uint16_t>> _imageSamplersCreateInfos;
 		std::vector<VkSampler> _imageSamplers;
-		std::vector<VkImageView> _imageViews;
+		std::vector<VkImageView*> _imageViews;
 
 		std::vector< VkDescriptorSetLayoutBinding> _layoutBindings;
 		std::vector<VkWriteDescriptorSet> _descriptorWrites; // stored as part of the class for optimization (avoids excess copying), as well as scope

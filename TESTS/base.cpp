@@ -154,7 +154,6 @@ int main() {
 
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
-
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
@@ -195,7 +194,6 @@ int main() {
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
-
 	// buffer wrapper for vertex Buffer
 	val::buffer vertexBuffer(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
@@ -246,6 +244,9 @@ int main() {
 
 		mainProc.nextFrame();
 	}
+
+	vertexBuffer.destroy();
+	indexBuffer.destroy();
 
 	window.cleanupSwapChain();
 	mainProc.cleanup();

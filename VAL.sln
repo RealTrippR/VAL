@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VAL", "VAL\VAL.vcxproj", "{
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TOOLS", "TOOLS\TOOLS.pyproj", "{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SAMPLES", "SAMPLES", "{5BF2F103-E0FB-4939-8BE4-0F832D2C0B63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -314,7 +314,7 @@ int main() {
 	fragShader._imageSamplersCreateInfos = { { samplerInfo,1 } };
 
 	VkImageView imgView = VK_NULL_HANDLE;
-	fragShader._imageViews = { imgView };
+	fragShader._imageViews = { &imgView };
 
 	// config grahics pipeline
 	val::graphicsPipelineCreateInfo pipelineInfo;
@@ -360,7 +360,7 @@ int main() {
 	val::meshTextured mesh;
 	mesh.loadFromDiskObj(mainProc, MODEL_PATH, true);
 	mesh.setTexture(mainProc, &textureImg);
-	fragShader._imageViews[0] = mesh._textureImageView;
+	fragShader._imageViews[0] = &mesh._textureImageView;
 
 	//////////////////////////////////////////////////////////////////
 	// create instance buffer
