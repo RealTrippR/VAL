@@ -14,8 +14,6 @@ namespace val {
 		else {
 			vkCmdDraw(commandBuffer, _vertexCount, instanceCount, 0, 0); // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdDraw.html
 		}
-
-		vkCmdEndRenderPass(commandBuffer);
 	}
 
 	void renderTarget::update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline) {		
@@ -62,6 +60,9 @@ namespace val {
 	{
 		auto& graphicsQueue = proc._graphicsQueue;
 		const auto& currentFrame = proc._currentFrame;
+
+		vkCmdEndRenderPass(proc._graphicsQueue._commandBuffers[currentFrame]);
+
 
 		// END RECORDING
 		if (vkEndCommandBuffer(proc._graphicsQueue._commandBuffers[currentFrame]) != VK_SUCCESS) {
