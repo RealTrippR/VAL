@@ -3,7 +3,8 @@
 
 namespace val
 {
-	void buffer::create(const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage) {
+	void buffer::create(VAL_PROC& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage) {
+		_proc = proc;
 		_proc.createBuffer(size, bufferUsage, bufferSpaceToVkMemoryProperty(space), _buffer, _memory);
 		_size = size;
 		_space = space;
@@ -84,7 +85,7 @@ namespace val
 				{
 					_dataMapped = tmp;
 				}
-				else {
+				else { // if the realloc fails, use malloc instead
 					vkUnmapMemory(_proc._device, _memory);
 					free(_dataMapped);
 					_dataMapped = malloc(newSize);
@@ -99,13 +100,19 @@ namespace val
 	}
 
 	void buffer::destroy() {
-		free(_dataMapped);
+		if (_dataMapped) {
+			free(_dataMapped);
+		}
 		vkFreeMemory(_proc._device, _memory, VK_NULL_HANDLE);
 		vkDestroyBuffer(_proc._device, _buffer, VK_NULL_HANDLE);
 	}
 
 	const bufferSpace& buffer::getBufferSpace() {
 		return _space;
+	}
+
+	const uint32_t& buffer::size() {
+		return _size;
 	}
 
 	const VkBuffer& buffer::getVkBuffer() {
@@ -119,4 +126,13 @@ namespace val
 	void* buffer::getDataMapped() {
 		return _dataMapped;
 	}
+
+	const VkBufferUsageFlags& buffer::getUsageFlags() {
+		return _usage;
+	}
+
+	VAL_PROC* buffer::getVAL_Proc() {
+		return  &_proc;
+	}
+
 }

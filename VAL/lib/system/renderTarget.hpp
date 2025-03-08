@@ -5,6 +5,7 @@
 
 namespace val {
 	class queueManager; // forward declaration
+	class graphicsPipelineCreateInfo; // forward declaration
 	class renderTarget {
 	public:
 		renderTarget() = default;
@@ -14,7 +15,7 @@ namespace val {
 	public:
 		void render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer, const uint32_t& instanceCount = 1u);
 
-		void update(VAL_PROC& proc, const uint16_t& pipelineIdx);
+		void update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline);
 
 		void begin(VAL_PROC& proc);
 

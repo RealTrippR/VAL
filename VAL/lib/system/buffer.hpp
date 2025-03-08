@@ -8,11 +8,12 @@ namespace val
 	class buffer
 	{
 	public:
+
 		buffer(VAL_PROC& proc) : _proc(proc) {}
 
-		buffer(VAL_PROC& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage)
+		buffer(VAL_PROC& proc, const uint32_t& size, const bufferSpace& space, const VkBufferUsageFlags bufferUsage)
 			: _proc(proc) {
-			create(size, usage, bufferUsage);
+			create(proc, size, space, bufferUsage);
 		}
 		~buffer() {
 			destroy();
@@ -22,7 +23,7 @@ namespace val
 		buffer& operator=(const buffer&) = delete;
 
 	public:
-		void create(const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage);
+		void create(VAL_PROC& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage);
 
 		void overwriteFromStagingBuffer(void* data, uint64_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
@@ -30,11 +31,12 @@ namespace val
 
 		void resize(uint32_t newSize);
 
-		//void update(void* data);
 		void destroy();
 
 	public:
 		const bufferSpace& getBufferSpace();
+
+		const uint32_t& size();
 
 		const VkBuffer& getVkBuffer();
 
@@ -42,11 +44,15 @@ namespace val
 
 		void* getDataMapped();
 
+		const VkBufferUsageFlags& getUsageFlags();
+
+		VAL_PROC* getVAL_Proc();
+
 	protected:
 		VAL_PROC& _proc;  // Store a reference
-		uint32_t _size;
-		bufferSpace _space;
-		VkBufferUsageFlags _usage;
+		uint32_t _size = 0u;
+		bufferSpace _space{};
+		VkBufferUsageFlags _usage = 0;
 		VkBuffer _buffer = VK_NULL_HANDLE;
 		VkDeviceMemory _memory = VK_NULL_HANDLE;
 		void* _dataMapped = NULL;

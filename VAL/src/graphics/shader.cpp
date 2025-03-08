@@ -4,13 +4,21 @@
 namespace val {
 	bool shader::loadFromFile(fs::path filepath) {
 		_filepath = fs::absolute(filepath);
+#ifndef NDEBUG
+
+		if (!std::filesystem::exists(filepath)) {
+			printf("VAL: WARNING: Attempted to load shader from invalid filepath: %ws\n", filepath.c_str());
+			return false;
+		}
+
+#endif // !NDEBUG
 
 		if (readByteFile(_filepath.string(), &_byteCode)) {
 			return true;
 		}
 #ifndef  NDEBUG
 		else {
-			printf("\nVAL: FAILED TO READ FILE FROM DISK: %s\n", filepath.c_str());
+			printf("\nVAL: FAILED TO READ FILE FROM DISK: %ws\n", filepath.c_str());
 		}
 #endif // ! NDEBUG
 	}

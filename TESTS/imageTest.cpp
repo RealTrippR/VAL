@@ -37,7 +37,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 
-void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
+void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -51,7 +51,7 @@ void updateUniformBuffer(int shaderIndex, val::VAL_PROC& proc) {
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
-	memcpy(proc._uniformBuffersMapped[proc._currentFrame][shaderIndex], &ubo, sizeof(ubo));
+	hdl.update(proc, &ubo);
 }
 
 void updateImages(val::VAL_PROC& proc, VkSampler* imageSampler, VkImageView* newImageView, VkDescriptorSet descriptorSet) {
@@ -72,7 +72,7 @@ void updateImages(val::VAL_PROC& proc, VkSampler* imageSampler, VkImageView* new
 	vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 }
 
-void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -181,8 +181,6 @@ int main() {
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-	uniformBufferObject ubo;
-
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
 	val::imageFormatRequirements formatReqs;
@@ -191,31 +189,28 @@ int main() {
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	// The shader class is poorly optimized and fucking retarded at the moment
+	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::shader vertShader("shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions().data(),
-	res::vertex::getAttributeDescriptions().size());
-	vertShader.setBindingDescription(res::vertex::getBindingDescription());
-	vertShader.setUniformBufferData(&ubo, sizeof(ubo), 1);
+	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
+	vertShader._UBO_Handles = { {&uboHdl,0 } };
 
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::shader fragShader("shaders/imagefrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	VkSamplerCreateInfo samplerInfo{};
 	setImageSamplerInfo(&samplerInfo);
-	fragShader.setImageSamplers({ samplerInfo });
+	fragShader.setImageSamplers({ { samplerInfo, 1 } });
 
 	VkImageView currentImgView;
-	fragShader.setImageView({&currentImgView});
+	fragShader._imageViews = { &currentImgView };
 
 	// config grahics pipeline
-	val::pipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
-
-	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function
+	val::graphicsPipelineCreateInfo pipelineInfo;
+	pipelineInfo.shaders = { &fragShader, &vertShader };
 
 	setGraphicsPipelineInfo(pipelineInfo);
 
@@ -259,16 +254,15 @@ int main() {
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
 
-	VkBuffer vertexBuffer = NULL;
-	VkDeviceMemory vertexBufferMem = NULL;
-	mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(res::vertex), &vertexBuffer, &vertexBufferMem);
+	// buffer wrapper for vertex Buffer
+	val::buffer vertexBuffer(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
+
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	VkBuffer indexBuffer = NULL;
-	VkDeviceMemory indexBufferMem = NULL;
-
-	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
+	val::buffer indexBuffer(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
 
@@ -286,18 +280,39 @@ int main() {
 
 
 	// this needs to be called only after the frag shader's image view has been set
-	mainProc.createDescriptorSets(&pipelineInfo, 0u);
+	mainProc.createDescriptorSets(&pipelineInfo);
+
+	//////////////////////////////////////////////////////////////
+	val::renderTarget renderTarget;
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setArea(window._swapChainExtent);
+	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
+	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
+
+	// config viewport, covers the entire size of the window
+	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
+		auto& currentFrame = mainProc._currentFrame;
+
+		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
-		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
-		updateUniformBuffer(0/*the vert shader is the first to be created, so it's index is 0*/, mainProc); // maybe updateDescriptorSet(s)?
+		updateUniformBuffer(mainProc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		mainProc.beginDraw(imageFormat);
 
-		mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, vertexBuffer, indexBuffer, indices.data(), indices.size(), imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
+		renderTarget.begin(mainProc);
+		renderTarget.update(mainProc, pipelineInfo);
+		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
+
+		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+
+		mainProc.nextFrame();
 
 		timer++;
 		if (timer > 200) {
@@ -314,19 +329,10 @@ int main() {
 			//std::cout << "IMAGE SWAPPED!\n";
 		}
 
-		// Wait idle for the GPU to finish executing the command buffer
-		vkDeviceWaitIdle(mainProc._device);
-
-		mainProc.submit(imageFormat);
-
-		window.waitForFences(); // this is required because the update images function modifies the descriptor sets,
-								// and in Vulkan we have to wait for the current command buffer to finish before we can modify or destroy them.
-
-		const auto& currentFrame = mainProc._currentFrame;
 		updateImages(mainProc, &fragShader._imageSamplers[0], &currentImgView, mainProc._descriptorSets[0][currentFrame]);
 	}
 
-	mainProc.cleanup(windowHDL_GLFW);
+	mainProc.cleanup();
 
 	vkDestroyImageView(mainProc._device, imgView1, NULL);
 	vkDestroyImageView(mainProc._device, imgView2, NULL);

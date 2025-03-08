@@ -18,8 +18,8 @@ namespace val {
 	class pipelineCreateInfo {
 	public:
 		std::vector<shader*> shaders;
-		uint32_t pipelineIdx;
-		uint32_t descriptorsIdx; // index of descriptor sets and layouts
+		uint32_t pipelineIdx = 0u;
+		uint32_t descriptorsIdx = 0u; // index of descriptor sets and layouts
 	public:
 		virtual std::vector<UBO_Handle*> getUniqueUBOs();
 

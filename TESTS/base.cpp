@@ -207,7 +207,7 @@ int main() {
 	//////////////////////////////////////////////////////////////
 	// create descriptor sets - this should be merged into the
 	// pipeline creation function
-	mainProc.createDescriptorSets(&pipelineInfo,0u);
+	mainProc.createDescriptorSets(&pipelineInfo);
 	//////////////////////////////////////////////////////////////
 	
 
@@ -236,7 +236,7 @@ int main() {
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
 		renderTarget.begin(mainProc);
-		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
+		renderTarget.update(mainProc, pipelineInfo);
 		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.submit(mainProc, {presentQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);
 

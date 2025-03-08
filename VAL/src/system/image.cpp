@@ -13,6 +13,11 @@ namespace val {
 		if (_image) {
 			printf("VAL: The create function should not be called on an already initialized image, use the recreate function instead. The memory address of _image is: %p", &_image);
 		}
+
+		if (!std::filesystem::exists(path)) {
+			printf("VAL: WARNING: Attempted to load image from invalid filepath: %ws\n", path.c_str());
+		}
+
 #endif // !NDEBUG
 
 		_image = createTextureImage(&proc, path, _pixels, format, _img_memory,

@@ -1,5 +1,3 @@
-// https://snorristurluson.github.io/TextRenderingWithFreetype/ - FreeType con Vulkan
-
 #include <iostream>
 #include <string>
 #include <chrono>
@@ -151,7 +149,7 @@ void setupRenderPass2(val::renderPassInfo& passInfo, const VkFormat imageFormat)
 	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
 
 	static VkAttachmentReference colorAttachmentRef = {};
 	colorAttachmentRef.attachment = 0;
@@ -326,7 +324,6 @@ int main() {
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	mainProc.transitionImageLayout(renderTargetImg, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	//mainProc.transitionImageLayout(renderTargetImg, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		auto& graphicsQueue = mainProc._graphicsQueue;
@@ -352,7 +349,9 @@ int main() {
 		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo2.pipelineIdx], renderTargetFramebuffer);
 	
 		mainProc.transitionImageLayout(renderTargetImg, imageFormat,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, graphicsQueue._commandBuffers[mainProc._currentFrame]);
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*this should match the colorAttachment.finalLayout of the 2nd render pass*/, 
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			graphicsQueue._commandBuffers[mainProc._currentFrame]);
 
 		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });

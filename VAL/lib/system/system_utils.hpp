@@ -84,6 +84,8 @@ namespace val {
 
 	//VkSurfaceFormatKHR findSurfaceImageFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 
+	VkFormat findSupportedImageFormat(VAL_PROC& proc, imageFormatRequirements& requirements);
+
 	VkFormat findSupportedImageFormat(VkPhysicalDevice physicalDevice, imageFormatRequirements& requirements);
 
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);

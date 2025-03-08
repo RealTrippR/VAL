@@ -4,6 +4,7 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
+	class pipelineCreateInfo; // forward declaration
 	struct pushConstantHandle {
 		pushConstantHandle() = default;
 		pushConstantHandle(const uint16_t size, const uint16_t offset = 0) 
@@ -13,7 +14,7 @@ namespace val {
 			_procMemoryOffset = 0;
 			_stageFlags = 0;
 		}
-		void update(VAL_PROC& proc, void* data, const uint16_t& pipelineIdx);
+		void update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline);
 
 		VkPushConstantRange toVkPushConstantRange();
 	public:

@@ -16,7 +16,7 @@ namespace val {
 	class image {
 	public:
 		image() = default;
-		image(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) {
+		image(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : image() {
 			create(proc, path, format, mipLevels, MSAA_samples);
 		}
 
@@ -25,6 +25,9 @@ namespace val {
 				vkDestroyImage(_device, _image, NULL);
 				vkFreeMemory(_device, _img_memory, NULL);
 				_img_memory = NULL;
+			}
+			if (_pixels) {
+				stbi_image_free(_pixels);
 			}
 		}
 
@@ -75,14 +78,14 @@ namespace val {
 
 	protected:
 		stbi_uc* _pixels = NULL;
-		VkImage _image;
-		VkFormat _format;
-		int32_t _width; // source image width
-		int32_t _height; // source image height
-		uint8_t _channels;
-		uint8_t _mipLevels;
-		VkDeviceMemory _img_memory;
-		VkDevice _device;
+		VkImage _image{};
+		VkFormat _format{};
+		int32_t _width{}; // source image width
+		int32_t _height{}; // source image height
+		uint8_t _channels{};
+		uint8_t _mipLevels{};
+		VkDeviceMemory _img_memory{};
+		VkDevice _device{};
 	};
 }
 #endif // !VAL_IMAGE_HPP

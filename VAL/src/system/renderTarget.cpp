@@ -25,8 +25,8 @@ namespace val {
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void renderTarget::update(VAL_PROC& proc, const uint16_t& pipelineIdx) {		
-
+	void renderTarget::update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline) {		
+		const auto& pipelineIdx = pipeline.pipelineIdx;
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
 		vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);

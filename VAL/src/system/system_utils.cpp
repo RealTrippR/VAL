@@ -207,6 +207,9 @@ namespace val {
 
 		return availableFormats[0];
 	}*/
+	VkFormat findSupportedImageFormat(VAL_PROC& proc, imageFormatRequirements& requirements) {
+		return findSupportedImageFormat(proc._physicalDevice, requirements);
+	}
 
 	VkFormat findSupportedImageFormat(VkPhysicalDevice physicalDevice, imageFormatRequirements& requirements) {
 #ifndef NDEBUG
@@ -285,24 +288,32 @@ namespace val {
 		int* texWidthOut /*NULL BY DEFAULT*/, int* texHeightOut /*NULL BY DEFAULT*/, uint8_t* texChannelsOut /*NULL BY DEFAULT*/) {
 		VkImage textureImage = NULL;
 		int texWidth, texHeight, texChannels;
-		pixelsOut = stbi_load(imgFilepath.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		VkDeviceSize imageSize = texWidth * texHeight * (texChannels + 1);
+
+		const int imgRGBA_Type = STBI_rgb_alpha;
+		pixelsOut = stbi_load(imgFilepath.string().c_str(), &texWidth, &texHeight, &texChannels, imgRGBA_Type);
+		VkDeviceSize imageSize = texWidth * texHeight * (imgRGBA_Type);
 
 		if (!pixelsOut) {
-			printf("VAL: FAILED TO LOAD TEXTURE IMAGE, IMAGE AT FILEPATH: %s IS OF AN UNSUPPORTED TYPE OR DOES NOT EXIST!\n", imgFilepath.c_str());
+			printf("VAL: FAILED TO LOAD TEXTURE IMAGE, IMAGE AT FILEPATH: %ws IS OF AN UNSUPPORTED TYPE OR DOES NOT EXIST!\n", imgFilepath.c_str());
+			printf("Error loading image: %s\n", stbi_failure_reason());
 			throw std::runtime_error("FML: FAILED TO LOAD TEXTURE IMAGE");
 		}
+#ifndef NDEBUG
+		else {
+			printf("Successfully loaded image %s. Image dimensions: %d x %d, Channels: %d\n", imgFilepath.string().c_str(), texWidth, texHeight, texChannels);
+		}
+#endif // !NDEBUG
+
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 		proc->createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
+
 		void* data;
 		vkMapMemory(proc->_device, stagingBufferMemory, 0, imageSize, 0, &data);
 		memcpy(data, pixelsOut, static_cast<size_t>(imageSize));
 		vkUnmapMemory(proc->_device, stagingBufferMemory);
-
-		stbi_image_free(pixelsOut);
 
 		proc->createImage(texWidth, texHeight, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 			VK_IMAGE_USAGE_SAMPLED_BIT | additionalUsageFlagBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory, mipLevels);
@@ -332,6 +343,7 @@ namespace val {
 
 	bool readByteFile(const std::string& filename, std::vector<char>* dst) {
 		std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
 
 		if (!file.is_open()) {
 			return false;
