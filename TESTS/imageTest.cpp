@@ -234,17 +234,12 @@ int main() {
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 
-	VkImageView imgView1;
-	VkImageView imgView2;
-
-
-
 	val::image img1(mainProc, "testImage.jpg", imageFormat);
-	mainProc.createImageView(img1.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &imgView1);
+	val::imageView imgView1(mainProc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
 
 	val::image img2(mainProc, "testImage2.png", imageFormat);
-	mainProc.createImageView(img2.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &imgView2);
-	
+	val::imageView imgView2(mainProc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
+
 
 
 	const std::vector<res::vertex> vertices = {
@@ -267,9 +262,8 @@ int main() {
 
 
 	currentImgView = imgView1;
-
 	// sets the image view for the frag shader.
-	fragShader._imageViews[0] = &imgView1;
+	fragShader._imageViews[0] = imgView1;
 
 	int timer = 0;
 	bool imgNum = 0;
@@ -332,10 +326,10 @@ int main() {
 		updateImages(mainProc, &fragShader._imageSamplers[0], &currentImgView, mainProc._descriptorSets[0][currentFrame]);
 	}
 
+	imgView1.destroy();
+	imgView2.destroy();
 	mainProc.cleanup();
 
-	vkDestroyImageView(mainProc._device, imgView1, NULL);
-	vkDestroyImageView(mainProc._device, imgView2, NULL);
 
 
 	return EXIT_SUCCESS;

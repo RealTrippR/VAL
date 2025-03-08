@@ -150,6 +150,7 @@
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
+    <ClInclude Include="lib\system\imageView.hpp" />
     <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\queueManager.hpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\system\buffer.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
+    <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />

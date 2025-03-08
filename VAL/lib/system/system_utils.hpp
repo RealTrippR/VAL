@@ -94,7 +94,7 @@ namespace val {
 
 	VkImageView createImageView(VkDevice device, VkImage image, const VkFormat& format, const uint32_t& mipLevels = 1U);
 
-	VkImage createTextureImage(VAL_PROC* proc, fs::path imgFilepath, stbi_uc* pixelsOut, VkFormat format, VkDeviceMemory& textureImageMemory,
+	VkImage createTextureImage(VAL_PROC* proc, fs::path imgFilepath, stbi_uc** pixelsOut, VkFormat format, VkDeviceMemory& textureImageMemory,
 		const VkImageUsageFlagBits& additionalUsageFlagBits = VkImageUsageFlagBits(0), const uint32_t& mipLevels = 1U,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL);
 	// returns false if the file cannot be read

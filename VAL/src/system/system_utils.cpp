@@ -283,17 +283,17 @@ namespace val {
 		return imageView;
 	}
 
-	VkImage createTextureImage(VAL_PROC* proc, fs::path imgFilepath, stbi_uc* pixelsOut, VkFormat format,
+	VkImage createTextureImage(VAL_PROC* proc, fs::path imgFilepath, stbi_uc** pixelsOut, VkFormat format,
 		VkDeviceMemory& textureImageMemory, const VkImageUsageFlagBits& additionalUsageFlagBits, const uint32_t& mipLevels,
 		int* texWidthOut /*NULL BY DEFAULT*/, int* texHeightOut /*NULL BY DEFAULT*/, uint8_t* texChannelsOut /*NULL BY DEFAULT*/) {
 		VkImage textureImage = NULL;
 		int texWidth, texHeight, texChannels;
 
 		const int imgRGBA_Type = STBI_rgb_alpha;
-		pixelsOut = stbi_load(imgFilepath.string().c_str(), &texWidth, &texHeight, &texChannels, imgRGBA_Type);
+		*pixelsOut = stbi_load(imgFilepath.string().c_str(), &texWidth, &texHeight, &texChannels, imgRGBA_Type);
 		VkDeviceSize imageSize = texWidth * texHeight * (imgRGBA_Type);
 
-		if (!pixelsOut) {
+		if (!*pixelsOut) {
 			printf("VAL: FAILED TO LOAD TEXTURE IMAGE, IMAGE AT FILEPATH: %ws IS OF AN UNSUPPORTED TYPE OR DOES NOT EXIST!\n", imgFilepath.c_str());
 			printf("Error loading image: %s\n", stbi_failure_reason());
 			throw std::runtime_error("FML: FAILED TO LOAD TEXTURE IMAGE");
@@ -312,7 +312,7 @@ namespace val {
 
 		void* data;
 		vkMapMemory(proc->_device, stagingBufferMemory, 0, imageSize, 0, &data);
-		memcpy(data, pixelsOut, static_cast<size_t>(imageSize));
+		memcpy(data, *pixelsOut, static_cast<size_t>(imageSize));
 		vkUnmapMemory(proc->_device, stagingBufferMemory);
 
 		proc->createImage(texWidth, texHeight, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |

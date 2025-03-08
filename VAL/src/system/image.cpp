@@ -20,7 +20,7 @@ namespace val {
 
 #endif // !NDEBUG
 
-		_image = createTextureImage(&proc, path, _pixels, format, _img_memory,
+		_image = createTextureImage(&proc, path, &_pixels, format, _img_memory,
 			VkImageUsageFlagBits(0), mipLevels, &_width, &_height, &_channels);
 		_device = proc._device;
 		_format = format;
