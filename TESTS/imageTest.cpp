@@ -299,9 +299,9 @@ int main() {
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.begin(mainProc);
+		renderTarget.begin(mainProc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.update(mainProc, pipelineInfo);
-		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.render(mainProc, { viewport });
 		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });

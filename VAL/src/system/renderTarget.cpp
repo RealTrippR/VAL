@@ -3,17 +3,10 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	void renderTarget::render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, VkRenderPass& renderPass, VkFramebuffer& frameBuffer, const uint32_t& instanceCount /*DEFAULT = 1U*/)
+	void renderTarget::render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, const uint32_t& instanceCount /*DEFAULT = 1U*/)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
-
-		// this would make more sense to have in the update function
-		_renderPassBeginInfo.renderPass = renderPass;
-		_renderPassBeginInfo.framebuffer = frameBuffer;
-
 		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
-		vkCmdBeginRenderPass(commandBuffer, &_renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
 
 		if (_indexCount>0) {
 			vkCmdDrawIndexed(commandBuffer, (uint32_t)(_indexCount), instanceCount, 0, 0, 0); // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdDrawIndexed.html
@@ -43,16 +36,24 @@ namespace val {
 		}
 	}
 
-	void renderTarget::begin(VAL_PROC& proc) {
+	void renderTarget::begin(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer) {
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
-		vkResetCommandBuffer(proc._graphicsQueue._commandBuffers[proc._currentFrame], 0);
+		vkResetCommandBuffer(commandBuffer, 0);
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-		if (vkBeginCommandBuffer(proc._graphicsQueue._commandBuffers[proc._currentFrame], &beginInfo) != VK_SUCCESS) {
+		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
 			throw std::runtime_error("failed to begin recording command buffer!");
 		}
+
+
+		// this would make more sense to have in the update function
+		_renderPassBeginInfo.renderPass = renderPass;
+		_renderPassBeginInfo.framebuffer = frameBuffer;
+
+		vkCmdBeginRenderPass(commandBuffer, &_renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
 	
