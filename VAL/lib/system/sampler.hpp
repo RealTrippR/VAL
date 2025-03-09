@@ -13,16 +13,16 @@ namespace val {
 	class sampler {
 	public:
 		sampler(VAL_PROC& proc) : _proc(proc) { initDefaultValues(); };
-		sampler(VAL_PROC& proc, std::vector<imageView&> imageViews, samplerType samplerType = combinedImage) : _proc(proc), _imageViews(imageViews), _samplerType(samplerType) { initDefaultValues(); };
+		sampler(VAL_PROC& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
+		sampler(VAL_PROC& proc, val::imageView* imgView, samplerType samplerType = combinedImage) : _proc(proc), _imgView(imgView), _samplerType(samplerType) { initDefaultValues(); };
 	public:
 		void create();
 
 		//void recreate();
 	public:
-		void addImageView(imageView& imgView);
+		void bindImageView(imageView& imageView);
 
-		void removeImageView(imageView& imgView);
-
+		imageView* getImageView();
 	public:
 		void setSamplerType(const samplerType& type);
 
@@ -80,8 +80,8 @@ namespace val {
 	private:
 		inline void initDefaultValues() {
 			_samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-			_samplerCreateInfo.anisotropyEnable = VK_TRUE;  // Enable anisotropic filtering
-			_samplerCreateInfo.maxAnisotropy = 8.0;
+			_samplerCreateInfo.anisotropyEnable = VK_FALSE;  // Enable anisotropic filtering
+			_samplerCreateInfo.maxAnisotropy = 16.0f;
 			_samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 			_samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 			_samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -100,8 +100,7 @@ namespace val {
 		samplerType _samplerType = combinedImage;
 		VkSampler _sampler = VK_NULL_HANDLE;
 		VkSamplerCreateInfo _samplerCreateInfo{};
-		std::vector<imageView&> _imageViews;
-		std::unordered_map<imageView*, size_t> _imageViewLookupMap;
+		imageView* _imgView;
 	};
 }
 

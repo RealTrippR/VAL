@@ -25,6 +25,8 @@ const bool enableValidationLayers = true;
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
 
+#include <Windows.h>
+
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
@@ -52,24 +54,6 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	ubo.proj[1][1] *= -1;
 
 	hdl.update(proc, &ubo);
-}
-
-void updateImages(val::VAL_PROC& proc, VkSampler* imageSampler, VkImageView* newImageView, VkDescriptorSet descriptorSet) {
-	VkDescriptorImageInfo imageInfo{};
-	imageInfo.imageView = *newImageView;
-	imageInfo.sampler = *imageSampler;
-	imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-	VkWriteDescriptorSet descriptorWrite{};
-	descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrite.dstSet = descriptorSet;
-	descriptorWrite.dstBinding = 1; // THIS MUST MATCH THE BINDING
-	descriptorWrite.dstArrayElement = 0;
-	descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorWrite.descriptorCount = 1;
-	descriptorWrite.pImageInfo = &imageInfo;
-
-	vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 }
 
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
@@ -201,12 +185,10 @@ int main() {
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	VkSamplerCreateInfo samplerInfo{};
-	setImageSamplerInfo(&samplerInfo);
-	fragShader.setImageSamplers({ { samplerInfo, 1 } });
-
-	VkImageView currentImgView;
-	fragShader._imageViews = { &currentImgView };
+	/*VkSamplerCreateInfo samplerInfo{};
+	setImageSamplerInfo(&samplerInfo);*/
+	val::sampler imgSampler(mainProc, val::combinedImage);
+	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
 	val::graphicsPipelineCreateInfo pipelineInfo;
@@ -260,10 +242,8 @@ int main() {
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
-
-	currentImgView = imgView1;
-	// sets the image view for the frag shader.
-	fragShader._imageViews[0] = imgView1;
+	// sets the image view for the sampler
+	imgSampler.bindImageView(imgView1);
 
 	int timer = 0;
 	bool imgNum = 0;
@@ -312,26 +292,22 @@ int main() {
 		if (timer > 200) {
 			timer = 0;
 			imgNum = !imgNum;
-
+			std::cout << "IMAGE SWAPPED!\n\n";
 			if (imgNum) {
-				currentImgView = imgView2;
+				imgSampler.bindImageView(imgView2);
+				fragShader.updateImageSampler(mainProc, pipelineInfo, { imgSampler,1 });
+
 			}
 			else {
-				currentImgView = imgView1;
+				imgSampler.bindImageView(imgView1);
+				fragShader.updateImageSampler(mainProc, pipelineInfo, { imgSampler,1 });
 			}
-
-			//std::cout << "IMAGE SWAPPED!\n";
 		}
-
-		fragShader.updateImageView(0, imgView1);
-		updateImages(mainProc, &fragShader._imageSamplers[0], &currentImgView, mainProc._descriptorSets[0][currentFrame]);
 	}
 
 	imgView1.destroy();
 	imgView2.destroy();
 	mainProc.cleanup();
-
-
 
 	return EXIT_SUCCESS;
 }

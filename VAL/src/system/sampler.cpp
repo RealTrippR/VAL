@@ -13,18 +13,14 @@ namespace val {
 		}
 	}
 
-	void sampler::addImageView(imageView& imgView) {
-		_imageViews.push_back(imgView);
-		_imageViewLookupMap[&imgView] = _imageViews.size();
+	void sampler::bindImageView(imageView& imageView) {
+		_imgView = &imageView;
 	}
 
-	void sampler::removeImageView(imageView& imgView) {
-		_imageViewLookupMap;
-		const size_t idx = _imageViewLookupMap[&imgView];
-		_imageViewLookupMap.erase(&imgView);
-		_imageViews.erase(_imageViews.begin() + idx);
+	imageView* sampler::getImageView() {
+		return _imgView;
 	}
-
+	
 	void sampler::setSamplerType(const samplerType& type) {
 		_samplerType = type;
 	}

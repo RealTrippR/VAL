@@ -32,12 +32,17 @@ namespace val {
 	}
 
 
-	void shader::setImageSamplers(std::vector< std::pair<VkSamplerCreateInfo, uint16_t>> samplerInfo) {
-		_imageSamplersCreateInfos = samplerInfo;
+	void shader::setImageSamplers(std::vector< std::pair<val::sampler*, uint16_t>> samplerInfo) {
+		_imageSamplers = samplerInfo;
 	}
 
 	void shader::createImageSamplers(VAL_PROC* proc) {
-
+		for (int i = 0; i < _imageSamplers.size(); ++i) {
+			// create uncreated sampler
+			if (VK_NULL_HANDLE == _imageSamplers[i].first->getVkSampler() ) {
+				_imageSamplers[i].first->create();
+			}
+		}
 		//_imageSamplers.resize(_imageSamplersCreateInfos.size());
 		/*const VkPhysicalDeviceProperties& properties = proc->_physicalDeviceProperties;
 		for (int i = 0; i < _imageSamplersCreateInfos.size(); ++i) {
@@ -101,7 +106,17 @@ namespace val {
 			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
 			samplerLayoutBinding.binding = _imageSamplers[i].second;
 			samplerLayoutBinding.descriptorCount = 1;
-			samplerLayoutBinding.descriptorType = _imageSamplers[i].first.getSamplerType();
+			if (_imageSamplers[i].first->getSamplerType() == combinedImage) {
+				samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+			}
+			else if (_imageSamplers[i].first->getSamplerType() == combinedImage) {
+				samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+			}
+			else {
+				printf("VAL: Unsupported sampler type. The type of _imageSampler # %d is invalid!", i);
+				throw std::runtime_error("VAL: Unsupported sampler type. The type of _imageSampler #" + std::to_string(i) + "is invalid!");
+			}
 			samplerLayoutBinding.pImmutableSamplers = nullptr;
 			samplerLayoutBinding.stageFlags = getStageFlags();
 			_layoutBindings.push_back(samplerLayoutBinding);
@@ -145,45 +160,47 @@ namespace val {
 		}
 		idx = _descriptorWrites.size();
 
+		/*
 #ifndef NDEBUG
 		if ((_imageSamplers.size() != _imageViews.size())) {
 			throw std::logic_error("FML: AN IMAGE_SAMPLER CANNOT WORK WITHOUT AN IMAGE_VIEW AND VICE VERSA");
 			throw std::logic_error("FML: AN IMAGE_SAMPLER AND IMAGE_VIEWS MUST BE OF THE SAME SIZE");
 		}
 #endif // !NDEBUG
+		*/
 
-		if (_imageSamplers.size() > 0 && _imageViews.size() > 0) {
-			_descriptorWrites.resize(_descriptorWrites.size() + 1);
-
-			idx = _descriptorWrites.size() - 1;
-
-			//// memset to VkWriteDescriptorSet 0
-			memset(&_descriptorWrites[idx], 0, sizeof(VkWriteDescriptorSet));
-
+		if (_imageSamplers.size() > 0) {
 			//// Image Sampler Descriptor Info
 			std::vector<VkDescriptorImageInfo> imageInfos(_imageSamplers.size());
 
-			// this could be optimized by directly loading it to the descriptor writes
 			for (int i = 0; i < imageInfos.size(); ++i) {
-				imageInfos[i].sampler = _imageSamplers[i].first.getVkSampler();
-				imageInfos[i].imageView = *_imageViews[i];
-				imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			}
+				_descriptorWrites.resize(_descriptorWrites.size() + 1);
 
-			//// Set up the VkWriteDescriptorSet for Image Sampler
-			_descriptorWrites[idx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			_descriptorWrites[idx].dstBinding = 1; // Binding index for image sampler
-			_descriptorWrites[idx].dstArrayElement = 0;
-			_descriptorWrites[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			_descriptorWrites[idx].descriptorCount = imageInfos.size();  // One image sampler descriptor
-			if (imageInfos.size() > 0) {
-				_descriptorWrites[idx].pImageInfo = imageInfos.data();
+				idx = _descriptorWrites.size() - 1;
+
+				//// memset to VkWriteDescriptorSet 0
+				memset(&_descriptorWrites[idx], 0, sizeof(VkWriteDescriptorSet));
+
+				////////////////////////////////////////////////////////////////////
+				imageInfos[i].sampler = _imageSamplers[i].first->getVkSampler();
+				imageInfos[i].imageView = *(_imageSamplers[i].first->getImageView());
+				imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+				//// Set up the VkWriteDescriptorSet for Image Sampler
+				_descriptorWrites[idx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				_descriptorWrites[idx].dstBinding = 1; // Binding index for image sampler
+				_descriptorWrites[idx].dstArrayElement = 0;
+				_descriptorWrites[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				_descriptorWrites[idx].descriptorCount = imageInfos.size();  // One image sampler descriptor
+				if (imageInfos.size() > 0) {
+					_descriptorWrites[idx].pImageInfo = imageInfos.data();
+				}
+				else {
+					_descriptorWrites[idx].pImageInfo = VK_NULL_HANDLE;
+				}
+				_descriptorWrites[idx].pBufferInfo = VK_NULL_HANDLE;
+				_descriptorWrites[idx].pTexelBufferView = VK_NULL_HANDLE;
 			}
-			else {
-				_descriptorWrites[idx].pImageInfo = VK_NULL_HANDLE;
-			}
-			_descriptorWrites[idx].pBufferInfo = VK_NULL_HANDLE;
-			_descriptorWrites[idx].pTexelBufferView = VK_NULL_HANDLE;
 		}
 
 		return &_descriptorWrites;
@@ -245,26 +262,24 @@ namespace val {
 		return _pushConstants;
 	}
 
-	void shader::changeImageView(VAL_PROC& proc, const pipelineCreateInfo& pipeline, const uint32_t& imgSamplerIndex, val::imageView newImgView) {
-		VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][proc._currentFrame];
+	void shader::updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler) {
+		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
+			VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][i];
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageView = *(sampler.first.getImageView());
+			imageInfo.sampler = sampler.first.getVkSampler();
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageView = *newImgView;
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = sampler.second; // THIS MUST MATCH THE BINDING
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pImageInfo = &imageInfo;
 
-		VkWriteDescriptorSet descriptorWrite{};
-		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrite.dstSet = descriptorSet;
-		descriptorWrite.dstBinding = _imageSamplersCreateInfos[imgSamplerIndex].second; // THIS MUST MATCH THE BINDING
-		descriptorWrite.dstArrayElement = 0;
-		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrite.descriptorCount = 1;
-		descriptorWrite.pImageInfo = &imageInfo;
-
-		vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
-	}
-
-	void shader::changeImageSampler(const uint32_t imgSamplerindex, VkSampler newSampler) {
-
+			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+		}
 	}
 }

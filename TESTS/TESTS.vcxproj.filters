@@ -17,6 +17,7 @@
     <ClCompile Include="multimeshRenderTest.cpp" />
     <ClCompile Include="SSBOtest.cpp" />
     <ClCompile Include="specializationConstantsTest.cpp" />
+    <ClCompile Include="advancedSamplerTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
