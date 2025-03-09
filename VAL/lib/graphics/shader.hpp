@@ -9,6 +9,7 @@
 #include <VAL/lib/system/pushConstantHandle.hpp>
 #include <VAL/lib/system/SSBO_Handle.hpp>
 #include <VAL/lib/system/specializationConstant.hpp>
+#include <VAL/lib/system/sampler.hpp>
 
 #include <optional>
 #include <string.h>
@@ -54,7 +55,7 @@ namespace val {
 		// change to allow for multiple image samplers (only one allowed per image view)
 		void setImageSamplers(const std::vector< std::pair<VkSamplerCreateInfo, uint16_t>> sampler);
 
-		void createImageSamplers(VAL_PROC* procFML);
+		void createImageSamplers(VAL_PROC* proc);
 
 		const fs::path& getFilepath() noexcept;
 
@@ -84,6 +85,11 @@ namespace val {
 		const std::vector<std::pair<pushConstantHandle*, uint16_t>>& getPushConstants() noexcept;
 
 	public:
+		void changeImageView(VAL_PROC& proc, const pipelineCreateInfo& pipeline, const uint32_t& imgViewIndex, val::imageView newImgView);
+
+		void changeImageSampler(VAL_PROC& proc, const uint32_t imgSamplerindex, VkSampler newSampler);
+
+	public:
 		VkShaderStageFlags _shaderStageFlags;
 
 		std::string _entryPoint = "main";
@@ -94,8 +100,7 @@ namespace val {
 		std::vector<std::pair<pushConstantHandle*, uint16_t>> _pushConstants;
 		std::vector< std::pair<UBO_Handle*, uint16_t>> _UBO_Handles;
 		std::vector<std::pair<SSBO_Handle*, uint16_t>> _SSBO_Handles;
-		std::vector< std::pair<VkSamplerCreateInfo, uint16_t>> _imageSamplersCreateInfos;
-		std::vector<VkSampler> _imageSamplers;
+		std::vector<std::pair<val::sampler, uint16_t>> _imageSamplers;
 		std::vector<VkImageView*> _imageViews;
 
 		std::vector< VkDescriptorSetLayoutBinding> _layoutBindings;

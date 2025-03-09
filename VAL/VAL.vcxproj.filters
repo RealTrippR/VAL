@@ -116,6 +116,9 @@
     <ClInclude Include="lib\system\imageView.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\sampler.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -167,6 +170,9 @@
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\system\imageView.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\sampler.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>

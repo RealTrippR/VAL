@@ -323,6 +323,7 @@ int main() {
 			//std::cout << "IMAGE SWAPPED!\n";
 		}
 
+		fragShader.updateImageView(0, imgView1);
 		updateImages(mainProc, &fragShader._imageSamplers[0], &currentImgView, mainProc._descriptorSets[0][currentFrame]);
 	}
 

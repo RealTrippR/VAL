@@ -36,18 +36,17 @@ namespace val {
 		_imageSamplersCreateInfos = samplerInfo;
 	}
 
-	void shader::createImageSamplers(VAL_PROC* procFML) {
-		_imageSamplers.resize(_imageSamplersCreateInfos.size());
+	void shader::createImageSamplers(VAL_PROC* proc) {
 
-		const VkPhysicalDeviceProperties& properties = procFML->_physicalDeviceProperties;
-
+		//_imageSamplers.resize(_imageSamplersCreateInfos.size());
+		/*const VkPhysicalDeviceProperties& properties = proc->_physicalDeviceProperties;
 		for (int i = 0; i < _imageSamplersCreateInfos.size(); ++i) {
 			float& ans = _imageSamplersCreateInfos[i].first.maxAnisotropy;
 			ans = std::clamp(ans, 0.f, properties.limits.maxSamplerAnisotropy);
-			if (vkCreateSampler(procFML->_device, &_imageSamplersCreateInfos[i].first, nullptr, &_imageSamplers[i]) != VK_SUCCESS) {
+			if (vkCreateSampler(proc->_device, &_imageSamplersCreateInfos[i].first, nullptr, &_imageSamplers[i]) != VK_SUCCESS) {
 				throw std::runtime_error("FAILED TO CREATE TEXTURE SAMPLER!");
 			}
-		}
+		}*/
 		/* some shaders don't use image samplers
 #ifndef NDEBUG
 		else {
@@ -98,11 +97,11 @@ namespace val {
 			_layoutBindings.push_back(ssboLayoutBinding);
 		}
 
-		for (uint32_t i = 0; i < _imageSamplersCreateInfos.size(); ++i) {
+		for (uint32_t i = 0; i < _imageSamplers.size(); ++i) {
 			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-			samplerLayoutBinding.binding = _imageSamplersCreateInfos[i].second;
+			samplerLayoutBinding.binding = _imageSamplers[i].second;
 			samplerLayoutBinding.descriptorCount = 1;
-			samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			samplerLayoutBinding.descriptorType = _imageSamplers[i].first.getSamplerType();
 			samplerLayoutBinding.pImmutableSamplers = nullptr;
 			samplerLayoutBinding.stageFlags = getStageFlags();
 			_layoutBindings.push_back(samplerLayoutBinding);
@@ -166,7 +165,7 @@ namespace val {
 
 			// this could be optimized by directly loading it to the descriptor writes
 			for (int i = 0; i < imageInfos.size(); ++i) {
-				imageInfos[i].sampler = _imageSamplers[i];
+				imageInfos[i].sampler = _imageSamplers[i].first.getVkSampler();
 				imageInfos[i].imageView = *_imageViews[i];
 				imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
@@ -244,5 +243,28 @@ namespace val {
 
 	const std::vector<std::pair<pushConstantHandle*, uint16_t>>& shader::getPushConstants() noexcept {
 		return _pushConstants;
+	}
+
+	void shader::changeImageView(VAL_PROC& proc, const pipelineCreateInfo& pipeline, const uint32_t& imgSamplerIndex, val::imageView newImgView) {
+		VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][proc._currentFrame];
+
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.imageView = *newImgView;
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = descriptorSet;
+		descriptorWrite.dstBinding = _imageSamplersCreateInfos[imgSamplerIndex].second; // THIS MUST MATCH THE BINDING
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.pImageInfo = &imageInfo;
+
+		vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+	}
+
+	void shader::changeImageSampler(const uint32_t imgSamplerindex, VkSampler newSampler) {
+
 	}
 }
