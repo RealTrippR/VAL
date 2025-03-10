@@ -2,20 +2,22 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void imageView::create(VAL_PROC& proc, val::image& img, const VkImageAspectFlags& aspectFlags) {
-		_proc = proc;
+	void imageView::create(val::image& img, const VkImageAspectFlags& aspectFlags) {
 		_aspectFlags = aspectFlags;
 		_img = &img;
-		proc.createImageView(_img->getImage(), _img->getFormat(), VK_IMAGE_ASPECT_COLOR_BIT, &_imgView);
+		_proc.createImageView(_img->getImage(), _img->getFormat(), VK_IMAGE_ASPECT_COLOR_BIT, &_imgView);
 	}
 
-	void imageView::recreate(VAL_PROC& proc, val::image& img, const VkImageAspectFlags& aspectFlags) {
+	void imageView::recreate(val::image& img, const VkImageAspectFlags& aspectFlags) {
 		destroy();
-		create(proc, img, aspectFlags);
+		create(img, aspectFlags);
 	}
 
 	void imageView::destroy() {
-		vkDestroyImageView(_proc._device, _imgView, VK_NULL_HANDLE);
+		if (_imgView) {
+			vkDestroyImageView(_proc._device, _imgView, VK_NULL_HANDLE);
+			_imgView = NULL;
+		}
 	}
 
 	VAL_PROC& imageView::getProc() {

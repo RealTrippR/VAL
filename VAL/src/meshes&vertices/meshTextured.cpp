@@ -35,6 +35,6 @@ namespace val {
 		if (_textureImageView) {
 			vkDestroyImageView(proc._device, _textureImageView, NULL);
 		}
-		_textureImageView= createImageView(proc._device, texture->getImage(), texture->getFormat(), texture->getMipLevels());
+		_textureImageView.recreate(*texture, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 }

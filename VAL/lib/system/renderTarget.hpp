@@ -15,11 +15,14 @@ namespace val {
 	public:
 		void render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, const uint32_t& instanceCount = 1u);
 
+		void rebindDescriptorSet(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline);
+
 		void update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline);
 
 		void begin(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer);
 
 		void submit(VAL_PROC& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence = VK_NULL_HANDLE);
+
 	public:
 		void setVertexBuffers(const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount) {
 			_vertexBuffers = vertexBuffers;

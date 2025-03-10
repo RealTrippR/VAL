@@ -37,7 +37,7 @@ namespace val {
 			return _pixels;
 		}
 
-		inline const VkImage& getImage() {
+		inline VkImage& getImage() {
 			return _image;
 		}
 
@@ -57,7 +57,7 @@ namespace val {
 			return _format;
 		}
 
-		inline const VkDeviceMemory& getMemory() {
+		inline VkDeviceMemory& getMemory() {
 			return _img_memory;
 		}
 

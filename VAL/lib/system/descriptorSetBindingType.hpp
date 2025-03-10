@@ -1,0 +1,4 @@
+enum descriptorSetBindingType {
+	STATIC,
+	DYNAMIC
+};

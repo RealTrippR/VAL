@@ -88,31 +88,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	colorBlending.blendConstants[3] = 0.0f;
 }
 
-void setImageSamplerInfo(VkSamplerCreateInfo* info) {
-	info->sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-
-	info->magFilter = VK_FILTER_LINEAR;
-	info->minFilter = VK_FILTER_LINEAR;
-	info->addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->anisotropyEnable = VK_TRUE;
-	
-	info->maxAnisotropy = 8; // this value will be clamped if it is greater than what is supported by the graphics card
-	info->borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-	info->unnormalizedCoordinates = VK_FALSE;
-	info->compareEnable = VK_FALSE;
-	info->compareOp = VK_COMPARE_OP_ALWAYS;
-	info->mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	info->mipLodBias = 0.0f;
-	info->minLod = 0.0f;
-	info->maxLod = 0.0f;
-	info->anisotropyEnable = VK_FALSE;
-	info->maxAnisotropy = 1.0f;
-}
-
 void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentImageFormat) {
-
 	// attachments
 	static VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = colorAttachmentImageFormat;
@@ -185,8 +161,6 @@ int main() {
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	/*VkSamplerCreateInfo samplerInfo{};
-	setImageSamplerInfo(&samplerInfo);*/
 	val::sampler imgSampler(mainProc, val::combinedImage);
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
@@ -242,7 +216,8 @@ int main() {
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
-	// sets the image view for the sampler
+	// if the img sampler is not standalone, it must be intitially binded with an image view
+	// before the descriptor sets are created
 	imgSampler.bindImageView(imgView1);
 
 	int timer = 0;

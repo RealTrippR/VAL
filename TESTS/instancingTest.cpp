@@ -72,29 +72,6 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setImageSamplerInfo(VkSamplerCreateInfo* info) {
-	info->sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-
-	info->magFilter = VK_FILTER_LINEAR;
-	info->minFilter = VK_FILTER_LINEAR;
-	info->addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->anisotropyEnable = VK_TRUE;
-
-	info->maxAnisotropy = 8; // this value will be clamped if it is greater than what is supported by the graphics card
-	info->borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-	info->unnormalizedCoordinates = VK_FALSE;
-	info->compareEnable = VK_FALSE;
-	info->compareOp = VK_COMPARE_OP_ALWAYS;
-	info->mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	info->mipLodBias = 0.0f;
-	info->minLod = 0.0f;
-	info->maxLod = 0.0f;
-	info->anisotropyEnable = VK_FALSE;
-	info->maxAnisotropy = 1.0f;
-}
-
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, VkSampleCountFlagBits msaaSamples) {
 	// RASTERIZER
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
@@ -309,12 +286,8 @@ int main() {
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	VkSamplerCreateInfo samplerInfo{};
-	setImageSamplerInfo(&samplerInfo);
-	fragShader._imageSamplersCreateInfos = { { samplerInfo,1 } };
-
-	VkImageView imgView = VK_NULL_HANDLE;
-	fragShader._imageViews = { &imgView };
+	val::sampler imgSampler(mainProc, val::combinedImage);
+	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
 	val::graphicsPipelineCreateInfo pipelineInfo;
@@ -357,10 +330,11 @@ int main() {
 	//////////////////////////////////////////////////
 	// Create mesh and texture, load object and apply texture to the image
 	val::image textureImg(mainProc, TEXTURE_PATH, imageFormat);
-	val::meshTextured mesh;
+	val::meshTextured mesh(mainProc);
 	mesh.loadFromDiskObj(mainProc, MODEL_PATH, true);
 	mesh.setTexture(mainProc, &textureImg);
-	fragShader._imageViews[0] = &mesh._textureImageView;
+	imgSampler.bindImageView(mesh._textureImageView);
+	//fragShader._imageViews[0] = &mesh._textureImageView;
 
 	//////////////////////////////////////////////////////////////////
 	// create instance buffer
@@ -395,7 +369,7 @@ int main() {
 
 	//////////////////////////////////////////////////////////////////
 
-	mainProc.createDescriptorSets(&pipelineInfo, 0u);
+	mainProc.createDescriptorSets(&pipelineInfo);
 
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
@@ -426,20 +400,16 @@ int main() {
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.begin(mainProc);
-		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
-		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer, MAX_INSTANCES);
+		renderTarget.begin(mainProc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.update(mainProc, pipelineInfo);
+		renderTarget.render(mainProc, { viewport }, MAX_INSTANCES);
 		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
-
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+
 		mainProc.nextFrame();
 
 		window.waitForFences();
 	}
-
-	mainProc.cleanup();
-
-	vkDestroyImageView(mainProc._device, imgView, NULL);
 
 	mainProc.cleanup();
 

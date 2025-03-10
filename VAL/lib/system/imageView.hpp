@@ -7,10 +7,9 @@ namespace val {
 
 	class imageView {
 	public:
-		imageView() = delete;
 		imageView(VAL_PROC& proc) : _proc(proc) {};
 		imageView(VAL_PROC& proc, val::image& img, const VkImageAspectFlags& aspectFlags) : _proc(proc) {
-			create(proc, img, aspectFlags);
+			create(img, aspectFlags);
 		}
 
 		~imageView() {
@@ -26,9 +25,9 @@ namespace val {
 		}
 
 	public:
-		void create(VAL_PROC& proc, val::image& img, const VkImageAspectFlags& aspectFlags);
+		void create(val::image& img, const VkImageAspectFlags& aspectFlags);
 
-		void recreate(VAL_PROC& proc, val::image& img, const VkImageAspectFlags& aspectFlags);
+		void recreate(val::image& img, const VkImageAspectFlags& aspectFlags);
 
 		void destroy();
 	public:

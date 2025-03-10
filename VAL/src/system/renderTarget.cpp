@@ -16,6 +16,15 @@ namespace val {
 		}
 	}
 
+	void renderTarget::rebindDescriptorSet(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline) {
+		const auto& pipelineIdx = pipeline.pipelineIdx;
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
+		// bind pipeline and respective descriptor sets
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelines[pipelineIdx]);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._pipelineLayouts[pipelineIdx],
+			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
+	}
+
 	void renderTarget::update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline) {		
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
