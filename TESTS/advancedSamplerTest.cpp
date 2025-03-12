@@ -268,12 +268,12 @@ int main() {
 
 		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
 		renderTarget.begin(proc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.update(proc, pipelineInfo);
+		updateUniformBuffer(proc, uboHdl);
 
 
 		float tmp = (sin(ftimeSec)+1.f) / 2.f;
