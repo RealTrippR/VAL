@@ -14,7 +14,10 @@ namespace val {
 			_procMemoryOffset = 0;
 			_stageFlags = 0;
 		}
+
 		void update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline);
+
+		void update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer cmdBuffer);
 
 		VkPushConstantRange toVkPushConstantRange();
 	public:

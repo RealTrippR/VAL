@@ -261,7 +261,16 @@ namespace val {
 				_descriptorWrites[idx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				_descriptorWrites[idx].dstBinding = 1; // Binding index for image sampler
 				_descriptorWrites[idx].dstArrayElement = 0;
-				_descriptorWrites[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				if (_imageSamplers[i].values[0]->getSamplerType() == combinedImage) {
+					_descriptorWrites[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				}
+				else if (_imageSamplers[i].values[0]->getSamplerType() == standalone) {
+					_descriptorWrites[idx].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+				}
+				else {
+					printf("VAL: ERROR: Samper at %h has an invalid sampler type of %d!\n", &_imageSamplers[i].values[0], _imageSamplers[i].values[0]->getSamplerType());
+					throw std::runtime_error("INVALID SAMPLER TYPE");
+				}
 				_descriptorWrites[idx].descriptorCount = imageInfos.size();  // One image sampler descriptor
 				if (imageInfos.size() > 0) {
 					_descriptorWrites[idx].pImageInfo = imageInfos.data();
@@ -273,7 +282,9 @@ namespace val {
 				_descriptorWrites[idx].pTexelBufferView = VK_NULL_HANDLE;
 			}
 		}
+		idx = _descriptorWrites.size();
 
+		_descriptorWrites.resize(_descriptorWrites.size() + _textures.size());
 		for (uint32_t i = 0; i < _textures.size(); ++i) {
 			VkWriteDescriptorSet& descWrite = _descriptorWrites[i + idx];
 
@@ -285,7 +296,6 @@ namespace val {
 			descWrite.descriptorCount = _textures[i].values.size();
 			descWrite.pImageInfo = NULL; // this is set later
 		}
-
 		idx = _descriptorWrites.size();
 
 		return &_descriptorWrites;
@@ -345,23 +355,13 @@ namespace val {
 		return _bindings;
 	}
 
-	void shader::setPushConstants(const std::vector<descriptorBinding<pushConstantHandle*>>& pushConstants) {
-		_pushConstants = pushConstants;
-		for (auto& PC_DESC_WRITE : _pushConstants) {
-			#ifndef NDEBUG
-			if (PC_DESC_WRITE.values.size()>1)
-			{
-				printf("VAL: ERROR: The size of values in a Push Constant descriptor binding cannot be greater than 1!\n");
-				throw std::runtime_error("VAL: ERROR: The size of values in a Push Constant descriptor binding cannot be greater than 1!");
-			}
-			#endif // !NDEBUG
-			// push constants cannot be an array
-			PC_DESC_WRITE.values[0]->_stageFlags = VkShaderStageFlagBits(PC_DESC_WRITE.values[0]->_stageFlags | _shaderStageFlags);
-		}
+	void shader::setPushConstant(pushConstantHandle* pushConstant) {
+		_pushConstant = pushConstant;
+		_pushConstant->_stageFlags = VkShaderStageFlags(pushConstant->_stageFlags | _shaderStageFlags);
 	}
 
-	const std::vector<descriptorBinding<pushConstantHandle*>>& shader::getPushConstants() noexcept {
-		return _pushConstants;
+	pushConstantHandle* shader::getPushConstant() noexcept {
+		return _pushConstant;
 	}
 
 	void shader::setTextures(const std::vector<descriptorBinding<val::imageView*>> textures) {

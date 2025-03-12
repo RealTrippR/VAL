@@ -80,9 +80,9 @@ namespace val {
 
 		const std::vector<VkVertexInputBindingDescription>& getBindingDescriptions() noexcept;
 
-		void setPushConstants(const std::vector<descriptorBinding<pushConstantHandle*>>& pushConstants);
+		void setPushConstant(pushConstantHandle* pushConstant);
 
-		const std::vector<descriptorBinding<pushConstantHandle*>>& getPushConstants() noexcept;
+		pushConstantHandle* getPushConstant() noexcept;
 
 		void setTextures(const std::vector<descriptorBinding<val::imageView*>> textures);
 
@@ -107,7 +107,7 @@ namespace val {
 		fs::path _filepath;
 
 		std::vector<descriptorBinding<specializationConstant*/*Constant*/>> _specializationConstants;
-		std::vector<descriptorBinding<pushConstantHandle*>> _pushConstants;
+		pushConstantHandle* _pushConstant;
 		std::vector<descriptorBinding<UBO_Handle*>> _UBO_Handles;
 		std::vector<descriptorBinding<SSBO_Handle*>> _SSBO_Handles;
 		std::vector<descriptorBinding<val::sampler*>> _imageSamplers;

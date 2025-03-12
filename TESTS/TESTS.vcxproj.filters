@@ -19,6 +19,7 @@
     <ClCompile Include="specializationConstantsTest.cpp" />
     <ClCompile Include="advancedSamplerTest.cpp" />
     <ClCompile Include="immutableSamplerTest.cpp" />
+    <ClCompile Include="UBO_SSBO_ArrayTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />

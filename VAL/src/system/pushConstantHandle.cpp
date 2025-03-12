@@ -3,15 +3,33 @@
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
 
 namespace val {
-	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline) {
+	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer cmdBuffer) {
+
 		vkCmdPushConstants(
-			proc._graphicsQueue._commandBuffers[proc._currentFrame],
+			cmdBuffer,
 			proc._pipelineLayouts[pipeline.pipelineIdx],
 			_stageFlags,
-			0,
+			_offset,
 			_size,
 			data
 		);
+
+		memcpy(((char*)proc._pushConstantData) + _procMemoryOffset, data, _size);
+	}
+
+	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline) {
+
+		VkCommandBuffer cmdBuffer = proc.beginSingleTimeCommands();
+		vkCmdPushConstants(
+			cmdBuffer,
+			proc._pipelineLayouts[pipeline.pipelineIdx],
+			_stageFlags,
+			_offset,
+			_size,
+			data
+		);
+
+		proc.endSingleTimeCommands(cmdBuffer);
 		memcpy(((char*)proc._pushConstantData) + _procMemoryOffset, data, _size);
 	}
 

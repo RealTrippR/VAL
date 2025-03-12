@@ -46,6 +46,7 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
+float ftimeSec;
 
 void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
@@ -53,10 +54,10 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	ftimeSec = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	static uniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.model = glm::rotate(glm::mat4(1.0f), ftimeSec * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
@@ -139,6 +140,11 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 int main() {
 	val::VAL_PROC proc;
 
+
+	val::imageView imgView1(proc);
+	val::imageView imgView2(proc);
+
+	val::pushConstantHandle PC_ImgScissor(sizeof(float));
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
@@ -166,17 +172,17 @@ int main() {
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader.setUBOs({ {&uboHdl,0 } });
 
-	val::imageView imgView1(proc);
-	val::imageView imgView2(proc);
 
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/doubleImageShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	val::sampler imgSampler(proc, val::standalone);
+	imgSampler.bindImageView(imgView1);
 	// https://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 	fragShader.setTextures({ {{&imgView1, &imgView2 }, 2} });
+	fragShader.setPushConstant(&PC_ImgScissor);
 	//fragShader.setTextures({ {&imgView1, 2, 1 } });
 
 	// config grahics pipeline
@@ -206,10 +212,10 @@ int main() {
 	//////////////////////////////////////////////////
 
 	val::image img1(proc, "testImage.jpg", imageFormat);
-	(proc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
+	imgView1.create(img1, VK_IMAGE_ASPECT_COLOR_BIT);
 
 	val::image img2(proc, "testImage2.png", imageFormat);
-	(proc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
+	imgView2.create(img2, VK_IMAGE_ASPECT_COLOR_BIT);
 
 
 
@@ -230,12 +236,6 @@ int main() {
 	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
-
-	// if the img sampler is not standalone, it must be intitially binded with an image view
-	// before the descriptor sets are created
-	imgSampler.bindImageView(imgView1);
-
-	int timer = 0;
 	bool imgNum = 0;
 
 	VkClearValue clearValues[1];
@@ -258,6 +258,9 @@ int main() {
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
+	float tmp = .7;
+	PC_ImgScissor.update(proc, &tmp, pipelineInfo);
+
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
@@ -271,28 +274,18 @@ int main() {
 
 		renderTarget.begin(proc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.update(proc, pipelineInfo);
+
+
+		float tmp = (sin(ftimeSec)+1.f) / 2.f;
+		// if you're updating a buffer during a draw or compute operation, 
+		// ALWAYS pass the respective cmd buffer into the update function for performance gains
+		PC_ImgScissor.update(proc, &tmp, pipelineInfo, cmdBuffer);
+
 		renderTarget.render(proc, { viewport });
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
-
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
 		proc.nextFrame();
-
-		timer++;
-		if (timer > 200) {
-			timer = 0;
-			imgNum = !imgNum;
-			std::cout << "IMAGE SWAPPED!\n\n";
-			if (imgNum) {
-				imgSampler.bindImageView(imgView2);
-				//fragShader.updateImageSampler(proc, pipelineInfo, { imgSampler,1 });
-
-			}
-			else {
-				imgSampler.bindImageView(imgView1);
-				//fragShader.updateImageSampler(proc, pipelineInfo, { imgSampler,1 });
-			}
-		}
 	}
 
 	imgView1.destroy();

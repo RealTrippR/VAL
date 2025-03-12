@@ -270,12 +270,9 @@ int main() {
 			std::cout << "IMAGE SWAPPED!\n\n";
 			if (imgNum) {
 				imgSampler.bindImageView(imgView2);
-				fragShader.updateImageSampler(mainProc, pipelineInfo, { imgSampler,1 });
-
 			}
 			else {
 				imgSampler.bindImageView(imgView1);
-				fragShader.updateImageSampler(mainProc, pipelineInfo, { imgSampler,1 });
 			}
 		}
 	}

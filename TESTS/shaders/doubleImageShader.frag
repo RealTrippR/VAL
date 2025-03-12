@@ -9,10 +9,14 @@ layout(location = 1) in vec2 fragTexCoord;
 
 layout(location = 0) out vec4 outColor;
 
+layout( push_constant ) uniform constants
+{
+	float scissor;
+} pushConstant;
+
 void main() {
-    // Select texture from the array based on some condition (e.g., index or fragment color)
-    int textureIndex = 0; // Just an example, choose between 0 and 1
-    if (fragColor.r > 0.5) {
+    int textureIndex = 0;
+    if (fragColor.r > pushConstant.scissor) { // the r value is the x cord in a range from 0-1
         textureIndex = 1;
     }
 

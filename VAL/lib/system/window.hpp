@@ -72,20 +72,20 @@ namespace val {
 		queueManager _presentQueue;
 		//VkQueue _presentQueue;
 
-		VkSurfaceKHR _surface;
+		VkSurfaceKHR _surface{};
 		////////////////// SWAPCHAIN //////////////////
 
-		VkSwapchainKHR _swapChain;
+		VkSwapchainKHR _swapChain{};
 		std::vector<VkImage> _swapChainImages;
 		//VkFormat _swapChainImageFormat;
-		VkExtent2D _swapChainExtent;
+		VkExtent2D _swapChainExtent{};
 		std::vector<VkImageView> _swapChainImageViews;
 		std::vector<VkFramebuffer> _swapChainFrameBuffers;
 
 		// this data is used to recreate the swap chain when it's out of date.
 		VkImageView* _swapChainAttachments;
 		uint16_t _swapChainAttachmentCount;
-		VkRenderPass _swapChainRenderPass;
+		VkRenderPass _swapChainRenderPass{};
 
 
 
