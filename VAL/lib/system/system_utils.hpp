@@ -23,7 +23,7 @@
 #include <filesystem>
 #include <math.h>
 
-#include <VAL/lib/system/descriptorSetBindingType.hpp>
+#include <VAL/lib/system/descriptorBinding.hpp>
 
 enum bufferSpace {
 	GPU_ONLY,

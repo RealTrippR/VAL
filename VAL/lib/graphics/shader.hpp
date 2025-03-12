@@ -53,7 +53,7 @@ namespace val {
 		const std::string& getEntryPoint();
 
 		// change to allow for multiple image samplers (only one allowed per image view)
-		void setImageSamplers(std::vector< std::pair<val::sampler*, uint16_t>> samplerInfo);
+		void setImageSamplers(std::vector<descriptorBinding<val::sampler*>> samplerInfo);
 
 		void createImageSamplers(VAL_PROC* proc);
 
@@ -70,7 +70,7 @@ namespace val {
 		virtual std::vector<VkWriteDescriptorSet>* getDescriptorWrites();
 
 		// outer vector is for each frame in flight, second is for the buffer info for that frame
-		virtual std::vector<std::vector<VkDescriptorBufferInfo>>* getDescriptorBufferInfos(VAL_PROC& proc);
+		virtual std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>>* getDescriptorBufferInfos(VAL_PROC& proc);
 
 		void setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes);
 
@@ -80,9 +80,21 @@ namespace val {
 
 		const std::vector<VkVertexInputBindingDescription>& getBindingDescriptions() noexcept;
 
-		void setPushConstants(const std::vector<std::pair<pushConstantHandle*, uint16_t>>& pushConstants);
+		void setPushConstants(const std::vector<descriptorBinding<pushConstantHandle*>>& pushConstants);
 
-		const std::vector<std::pair<pushConstantHandle*, uint16_t>>& getPushConstants() noexcept;
+		const std::vector<descriptorBinding<pushConstantHandle*>>& getPushConstants() noexcept;
+
+		void setTextures(const std::vector<descriptorBinding<val::imageView*>> textures);
+
+		const std::vector<descriptorBinding<val::imageView*>> getTextures() noexcept;
+
+		void setUBOs(const std::vector<descriptorBinding<UBO_Handle*>>& ubos);
+
+		const std::vector<descriptorBinding<val::UBO_Handle*>> getUBOS() noexcept;
+
+		void setSSBOs(const std::vector<descriptorBinding<SSBO_Handle*>>& SSBOs);
+
+		const std::vector<descriptorBinding<val::SSBO_Handle*>> getSSBOs() noexcept;
 
 	public:
 		void updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler);
@@ -94,17 +106,18 @@ namespace val {
 		std::vector<char> _byteCode;
 		fs::path _filepath;
 
-		std::vector<std::pair<specializationConstant*/*Constant*/, uint16_t/*constant_id*/>> _specializationConstants;
-		std::vector<std::pair<pushConstantHandle*, uint16_t>> _pushConstants;
-		std::vector< std::pair<UBO_Handle*, uint16_t>> _UBO_Handles;
-		std::vector<std::pair<SSBO_Handle*, uint16_t>> _SSBO_Handles;
-		std::vector<std::pair<val::sampler*, uint16_t>> _imageSamplers;
+		std::vector<descriptorBinding<specializationConstant*/*Constant*/>> _specializationConstants;
+		std::vector<descriptorBinding<pushConstantHandle*>> _pushConstants;
+		std::vector<descriptorBinding<UBO_Handle*>> _UBO_Handles;
+		std::vector<descriptorBinding<SSBO_Handle*>> _SSBO_Handles;
+		std::vector<descriptorBinding<val::sampler*>> _imageSamplers;
+		std::vector<descriptorBinding<val::imageView*>> _textures;
 		//std::vector<VkImageView*> _imageViews;
 
 		std::vector< VkDescriptorSetLayoutBinding> _layoutBindings;
 		std::vector<VkWriteDescriptorSet> _descriptorWrites; // stored as part of the class for optimization (avoids excess copying), as well as scope
-		// outer vector is for each frame in flight, second is for the buffer info for that frame
-		std::vector<std::vector<VkDescriptorBufferInfo>> _descriptorWriteBufferInfos; // stored as part of the class for optimization (avoids excess copying), as well as scope
+		// outer vector is for each frame in flight, second is for the buffer info for that frame, third is to represent the buffer infos as an array
+		std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>> _descriptorWriteBufferInfos; // stored as part of the class for optimization (avoids excess copying), as well as scope
 
 		std::vector<VkVertexInputAttributeDescription> _attributes;
 		std::vector< VkVertexInputBindingDescription> _bindings;

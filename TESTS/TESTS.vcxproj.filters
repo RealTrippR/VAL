@@ -18,6 +18,7 @@
     <ClCompile Include="SSBOtest.cpp" />
     <ClCompile Include="specializationConstantsTest.cpp" />
     <ClCompile Include="advancedSamplerTest.cpp" />
+    <ClCompile Include="immutableSamplerTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
@@ -78,6 +79,9 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\specializationConstants.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\doubleImageShader.frag">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

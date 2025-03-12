@@ -32,15 +32,32 @@ namespace val {
 	}
 
 
-	void shader::setImageSamplers(std::vector< std::pair<val::sampler*, uint16_t>> samplerInfo) {
+	void shader::setImageSamplers(std::vector<descriptorBinding<val::sampler*>> samplerInfo) {
 		_imageSamplers = samplerInfo;
+		#ifndef NDEBUG
+		// validate the samplerInfo. Samplers cannot be binded as arrays.
+		for (auto& samplerWrite : samplerInfo) {
+			if (samplerWrite.values.size() > 1) {
+				printf("VAL: ERROR: Sampler descriptor writes can not be represented as arrays; the size of samplerWrite.values cannot be greater than 1!\n");
+				throw std::runtime_error("VAL: ERROR: Sampler descriptor writes can not be represented as arrays; the size of samplerWrite.values cannot be greater than 1!");
+			}
+		}
+		#endif // !NDEBUG
+
 	}
 
 	void shader::createImageSamplers(VAL_PROC* proc) {
 		for (int i = 0; i < _imageSamplers.size(); ++i) {
+#ifndef NDEBUG
+			if (_imageSamplers[i].values.size() > 1) {
+				printf("VAL: ERROR: Image samplers cannot be bound as an array; the values property cannot have a size above 1!");
+				throw std::runtime_error("ERROR: Image samplers cannot be bound as an array; the values property cannot have a size above 1!");
+			}
+#endif // !NDEBUG
+
 			// create uncreated sampler
-			if (VK_NULL_HANDLE == _imageSamplers[i].first->getVkSampler() ) {
-				_imageSamplers[i].first->create();
+			if (VK_NULL_HANDLE == _imageSamplers[i].values[0]->getVkSampler() ) {
+				_imageSamplers[i].values[0]->create();
 			}
 		}
 		//_imageSamplers.resize(_imageSamplersCreateInfos.size());
@@ -84,43 +101,99 @@ namespace val {
 
 		for (uint32_t i = 0; i < _UBO_Handles.size(); ++i) {
 			VkDescriptorSetLayoutBinding uboLayoutBinding{};
-			uboLayoutBinding.binding = _UBO_Handles[i].second;
-			uboLayoutBinding.descriptorCount = 1;
+			uboLayoutBinding.binding = _UBO_Handles[i].bindingIndex;
+			uboLayoutBinding.descriptorCount = _UBO_Handles[i].values.size();
 			uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			uboLayoutBinding.pImmutableSamplers = nullptr;
+			uboLayoutBinding.pImmutableSamplers = NULL;
 			uboLayoutBinding.stageFlags = getStageFlags();
 			_layoutBindings.push_back(uboLayoutBinding);
 		}
 
 		for (uint32_t i = 0; i < _SSBO_Handles.size(); ++i) {
 			VkDescriptorSetLayoutBinding ssboLayoutBinding{};
-			ssboLayoutBinding.binding = _SSBO_Handles[i].second;
-			ssboLayoutBinding.descriptorCount = 1;
+			ssboLayoutBinding.binding = _SSBO_Handles[i].bindingIndex;
+			ssboLayoutBinding.descriptorCount = _SSBO_Handles[i].values.size();
 			ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			ssboLayoutBinding.pImmutableSamplers = nullptr;
+			ssboLayoutBinding.pImmutableSamplers = NULL;
 			ssboLayoutBinding.stageFlags = getStageFlags();
 			_layoutBindings.push_back(ssboLayoutBinding);
 		}
 
+
+		std::vector<std::pair<val::sampler*, uint32_t>> combinedImageSamplers;
+		std::vector< std::pair<val::sampler*, uint32_t>> standaloneImageSamplers;
+
+
+		for (val::descriptorBinding<val::sampler*>& descBinding : _imageSamplers) {
+#ifndef NDEBUG
+			if (descBinding.values.size()>1) {
+				printf("VAL: WARNING: descriptorBinding<val::sampler*> cannot have more than 1 value attached to it; it cannot be treated as an array!\n");
+			}
+#endif // NDEBUG
+			for (val::sampler* sampler : descBinding.values) {
+				if (sampler->getSamplerType() == combinedImage) {
+					combinedImageSamplers.push_back({ sampler,descBinding.bindingIndex});
+				}
+				else if (sampler->getSamplerType() == standalone) {
+					standaloneImageSamplers.push_back({ sampler,descBinding.bindingIndex });
+				}
+			}
+		}
+
+		for (uint32_t i = 0; i < combinedImageSamplers.size(); ++i) {
+			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+			samplerLayoutBinding.binding = combinedImageSamplers[i].second;
+			samplerLayoutBinding.descriptorCount = 1;
+			samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			samplerLayoutBinding.pImmutableSamplers = NULL;
+			samplerLayoutBinding.stageFlags = getStageFlags();
+			_layoutBindings.push_back(samplerLayoutBinding);
+		}
+
+		for (uint32_t i = 0; i < standaloneImageSamplers.size(); ++i) {
+			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+			samplerLayoutBinding.binding = standaloneImageSamplers[i].second;
+			samplerLayoutBinding.descriptorCount = 1;
+			samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+			samplerLayoutBinding.pImmutableSamplers = NULL;
+			samplerLayoutBinding.stageFlags = getStageFlags();
+			_layoutBindings.push_back(samplerLayoutBinding);
+		}
+
+
+		for (uint32_t i = 0; i < _textures.size(); ++i) {
+			VkDescriptorSetLayoutBinding textureLayoutBinding{};
+			textureLayoutBinding.binding = _textures[i].bindingIndex;
+			textureLayoutBinding.descriptorCount = _textures[i].values.size();
+			textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			textureLayoutBinding.stageFlags = getStageFlags();
+			textureLayoutBinding.pImmutableSamplers = NULL;
+			_layoutBindings.push_back(textureLayoutBinding);
+		}
+
+		/*
 		for (uint32_t i = 0; i < _imageSamplers.size(); ++i) {
 			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-			samplerLayoutBinding.binding = _imageSamplers[i].second;
-			samplerLayoutBinding.descriptorCount = 1;
-			if (_imageSamplers[i].first->getSamplerType() == combinedImage) {
+			samplerLayoutBinding.binding = _imageSamplers[i].bindingIndex;
+			samplerLayoutBinding.descriptorCount = _imageSamplers[i].count;
+			if (_imageSamplers[i].values[0]->getSamplerType() == combinedImage) {
 				samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				samplerLayoutBinding.pImmutableSamplers = NULL;
 
 			}
-			else if (_imageSamplers[i].first->getSamplerType() == combinedImage) {
+			else if (_imageSamplers[i].values[0]->getSamplerType() == standalone) {
 				samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+				//samplerLayoutBinding.pImmutableSamplers = &(_imageSamplers[i].values[0]->getVkSampler());
+				samplerLayoutBinding.pImmutableSamplers = NULL;
 			}
 			else {
 				printf("VAL: Unsupported sampler type. The type of _imageSampler # %d is invalid!", i);
 				throw std::runtime_error("VAL: Unsupported sampler type. The type of _imageSampler #" + std::to_string(i) + "is invalid!");
 			}
-			samplerLayoutBinding.pImmutableSamplers = nullptr;
 			samplerLayoutBinding.stageFlags = getStageFlags();
 			_layoutBindings.push_back(samplerLayoutBinding);
 		}
+		*/
 
 		return &_layoutBindings;
 	}
@@ -136,11 +209,10 @@ namespace val {
 				
 			memset(&descWrite, 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem
 			// pack the value index into the puffer info, it will be used later to update descriptor sets
-			descWrite.pBufferInfo = (VkDescriptorBufferInfo*)(_UBO_Handles[i].first->_index);
 			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descWrite.dstBinding = _UBO_Handles[i].second;
+			descWrite.dstBinding = _UBO_Handles[i].bindingIndex;
 			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descWrite.descriptorCount = 1;
+			descWrite.descriptorCount = _UBO_Handles[i].values.size();
 			descWrite.pBufferInfo = VK_NULL_HANDLE;
 		}
 		idx = _descriptorWrites.size();
@@ -151,11 +223,10 @@ namespace val {
 
 			memset(&descWrite, 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem
 			// pack the value index into the puffer info, it will be used later to update descriptor sets
-			descWrite.pBufferInfo = (VkDescriptorBufferInfo*)(_SSBO_Handles[i].first->_index);
 			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descWrite.dstBinding = _SSBO_Handles[i].second;
+			descWrite.dstBinding = _SSBO_Handles[i].bindingIndex;
 			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			descWrite.descriptorCount = 1;
+			descWrite.descriptorCount = _SSBO_Handles[i].values.size();
 			descWrite.pBufferInfo = VK_NULL_HANDLE;
 		}
 		idx = _descriptorWrites.size();
@@ -182,8 +253,8 @@ namespace val {
 				memset(&_descriptorWrites[idx], 0, sizeof(VkWriteDescriptorSet));
 
 				////////////////////////////////////////////////////////////////////
-				imageInfos[i].sampler = _imageSamplers[i].first->getVkSampler();
-				imageInfos[i].imageView = *(_imageSamplers[i].first->getImageView());
+				imageInfos[i].sampler = _imageSamplers[i].values[0]->getVkSampler();
+				imageInfos[i].imageView = *(_imageSamplers[i].values[0]->getImageView());
 				imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 				//// Set up the VkWriteDescriptorSet for Image Sampler
@@ -203,10 +274,24 @@ namespace val {
 			}
 		}
 
+		for (uint32_t i = 0; i < _textures.size(); ++i) {
+			VkWriteDescriptorSet& descWrite = _descriptorWrites[i + idx];
+
+			memset(&descWrite, 0, sizeof(VkWriteDescriptorSet)); // 0 clears mem
+			// pack the value index into the puffer info, it will be used later to update descriptor sets
+			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descWrite.dstBinding = _textures[i].bindingIndex;
+			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			descWrite.descriptorCount = _textures[i].values.size();
+			descWrite.pImageInfo = NULL; // this is set later
+		}
+
+		idx = _descriptorWrites.size();
+
 		return &_descriptorWrites;
 	}
 
-	std::vector<std::vector<VkDescriptorBufferInfo>>* shader::getDescriptorBufferInfos(VAL_PROC& proc) {
+	std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>>* shader::getDescriptorBufferInfos(VAL_PROC& proc) {
 		auto& bufferWrites = _descriptorWriteBufferInfos;
 		bufferWrites.clear();
 		bufferWrites.resize(proc._MAX_FRAMES_IN_FLIGHT);
@@ -214,21 +299,30 @@ namespace val {
 			for (size_t i = 0; i < _UBO_Handles.size(); ++i) {
 				auto& uboHDL = _UBO_Handles[i];
 				bufferWrites[frame].emplace_back();
-				VkDescriptorBufferInfo& buffInfo = bufferWrites[frame].back();
-				memset(&buffInfo, 0, sizeof(VkDescriptorBufferInfo)); // 0 out memory
-				buffInfo.buffer = uboHDL.first->getBuffers(proc)[frame];
-				buffInfo.range = uboHDL.first->_size;
-				buffInfo.offset = 0;
+				std::vector<VkDescriptorBufferInfo>& buffInfoArr = bufferWrites[frame].back();
+				buffInfoArr.resize(uboHDL.values.size());
+				for (size_t j = 0; j < buffInfoArr.size(); ++j) {
+					VkDescriptorBufferInfo& buffInfo = buffInfoArr[j];
+					memset(&buffInfo, 0, sizeof(VkDescriptorBufferInfo)); // 0 out memory
+					buffInfo.buffer = uboHDL.values[j]->getBuffers(proc)[frame];
+					buffInfo.range = uboHDL.values[j]->_size;
+					buffInfo.offset = 0;
+				}
+			
 			}
 
 			for (size_t i = 0; i < _SSBO_Handles.size(); ++i) {
 				auto& ssboHDL = _SSBO_Handles[i];
 				bufferWrites[frame].emplace_back();
-				VkDescriptorBufferInfo& buffInfo = bufferWrites[frame].back();
-				memset(&buffInfo, 0, sizeof(VkDescriptorBufferInfo)); // 0 out memory
-				buffInfo.buffer = ssboHDL.first->getBuffers(proc)[frame];
-				buffInfo.range = ssboHDL.first->_size;
-				buffInfo.offset = 0;
+				std::vector<VkDescriptorBufferInfo>& buffInfoArr = bufferWrites[frame].back();
+				buffInfoArr.resize(ssboHDL.values.size());
+				for (size_t j = 0; j < buffInfoArr.size(); ++j) {
+					VkDescriptorBufferInfo& buffInfo = buffInfoArr[j];
+					memset(&buffInfo, 0, sizeof(VkDescriptorBufferInfo)); // 0 out memory
+					buffInfo.buffer = ssboHDL.values[j]->getBuffers(proc)[frame];
+					buffInfo.range = ssboHDL.values[j]->_size;
+					buffInfo.offset = 0;
+				}
 			}
 		}
 
@@ -251,15 +345,47 @@ namespace val {
 		return _bindings;
 	}
 
-	void shader::setPushConstants(const std::vector<std::pair<pushConstantHandle*, uint16_t>>& pushConstants) {
+	void shader::setPushConstants(const std::vector<descriptorBinding<pushConstantHandle*>>& pushConstants) {
 		_pushConstants = pushConstants;
-		for (auto& PC_Hdl : _pushConstants) {
-			PC_Hdl.first->_stageFlags = VkShaderStageFlagBits(PC_Hdl.first->_stageFlags | _shaderStageFlags);
+		for (auto& PC_DESC_WRITE : _pushConstants) {
+			#ifndef NDEBUG
+			if (PC_DESC_WRITE.values.size()>1)
+			{
+				printf("VAL: ERROR: The size of values in a Push Constant descriptor binding cannot be greater than 1!\n");
+				throw std::runtime_error("VAL: ERROR: The size of values in a Push Constant descriptor binding cannot be greater than 1!");
+			}
+			#endif // !NDEBUG
+			// push constants cannot be an array
+			PC_DESC_WRITE.values[0]->_stageFlags = VkShaderStageFlagBits(PC_DESC_WRITE.values[0]->_stageFlags | _shaderStageFlags);
 		}
 	}
 
-	const std::vector<std::pair<pushConstantHandle*, uint16_t>>& shader::getPushConstants() noexcept {
+	const std::vector<descriptorBinding<pushConstantHandle*>>& shader::getPushConstants() noexcept {
 		return _pushConstants;
+	}
+
+	void shader::setTextures(const std::vector<descriptorBinding<val::imageView*>> textures) {
+		_textures = textures;
+	}
+
+	const std::vector<descriptorBinding<val::imageView*>> shader::getTextures() noexcept {
+		return _textures;
+	}
+
+	void shader::setUBOs(const std::vector<descriptorBinding<UBO_Handle*>>& ubos) {
+		_UBO_Handles = ubos;
+	}
+
+	const std::vector<descriptorBinding<val::UBO_Handle*>> shader::getUBOS() noexcept {
+		return _UBO_Handles;
+	}
+
+	void shader::setSSBOs(const std::vector<descriptorBinding<SSBO_Handle*>>& SSBOs) {
+		_SSBO_Handles = SSBOs;
+	}
+
+	const std::vector<descriptorBinding<val::SSBO_Handle*>> shader::getSSBOs() noexcept {
+		return _SSBO_Handles;
 	}
 
 	void shader::updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler) {

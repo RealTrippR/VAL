@@ -8,6 +8,7 @@ namespace val {
 	enum samplerType {
 		combinedImage, // equivalent to VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
 		standalone, // equivalent to VK_DESCRIPTOR_TYPE_SAMPLER 
+		immutable //  // equivalent to combinedImage except it cannot be changed and is baked into the graphics pipeline
 	};
 
 	class sampler {
@@ -75,7 +76,7 @@ namespace val {
 
 		const VkSamplerCreateInfo& getSamplerCreateInfo();
 
-		VkSampler getVkSampler();
+		VkSampler& getVkSampler();
 
 	private:
 		inline void initDefaultValues() {

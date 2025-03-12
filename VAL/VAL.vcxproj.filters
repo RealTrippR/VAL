@@ -59,9 +59,6 @@
     <ClInclude Include="lib\system\image.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\chunkedBuffer.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp">
       <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
@@ -119,7 +116,7 @@
     <ClInclude Include="lib\system\sampler.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\descriptorSetBindingType.hpp">
+    <ClInclude Include="lib\system\descriptorBinding.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
   </ItemGroup>

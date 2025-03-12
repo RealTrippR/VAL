@@ -135,9 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="advancedSamplerTest.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="advancedSamplerTest.cpp" />
+    <ClCompile Include="immutableSamplerTest.cpp" />
     <ClCompile Include="instancingTest.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -196,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\colorshader.frag" />
+    <None Include="shaders\doubleImageShader.frag" />
     <None Include="shaders\imageshader.frag" />
     <None Include="shaders\instancedShader.vert" />
     <None Include="shaders\multimeshRenderer.vert" />

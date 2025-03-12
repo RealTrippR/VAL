@@ -148,7 +148,7 @@
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />
     <ClInclude Include="lib\system\depthBuffer.hpp" />
-    <ClInclude Include="lib\system\descriptorSetBindingType.hpp" />
+    <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
@@ -166,7 +166,6 @@
     <ClInclude Include="lib\system\resourceManager.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
-    <ClInclude Include="lib\system\chunkedBuffer.hpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />

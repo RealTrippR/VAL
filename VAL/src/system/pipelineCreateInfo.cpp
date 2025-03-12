@@ -6,11 +6,12 @@ namespace val {
 	std::vector<UBO_Handle*> pipelineCreateInfo::getUniqueUBOs() {
 		std::vector<UBO_Handle*> UBO_Handles;
 		for (shader* shdr : shaders) {
-			for (auto UBO_PAIR : shdr->_UBO_Handles) {
-				UBO_Handle* UBO_Hdl = UBO_PAIR.first;
-				if (std::find(UBO_Handles.begin(), UBO_Handles.end(), UBO_Hdl) == UBO_Handles.end()) {
-					UBO_Hdl->stageFlags = VkShaderStageFlagBits(UBO_Hdl->stageFlags | shdr->getStageFlags());
-					UBO_Handles.push_back(UBO_Hdl);
+			for (auto& UBO_Write : shdr->_UBO_Handles) {
+				for (auto& UBO_Hdl : UBO_Write.values) {
+					if (std::find(UBO_Handles.begin(), UBO_Handles.end(), UBO_Hdl) == UBO_Handles.end()) {
+						UBO_Hdl->stageFlags = VkShaderStageFlagBits(UBO_Hdl->stageFlags | shdr->getStageFlags());
+						UBO_Handles.push_back(UBO_Hdl);
+					}
 				}
 			}
 		}
@@ -21,7 +22,7 @@ namespace val {
 		std::vector<pushConstantHandle*> PC_Handles;
 		for (shader* shdr : shaders) {
 			for (auto PC_PAIR : shdr->_pushConstants) {
-				pushConstantHandle* PC_Hdl = PC_PAIR.first;
+				pushConstantHandle* PC_Hdl = PC_PAIR.values[0];
 				if (std::find(PC_Handles.begin(), PC_Handles.end(), PC_Hdl) == PC_Handles.end()) {
 					PC_Hdl->_stageFlags = PC_Hdl->_stageFlags | shdr->getStageFlags();
 					PC_Handles.push_back(PC_Hdl);
@@ -34,11 +35,12 @@ namespace val {
 	std::vector<SSBO_Handle*> pipelineCreateInfo::getUniqueSSBOs() {
 		std::vector<SSBO_Handle*> SSBO_Handles;
 		for (shader* shdr : shaders) {
-			for (auto SSBO_PAIR : shdr->_SSBO_Handles) {
-				SSBO_Handle* SSBO_HDL = SSBO_PAIR.first;
-				if (std::find(SSBO_Handles.begin(), SSBO_Handles.end(), SSBO_HDL) == SSBO_Handles.end()) {
-					SSBO_HDL->_stageFlags = SSBO_HDL->_stageFlags | shdr->getStageFlags();
-					SSBO_Handles.push_back(SSBO_HDL);
+			for (auto SSBO_Write : shdr->_SSBO_Handles) {
+				for (SSBO_Handle* SSBO_HDL : SSBO_Write.values) {
+					if (std::find(SSBO_Handles.begin(), SSBO_Handles.end(), SSBO_HDL) == SSBO_Handles.end()) {
+						SSBO_HDL->_stageFlags = SSBO_HDL->_stageFlags | shdr->getStageFlags();
+						SSBO_Handles.push_back(SSBO_HDL);
+					}
 				}
 			}
 		}

@@ -129,7 +129,7 @@ namespace val {
 		return _samplerCreateInfo;
 	}
 
-	VkSampler sampler::getVkSampler() {
+	VkSampler& sampler::getVkSampler() {
 		return _sampler;
 	}
 }
