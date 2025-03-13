@@ -129,7 +129,7 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 }
 
 int main() {
-	val::VAL_PROC mainProc;
+	val::VAL_PROC proc;
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -140,7 +140,7 @@ int main() {
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
 
 	// The creation of the swapchain is handled in the window
-	val::window window(windowHDL_GLFW, &mainProc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -173,9 +173,9 @@ int main() {
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	mainProc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat = val::findSupportedImageFormat(mainProc._physicalDevice, formatReqs);
+	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 	
 	val::renderPassInfo renderPassInfo;
 	setRenderPassInfo(renderPassInfo, imageFormat);
@@ -183,9 +183,9 @@ int main() {
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
 
-	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, {&pipelineInfo}, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, {&pipelineInfo}, &renderPasses);
 
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], mainProc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], proc._device);
 
 
 	const std::vector<res::vertex> vertices = {
@@ -195,19 +195,19 @@ int main() {
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
 	//////////////////////////////////////////////////////////////
 	// create descriptor sets - this should be merged into the
 	// pipeline creation function
-	mainProc.createDescriptorSets(&pipelineInfo);
+	proc.createDescriptorSets(&pipelineInfo);
 	//////////////////////////////////////////////////////////////
 	
 
@@ -225,31 +225,29 @@ int main() {
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
-		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = mainProc._currentFrame;
+		auto& currentFrame = proc._currentFrame;
 
-		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
+		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		updateUniformBuffer(mainProc, uboHdl);
+		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-
-		renderTarget.begin(mainProc);
-		renderTarget.update(mainProc, pipelineInfo);
-		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
-		renderTarget.submit(mainProc, {presentQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);
-
+		renderTarget.begin(proc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.update(proc, pipelineInfo);
+		renderTarget.render(proc, { viewport });
+		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
-		mainProc.nextFrame();
+		proc.nextFrame();
 	}
 
 	vertexBuffer.destroy();
 	indexBuffer.destroy();
 
 	window.cleanupSwapChain();
-	mainProc.cleanup();
+	proc.cleanup();
 
 	return EXIT_SUCCESS;
 }
