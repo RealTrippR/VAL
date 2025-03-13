@@ -23,6 +23,7 @@ namespace val {
 		for (shader* shdr : shaders) {
 			if (shdr->_pushConstant != NULL) {
 				pushConstantHandle* PC_Hdl = shdr->_pushConstant;
+
 				if (std::find(PC_Handles.begin(), PC_Handles.end(), PC_Hdl) == PC_Handles.end()) {
 					PC_Hdl->_stageFlags = PC_Hdl->_stageFlags | shdr->getStageFlags();
 					PC_Handles.push_back(PC_Hdl);

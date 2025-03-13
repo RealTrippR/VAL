@@ -1,35 +1,26 @@
 #include <VAL/lib/system/pushConstantHandle.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
+#include <VAL/lib/graphics/shader.hpp>
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
 
 namespace val {
-	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer cmdBuffer) {
+	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, const shader& shdr, VkCommandBuffer& cmdBuffer) {
+#ifndef NDEBUG
+		if (_size % 4 != 0) {
+			printf("VAL: WARNING: Push constant at memory address %h has a size that is not a multiple of 4! It's size is: %d", this, _size);
+		}
+
+#endif // !NDEBUG
 
 		vkCmdPushConstants(
 			cmdBuffer,
 			proc._pipelineLayouts[pipeline.pipelineIdx],
-			_stageFlags,
+			shdr._shaderStageFlags,
 			_offset,
 			_size,
 			data
 		);
 
-		memcpy(((char*)proc._pushConstantData) + _procMemoryOffset, data, _size);
-	}
-
-	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline) {
-
-		VkCommandBuffer cmdBuffer = proc.beginSingleTimeCommands();
-		vkCmdPushConstants(
-			cmdBuffer,
-			proc._pipelineLayouts[pipeline.pipelineIdx],
-			_stageFlags,
-			_offset,
-			_size,
-			data
-		);
-
-		proc.endSingleTimeCommands(cmdBuffer);
 		memcpy(((char*)proc._pushConstantData) + _procMemoryOffset, data, _size);
 	}
 

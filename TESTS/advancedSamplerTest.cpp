@@ -259,7 +259,6 @@ int main() {
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	float tmp = .7;
-	PC_ImgScissor.update(proc, &tmp, pipelineInfo);
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		auto& graphicsQueue = proc._graphicsQueue;
@@ -276,7 +275,7 @@ int main() {
 		float tmp = (sin(ftimeSec)+1.f) / 2.f;
 		// if you're updating a buffer during a draw or compute operation, 
 		// ALWAYS pass the respective cmd buffer into the update function for performance gains
-		PC_ImgScissor.update(proc, &tmp, pipelineInfo, cmdBuffer);
+		PC_ImgScissor.update(proc, &tmp, pipelineInfo, fragShader, cmdBuffer);
 
 		renderTarget.render(proc, { viewport });
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
