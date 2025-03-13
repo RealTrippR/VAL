@@ -66,29 +66,6 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setImageSamplerInfo(VkSamplerCreateInfo* info) {
-	info->sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-
-	info->magFilter = VK_FILTER_LINEAR;
-	info->minFilter = VK_FILTER_LINEAR;
-	info->addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->anisotropyEnable = VK_TRUE;
-
-	info->maxAnisotropy = 8; // this value will be clamped if it is greater than what is supported by the graphics card
-	info->borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-	info->unnormalizedCoordinates = VK_FALSE;
-	info->compareEnable = VK_FALSE;
-	info->compareOp = VK_COMPARE_OP_ALWAYS;
-	info->mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	info->mipLodBias = 0.0f;
-	info->minLod = 0.0f;
-	info->maxLod = 0.0f;
-	info->anisotropyEnable = VK_FALSE;
-	info->maxAnisotropy = 1.0f;
-}
-
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, VkSampleCountFlagBits msaaSamples) {
 	// RASTERIZER
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
@@ -148,7 +125,6 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, VkSampleCoun
 
 
 void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat, VkSampleCountFlagBits msaaSamples) {
-
 
 	// MUST BE STATIC IN MEMORY
 	static VkAttachmentDescription depthAttachment{};
@@ -222,8 +198,11 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 
 
 int main() {
-	val::VAL_PROC mainProc;
+	val::VAL_PROC proc;
 
+	val::meshTextured mesh(proc);
+	val::sampler imgSampler(proc, val::combinedImage);
+	imgSampler.bindImageView(mesh._textureImageView);
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
@@ -233,7 +212,7 @@ int main() {
 	VkExtent2D windowSize{ 800,800 }; // in pixels
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(windowSize.width, windowSize.height, "Test", NULL, NULL);
 
-	val::window window(windowHDL_GLFW, &mainProc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -249,12 +228,12 @@ int main() {
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	mainProc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat = val::findSupportedImageFormat(mainProc._physicalDevice, renderImageFormatReqs);
+	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, renderImageFormatReqs);
 
 
-	VkSampleCountFlagBits msaaSamples = mainProc.getMaxSampleCount();
+	VkSampleCountFlagBits msaaSamples = proc.getMaxSampleCount();
 
 	printf("\n>-- MSAA Sample count: %d\n\n", msaaSamples);
 
@@ -264,18 +243,17 @@ int main() {
 	VkImage colorImage;
 	VkDeviceMemory colorImageMemory;
 	VkImageView colorImageView;
-	mainProc.createImage(windowSize.width, windowSize.height, imageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+	proc.createImage(windowSize.width, windowSize.height, imageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory, 1u, msaaSamples);
 	// this function should be changed to image colorImageView in the front
-	mainProc.createImageView(colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &colorImageView, 1u);
+	proc.createImageView(colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &colorImageView, 1u);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	// The shader class is poorly optimized and fucking retarded at the moment
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/instancedShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions().data(),
-		val::vertex3D::getAttributeDescriptions().size());
-	vertShader.setBindingDescription(val::vertex3D::getBindingDescription());
+	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions());
+	vertShader.setBindingDescriptions({ val::vertex3D::getBindingDescription() });
 	
 	vertShader._UBO_Handles = { { &uboHdl, 0 } };
 
@@ -284,18 +262,14 @@ int main() {
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	VkSamplerCreateInfo samplerInfo{};
-	setImageSamplerInfo(&samplerInfo);
-	fragShader._imageSamplersCreateInfos = { { samplerInfo,1 } };
+	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	VkImageView imgView = VK_NULL_HANDLE;
-	fragShader._imageViews = { &imgView };
-
+\
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
-	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function
-	setGraphicsPipelineInfo(pipelineInfo, msaaSamples);
+	val::graphicsPipelineCreateInfo pipeline;
+	pipeline.shaders = { &vertShader,&fragShader };
+	setGraphicsPipelineInfo(pipeline, msaaSamples);
 
 	// FML uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -311,37 +285,36 @@ int main() {
 	depthFormatReqs.features = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	depthFormatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	VkFormat depthFormat = val::findSupportedImageFormat(mainProc._physicalDevice, depthFormatReqs);
+	VkFormat depthFormat = val::findSupportedImageFormat(proc._physicalDevice, depthFormatReqs);
 
 
 	val::renderPassInfo renderPassInfo;
 	setRenderPassInfo(renderPassInfo, imageFormat, depthFormat, msaaSamples);
-	pipelineInfo.renderPassInfo = &renderPassInfo;
+	pipeline.renderPassInfo = &renderPassInfo;
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
-	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline }, &renderPasses);
 
 	// Create depth buffer
 	val::depthBuffer depthBuffer;
-	depthBuffer.create(mainProc, window._swapChainExtent, depthFormat, 1u, 1u, msaaSamples);
+	depthBuffer.create(proc, window._swapChainExtent, depthFormat, 1u, 1u, msaaSamples);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front(), colorImageView };
-	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], mainProc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER FML_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 	// Create mesh and texture, load object and apply texture to the image
-	val::image textureImg(mainProc, TEXTURE_PATH, imageFormat);
-	val::meshTextured mesh;
-	mesh.loadFromDiskObj(mainProc, MODEL_PATH, true);
-	mesh.setTexture(mainProc, &textureImg);
-	fragShader._imageViews[0] = &mesh._textureImageView;
+	val::image textureImg(proc, TEXTURE_PATH, imageFormat);
+	mesh.loadFromDiskObj(proc, MODEL_PATH, true);
+	mesh.setTexture(proc, &textureImg);
+	//fragShader._imageViews[0] = &mesh._textureImageView;
 
 	
 	//////////////////////////////////////////////////////////////////
 
-	mainProc.createDescriptorSets(&pipelineInfo, 0u);
+	proc.createDescriptorSets(&pipeline);
 
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
@@ -352,7 +325,7 @@ int main() {
 		{.color { 0.0f, 0.0f, 0.0f, 1.0f } }
 		});
 	renderTarget.setIndexBuffer(mesh._indexBuffer, mesh._indices.size());
-	renderTarget.setVertexBuffer(mesh._vertexBuffer, mesh._vertices.size());
+	renderTarget.setVertexBuffers({ mesh._vertexBuffer }, mesh._vertices.size());
 	
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
@@ -362,32 +335,31 @@ int main() {
 		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
 		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
 
-		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = mainProc._currentFrame;
+		auto& currentFrame = proc._currentFrame;
 
-		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
+		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		updateUniformBuffer(mainProc, uboHdl);
+		updateUniformBuffer(proc, uboHdl);
+
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-
-		renderTarget.begin(mainProc);
-		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
-		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
-		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
-
+		renderTarget.begin(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
+		renderTarget.update(proc, pipeline);
+		renderTarget.render(proc, { viewport });
+		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
-		mainProc.nextFrame();
+		proc.nextFrame();
 
 		window.waitForFences();
 	}
 
-	mainProc.cleanup();
+	proc.cleanup();
 
-	vkDestroyImageView(mainProc._device, imgView, NULL);
+	vkDestroyImageView(proc._device, imgView, NULL);
 
-	mainProc.cleanup();
+	proc.cleanup();
 
 	return EXIT_SUCCESS;
 }

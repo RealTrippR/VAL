@@ -270,12 +270,9 @@ int main() {
 		glfwPollEvents();
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-
 		renderTarget.begin(proc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.update(proc, pipelineInfo);
 		updateUniformBuffer(proc, uboHdl);
-
-
 		float tmp = (sin(ftimeSec)+1.f) / 2.f;
 		// if you're updating a buffer during a draw or compute operation, 
 		// ALWAYS pass the respective cmd buffer into the update function for performance gains

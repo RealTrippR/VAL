@@ -88,7 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\viking_room.png">
-      <Filter>res</Filter>
+      <Filter>shaders</Filter>
     </Image>
   </ItemGroup>
 </Project>

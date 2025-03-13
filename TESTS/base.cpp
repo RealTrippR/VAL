@@ -166,10 +166,9 @@ int main() {
 
 	//////////////////////////////////////////////////////////////
 
-	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders = { &vertShader,&fragShader };
-
-	setGraphicsPipelineInfo(pipelineInfo);
+	val::graphicsPipelineCreateInfo pipeline;
+	pipeline.shaders = { &vertShader,&fragShader };
+	setGraphicsPipelineInfo(pipeline);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
@@ -179,11 +178,11 @@ int main() {
 	
 	val::renderPassInfo renderPassInfo;
 	setRenderPassInfo(renderPassInfo, imageFormat);
-	pipelineInfo.renderPassInfo = &renderPassInfo;
+	pipeline.renderPassInfo = &renderPassInfo;
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
 
-	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, {&pipelineInfo}, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, {&pipeline}, &renderPasses);
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], proc._device);
 
@@ -207,7 +206,7 @@ int main() {
 	//////////////////////////////////////////////////////////////
 	// create descriptor sets - this should be merged into the
 	// pipeline creation function
-	proc.createDescriptorSets(&pipelineInfo);
+	proc.createDescriptorSets(&pipeline);
 	//////////////////////////////////////////////////////////////
 	
 
@@ -219,7 +218,6 @@ int main() {
 	renderTarget.setClearValues({{ 0.0f, 0.0f, 0.0f, 1.0f }});
 	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer()}, vertices.size());
-	//renderTarget.setThreadID(THREAD_1_ID) -- just an idea of how to implement multi-threading
 	
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
@@ -234,8 +232,8 @@ int main() {
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.begin(proc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
-		renderTarget.update(proc, pipelineInfo);
+		renderTarget.begin(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
+		renderTarget.update(proc, pipeline);
 		renderTarget.render(proc, { viewport });
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
