@@ -145,10 +145,6 @@ namespace val {
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			if (vkCreateImageView(_procVAL->_device, &createInfo, nullptr, &_swapChainImageViews[i]) != VK_SUCCESS) {
-				throw std::runtime_error("FAILED TO CREATE IMAGE VIEW");
-			}
-
 			_swapChainImageViews[i] = createImageView(_procVAL->_device, +_swapChainImages[i], swapchainFormat);
 		}
 	}
