@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="base.cpp" />
+    <ClCompile Include="multisampling.cpp" />
+    <ClCompile Include="multi-threadingTest.cpp" />
+    <ClCompile Include="pushConstantTest.cpp" />
+    <ClCompile Include="imageTest.cpp" />
+    <ClCompile Include="shaderInput.cpp" />
+    <ClCompile Include="3Drendering.cpp" />
+    <ClCompile Include="DepthBufferTest.cpp" />
+    <ClCompile Include="WindowResizing.cpp" />
+    <ClCompile Include="renderpassToImage.cpp" />
+    <ClCompile Include="MipMapTest.cpp" />
+    <ClCompile Include="raytracingTest.cpp" />
+    <ClCompile Include="instancingTest.cpp" />
+    <ClCompile Include="multimeshRenderTest.cpp" />
+    <ClCompile Include="SSBOtest.cpp" />
+    <ClCompile Include="specializationConstantsTest.cpp" />
+    <ClCompile Include="advancedSamplerTest.cpp" />
+    <ClCompile Include="immutableSamplerTest.cpp" />
+    <ClCompile Include="UBO_SSBO_ArrayTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vertex.hpp" />
+    <ClInclude Include="polygonVertex.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="res">
+      <UniqueIdentifier>{18e5d848-cc15-4194-b562-d5dcbf0d2060}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{238477f5-2776-47ac-89df-5dc40f93e896}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools">
+      <UniqueIdentifier>{86e71151-6369-4f8e-bd4c-d90aa652f8f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders-compiled">
+      <UniqueIdentifier>{cc159bea-ab3f-4d77-9442-59a9a432d569}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tools\compileShaders.py">
+      <Filter>tools</Filter>
+    </None>
+    <None Include="shaders\colorshader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\imageshader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\multimeshRenderer.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\polygon.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\polygon.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shader3Dimage.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shaderPushConstantTest.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\particleShader.comp">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\instancedShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\particleShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\particleShader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\specializationConstants.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\doubleImageShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\viking_room.png">
+      <Filter>res</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

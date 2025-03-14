@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="src\graphics">
+      <UniqueIdentifier>{30c6c80f-12f1-4db1-b228-95714ec45e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\input">
+      <UniqueIdentifier>{5175bb05-8e80-4056-a0f2-709e8c0e7a83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\graphics">
+      <UniqueIdentifier>{856c93f9-12a2-408e-84c1-c779ce7c22c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\system">
+      <UniqueIdentifier>{dea0e839-27df-4b7a-a07c-d65394a3cd45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\input">
+      <UniqueIdentifier>{9c57c334-5aaf-43b9-8328-71c491475afe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\system">
+      <UniqueIdentifier>{945cad8e-9118-4e7a-8aef-9964390d6c6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="notes">
+      <UniqueIdentifier>{aed7b81b-d8ea-41f3-a7f0-98e8b1f15d9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\meshes&amp;vertices">
+      <UniqueIdentifier>{8e4c79e9-3305-4a27-aa3a-245f3e6a4c41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\meshes&amp;vertices">
+      <UniqueIdentifier>{22eaad85-1d78-404b-abd5-0ce6dac73f5f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\VAL_PROC.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\system_utils.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\window.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\graphics\shader.hpp">
+      <Filter>lib\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\resourceManager.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\renderPassInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\UBO_Handle.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\pushConstantHandle.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\SSBO_Handle.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\computePipelineCreateInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="src\system\pipelineCreateInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\queueManager.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\pipelineCreateInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\renderTarget.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\computeTarget.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\depthBuffer.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\buffer.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\specializationConstant.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\imageView.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\sampler.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\descriptorBinding.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\image.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\cleanupManager.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\tiedGraphicsObject.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\system\VAL_PROC.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\window.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\system_utils.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\shader.cpp">
+      <Filter>src\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\image.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\UBO_Handle.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\pushConstantHandle.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\pipelineCreateInfo.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\queueManager.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\SSBO_Handle.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\renderTarget.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\computeTarget.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\depthBuffer.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\buffer.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\imageView.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\sampler.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\cleanupManager.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="notes\to-do-list.txt">
+      <Filter>notes</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Tool">
+      <UniqueIdentifier>{4c8e7579-f53b-4596-8723-97899d4ab8e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tools\BenchmarkAnalysis.py">
+      <Filter>Tool</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="500_thousand_vertices.cpp" />
+    <ClCompile Include="1_million_vertices.cpp" />
+    <ClCompile Include="2_million_vertices.cpp" />
+    <ClCompile Include="..\TESTS\SSBOtest.cpp" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,128 @@
+﻿[ ] - Planned change
+[!] - Top priority
+[~] - In progress
+[✓] - Complete
+
+----------------------------------------------------------------------------------------------------------------
+VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
+----------------------------------------------------------------------------------------------------------------
+
+[✓] Rename to VAL (Vulkan Abstraction Library)
+
+[ ] Optimize pipelineCreateInfo functions (cache and pass by reference instead of value)
+
+[!] Change the updateSwapChain function to use the optimal VK_PIPELINE_STAGE_FLAGS
+
+[✓] Add support for instancing
+
+[~] Improve binding descriptions, and allow bindings to be binding not only by their index but also by their name in source code. See: https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ComputeShader.SetInt.html
+
+[!] Use Vulkan Memory Allocator to simplify the process of allocating data. (https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
+
+[!] Implement Z-prepass support for performance gains. (see: https://www.youtube.com/watch?v=2ZK527cQbeo)
+
+[✓] create a val::graphicsPipeline and val::computePipeline class to manage and simplify the handling of pipelines
+
+[✓] It is imperative that the binding index of descriptorBindings (i.e. ubo, push constant, and ssbo handles) can be specificied,
+	in val::shaders, not in the actual handles themselves, because some handles are shared across shaders.
+
+[✓] Ensure that shaders can use shaders can use multiple image samplers and multiple image views. Also, allow for layout bindings of samplers.
+
+[!] pack uniform buffer vectors into a single vector for optimization
+
+[!] reform storage and uniform buffers in the VAL_PROC from [currentFrame][bufferIdx] to [bufferIdx][currentFrame]
+	because it allows for simpler and faster access and writing of data.
+
+[!] Give developers more control of the render passes created/submitted to the pipeline creation process.
+    Currently their extent cannot be specified.
+
+[!] To implement multi-threading, consider creating renderThread class for this purpose. (a typedef?)
+	This might have to be passed into functions as an argument,
+	or move functions to be mulithreaded into this class
+
+[!] Optimize buffers - for better performance they should be close together in memory
+	This can be done with UBOs as it has already been done with push constants.
+
+[ ] Consider loading pixels from a seperate function rather than as a part of createTextureImage funciton.
+	This would give developers flexibility to load images with whatever loading/saving system they choose.
+	Write a test to ensure that VAL supports more than just .jpg and .png images.
+	OpenImageIO might be a good alternative. (https://github.com/AcademySoftwareFoundation/OpenImageIO)
+
+[✓] Simplify the process of creating uniform buffers, push constants, etc, etc, and
+	simplify the process of uploading data to shaders
+
+[✓] Add dedicated compute and transfer queues.
+ 
+[ ] create shaderTest.cpp to test uploading UBOs, push constants, and SSBOs.
+
+[ ] Optimize buffers. Create a chunked or packed buffer class for this purpose.
+
+[ ] Change the mipmap value passed through function from uint32_t to uint8_t.
+	Using 32 bits for such a value is absurd, as even an image a million by a million pixels across will only need a mipmap level of 20.
+
+[~] Improve transitionImageLayout
+
+[ ] Add support for glsl Vulkan "sets." See: https://community.khronos.org/t/what-is-set-and-binding-in-glsl/109509
+
+[✓] Check if VAL_PROC::createSwapChainFrameBuffers is actually needed (I believe that the windowVAL class are has an implementation)
+
+[!] Fix all memory leaks and create a better way to handle this problem. (i.e. a cleanup manager?)
+
+[~] Create mesh3Dtextured, mesh3Dunicolor, and mesh3Dcolor classes to simplify the process of loading, managed, and created 3D objects
+
+[ ] Take a look into Vulkan Memory Allocator. (https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator).
+	It could greatly simplify the process of handling memory and buffers
+
+[ ] Create a simplified image class that has less featured and variables (i.e. no mipmapping, no multisampling), but takes up less space in Memory
+
+[ ] Create a resource manager to manage things like vertex buffers, index buffers, etc
+
+[ ] Add multiple command pools for multithreading, as command pools are not thread safe.
+
+[ ] add a recreateGraphicsPipeline function; might not be nessecary
+
+[~] Update the descriptor set and graphicsPipelineCreateInfo: the descriptor set currently only supports vertex shaders for UBO binding, 
+	and the descriptor set has no way to access all of the shaders in a single vector from the graphicsPipelineCreateInfo
+
+[ ] Optimize the createDescriptorSet function in VAL_PROC - currently there is excess copying of data (i.e. vector to C struct)
+
+[ ] Consider making a VAL_FAIL and VAL_SUCCESS for failures and successes of functions
+
+[✓] Add the ability to set the MAX_FRAMES_IN_FLIGHT upon initialization of VAL_PROC
+
+[ ] Allow framebuffers to take more than 1 color input from frag shaders
+
+[!] mainProc.drawFrameExperimental(vertexBuffer, indexBuffer, indices); - This only allows for the binding of 3 different buffers - not suitable for practical use.
+
+[ ] multiple window support - https://community.khronos.org/t/multiple-glfw-windows-with-single-context/108421
+
+[!] update the createImageView function to take aspect flags as an input to allow for depth buffering support (https://vulkan-tutorial.com/Depth_buffering)
+	It's more complicated than just updating createImageView - check the transitionImageLayout and renderPass and frameBuffer creation functions as well as the recordCommandBuffer function.
+	See also: https://open.gl/depthstencils
+	recreateSwapChain will have to be modified as well.
+
+[✓] Ensure that window resizing works properly.
+
+[!] Complete Shader Input Test.
+
+[✓] Ensure that multiple shaders can be used simultaneously.
+	! YOU CAN ONLY HAVE ONE OF EACH TYPE OF SHADER PER GRAPHICS PIPELINE !
+	! Pipeline Preloading is a viable and efficient solution to this problem !
+	(Pipeline preloading is the act of preloading graphics pipelines so that they can be swapped at runtime)
+	(On the other hand, pipeline caching is the act of saving and loading 
+		pipelines to disk so that they only have to be compiled once.)
+	This will require management and creation of multiple graphics pipelines.
+	See: https://stackoverflow.com/questions/67356656/fundamental-questions-about-multiple-vertex-types-and-multiple-shaders
+	Signifigant changes may have to be made to the recordRenderPassCommands()  function in FML_PROC.
+	The createFrameBuffers must be updated.
+	See: https://www.reddit.com/r/vulkan/comments/akbwir/multiple_fragment_shaders_and_running_in_coercion/
+
+[ ] Implement support for multi-pass rendering. See:https://developer.samsung.com/galaxy-gamedev/resources/articles/renderpasses.html
+
+[✓] Implement the Depth Buffer Test. See https://vulkan-tutorial.com/Depth_buffering for reference.
+
+[ ] Add support for dynamic rendering. See: https://docs.vulkan.org/samples/latest/samples/extensions/dynamic_rendering/README.html
+
+[ ] Optimize the createUBOs and createSSBO functions
+
+[ ] Consider purchasing https://www.oreilly.com/library/view/vulkantm-programming-guide/9780134464701/ch13.html
