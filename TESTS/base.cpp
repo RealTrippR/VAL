@@ -221,7 +221,7 @@ int main() {
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
-	/*
+	
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
@@ -240,7 +240,7 @@ int main() {
 
 		proc.nextFrame();
 	}
-	*/
+	
 
 	vertexBuffer.destroy();
 	indexBuffer.destroy();
