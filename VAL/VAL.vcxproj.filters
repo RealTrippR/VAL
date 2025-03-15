@@ -36,6 +36,9 @@
     <Filter Include="src\meshes&amp;vertices">
       <UniqueIdentifier>{22eaad85-1d78-404b-abd5-0ce6dac73f5f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\renderAttachments">
+      <UniqueIdentifier>{fa190f21-513e-46b1-9bf1-7e51b71247ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\VAL_PROC.hpp">
@@ -49,9 +52,6 @@
     </ClInclude>
     <ClInclude Include="lib\graphics\shader.hpp">
       <Filter>lib\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\system\resourceManager.hpp">
-      <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\renderPassInfo.hpp">
       <Filter>lib\system</Filter>
@@ -81,9 +81,6 @@
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
-    <ClInclude Include="src\system\pipelineCreateInfo.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\queueManager.hpp">
@@ -124,6 +121,27 @@
     </ClInclude>
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp">
       <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\renderPass2.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderAttachments\colorAttachment.hpp">
+      <Filter>lib\renderAttachments</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderAttachments\depthAttachment.hpp">
+      <Filter>lib\renderAttachments</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderAttachments\inputAttachment.hpp">
+      <Filter>lib\renderAttachments</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderAttachments\renderAttachment.hpp">
+      <Filter>lib\renderAttachments</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderAttachments\resolveAttachment.hpp">
+      <Filter>lib\renderAttachments</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderAttachments\attachmentEnums.hpp">
+      <Filter>lib\renderAttachments</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -182,6 +200,9 @@
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\system\cleanupManager.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\renderPass2.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>

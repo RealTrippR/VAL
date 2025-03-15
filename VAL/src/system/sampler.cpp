@@ -13,6 +13,13 @@ namespace val {
 		}
 	}
 
+	void sampler::destroy() {
+		if (_sampler) {
+			vkDestroySampler(_proc._device, _sampler, NULL);
+			_sampler = NULL;
+		}
+	}
+
 	void sampler::bindImageView(imageView& imageView) {
 		_imgView = &imageView;
 	}

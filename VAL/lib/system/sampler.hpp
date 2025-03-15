@@ -16,9 +16,14 @@ namespace val {
 		sampler(VAL_PROC& proc) : _proc(proc) { initDefaultValues(); };
 		sampler(VAL_PROC& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
 		sampler(VAL_PROC& proc, val::imageView* imgView, samplerType samplerType = combinedImage) : _proc(proc), _imgView(imgView), _samplerType(samplerType) { initDefaultValues(); };
+
+		~sampler() {
+			destroy();
+		}
 	public:
 		void create();
 
+		void destroy();
 		//void recreate();
 	public:
 		void bindImageView(imageView& imageView);

@@ -107,7 +107,9 @@ namespace val
 
 		vkQueueWaitIdle(_queue); // wait for semaphores to finish
 
-		vkFreeCommandBuffers(proc._device, proc._commandPool, _commandBuffers.size(), _commandBuffers.data());
+		if (_commandBuffers.size() > 0) {
+			vkFreeCommandBuffers(proc._device, proc._commandPool, _commandBuffers.size(), _commandBuffers.data());
+		}
 
 		for (int i = 0; i < _semaphores.size(); ++i) {
 			vkDestroySemaphore(proc._device, _semaphores[i], VK_NULL_HANDLE);

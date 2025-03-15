@@ -41,7 +41,7 @@ const bool enableValidationLayers = true;
 #include <ExternalLibraries/tiny_obj_loader.h>
 #define MAX_INSTANCES 32
 
-const std::string MODEL_PATH = "res/asteroid/asteriod.obj";
+const std::string MODEL_PATH = "res/asteroid/asteroid.obj";
 const std::string TEXTURE_PATH = "res/asteroid/Asteroid1a_Color_2K.png";
 
 struct uniformBufferObject {
@@ -130,8 +130,8 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, VkSampleCoun
 
 
 
-void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat, VkSampleCountFlagBits msaaSamples) {
-
+void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat, VkSampleCountFlagBits msaaSamples)
+{
 
 	// MUST BE STATIC IN MEMORY
 	static VkAttachmentDescription depthAttachment{};
@@ -276,8 +276,7 @@ int main() {
 	// Per-instance binding (for mat4 inModel)
 	bindingDescriptions[1].binding = 1;
 	bindingDescriptions[1].stride = sizeof(glm::mat4);
-	bindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE; // Per-instance
-
+	bindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
 	vertShader.setBindingDescriptions(bindingDescriptions);
 	vertShader._UBO_Handles = { { &uboHdl, 0 } };
 

@@ -37,9 +37,6 @@ namespace val {
 			//parent.availableChunkIndices.erase(parent.availableChunkIndices.begin() + (this - parent.chunks.data()));
 		}		
 	}
-	//void cleanupManagerChunk::removeObject(tiedGraphicsObject* obj) {
-
-	//}
 	
 	void cleanupManager::addObject(tiedGraphicsObject* obj) {
 		if (availableChunkIndices.size() == 0) {

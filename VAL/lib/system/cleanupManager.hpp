@@ -25,7 +25,6 @@ namespace val {
 	public:
 		void addObject(tiedGraphicsObject* obj, cleanupManager* parent);
 
-		void removeObject(tiedGraphicsObject* obj);
 	public:
 		tiedGraphicsObject** _objectList = NULL;
 		uint64_t _objectCount = 0;

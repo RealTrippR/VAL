@@ -90,6 +90,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 
 void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentImageFormat) {
 
+	/*
 	// attachments
 	static VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = colorAttachmentImageFormat;
@@ -102,7 +103,6 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 	renderPassInfo.attachments = { colorAttachment };
-	//renderPassInfo.attachmentImageLayouts = { VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*This second value is the layout of the corresponding VkAttachmentReference*/};
 
 	static VkAttachmentReference colorAttachmentRef{};
 	colorAttachmentRef.attachment = 0;
@@ -110,7 +110,7 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 
 	// subpasses
 	static VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; // VK_PIPELINE_BIND_POINT_GRAPHICS, VK_PIPELINE_BIND_POINT_COMPUTE
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments = &colorAttachmentRef;
 
@@ -125,9 +125,13 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 	renderPassInfo.subpassDependencies = { dependency };
+	*/
+	VkSubpassDescription sub;
 }
 
 int main() {
+
+	val::window window; // it is important that the window comes before the VAL_PROC object to ensure that the window is not invalidated until after the destructor of the VAL_PROC has finished.
 	val::VAL_PROC proc;
 	
 	/////////// consider moving this into the window class ///////////
@@ -137,9 +141,8 @@ int main() {
 	//////////////////////////////////////////////////////////////////
 
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
+	window = val::window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
-	// The creation of the swapchain is handled in the window
-	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -183,7 +186,7 @@ int main() {
 
 	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline }, &renderPasses);
 	
-	//window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], proc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], proc._device);
 
 
 	const std::vector<res::vertex> vertices = {
@@ -248,9 +251,6 @@ int main() {
 	for (auto& pass : renderPasses) {
 		vkDestroyRenderPass(proc._device, pass, NULL);
 	}
-	renderPasses.clear();
-
-	proc.cleanup();
 
 	return EXIT_SUCCESS;
 }

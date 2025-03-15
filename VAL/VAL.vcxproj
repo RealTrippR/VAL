@@ -144,6 +144,12 @@
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
+    <ClInclude Include="lib\renderAttachments\attachmentEnums.hpp" />
+    <ClInclude Include="lib\renderAttachments\colorAttachment.hpp" />
+    <ClInclude Include="lib\renderAttachments\depthAttachment.hpp" />
+    <ClInclude Include="lib\renderAttachments\inputAttachment.hpp" />
+    <ClInclude Include="lib\renderAttachments\renderAttachment.hpp" />
+    <ClInclude Include="lib\renderAttachments\resolveAttachment.hpp" />
     <ClInclude Include="lib\system\buffer.hpp" />
     <ClInclude Include="lib\system\cleanupManager.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
@@ -152,6 +158,7 @@
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
+    <ClInclude Include="lib\system\renderPass2.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
     <ClInclude Include="lib\system\imageView.hpp" />
     <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
@@ -165,7 +172,6 @@
     <ClInclude Include="lib\system\UBO_Handle.hpp" />
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
     <ClInclude Include="lib\system\renderPassInfo.hpp" />
-    <ClInclude Include="lib\system\resourceManager.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
@@ -180,11 +186,11 @@
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
+    <ClCompile Include="src\system\renderPass2.cpp" />
     <ClCompile Include="src\system\renderTarget.cpp" />
     <ClCompile Include="src\system\sampler.cpp" />
     <ClCompile Include="src\system\SSBO_Handle.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />
-    <ClInclude Include="src\system\pipelineCreateInfo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\UBO_Handle.cpp" />

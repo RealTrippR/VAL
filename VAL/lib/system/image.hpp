@@ -21,14 +21,7 @@ namespace val {
 		}
 
 		~image() {
-			if (_img_memory) {
-				vkDestroyImage(_device, _image, NULL);
-				vkFreeMemory(_device, _img_memory, NULL);
-				_img_memory = NULL;
-			}
-			if (_pixels) {
-				stbi_image_free(_pixels);
-			}
+			destroy();
 		}
 
 		void recreate(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U);
@@ -66,8 +59,15 @@ namespace val {
 		}
 
 		inline const void destroy() {
-			vkDestroyImage(_device, _image, NULL);
-			vkFreeMemory(_device, _img_memory, NULL);
+			if (_img_memory) {
+				vkDestroyImage(_device, _image, NULL);
+				vkFreeMemory(_device, _img_memory, NULL);
+				_img_memory = NULL;
+			}
+			if (_pixels) {
+				stbi_image_free(_pixels);
+				_pixels = NULL;
+			}
 		}
 
 	public:
