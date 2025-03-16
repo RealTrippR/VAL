@@ -6,10 +6,9 @@
 namespace val
 {
 	class depthAttachment : public renderAttachment {
-
-
-	protected:
-		static constexpr VkImageLayout _layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		constexpr VkImageLayout getRefLayout() const override {
+			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
 	};
 }
 

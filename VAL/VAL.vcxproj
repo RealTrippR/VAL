@@ -158,7 +158,8 @@
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
-    <ClInclude Include="lib\system\renderPass2.hpp" />
+    <ClInclude Include="lib\system\pipelineType.hpp" />
+    <ClInclude Include="lib\system\renderPass.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
     <ClInclude Include="lib\system\imageView.hpp" />
     <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="lib\system\renderTarget.hpp" />
     <ClInclude Include="lib\system\specializationConstant.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
+    <ClInclude Include="lib\system\subpass.hpp" />
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Handle.hpp" />
@@ -177,6 +179,7 @@
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
+    <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />
     <ClCompile Include="src\system\cleanupManager.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
@@ -184,12 +187,14 @@
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
+    <ClCompile Include="src\system\pipelineType.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
-    <ClCompile Include="src\system\renderPass2.cpp" />
+    <ClCompile Include="src\system\renderPass.cpp" />
     <ClCompile Include="src\system\renderTarget.cpp" />
     <ClCompile Include="src\system\sampler.cpp" />
     <ClCompile Include="src\system\SSBO_Handle.cpp" />
+    <ClCompile Include="src\system\subpass.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />
   </ItemGroup>
   <ItemGroup>

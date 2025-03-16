@@ -25,16 +25,18 @@ namespace val {
 	}
 
 	void window::cleanup() {
-		glfwDestroyWindow(_window);
-		glfwTerminate();
-		_presentQueue.destroy(*_procVAL);
-		cleanupSwapChain();
-		if (_surface) {
+		if (_procVAL) {
+			glfwDestroyWindow(_window);
+			glfwTerminate();
+			_presentQueue.destroy(*_procVAL);
+			cleanupSwapChain();
 			vkDestroySurfaceKHR(_procVAL->_instance, _surface, NULL);
+			_swapChain = NULL;
+			_swapChainImageViews.clear();
+			_swapChainFrameBuffers.clear();
+
+			_procVAL = NULL;
 		}
-		_swapChain = NULL;
-		_swapChainImageViews.clear();
-		_swapChainFrameBuffers.clear();
 	}
 
 

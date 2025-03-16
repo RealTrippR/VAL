@@ -2,6 +2,7 @@
 #define FML_GRAPHICS_PIPELINE_CREATE_INFO_HPP
 
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
+#include <VAL/lib/system/renderPass.hpp>
 
 namespace val {
 	class shader;
@@ -9,7 +10,8 @@ namespace val {
 	class graphicsPipelineCreateInfo : public pipelineCreateInfo {
 	public:		
 		std::vector<VkDynamicState> dynamicStates;
-		renderPassInfo* renderPassInfo;
+		//renderPassInfo* renderPassInfo;
+		renderPassManager* renderPass;
 		VkPipelineDynamicStateCreateInfo dynamicState{};
 		VkPipelineRasterizationStateCreateInfo rasterizer{};
 		VkPipelineMultisampleStateCreateInfo multisampling{};

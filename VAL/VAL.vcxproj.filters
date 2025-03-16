@@ -39,6 +39,9 @@
     <Filter Include="lib\renderAttachments">
       <UniqueIdentifier>{fa190f21-513e-46b1-9bf1-7e51b71247ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\renderAttachments">
+      <UniqueIdentifier>{e9c43b77-edf6-459d-934b-393fef2a70dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\VAL_PROC.hpp">
@@ -122,9 +125,6 @@
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\renderPass2.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
     <ClInclude Include="lib\renderAttachments\colorAttachment.hpp">
       <Filter>lib\renderAttachments</Filter>
     </ClInclude>
@@ -142,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="lib\renderAttachments\attachmentEnums.hpp">
       <Filter>lib\renderAttachments</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\renderPass.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\pipelineType.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\subpass.hpp">
+      <Filter>lib\system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -202,8 +211,17 @@
     <ClCompile Include="src\system\cleanupManager.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\renderPass2.cpp">
+    <ClCompile Include="src\system\pipelineType.cpp">
       <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\renderPass.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\subpass.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderAttachments\renderAttachment.cpp">
+      <Filter>src\renderAttachments</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

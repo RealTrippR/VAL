@@ -201,7 +201,6 @@ void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttach
 
 int main() {
 	val::VAL_PROC mainProc;
-	mainProc.setCleanupManagerEnabled(true);
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();

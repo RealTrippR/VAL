@@ -16,17 +16,19 @@ namespace val {
 	public:
 		window() = default;
 		window(GLFWwindow* windowHDL, VAL_PROC* valProc, VkColorSpaceKHR colorSpace) {
+			if (!windowHDL) {
+				printf("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
+				throw std::runtime_error("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
+			}
 			_window = windowHDL;
 			_procVAL = valProc;
 			_colorSpace = colorSpace;
-			//fmlProc->_windowFML = this;
 		}
-		// void init(const uint32_t& size_x, const uint32_t& size_y, const char* windowTitle, GLFWmonitor* monitor = NULL);
-		// void windowSetMonitor();
-		// void close();
-		// void minimize();
-		// void resize(const uint32_t &size_x, const uint32_t &size_y);
-		// void reposition(const uint32_t &pos_x, const uint32_t &pos_y);
+
+		~window() {
+			cleanup();
+		}
+	public:
 		void setWindowHandleGLFW(GLFWwindow* windowHDL);
 		GLFWwindow* getWindowHandleGLFW();
 

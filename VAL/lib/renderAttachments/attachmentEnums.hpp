@@ -9,7 +9,7 @@ namespace val {
 		CLEAR 
 	};
 
-	VkAttachmentStoreOp RENDER_ATTACHMENT_OPERATION_TYPE_TO_VK_ATTACHMENT_STORE_OP(const RENDER_ATTACHMENT_OPERATION_TYPE& opType) {
+	constexpr VkAttachmentStoreOp RENDER_ATTACHMENT_OPERATION_TYPE_TO_VkAttachmentStoreOp(const RENDER_ATTACHMENT_OPERATION_TYPE& opType) {
 		switch (opType) {
 		case DISCARD:
 			return VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -26,7 +26,7 @@ namespace val {
 		}
 	}
 
-	VkAttachmentLoadOp RENDER_ATTACHMENT_OPERATION_TYPE_TO_VK_ATTACHMENT_LOAD_OP(RENDER_ATTACHMENT_OPERATION_TYPE& opType) {
+	constexpr VkAttachmentLoadOp RENDER_ATTACHMENT_OPERATION_TYPE_TO_VkAttachmentLoadOp(RENDER_ATTACHMENT_OPERATION_TYPE& opType) {
 		switch (opType) {
 		case DISCARD:
 			return VK_ATTACHMENT_LOAD_OP_DONT_CARE;

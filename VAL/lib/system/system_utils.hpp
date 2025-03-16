@@ -24,6 +24,7 @@
 #include <math.h>
 
 #include <VAL/lib/system/descriptorBinding.hpp>
+#include <VAL/lib/system/pipelineType.hpp>
 
 enum bufferSpace {
 	GPU_ONLY,

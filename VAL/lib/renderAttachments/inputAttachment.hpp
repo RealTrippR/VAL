@@ -6,10 +6,9 @@
 namespace val
 {
 	class inputAttachment : public renderAttachment {
-
-
-	protected:
-		static constexpr VkImageLayout _layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		constexpr VkImageLayout getRefLayout() const override {
+			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		}
 	};
 }
 
