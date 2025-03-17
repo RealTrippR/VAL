@@ -125,18 +125,15 @@ int main() {
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
-	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
 	vertShader._UBO_Handles = { {&uboHdl,0} };
-
 
 	// load and configure frag shader
 	val::shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
-
 	//////////////////////////////////////////////////////////////
 
 	val::graphicsPipelineCreateInfo pipeline;
@@ -152,7 +149,7 @@ int main() {
 	val::renderPassManager renderPassMngr;
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
-	//pipeline.renderPassInfo = &renderPassInfo;
+
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
 

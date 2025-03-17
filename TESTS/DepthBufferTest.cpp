@@ -59,29 +59,6 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setImageSamplerInfo(VkSamplerCreateInfo* info) {
-	info->sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-
-	info->magFilter = VK_FILTER_LINEAR;
-	info->minFilter = VK_FILTER_LINEAR;
-	info->addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	info->anisotropyEnable = VK_TRUE;
-
-	info->maxAnisotropy = 8; // this value will be clamped if it is greater than what is supported by the graphics card
-	info->borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-	info->unnormalizedCoordinates = VK_FALSE;
-	info->compareEnable = VK_FALSE;
-	info->compareOp = VK_COMPARE_OP_ALWAYS;
-	info->mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	info->mipLodBias = 0.0f;
-	info->minLod = 0.0f;
-	info->maxLod = 0.0f;
-	info->anisotropyEnable = VK_FALSE;
-	info->maxAnisotropy = 1.0f;
-}
-
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	// RASTERIZER
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
@@ -105,7 +82,6 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 	colorBlendAttachment.blendEnable = VK_FALSE;
 
-
 	// COLOR BLENDING
 	VkPipelineColorBlendStateCreateInfo& colorBlending = info.colorBlending;
 	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -117,7 +93,6 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	colorBlending.blendConstants[1] = 0.0f;
 	colorBlending.blendConstants[2] = 0.0f;
 	colorBlending.blendConstants[3] = 0.0f;
-
 
 	// DEPTH STENCIL
 	static VkPipelineDepthStencilStateCreateInfo depthStencil{};
@@ -139,68 +114,34 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 }
 
 
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, VkFormat depthFormat) {
+	using namespace val;
 
-void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat)
-{
-	// attachments - ALL MUST BE STATIC IN MEMORY
-	static VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = colorAttachmentFormat;
-	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	static subpass subpass(renderPassMngr, GRAPHICS);
 
-	// MUST BE STATIC IN MEMORY
-	static VkAttachmentDescription depthAttachment{};
-	depthAttachment.format = depthAttachmentFormat;
-	depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	// MUST BE STATIC IN MEMORY
-	static VkAttachmentReference depthAttachmentRef{};
-	depthAttachmentRef.attachment = 0;
-	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	// MUST BE STATIC IN MEMORY
-	// THE FINAL COLOR ATTACHMENT REFERENCE MUST ALWAYS BE THE LAST ATTACHMENT
-	static VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 1;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	// subpasses
-	// MUST BE STATIC IN MEMORY
-	static VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-	subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-	// MUST BE STATIC IN MEMORY
-	static VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-	renderPassInfo.subpasses = {subpass};
-	renderPassInfo.subpassDependencies = { dependency };
-	renderPassInfo.attachments = {depthAttachment, colorAttachment};
+	{
+		static depthAttachment depthAttach;
+		depthAttach.setImgFormat(depthFormat);
+		depthAttach.setLoadOperation(CLEAR);
+		depthAttach.setStoreOperation(DISCARD);
+		depthAttach.setFinalLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		subpass.bindAttachment(&depthAttach);
+	}
+	{
+		static colorAttachment colorAttach;
+		colorAttach.setImgFormat(imgFormat);
+		colorAttach.setLoadOperation(CLEAR);
+		colorAttach.setStoreOperation(STORE);
+		colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		subpass.bindAttachment(&colorAttach);
+	}
 }
 
-
-
 int main() {
-	val::VAL_PROC mainProc;
+	val::VAL_PROC proc;
+
+	val::imageView imgView(proc);
+
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -210,7 +151,7 @@ int main() {
 
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
 
-	val::window window(windowHDL_GLFW, &mainProc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -223,14 +164,10 @@ int main() {
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
 
-
-
-	// The shader class is poorly optimized and fucking retarded at the moment
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions().data(),
-		val::vertex3D::getAttributeDescriptions().size());
-	vertShader.setBindingDescription(val::vertex3D::getBindingDescription());
+	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions());
+	vertShader.setBindingDescriptions({ val::vertex3D::getBindingDescription() });
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	vertShader._UBO_Handles = { {&uboHdl,0} };
@@ -239,21 +176,20 @@ int main() {
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	VkSamplerCreateInfo samplerInfo{};
-	setImageSamplerInfo(&samplerInfo);
-	fragShader.setImageSamplers({ {samplerInfo,1} });
+	val::sampler imgSampler(proc, val::combinedImage);
+	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
-	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function
-	setGraphicsPipelineInfo(pipelineInfo);
+	val::graphicsPipelineCreateInfo pipeline;
+	pipeline.shaders.push_back(&vertShader); // consolidate into a single function
+	pipeline.shaders.push_back(&fragShader); // consolidate into a single function
+	setGraphicsPipelineInfo(pipeline);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	mainProc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat = val::findSupportedImageFormat(mainProc._physicalDevice, formatReqs);
+	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
 	val::imageFormatRequirements depthFormatReqs;
 	depthFormatReqs.acceptedFormats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
@@ -261,30 +197,31 @@ int main() {
 	depthFormatReqs.features = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	depthFormatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	VkFormat depthFormat = val::findSupportedImageFormat(mainProc._physicalDevice, depthFormatReqs);
+	VkFormat depthFormat = val::findSupportedImageFormat(proc._physicalDevice, depthFormatReqs);
 
+	val::renderPassManager renderPassMngr;
+	setRenderPass(renderPassMngr, imageFormat, depthFormat);
+	pipeline.renderPass = &renderPassMngr;
 
-	val::renderPassInfo renderPassInfo;
-	setRenderPassInfo(renderPassInfo, imageFormat, depthFormat);
-	pipelineInfo.renderPassInfo = &renderPassInfo;
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
-	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline }, &renderPasses);
 
 
 	// Create depth buffer
-	val::depthBuffer depthBuffer(mainProc, window._swapChainExtent, depthFormat, 1u);
+	val::depthBuffer depthBuffer(proc, window._swapChainExtent, depthFormat, 1u);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front()};
-	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], mainProc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER FML_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 
 	// CREATE IMAGE & IMAGE VIEW //
-	val::image img(mainProc, "testImage.jpg", imageFormat);
-	mainProc.createImageView(img.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &fragShader._imageViews[0]);
+	val::image img(proc, "testImage.jpg", imageFormat);
+	imgView.create(img, VK_IMAGE_ASPECT_COLOR_BIT);
+	imgSampler.bindImageView(imgView);
 
 
 	std::vector<val::vertex3D> vertices = {
@@ -301,7 +238,7 @@ int main() {
 
 	VkBuffer vertexBuffer = NULL;
 	VkDeviceMemory vertexBufferMem = NULL;
-	mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(val::vertex3D), &vertexBuffer, &vertexBufferMem);
+	proc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(val::vertex3D), &vertexBuffer, &vertexBufferMem);
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0,
@@ -310,9 +247,9 @@ int main() {
 
 	VkBuffer indexBuffer = NULL;
 	VkDeviceMemory indexBufferMem = NULL;
-	mainProc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
+	proc.createIndexBuffer(indices.data(), indices.size(), &indexBuffer, &indexBufferMem);
 
-	mainProc.createDescriptorSets(&pipelineInfo);
+	proc.createDescriptorSets(&pipeline);
 
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
@@ -328,11 +265,8 @@ int main() {
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
-	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
-		glfwPollEvents();
-		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
-		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
 
+	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
@@ -347,15 +281,9 @@ int main() {
 		renderTarget.render(proc, { viewport });
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
-		mainProc.nextFrame();
 
-		window.waitForFences();
+		proc.nextFrame();
 	}
-
-
-	vkDestroyImageView(mainProc._device, imgView, NULL);
-
-	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }

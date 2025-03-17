@@ -16,50 +16,55 @@ namespace val
 
 		for (uint32_t i = 0; i < _attachments.size(); ++i) {
 			renderAttachment& attachment = *(_attachments[i]);
-
-			// handle color attachment
-			renderAttachment* asColorAttachment = dynamic_cast<colorAttachment*>(&attachment);
-			if (asColorAttachment != NULL) {
-				_colorAttachments.resize(_colorAttachments.size() + 1);
-				_colorAttachments.back().attachment = i;
-				_colorAttachments.back().layout = attachment.getRefLayout();
-				continue;
+			{
+				// handle color attachment
+				renderAttachment* asColorAttachment = dynamic_cast<colorAttachment*>(&attachment);
+				if (asColorAttachment != NULL) {
+					_colorAttachments.resize(_colorAttachments.size() + 1);
+					_colorAttachments.back().attachment = i;
+					_colorAttachments.back().layout = attachment.getRefLayout();
+					continue;
+				}
 			}
 
-			// handle depth attachment
-			renderAttachment* asDepthAttachment = dynamic_cast<depthAttachment*>(&attachment);
-			if (asDepthAttachment != NULL) {
-#ifndef NDEBUG
-				_depthAttacmentDebugCount++;
-#endif // !NDEBUG
-				VkAttachmentReference tmp{};
-				tmp.attachment = i;
-				tmp.layout = asDepthAttachment->getRefLayout();
-				_depthStencilAttachment = tmp;
-				continue;
+			{
+				// handle depth attachment
+				renderAttachment* asDepthAttachment = dynamic_cast<depthAttachment*>(&attachment);
+				if (asDepthAttachment != NULL) {
+				#ifndef NDEBUG
+					_depthAttacmentDebugCount++;
+				#endif // !NDEBUG
+					VkAttachmentReference tmp{};
+					tmp.attachment = i;
+					tmp.layout = asDepthAttachment->getRefLayout();
+					_depthStencilAttachment = tmp;
+					continue;
+				}
 			}
-
-			// handle resolve attachment
-			renderAttachment* asResolveAttachment = dynamic_cast<resolveAttachment*>(&attachment);
-			if (asDepthAttachment != NULL) {
-				_resolveAttachments.resize(_resolveAttachments.size() + 1);
-				_resolveAttachments.back().attachment = i;
-				_resolveAttachments.back().layout = attachment.getRefLayout();
-				continue;
+			{
+				// handle resolve attachment
+				renderAttachment* asResolveAttachment = dynamic_cast<resolveAttachment*>(&attachment);
+				if (asResolveAttachment != NULL) {
+					_resolveAttachments.resize(_resolveAttachments.size() + 1);
+					_resolveAttachments.back().attachment = i;
+					_resolveAttachments.back().layout = attachment.getRefLayout();
+					continue;
+				}
 			}
-
-			// handle input attachment
-			renderAttachment* asInputAttachment = dynamic_cast<inputAttachment*>(&attachment);
-			if (asDepthAttachment != NULL) {
-				_inputAttachments.resize(_inputAttachments.size() + 1);
-				_inputAttachments.back().attachment = i;
-				_inputAttachments.back().layout = attachment.getRefLayout();
-				continue;
+			{
+				// handle input attachment
+				renderAttachment* asInputAttachment = dynamic_cast<inputAttachment*>(&attachment);
+				if (asInputAttachment != NULL) {
+					_inputAttachments.resize(_inputAttachments.size() + 1);
+					_inputAttachments.back().attachment = i;
+					_inputAttachments.back().layout = attachment.getRefLayout();
+					continue;
+				}
 			}
 		}
 
 #ifndef NDEBUG
-		if (_depthAttacmentDebugCount > 0)
+		if (_depthAttacmentDebugCount > 1)
 		{
 			printf("VAL: WARNING: Attempted to updated subpass at address %h with more than 1 depth stencil. This is invalid as only 1 depth stencil can be bound to a subpass.\n");
 		}

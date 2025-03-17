@@ -9,6 +9,10 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [✓] Rename to VAL (Vulkan Abstraction Library)
 
+[ ] Check if inputAttachments work as expected
+
+[ ] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
+
 [ ] Optimize pipelineCreateInfo functions (cache and pass by reference instead of value)
 
 [!] Change the updateSwapChain function to use the optimal VK_PIPELINE_STAGE_FLAGS

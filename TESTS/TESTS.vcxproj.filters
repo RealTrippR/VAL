@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="base.cpp" />
-    <ClCompile Include="multisampling.cpp" />
+    <ClCompile Include="multisamplingTest.cpp" />
     <ClCompile Include="multi-threadingTest.cpp" />
     <ClCompile Include="pushConstantTest.cpp" />
     <ClCompile Include="imageTest.cpp" />

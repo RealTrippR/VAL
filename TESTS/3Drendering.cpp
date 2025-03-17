@@ -265,9 +265,9 @@ int main() {
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	VkImageView imgView = VK_NULL_HANDLE;
-	\
-		// config grahics pipeline
-		val::graphicsPipelineCreateInfo pipeline;
+	
+	// config grahics pipeline
+	val::graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &vertShader,&fragShader };
 	setGraphicsPipelineInfo(pipeline, msaaSamples);
 

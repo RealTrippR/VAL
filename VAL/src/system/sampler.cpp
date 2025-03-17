@@ -35,10 +35,10 @@ namespace val {
 
 	void sampler::setMaxAnisotropy(const float& anisoLevel) {
 		if (anisoLevel > 0) {
-			_samplerCreateInfo.anisotropyEnable = true;
+			_samplerCreateInfo.anisotropyEnable = VK_TRUE;
 			_samplerCreateInfo.maxAnisotropy = anisoLevel;
 		} else{
-			_samplerCreateInfo.anisotropyEnable = false;
+			_samplerCreateInfo.anisotropyEnable = VK_FALSE;
 			_samplerCreateInfo.maxAnisotropy = 0.f;
 		}
 	}
