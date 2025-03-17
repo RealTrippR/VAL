@@ -26,7 +26,6 @@ namespace val
 					continue;
 				}
 			}
-
 			{
 				// handle depth attachment
 				renderAttachment* asDepthAttachment = dynamic_cast<depthAttachment*>(&attachment);
