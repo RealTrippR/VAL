@@ -3,6 +3,8 @@
 
 namespace val
 {
+
+	/*
 	void subpass::update(uint32_t startingAttachmentIndex) {
 		// update color attachments
 		_colorAttachments.clear();
@@ -15,7 +17,7 @@ namespace val
 #endif // !NDEBUG
 
 		for (uint32_t i = 0; i < _attachments.size(); ++i) {
-			renderAttachment& attachment = *(_attachments[i]);
+			renderAttachment& attachment = *(_rpMngr->_attachments[(_attachments[i]).attachment]);
 			{
 				// handle color attachment
 				colorAttachment* asColorAttachment = dynamic_cast<colorAttachment*>(&attachment);
@@ -24,7 +26,7 @@ namespace val
 					if (asColorAttachment->unused()) {
 						_colorAttachments.back().attachment = VK_ATTACHMENT_UNUSED;
 					} else {
-						_colorAttachments.back().attachment = i + startingAttachmentIndex;
+						//_colorAttachments.back().attachment = i + startingAttachmentIndex;
 					}
 					_colorAttachments.back().layout = attachment.getRefLayout();
 					continue;
@@ -103,17 +105,81 @@ namespace val
 		_subpassDesc.pInputAttachments = _inputAttachments.data();
 		_subpassDesc.inputAttachmentCount = _inputAttachments.size();
 	}
+	*/
 
+	void subpass::update() {
+		// Color attachments
+		_subpassDesc.pColorAttachments = _colorAttachments.data();
+		_subpassDesc.colorAttachmentCount = _colorAttachments.size();
 
+		// Depth attachment
+		if (_depthStencilAttachment.has_value()) {
+			_subpassDesc.pDepthStencilAttachment = &(_depthStencilAttachment.value());
+		}
 
-	void subpass::bindAttachment(renderAttachment* attachment) {
-		_attachments.push_back(attachment);
-		//_rpMngr->_attachments.push_back(attachment);
+		// Resolve attachments (1 for every multisampled color attachment; there won't always be a resolve attachment for every color attachment)
+		_subpassDesc.pResolveAttachments = _resolveAttachments.data();
+
+		// Input attachments
+		_subpassDesc.pInputAttachments = _inputAttachments.data();
+		_subpassDesc.inputAttachmentCount = _inputAttachments.size();
 	}
 
+	void subpass::bindAttachment(renderAttachment* attachment) {
+		// will not be added if it's already in the list
+		uint32_t idx = _rpMngr->addAttachment(attachment);
+		
+		// create attachment reference
+		VkAttachmentReference& vkRef = _attachmentReferences.emplace_back();
+		vkRef.attachment = idx;
+		vkRef.layout = attachment->getRefLayout();
+
+		/***********************************************/
+		{
+			// handle color attachment
+			colorAttachment* asColorAttachment = dynamic_cast<colorAttachment*>(attachment);
+			if (asColorAttachment) {
+				_colorAttachments.push_back(vkRef);
+				return;
+			}
+		}
+		{
+			// handle depth attachment
+			depthAttachment* asDepthAttachment = dynamic_cast<depthAttachment*>(attachment);
+			if (asDepthAttachment) {
+#ifndef NDEBUG
+				if (_depthStencilAttachment.has_value()) {
+					printf("VAL: Warning: The depth stencil attachment of subpass at address %h was overwritten during bindAttachment(), this is likely not intended behavior!\n", this);
+				}
+#endif // !NDEBUG
+				_depthStencilAttachment = vkRef;
+
+				return;
+			}
+		}
+		{
+			// handle resolve attachment
+			resolveAttachment* asResolveAttachment = dynamic_cast<resolveAttachment*>(attachment);
+			if (asResolveAttachment) {
+				_resolveAttachments.push_back(vkRef);
+				return;
+			}
+		}
+		{
+			// handle input attachment
+			inputAttachment* asInputAttachment = dynamic_cast<inputAttachment*>(attachment);
+			if (asInputAttachment) {
+				_inputAttachments.push_back(vkRef);
+				return;
+			}
+		}
+	}
+
+	/*
 	void subpass::removeAttachment(renderAttachment* attachment) {
 		_attachments.erase(std::remove(_attachments.begin(), _attachments.end(), attachment), _attachments.end());
 	}
+	*/
 
 	void subpass::attachToRenderPassManager() {
 		_rpMngr->_subpasses.push_back(this);

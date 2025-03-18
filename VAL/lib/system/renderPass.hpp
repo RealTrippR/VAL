@@ -18,12 +18,20 @@ namespace val {
 		void update();
 
 	protected:
+		// returns the index of the attachment
+		// if the attachment is already in the list of attachments, it won't be added,
+		// but it will still return it's index
+		uint32_t addAttachment(val::renderAttachment* attachment);
+
+	protected:
 		friend subpass;
 		friend VAL_PROC;
 		// these must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
 		std::vector<subpass*> _subpasses;
 
 		std::vector<VkSubpassDescription> _VkSubpasses;
+
+		std::vector<val::renderAttachment*> _attachments;
 
 		std::vector<VkAttachmentDescription> _VkAttachments;
 

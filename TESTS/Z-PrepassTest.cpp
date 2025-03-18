@@ -180,6 +180,7 @@ void setRenderPass(val::renderPassManager& renderPassManager, VkFormat imgFormat
 
 	/********** Main Render Pass **********/
 	static subpass mainSubpass(renderPassManager, GRAPHICS);
+	mainSubpass.bindAttachment(&depthAttach);
 	mainSubpass.bindAttachment(&colorAttach);
 }
 

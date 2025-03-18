@@ -25,18 +25,19 @@ namespace val
 		}
 	public:
 
-		void update(uint32_t startingAttachmentIndex);
+		void update();
 
 	public:
 		void bindAttachment(renderAttachment* attachment);
-		void removeAttachment(renderAttachment* attachment);
+
+		//void removeAttachment(renderAttachment* attachment);
 
 	public:
 		renderPassManager* _rpMngr;
 		/******************************************/
 		VkSubpassDescription _subpassDesc{};
 		VkSubpassDependency _dependency{};
-		std::vector<renderAttachment*> _attachments;
+		std::vector<VkAttachmentReference> _attachmentReferences;
 		/******************************************/
 		std::vector<VkAttachmentReference> _colorAttachments;
 		std::optional<VkAttachmentReference> _depthStencilAttachment; // subpasses can only have 1 depth attachment

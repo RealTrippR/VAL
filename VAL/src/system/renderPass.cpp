@@ -10,15 +10,11 @@ namespace val {
 	}
 
 	void renderPassManager::update() {
+		_VkSubpasses.clear();
 		uint32_t attachIdx = 0u;
-		_VkAttachments.clear();
 		// create std::vector<VkSubpassDescription> _VkSubpasses;
 		for (subpass* sp : _subpasses) {
-			sp->update(attachIdx);
-			for (renderAttachment* attachment : sp->_attachments) {
-				_VkAttachments.push_back(attachment->toVkAttachmentDescription());
-				attachIdx++;
-			}
+			sp->update();
 			_VkSubpasses.push_back(sp->_subpassDesc);
 		}
 
@@ -75,5 +71,18 @@ namespace val {
 		}
 
 		return _VkSubpassDependencies;
+	}
+
+	uint32_t renderPassManager::addAttachment(val::renderAttachment* attachment) {
+		// first check to make sure it hasn't been added yet
+		const auto& v = _attachments;
+		// Finding the index of val
+		auto it = std::find(v.begin(), v.end(), attachment);
+		if (it == v.end()) {
+			_attachments.push_back(attachment);
+			_VkAttachments.push_back(attachment->toVkAttachmentDescription());
+			return _attachments.size() - 1;
+		}
+		return std::distance(v.begin(), it);
 	}
 }
