@@ -9,6 +9,7 @@ namespace val {
 
 	class graphicsPipelineCreateInfo : public pipelineCreateInfo {
 	public:		
+		uint32_t subpassIndex = 0u;
 		std::vector<VkDynamicState> dynamicStates;
 		//renderPassInfo* renderPassInfo;
 		renderPassManager* renderPass;
@@ -19,6 +20,10 @@ namespace val {
 		VkPipelineColorBlendStateCreateInfo colorBlending{};
 		VkPipelineDepthStencilStateCreateInfo* depthStencil = NULL;
 		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+		inline VkRenderPass& getVkRenderPass() {
+			return renderPass->getVkRenderPass();
+		}
 	};
 }
 

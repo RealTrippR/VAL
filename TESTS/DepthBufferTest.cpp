@@ -276,7 +276,7 @@ int main() {
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.begin(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
+		renderTarget.beginPass(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
 		renderTarget.update(proc, pipeline);
 		renderTarget.render(proc, { viewport });
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);

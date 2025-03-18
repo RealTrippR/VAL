@@ -5,18 +5,30 @@ namespace val {
 		_subpasses.push_back(sp);
 	}
 
-	VkRenderPass renderPassManager::getVkRenderPass() {
-		return _renderPass;
+	VkRenderPass& renderPassManager::getVkRenderPass() {
+		return _VKrenderPass;
+	}
+
+	void renderPassManager::update() {
+		uint32_t attachIdx = 0u;
+		_VkAttachments.clear();
+		// create std::vector<VkSubpassDescription> _VkSubpasses;
+		for (subpass* sp : _subpasses) {
+			sp->update(attachIdx);
+			for (renderAttachment* attachment : sp->_attachments) {
+				_VkAttachments.push_back(attachment->toVkAttachmentDescription());
+				attachIdx++;
+			}
+			_VkSubpasses.push_back(sp->_subpassDesc);
+		}
+
+		createSubpassDependencies();
 	}
 
 	const std::vector<VkSubpassDependency>& renderPassManager::createSubpassDependencies() {
 		// subpasses must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
 
 		_VkSubpassDependencies.resize(_subpasses.size());
-
-		for (subpass* sbp : _subpasses) {
-			sbp->update(); // update _subpassDesc
-		}
 
 		// https://www.reddit.com/r/vulkan/comments/s80reu/subpass_dependencies_what_are_those_and_why_do_i/
 
@@ -50,15 +62,16 @@ namespace val {
 		}
 
 		// set destination access and stage masks
-		for (uint32_t i = 0; i < _VkSubpassDependencies.size() - 1; ++i) {
+		for (uint32_t i = 0; i < _VkSubpassDependencies.size()-1; ++i) {
 			VkSubpassDependency& subDependency = _VkSubpassDependencies[i];
 			VkSubpassDependency& nextSubDependency = _VkSubpassDependencies[i + 1];
 
 			subDependency.dstStageMask = nextSubDependency.srcStageMask;
 			subDependency.dstAccessMask = nextSubDependency.srcAccessMask;
 
-			subDependency.dstSubpass = i + 1;
+			subDependency.dstSubpass = i;
 			nextSubDependency.srcSubpass = i;
+			nextSubDependency.dstSubpass = i + 1;
 		}
 
 		return _VkSubpassDependencies;

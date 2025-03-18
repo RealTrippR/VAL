@@ -97,45 +97,17 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	colorBlending.blendConstants[3] = 0.0f;
 }
 
-void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentImageFormat) {
-	// attachments
-	static VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = colorAttachmentImageFormat;
-	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	using namespace val;
+	static colorAttachment colorAttach;
+	colorAttach.setImgFormat(imgFormat);
+	colorAttach.setLoadOperation(CLEAR);
+	colorAttach.setStoreOperation(STORE);
+	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	renderPassInfo.attachments = { colorAttachment };
-	//renderPassInfo.attachmentImageLayouts = { VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*This second value is the layout of the corresponding VkAttachmentReference*/ };
-
-	static VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	// subpasses
-	static VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-
-	renderPassInfo.subpasses = { subpass };
-
-	static VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-	renderPassInfo.subpassDependencies = { dependency };
+	static subpass subpass(renderPassMngr, GRAPHICS);
+	subpass.bindAttachment(&colorAttach);
 }
-
-
 
 int main() {
 	val::VAL_PROC proc;
@@ -186,22 +158,23 @@ int main() {
 	//fragShader.setTextures({ {&imgView1, 2, 1 } });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders = { &fragShader, &vertShader };
+	val::graphicsPipelineCreateInfo pipeline;
+	pipeline.shaders = { &fragShader, &vertShader };
 
-	setGraphicsPipelineInfo(pipelineInfo);
+	setGraphicsPipelineInfo(pipeline);
 
 	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
-
-	val::renderPassInfo renderPassInfo;
-	setRenderPassInfo(renderPassInfo, imageFormat);
-	pipelineInfo.renderPassInfo = &renderPassInfo;
+	
+	val::renderPassManager renderPassManager;
+	setRenderPass(renderPassManager, imageFormat);
+	pipeline.renderPass = &renderPassManager;
+	pipeline.subpassIndex = 0;
 	// 1 renderPass per pipeline
 	std::vector<VkRenderPass> renderPasses;
 
-	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipelineInfo }, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipeline }, &renderPasses);
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], proc._device);
 
@@ -244,7 +217,7 @@ int main() {
 
 
 	// this needs to be called only after the frag shader's image view has been set
-	proc.createDescriptorSets(&pipelineInfo);
+	proc.createDescriptorSets(&pipeline);
 
 	//////////////////////////////////////////////////////////////
 	val::renderTarget renderTarget;
@@ -261,23 +234,23 @@ int main() {
 	float tmp = .7;
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+		glfwPollEvents();
+
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
-
 		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
-		glfwPollEvents();
 
-		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.begin(proc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
-		renderTarget.update(proc, pipelineInfo);
 		updateUniformBuffer(proc, uboHdl);
 		float tmp = (sin(ftimeSec) + 1.f) / 2.f;
-		// if you're updating a buffer during a draw or compute operation, 
-		// ALWAYS pass the respective cmd buffer into the update function for performance gains
-		PC_ImgScissor.update(proc, &tmp, pipelineInfo, fragShader, cmdBuffer);
 
+		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		renderTarget.beginPass(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
+		PC_ImgScissor.update(proc, &tmp, pipeline, fragShader, cmdBuffer);
+		renderTarget.update(proc, pipeline);
 		renderTarget.render(proc, { viewport });
+		renderTarget.endPass(proc);
+
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 

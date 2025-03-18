@@ -151,7 +151,6 @@
     <ClInclude Include="lib\renderAttachments\renderAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\resolveAttachment.hpp" />
     <ClInclude Include="lib\system\buffer.hpp" />
-    <ClInclude Include="lib\system\cleanupManager.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />
     <ClInclude Include="lib\system\depthBuffer.hpp" />
@@ -181,13 +180,11 @@
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />
-    <ClCompile Include="src\system\cleanupManager.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
-    <ClCompile Include="src\system\pipelineType.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
     <ClCompile Include="src\system\renderPass.cpp" />

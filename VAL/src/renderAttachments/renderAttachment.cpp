@@ -63,4 +63,8 @@ namespace val
 	const VkFormat& renderAttachment::getImgFormat() {
 		return _imgFormat;
 	}
+
+	const bool& renderAttachment::unused() {
+		return _unused;
+	}
 }

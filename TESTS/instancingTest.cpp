@@ -399,7 +399,7 @@ int main() {
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.begin(mainProc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
+		renderTarget.beginPass(mainProc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.update(mainProc, pipelineInfo);
 		renderTarget.render(mainProc, { viewport }, MAX_INSTANCES);
 		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);

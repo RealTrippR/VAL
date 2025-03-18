@@ -64,6 +64,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, const VkSamp
 
 	VkPipelineMultisampleStateCreateInfo& multisampling = info.multisampling;
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	VkPhysicalDeviceFeatures f;
 
 	// for sampleShadingEnable to be valid, set: deviceFeatures.sampleRateShading = VK_TRUE; // enable sample shading feature for the device
 	//multisampling.sampleShadingEnable = VK_TRUE;
@@ -239,7 +240,7 @@ int main() {
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.begin(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
+		renderTarget.beginPass(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
 		renderTarget.update(proc, pipeline);
 		renderTarget.render(proc, { viewport });
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);

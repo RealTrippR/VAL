@@ -13,13 +13,21 @@ namespace val {
 		renderTarget(renderTarget&& other) = delete;
 
 	public:
-		void render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, const uint32_t& instanceCount = 1u);
+		void render(VAL_PROC& proc, const uint32_t& instanceCount = 1u);
 
 		void rebindDescriptorSet(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline);
 
-		void update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline);
+		void updatePipeline(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline);
 
-		void begin(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer);
+		void updateViewports(VAL_PROC& proc, const std::vector<VkViewport>& viewports);
+
+		void updateBuffers(VAL_PROC& proc);
+
+		void update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline, const std::vector<VkViewport>& viewports);
+
+		void beginPass(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer);
+
+		void endPass(VAL_PROC& proc); 
 
 		void submit(VAL_PROC& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence = VK_NULL_HANDLE);
 

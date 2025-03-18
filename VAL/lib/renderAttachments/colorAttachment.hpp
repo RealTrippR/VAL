@@ -8,13 +8,12 @@ namespace val
 	class colorAttachment : public renderAttachment
 	{
 	public:
-
+		colorAttachment() : renderAttachment() {}
+		colorAttachment(RENDER_ATTACHMENT_USAGE usage) : renderAttachment(usage) {}
+	public:
 		constexpr VkImageLayout getRefLayout() const override {
 			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		}
-
-	protected:
-		VkFormat _imgFormat;
 	};
 }
 

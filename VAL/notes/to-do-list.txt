@@ -9,6 +9,8 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [✓] Rename to VAL (Vulkan Abstraction Library)
 
+[ ] Complete the Raytracing test
+
 [ ] Check if inputAttachments work as expected
 
 [ ] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
@@ -22,8 +24,6 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 [~] Improve binding descriptions, and allow bindings to be binding not only by their index but also by their name in source code. See: https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ComputeShader.SetInt.html
 
 [!] Use Vulkan Memory Allocator to simplify the process of allocating data. (https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
-
-[!] Implement Z-prepass support for performance gains. (see: https://www.youtube.com/watch?v=2ZK527cQbeo)
 
 [✓] create a val::graphicsPipeline and val::computePipeline class to manage and simplify the handling of pipelines
 

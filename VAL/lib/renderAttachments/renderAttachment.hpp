@@ -5,8 +5,28 @@
 #include <VAL/lib/renderAttachments/attachmentEnums.hpp>
 
 namespace val {
+	class subpass; // forward declaration
+
+	enum RENDER_ATTACHMENT_USAGE {
+		USED,
+		UNUSED
+	};
+
 	class renderAttachment
 	{
+	public:
+		renderAttachment() = default;
+		renderAttachment(RENDER_ATTACHMENT_USAGE usage) {
+			switch (usage)
+			{
+			case val::UNUSED:
+				_unused = true;
+				break;
+			default:
+				_unused = false;
+				break;
+			}
+		}
 	public:
 		VkAttachmentDescription toVkAttachmentDescription();
 
@@ -30,11 +50,15 @@ namespace val {
 
 		const VkFormat& getImgFormat();
 
+		const bool& unused();
+
 		constexpr virtual VkImageLayout getRefLayout() const {
 			return VK_IMAGE_LAYOUT_UNDEFINED;
 		}
 
 	protected:
+		friend subpass;
+		friend VAL_PROC;
 		VkFormat _imgFormat = VK_FORMAT_UNDEFINED;
 		uint8_t _MSAA_Samples = 1u;
 		RENDER_ATTACHMENT_OPERATION_TYPE _loadOp = CLEAR;
@@ -43,6 +67,7 @@ namespace val {
 		RENDER_ATTACHMENT_OPERATION_TYPE _stencilStoreOp = DISCARD;
 		VkImageLayout _initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkImageLayout _finalLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		bool _unused = false;
 	};
 }
 #endif // !VAL_RENDER_ATTACHMENT_HPP

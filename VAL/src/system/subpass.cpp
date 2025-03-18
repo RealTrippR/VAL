@@ -3,7 +3,7 @@
 
 namespace val
 {
-	void subpass::update() {
+	void subpass::update(uint32_t startingAttachmentIndex) {
 		// update color attachments
 		_colorAttachments.clear();
 		_resolveAttachments.clear();
@@ -18,23 +18,31 @@ namespace val
 			renderAttachment& attachment = *(_attachments[i]);
 			{
 				// handle color attachment
-				renderAttachment* asColorAttachment = dynamic_cast<colorAttachment*>(&attachment);
+				colorAttachment* asColorAttachment = dynamic_cast<colorAttachment*>(&attachment);
 				if (asColorAttachment != NULL) {
 					_colorAttachments.resize(_colorAttachments.size() + 1);
-					_colorAttachments.back().attachment = i;
+					if (asColorAttachment->unused()) {
+						_colorAttachments.back().attachment = VK_ATTACHMENT_UNUSED;
+					} else {
+						_colorAttachments.back().attachment = i + startingAttachmentIndex;
+					}
 					_colorAttachments.back().layout = attachment.getRefLayout();
 					continue;
 				}
 			}
 			{
 				// handle depth attachment
-				renderAttachment* asDepthAttachment = dynamic_cast<depthAttachment*>(&attachment);
+				depthAttachment* asDepthAttachment = dynamic_cast<depthAttachment*>(&attachment);
 				if (asDepthAttachment != NULL) {
 				#ifndef NDEBUG
 					_depthAttacmentDebugCount++;
 				#endif // !NDEBUG
 					VkAttachmentReference tmp{};
-					tmp.attachment = i;
+					if (asDepthAttachment->unused()) {
+						tmp.attachment = VK_ATTACHMENT_UNUSED;
+					} else {
+						tmp.attachment = i + startingAttachmentIndex;
+					}
 					tmp.layout = asDepthAttachment->getRefLayout();
 					_depthStencilAttachment = tmp;
 					continue;
@@ -42,20 +50,30 @@ namespace val
 			}
 			{
 				// handle resolve attachment
-				renderAttachment* asResolveAttachment = dynamic_cast<resolveAttachment*>(&attachment);
+				resolveAttachment* asResolveAttachment = dynamic_cast<resolveAttachment*>(&attachment);
 				if (asResolveAttachment != NULL) {
 					_resolveAttachments.resize(_resolveAttachments.size() + 1);
-					_resolveAttachments.back().attachment = i;
+					if (asResolveAttachment->unused()) {
+						_inputAttachments.back().attachment = VK_ATTACHMENT_UNUSED;
+					}
+					else {
+						_resolveAttachments.back().attachment = i + startingAttachmentIndex;
+					}
 					_resolveAttachments.back().layout = attachment.getRefLayout();
 					continue;
 				}
 			}
 			{
 				// handle input attachment
-				renderAttachment* asInputAttachment = dynamic_cast<inputAttachment*>(&attachment);
+				inputAttachment* asInputAttachment = dynamic_cast<inputAttachment*>(&attachment);
 				if (asInputAttachment != NULL) {
 					_inputAttachments.resize(_inputAttachments.size() + 1);
-					_inputAttachments.back().attachment = i;
+					if (asInputAttachment->unused()) {
+						_inputAttachments.back().attachment = VK_ATTACHMENT_UNUSED;
+					}
+					else {
+						_inputAttachments.back().attachment = i + startingAttachmentIndex;
+					}
 					_inputAttachments.back().layout = attachment.getRefLayout();
 					continue;
 				}

@@ -291,7 +291,7 @@ int main() {
 	val::buffer indexBuffer2(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer2.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
-	VkFramebufferCreateInfo framebufferInfo {};
+	VkFramebufferCreateInfo framebufferInfo{};
 	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	framebufferInfo.renderPass = renderPasses[1];
 	framebufferInfo.attachmentCount = 1;
@@ -337,7 +337,7 @@ int main() {
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.begin(mainProc);
+		renderTarget.beginPass(mainProc);
 		renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 		renderTarget.update(mainProc, pipelineInfo1.pipelineIdx);
 		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo1.pipelineIdx], framebuffer);

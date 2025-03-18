@@ -344,7 +344,7 @@ int main() {
 		// the renderTarget must be updated after any changes are made 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.begin(mainProc);
+		renderTarget.beginPass(mainProc);
 		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
 		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
 		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame], computeQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);

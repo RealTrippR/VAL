@@ -3,10 +3,9 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	void renderTarget::render(VAL_PROC& proc, const std::vector<VkViewport>& viewports, const uint32_t& instanceCount /*DEFAULT = 1U*/)
+	void renderTarget::render(VAL_PROC& proc, const uint32_t& instanceCount /*DEFAULT = 1U*/)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
-		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
 
 		if (_indexCount>0) {
 			vkCmdDrawIndexed(commandBuffer, (uint32_t)(_indexCount), instanceCount, 0, 0, 0); // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdDrawIndexed.html
@@ -25,7 +24,34 @@ namespace val {
 			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 	}
 
-	void renderTarget::update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline) {		
+	void renderTarget::updatePipeline(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline)
+	{
+		const auto& pipelineIdx = pipeline.pipelineIdx;
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
+		// bind pipeline and respective descriptor sets
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelines[pipelineIdx]);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._pipelineLayouts[pipelineIdx],
+			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
+	}
+
+	void renderTarget::updateViewports(VAL_PROC& proc, const std::vector<VkViewport>&viewports)
+	{
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
+		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
+	}
+
+	void renderTarget::updateBuffers(VAL_PROC& proc)
+	{
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
+		// bind buffers
+		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		if (_indexCount > 0) {
+			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		}
+	}
+
+	void renderTarget::update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline, const std::vector<VkViewport>& viewports)
+	{
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
@@ -41,9 +67,11 @@ namespace val {
 		if (_indexCount>0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
+
+		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
 	}
 
-	void renderTarget::begin(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer) {
+	void renderTarget::beginPass(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
 		vkResetCommandBuffer(commandBuffer, 0);
@@ -63,15 +91,16 @@ namespace val {
 		vkCmdBeginRenderPass(commandBuffer, &_renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
+	void renderTarget::endPass(VAL_PROC& proc) {
+		vkCmdEndRenderPass(proc._graphicsQueue._commandBuffers[proc._currentFrame]);
+	}
+
 	
 	void renderTarget::submit(VAL_PROC& proc,
 		std::vector<VkSemaphore> waitSemaphores, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/)
 	{
 		auto& graphicsQueue = proc._graphicsQueue;
 		const auto& currentFrame = proc._currentFrame;
-
-		vkCmdEndRenderPass(proc._graphicsQueue._commandBuffers[currentFrame]);
-
 
 		// END RECORDING
 		if (vkEndCommandBuffer(proc._graphicsQueue._commandBuffers[currentFrame]) != VK_SUCCESS) {

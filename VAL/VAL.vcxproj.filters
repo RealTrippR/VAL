@@ -119,9 +119,6 @@
     <ClInclude Include="lib\system\image.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\cleanupManager.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
@@ -206,12 +203,6 @@
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\system\sampler.cpp">
-      <Filter>src\system</Filter>
-    </ClCompile>
-    <ClCompile Include="src\system\cleanupManager.cpp">
-      <Filter>src\system</Filter>
-    </ClCompile>
-    <ClCompile Include="src\system\pipelineType.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\system\renderPass.cpp">

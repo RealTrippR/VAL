@@ -25,7 +25,7 @@ namespace val
 		}
 	public:
 
-		void update();
+		void update(uint32_t startingAttachmentIndex);
 
 	public:
 		void bindAttachment(renderAttachment* attachment);

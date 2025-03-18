@@ -11,23 +11,11 @@ namespace val {
 	public:
 		void bindSubpass(subpass* sp);
 
-		VkRenderPass getVkRenderPass();
+		VkRenderPass& getVkRenderPass();
 
 		const std::vector<VkSubpassDependency>& createSubpassDependencies();
 
-		void update() {
-			_VkAttachments.clear();
-			// create std::vector<VkSubpassDescription> _VkSubpasses;
-			for (subpass* sp : _subpasses) {
-				sp->update();
-				for (renderAttachment* attachment : sp->_attachments) {
-					_VkAttachments.push_back(attachment->toVkAttachmentDescription());
-				}
-				_VkSubpasses.push_back(sp->_subpassDesc);
-			}
-
-			createSubpassDependencies();
-		}
+		void update();
 
 	protected:
 		friend subpass;
@@ -41,7 +29,7 @@ namespace val {
 
 		std::vector<VkSubpassDependency> _VkSubpassDependencies;
 
-		VkRenderPass _renderPass = VK_NULL_HANDLE;
+		VkRenderPass _VKrenderPass = VK_NULL_HANDLE;
 	};
 }
 
