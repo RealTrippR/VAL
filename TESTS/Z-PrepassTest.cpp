@@ -313,7 +313,7 @@ int main() {
 
 		vkCmdNextSubpass(cmdBuffer, VK_SUBPASS_CONTENTS_INLINE);
 
-\		renderTarget.updatePipeline(proc, pipeline);
+		renderTarget.updatePipeline(proc, pipeline);
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
