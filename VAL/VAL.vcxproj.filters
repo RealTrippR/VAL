@@ -56,9 +56,6 @@
     <ClInclude Include="lib\graphics\shader.hpp">
       <Filter>lib\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\renderPassInfo.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp">
       <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
@@ -149,6 +146,9 @@
     <ClInclude Include="lib\system\subpass.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\multisamplerManager.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -213,6 +213,9 @@
     </ClCompile>
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp">
       <Filter>src\renderAttachments</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\multisamplerManager.cpp">
+      <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

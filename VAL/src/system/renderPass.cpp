@@ -1,6 +1,14 @@
 #include <VAL/lib/system/renderPass.hpp>
+#include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
+	void renderPassManager::destroy() {
+		if (_VKrenderPass) {
+			vkDestroyRenderPass(_procVAL->_device, _VKrenderPass, VK_NULL_HANDLE);
+			_VKrenderPass = NULL;
+		}
+	}
+
 	void renderPassManager::bindSubpass(subpass* sp) {
 		_subpasses.push_back(sp);
 	}

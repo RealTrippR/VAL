@@ -134,6 +134,7 @@
     <ClCompile Include="1_million_vertices.cpp" />
     <ClCompile Include="2_million_vertices.cpp" />
     <ClCompile Include="500_thousand_vertices.cpp" />
+    <ClCompile Include="grassblades.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

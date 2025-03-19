@@ -9,6 +9,10 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [✓] Rename to VAL (Vulkan Abstraction Library)
 
+[ ] Simplify the configuration and setup of pipelines
+
+[✓] Simplify multisampling implementation
+
 [ ] Complete the Raytracing test
 
 [ ] Check if inputAttachments work as expected

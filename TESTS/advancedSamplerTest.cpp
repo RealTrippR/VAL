@@ -167,16 +167,13 @@ int main() {
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 	
-	val::renderPassManager renderPassManager;
+	val::renderPassManager renderPassManager(proc);
 	setRenderPass(renderPassManager, imageFormat);
 	pipeline.renderPass = &renderPassManager;
-	pipeline.subpassIndex = 0;
-	// 1 renderPass per pipeline
-	std::vector<VkRenderPass> renderPasses;
 
-	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipeline }, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipeline });
 
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], proc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u,pipeline.getVkRenderPass(), proc._device);
 
 
 
@@ -245,10 +242,10 @@ int main() {
 		float tmp = (sin(ftimeSec) + 1.f) / 2.f;
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.beginPass(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 		PC_ImgScissor.update(proc, &tmp, pipeline, fragShader, cmdBuffer);
-		renderTarget.update(proc, pipeline);
-		renderTarget.render(proc, { viewport });
+		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);

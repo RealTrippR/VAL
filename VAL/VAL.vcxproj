@@ -157,6 +157,7 @@
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
+    <ClInclude Include="lib\system\multisamplerManager.hpp" />
     <ClInclude Include="lib\system\pipelineType.hpp" />
     <ClInclude Include="lib\system\renderPass.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
@@ -172,7 +173,6 @@
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Handle.hpp" />
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
-    <ClInclude Include="lib\system\renderPassInfo.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
@@ -183,6 +183,7 @@
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
     <ClCompile Include="src\system\imageView.cpp" />
+    <ClCompile Include="src\system\multisamplerManager.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />

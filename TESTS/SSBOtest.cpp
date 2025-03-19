@@ -122,43 +122,16 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
 	info.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
 }
 
-void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentImageFormat) {
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	using namespace val;
+	static colorAttachment colorAttach;
+	colorAttach.setImgFormat(imgFormat);
+	colorAttach.setLoadOperation(CLEAR);
+	colorAttach.setStoreOperation(STORE);
+	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	// attachments
-	static VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = colorAttachmentImageFormat;
-	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-	renderPassInfo.attachments = { colorAttachment };
-	//renderPassInfo.attachmentImageLayouts = { VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*This second value is the layout of the corresponding VkAttachmentReference*/};
-
-	static VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	// subpasses
-	static VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-
-	renderPassInfo.subpasses = { subpass };
-
-	static VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-	renderPassInfo.subpassDependencies = { dependency };
+	static subpass subpass(renderPassMngr, GRAPHICS);
+	subpass.bindAttachment(&colorAttach);
 }
 
 void initParticles(std::vector<Particle>& particles, VkExtent2D displayExtent) {
@@ -181,7 +154,7 @@ void initParticles(std::vector<Particle>& particles, VkExtent2D displayExtent) {
 }
 
 int main() {
-	val::VAL_PROC mainProc;
+	val::VAL_PROC proc;
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -193,7 +166,7 @@ int main() {
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(windowSize.width, windowSize.height, "Test", NULL, NULL);
 
 	// The creation of the swapchain is handled in the window
-	val::window window(windowHDL_GLFW, &mainProc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -217,12 +190,10 @@ int main() {
 	val::UBO_Handle uboHDL(sizeof(UniformBufferObject));
 
 	// load and configure shaders
-	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/particleShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setBindingDescriptions({ Particle::getBindingDescription() });
 	vertShader.setVertexAttributes(Particle::getAttributeDescriptions());
 
-	// load and configure vert shader
 	val::shader fragShader("shaders-compiled/particleShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	val::shader computeShader("shaders-compiled/particleShadercomp.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
@@ -232,47 +203,47 @@ int main() {
 
 	//////////////////////////////////////////////////////////////
 
-	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders = { &vertShader, &fragShader };
+	val::graphicsPipelineCreateInfo pipeline;
+	pipeline.shaders = { &vertShader, &fragShader };
 
-	val::computePipelineCreateInfo computePipelineInfo;
-	computePipelineInfo.shaders = { &computeShader };
+	val::computePipelineCreateInfo computePipeline;
+	computePipeline.shaders = { &computeShader };
 
-	setGraphicsPipelineInfo(pipelineInfo);
+	setGraphicsPipelineInfo(pipeline);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	mainProc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat = val::findSupportedImageFormat(mainProc._physicalDevice, formatReqs);
+	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	val::renderPassInfo renderPassInfo;
-	setRenderPassInfo(renderPassInfo, imageFormat);
-	pipelineInfo.renderPassInfo = &renderPassInfo;
+	val::renderPassManager renderPassMNGR(proc);
+	setRenderPass(renderPassMNGR, imageFormat);
+	pipeline.renderPass = &renderPassMNGR;
 	// 1 renderPass per pipeline
-	std::vector<VkRenderPass> renderPasses;
 
-	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses, { &computePipelineInfo });
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline }, { &computePipeline });
 
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], mainProc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 	//////////////////////////////////////////////////////////////
 	// create descriptor sets - this should be merged into the
 	// pipeline creation function
-	mainProc.createDescriptorSets(&pipelineInfo);
-	mainProc.createDescriptorSets(&computePipelineInfo);
+	proc.createDescriptorSets(&pipeline);
+	proc.createDescriptorSets(&computePipeline);
 
 	//////////////////////////////////////////////////////////////
 	
 	// overwrite some of the previous descriptors
-	for (size_t i = 0; i < mainProc._MAX_FRAMES_IN_FLIGHT; i++) {
+	// it would be nice if there was a simpler way to do this...
+	for (size_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; i++) {
 		VkDescriptorBufferInfo storageBufferInfoLastFrame{};
-		storageBufferInfoLastFrame.buffer = ssboHdl.getBuffers(mainProc)[(i - 1) % mainProc._MAX_FRAMES_IN_FLIGHT];
+		storageBufferInfoLastFrame.buffer = ssboHdl.getBuffers(proc)[(i - 1) % proc._MAX_FRAMES_IN_FLIGHT];
 		storageBufferInfoLastFrame.offset = 0;
 		storageBufferInfoLastFrame.range = sizeof(Particle) * PARTICLE_COUNT;
 
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[0].dstSet = computePipelineInfo.getDescriptorSets(mainProc)[i];
+		descriptorWrites[0].dstSet = computePipeline.getDescriptorSets(proc)[i];
 		descriptorWrites[0].dstBinding = 1;
 		descriptorWrites[0].dstArrayElement = 0;
 		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -280,22 +251,22 @@ int main() {
 		descriptorWrites[0].pBufferInfo = &storageBufferInfoLastFrame;
 
 		VkDescriptorBufferInfo storageBufferInfoCurrentFrame{};
-		storageBufferInfoCurrentFrame.buffer = ssboHdl.getBuffers(mainProc)[i];
+		storageBufferInfoCurrentFrame.buffer = ssboHdl.getBuffers(proc)[i];
 		storageBufferInfoCurrentFrame.offset = 0;
 		storageBufferInfoCurrentFrame.range = sizeof(Particle) * PARTICLE_COUNT;
 
 		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[1].dstSet = computePipelineInfo.getDescriptorSets(mainProc)[i];
+		descriptorWrites[1].dstSet = computePipeline.getDescriptorSets(proc)[i];
 		descriptorWrites[1].dstBinding = 2;
 		descriptorWrites[1].dstArrayElement = 0;
 		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		descriptorWrites[1].descriptorCount = 1;
 		descriptorWrites[1].pBufferInfo = &storageBufferInfoCurrentFrame;
 
-		vkUpdateDescriptorSets(mainProc._device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+		vkUpdateDescriptorSets(proc._device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
     }
 
-	ssboHdl.updateFromTempStagingBuffer(mainProc, particles.data());
+	ssboHdl.updateFromTempStagingBuffer(proc, particles.data());
 
 	VkClearValue clearValues[1];
 	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
@@ -315,132 +286,51 @@ int main() {
 	// create & configure the compute target
 	val::computeTarget computeTarget;
 
-	// Sync info, handles semaphores and fences.
-	//val::syncInfo syncInfo(mainProc, { &mainProc._graphicsQueue,&mainProc._computeQueue }, , &computePipelineInfo);
-
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		glfwPollEvents();
+		lastTime = glfwGetTime();
 
-		val::queueManager& computeQueue = mainProc._computeQueue;
-		auto& graphicsQueue = mainProc._graphicsQueue;
+		val::queueManager& computeQueue = proc._computeQueue;
+		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = mainProc._currentFrame;
+		auto& currentFrame = proc._currentFrame;
 		
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-		computeTarget.begin(mainProc);
-		computeTarget.update(mainProc, computePipelineInfo);
-		computeTarget.compute(mainProc, PARTICLE_COUNT / 256, 1, 1);
-		computeTarget.submit(mainProc, {}, computeQueue._fences[currentFrame]);
+		computeTarget.begin(proc);
+		computeTarget.update(proc, computePipeline);
+		computeTarget.compute(proc, PARTICLE_COUNT / 256, 1, 1);
+		computeTarget.submit(proc, {}, computeQueue._fences[currentFrame]);
 
 		//////////////////////////////////////////////////////////////
-		updateUniformBuffer(mainProc, uboHDL);
+		updateUniformBuffer(proc, uboHDL);
 
 
 		// note: the getBuffers function is very ineffecient, it should be omptimized.
-		renderTarget.setVertexBuffers({ ssboHdl.getBuffers(mainProc)[mainProc._currentFrame] }, PARTICLE_COUNT);
+		renderTarget.setVertexBuffers({ ssboHdl.getBuffers(proc)[proc._currentFrame] }, PARTICLE_COUNT);
 		// the renderTarget must be updated after any changes are made 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.beginPass(mainProc);
-		renderTarget.update(mainProc, pipelineInfo.pipelineIdx);
-		renderTarget.render(mainProc, { viewport }, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
-		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame], computeQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.render(proc);
+		renderTarget.endPass(proc);
 
+		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame], computeQueue._semaphores[currentFrame]}, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
-
-		mainProc.nextFrame();
-
-		//vkQueueWaitIdle(mainProc._computeQueue._queue);
+		proc.nextFrame();
 
 		double currentTime = glfwGetTime();
 		lastFrameTime = (currentTime - lastTime) * 1000.0;
-		lastTime = currentTime;
 
-		glm::vec2* debugData = (glm::vec2*)(mainProc._SSBO_DataMapped[currentFrame][debugHdl._index]);
-		printf("DEBUG BUFFER: x: %f y: %f\n", debugData->x, debugData->y);
+		//glm::vec2* debugData = (glm::vec2*)(proc._SSBO_DataMapped[currentFrame][debugHdl._index]);
+		//printf("DEBUG BUFFER: x: %f y: %f\n", debugData->x, debugData->y);
 	}
 
 	window.cleanupSwapChain();
-	mainProc.cleanup();
+	proc.cleanup();
 
 	return EXIT_SUCCESS;
 }
-
-
-/*
-while (!glfwWindowShouldClose(windowHDL_GLFW)) {
-	glfwPollEvents();
-
-	auto& computeQueue = mainProc._computeQueue;
-	auto& graphicsQueue = mainProc._graphicsQueue;
-	auto& currentFrame = mainProc._currentFrame;
-
-	vkResetFences(mainProc._device, 1, &computeQueue._fences[currentFrame]);
-	vkResetCommandBuffer(computeQueue._commandBuffers[currentFrame], VkCommandBufferResetFlagBits 0);
-
-	VkCommandBufferBeginInfo beginInfo{};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-
-	if (vkBeginCommandBuffer(mainProc._computeQueue._commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS) {
-		throw std::runtime_error("failed to begin recording compute command buffer!");
-	}
-
-	vkCmdBindPipeline(mainProc._computeQueue._commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_COMPUTE, mainProc._computePipelines[0]);
-
-	vkCmdBindDescriptorSets(mainProc._computeQueue._commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_COMPUTE,
-		mainProc._computePipelineLayouts[0], 0, 1, &mainProc._descriptorSets[computePipelineInfo.pipelineIdx][currentFrame], 0, nullptr);
-
-	vkCmdDispatch(mainProc._computeQueue._commandBuffers[currentFrame], PARTICLE_COUNT / 256, 1, 1);
-
-	if (vkEndCommandBuffer(mainProc._computeQueue._commandBuffers[currentFrame]) != VK_SUCCESS) {
-		throw std::runtime_error("failed to record compute command buffer!");
-	}
-
-	/////////////////////////////////////
-	/////  Compute submission /////
-	VkSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &computeQueue._commandBuffers[currentFrame];
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = &computeQueue._semaphores[currentFrame];
-
-	if (vkQueueSubmit(computeQueue._queue, 1, &submitInfo, computeQueue._fences[currentFrame]) != VK_SUCCESS) {
-		throw std::runtime_error("failed to submit compute command buffer!");
-	};
-	/////////////////////////////////////
-
-	VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-
-	updateUniformBuffer(mainProc, uboHDL);
-
-	mainProc.beginDraw(imageFormat);
-
-	VkBuffer b = ssboHdl.getBuffers(mainProc)[mainProc._currentFrame]; // this function is very inefficient
-
-	vkCmdBindPipeline(graphicsQueue._commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, mainProc._graphicsPipelines[0]);
-
-	mainProc.drawFrameExperimental(0u, renderPasses[0], framebuffer, ssboHdl.getBuffers(mainProc)[mainProc._currentFrame], VK_NULL_HANDLE, 0,
-		PARTICLE_COUNT, 0, imageFormat, clearValues, uint16_t(sizeof(clearValues) / sizeof(VkClearValue)));
-
-
-
-
-	mainProc.endDraw(imageFormat);// updateSwapChain handles semaphores and fences, which just seems wrong
-
-	window.waitForFences();
-
-
-
-	double currentTime = glfwGetTime();
-	lastFrameTime = (currentTime - lastTime) * 1000.0;
-	lastTime = currentTime;
-
-	glm::vec2* debugData = (glm::vec2*)(mainProc._SSBO_DataMapped[currentFrame][debugHdl._index]);
-	printf("DEBUG BUFFER: x: %f y: %f\n", debugData->x, debugData->y);
-}
-*/

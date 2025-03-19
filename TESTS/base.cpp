@@ -144,16 +144,13 @@ int main() {
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	val::renderPassManager renderPassMngr;
+	val::renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
 
-	// 1 renderPass per pipeline
-	std::vector<VkRenderPass> renderPasses;
-
-	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline }, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline });
 	
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], proc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
 	const std::vector<res::vertex> vertices = {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
@@ -202,19 +199,15 @@ int main() {
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.beginPass(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
-		renderTarget.update(proc, pipeline);
-		renderTarget.render(proc, { viewport });
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
 		proc.nextFrame();
-	}
-
-	for (auto& pass : renderPasses) {
-		vkDestroyRenderPass(proc._device, pass, NULL);
 	}
 
 	return EXIT_SUCCESS;

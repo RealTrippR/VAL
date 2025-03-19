@@ -201,7 +201,7 @@ int main() {
 	val::VAL_PROC proc;
 	val::sampler imgSampler(proc, val::combinedImage);
 	val::imageView imgView(proc);
-	val::renderPassManager renderPassManager;
+	val::renderPassManager renderPassManager(proc);
 
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));

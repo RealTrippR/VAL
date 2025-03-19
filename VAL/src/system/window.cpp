@@ -18,6 +18,11 @@ namespace val {
 		}
 	}
 
+	void window::configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace) {
+		_window = windowHDL;
+		_colorSpace = colorSpace;
+	}
+
 	void window::display(const VkFormat& imageFormat, std::vector<VkSemaphore> waitOn) {
 		vkWaitForFences(_procVAL->_device, 1, &(_presentQueue._fences[_procVAL->_currentFrame]), VK_TRUE, UINT64_MAX);
 		updateSwapChain(imageFormat, waitOn);

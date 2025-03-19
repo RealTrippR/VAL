@@ -32,7 +32,12 @@ namespace val
 
 		//void removeAttachment(renderAttachment* attachment);
 
-	public:
+	protected:
+		friend VAL_PROC;
+		friend subpass;
+		friend renderAttachment;
+		friend renderPassManager;
+		/******************************************/
 		renderPassManager* _rpMngr;
 		/******************************************/
 		VkSubpassDescription _subpassDesc{};

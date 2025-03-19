@@ -15,6 +15,9 @@ namespace val {
 	class window {
 	public:
 		window() = default;
+		window(VAL_PROC& valProc) {
+			_procVAL = &valProc;
+		}
 		window(GLFWwindow* windowHDL, VAL_PROC* valProc, VkColorSpaceKHR colorSpace) {
 			if (!windowHDL) {
 				printf("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
@@ -33,6 +36,8 @@ namespace val {
 		GLFWwindow* getWindowHandleGLFW();
 
 	public:
+
+		void configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace);
 
 		void display(const VkFormat& imgFormat, std::vector<VkSemaphore> waitOn);
 
@@ -88,19 +93,6 @@ namespace val {
 		VkImageView* _swapChainAttachments;
 		uint16_t _swapChainAttachmentCount;
 		VkRenderPass _swapChainRenderPass{};
-
-
-
-
-
-		////////////////// SYNC OBJECTS //////////////////
-
-		//std::vector<VkSemaphore> _imageAvailableSemaphores;
-		//std::vector<VkSemaphore> _renderFinishedSemaphores;
-
-		//std::vector<VkFence> _inFlightFences;
-
-		///////////////////////////////////////////////
 	};
 }
 

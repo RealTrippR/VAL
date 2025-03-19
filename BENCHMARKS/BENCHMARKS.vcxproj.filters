@@ -15,5 +15,6 @@
     <ClCompile Include="1_million_vertices.cpp" />
     <ClCompile Include="2_million_vertices.cpp" />
     <ClCompile Include="..\TESTS\SSBOtest.cpp" />
+    <ClCompile Include="grassblades.cpp" />
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 #include <VAL/lib/system/system_utils.hpp>
-#include <VAL/lib/system/renderPassInfo.hpp>
+#include <VAL/lib/system/renderPass.hpp>
 #include <VAL/lib/system/UBO_Handle.hpp>
 #include <VAL/lib/system/pushConstantHandle.hpp>
 #include <VAL/lib/system/SSBO_Handle.hpp>

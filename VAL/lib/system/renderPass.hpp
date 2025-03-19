@@ -9,6 +9,14 @@ namespace val {
 	class renderPassManager
 	{
 	public:
+		renderPassManager(VAL_PROC& proc) { _procVAL = &proc; };
+		~renderPassManager() {
+			destroy();
+		}
+	public:
+
+		void destroy();
+
 		void bindSubpass(subpass* sp);
 
 		VkRenderPass& getVkRenderPass();
@@ -24,8 +32,12 @@ namespace val {
 		uint32_t addAttachment(val::renderAttachment* attachment);
 
 	protected:
+		friend renderAttachment;
 		friend subpass;
 		friend VAL_PROC;
+		/******************************************/
+		VAL_PROC* _procVAL = NULL;
+		/******************************************/
 		// these must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
 		std::vector<subpass*> _subpasses;
 

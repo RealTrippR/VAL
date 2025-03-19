@@ -113,11 +113,12 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, u
 }
 
 int main() {
-	val::VAL_PROC proc;
+	using namespace val;
+	VAL_PROC proc;
 
-	val::imageView imgView(proc);
+	imageView imgView(proc);
 
-	val::sampler imgSampler(proc, val::combinedImage);
+	sampler imgSampler(proc, combinedImage);
 	imgSampler.setMaxAnisotropy(0.f);
 	imgSampler.bindImageView(imgView);
 
@@ -156,40 +157,33 @@ int main() {
 
 
 	// THIS PROCESS MUST BE SIMPLIFIED
-	VkImage colorImage;
-	VkDeviceMemory colorImageMemory;
-	VkImageView colorImageView;
-	proc.createImage(windowSize.width, windowSize.height, imageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory, 1u, msaaSamples);
-	proc.createImageView(colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &colorImageView, 1u);
-
-
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	multisamplerManager multisamplerMngr(proc, msaaSamples);
+	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);
+	
+	UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
-	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	fragShader.setImageSamplers({ {&imgSampler, 1} });
 
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipeline;
+	graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &vertShader, &fragShader };
 	setGraphicsPipelineInfo(pipeline, msaaSamples);
 
-	val::renderPassManager renderPassMngr;
+	renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat, msaaSamples);
 	pipeline.renderPass = &renderPassMngr;
 
-	// 1 renderPass per pipeline
-	std::vector<VkRenderPass> renderPasses;
-	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline }, &renderPasses);
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline });
 
-	std::vector<VkImageView> attachments = { colorImageView };
-	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], proc._device);
+	std::vector<VkImageView> attachments = { multisamplerMngr.getVkImageView()};
+	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), pipeline.getVkRenderPass(), proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
@@ -206,12 +200,12 @@ int main() {
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
@@ -219,7 +213,7 @@ int main() {
 	proc.createDescriptorSets(&pipeline);
 
 	// configure the render target, setting vertex buffers, scissors, area, etc
-	val::renderTarget renderTarget;
+	renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setArea(window._swapChainExtent);
 	renderTarget.setScissorExtent(window._swapChainExtent);
@@ -240,9 +234,11 @@ int main() {
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.beginPass(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
-		renderTarget.update(proc, pipeline);
-		renderTarget.render(proc, { viewport });
+		renderTarget.beginPass(proc,pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.render(proc);
+		renderTarget.endPass(proc);
+
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 

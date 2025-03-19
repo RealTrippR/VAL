@@ -26,12 +26,14 @@
 #include <VAL/lib/system/descriptorBinding.hpp>
 #include <VAL/lib/system/pipelineType.hpp>
 
-enum bufferSpace {
-	GPU_ONLY,
-	CPU_GPU
-};
 
 namespace val {
+
+	enum bufferSpace {
+		GPU_ONLY,
+		CPU_GPU
+	};
+
 	class VAL_PROC; // forward declaration
 
 	namespace fs = std::filesystem;
