@@ -17,6 +17,8 @@ namespace val {
 		}
 
 		void update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, const shader& shdr, VkCommandBuffer& cmdBuffer);
+		
+		void update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer& cmdBuffer);
 
 		VkPushConstantRange toVkPushConstantRange();
 	public:

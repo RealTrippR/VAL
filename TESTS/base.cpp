@@ -160,12 +160,12 @@ int main() {
 	};
 
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), val::CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 

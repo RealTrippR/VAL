@@ -6,6 +6,15 @@
 ----------------------------------------------------------------------------------------------------------------
 VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 ----------------------------------------------------------------------------------------------------------------
+[!] Add support for another buffer space: GPU_LOCAL_CPU (this is only a recommendation, as not all GPU's support this. If it's not supported, it will be replaced by GPU_CPU)
+
+[!] Add a new property to buffers, AUTO_FLUSH_MEMORY and MANUALLY_FLUSH_MEMORY (equivalent to  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, see https://registry.khronos.org/vulkan/specs/latest/man/html/VkMemoryPropertyFlagBits.html)
+
+[ ] Enable customizable frames per flight for UBOs and SSBOS.
+
+[✓] Enable customizable frames per flight count for the val::buffer class to allow them to be properly updated during rendering. Each buffer can be created with a frames in flight property.
+
+[ ] Test MoltenVK to ensure full cross platform support with MacOS (https://github.com/KhronosGroup/MoltenVK)
 
 [✓] Rename to VAL (Vulkan Abstraction Library)
 

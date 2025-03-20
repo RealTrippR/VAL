@@ -92,7 +92,6 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, u
 	using namespace val;
 
 	static subpass subpass(renderPassMngr, GRAPHICS);
-
 	{
 		static colorAttachment colorAttach;
 		colorAttach.setMSAA_Samples(MSAA_Samples);
@@ -122,9 +121,7 @@ int main() {
 	imgSampler.setMaxAnisotropy(0.f);
 	imgSampler.bindImageView(imgView);
 
-
 	VkFormat imageFormat;
-
 	VkSampleCountFlagBits msaaSamples;
 
 	/////////// consider moving this into the window class ///////////
@@ -155,8 +152,6 @@ int main() {
 
 	printf("\n>-- MSAA Sample count: %d\n\n", msaaSamples);
 
-
-	// THIS PROCESS MUST BE SIMPLIFIED
 	multisamplerManager multisamplerMngr(proc, msaaSamples);
 	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);
 	

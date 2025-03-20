@@ -357,7 +357,7 @@ namespace val {
 
 	void shader::setPushConstant(pushConstantHandle* pushConstant) {
 		_pushConstant = pushConstant;
-		_pushConstant->_stageFlags = VkShaderStageFlags(pushConstant->_stageFlags | _shaderStageFlags);
+		_pushConstant->_stageFlags |= _shaderStageFlags;
 	}
 
 	pushConstantHandle* shader::getPushConstant() noexcept {

@@ -39,10 +39,13 @@ const bool enableValidationLayers = true;
 #include <ExternalLibraries/stb_image.h>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <ExternalLibraries/tiny_obj_loader.h>
-#define MAX_INSTANCES 32
 
+/****************************************************/
+#define MAX_INSTANCES 32
+#define FRAMES_IN_FLIGHT 2u
 const std::string MODEL_PATH = "res/asteroid/asteroid.obj";
 const std::string TEXTURE_PATH = "res/asteroid/Asteroid1a_Color_2K.png";
+/****************************************************/
 
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
@@ -128,84 +131,44 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, VkSampleCoun
 	info.depthStencil = &depthStencil;
 }
 
-
-
-void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentFormat, VkFormat depthAttachmentFormat, VkSampleCountFlagBits msaaSamples)
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, VkFormat depthFormat, VkSampleCountFlagBits samples)
 {
+	using namespace val;
 
-	// MUST BE STATIC IN MEMORY
-	static VkAttachmentDescription depthAttachment{};
-	depthAttachment.format = depthAttachmentFormat;
-	depthAttachment.samples = msaaSamples;
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	static subpass subpass(renderPassMngr, GRAPHICS);
 
-	// attachments - ALL MUST BE STATIC IN MEMORY
-	static VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = colorAttachmentFormat;
-	colorAttachment.samples = msaaSamples;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	static VkAttachmentDescription colorAttachmentResolve{};
-	colorAttachmentResolve.format = colorAttachmentFormat;
-	colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-	// MUST BE STATIC IN MEMORY
-	static VkAttachmentReference depthAttachmentRef{};
-	depthAttachmentRef.attachment = 0;
-	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	static VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 1;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	// THE FINAL COLOR ATTACHMENT REFERENCE MUST ALWAYS BE THE LAST ATTACHMENT
-	static VkAttachmentReference colorAttachmentResolveRef{};
-	colorAttachmentResolveRef.attachment = 2;
-	colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	// subpasses
-	// MUST BE STATIC IN MEMORY
-	static VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-	subpass.pDepthStencilAttachment = &depthAttachmentRef;
-	subpass.pResolveAttachments = &colorAttachmentResolveRef;
-
-	// MUST BE STATIC IN MEMORY
-	static VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-	dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-	renderPassInfo.subpasses = { subpass };
-	renderPassInfo.subpassDependencies = { dependency };
-	renderPassInfo.attachments = { depthAttachment, colorAttachment, colorAttachmentResolve };
+	{
+		static depthAttachment depthAttach;
+		depthAttach.setMSAA_Samples(samples);
+		depthAttach.setImgFormat(depthFormat);
+		depthAttach.setLoadOperation(CLEAR);
+		depthAttach.setStoreOperation(DISCARD);
+		depthAttach.setFinalLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		subpass.bindAttachment(&depthAttach);
+	}
+	{
+		static colorAttachment colorAttach;
+		colorAttach.setMSAA_Samples(samples);
+		colorAttach.setImgFormat(imgFormat);
+		colorAttach.setLoadOperation(CLEAR);
+		colorAttach.setStoreOperation(STORE);
+		colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		subpass.bindAttachment(&colorAttach);
+	}
+	{
+		static resolveAttachment resolveAttach;
+		resolveAttach.setImgFormat(imgFormat);
+		resolveAttach.setLoadOperation(DISCARD);
+		resolveAttach.setStoreOperation(STORE);
+		resolveAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		subpass.bindAttachment(&resolveAttach);
+	}
 }
 
+int main() 
+{ using namespace val;
 
-
-int main() {
-	val::VAL_PROC mainProc;
+	VAL_PROC proc;
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -216,57 +179,42 @@ int main() {
 	VkExtent2D windowSize{ 800,800 }; // in pixels
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(windowSize.width, windowSize.height, "Test", NULL, NULL);
 
-	val::window window(windowHDL_GLFW, &mainProc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
 	// FML uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements renderImageFormatReqs;
+	imageFormatRequirements renderImageFormatReqs;
 	renderImageFormatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	renderImageFormatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	renderImageFormatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	renderImageFormatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	// creates Vulkan logical and physical devices
-	// if a window is passed through, the windowSurface is also created
-	mainProc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	// creates Vulkan logical and physical devices; if a window is passed through, the windowSurface is also created
+	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat = val::findSupportedImageFormat(mainProc._physicalDevice, renderImageFormatReqs);
+	VkFormat imageFormat = findSupportedImageFormat(proc._physicalDevice, renderImageFormatReqs);
 
 
-	VkSampleCountFlagBits msaaSamples = mainProc.getMaxSampleCount();
-
-	printf("\n>-- MSAA Sample count: %d\n\n", msaaSamples);
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////
-	// CREATES COLOR RESOLVE IMAGE FOR MULTI-SAMPLING
-	// THIS PROCESS MUST BE SIMPLIFIED
-	VkImage colorImage;
-	VkDeviceMemory colorImageMemory;
-	VkImageView colorImageView;
-	mainProc.createImage(windowSize.width, windowSize.height, imageFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory, 1u, msaaSamples);
-	// this function should be changed to image colorImageView in the front
-	mainProc.createImageView(colorImage, imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &colorImageView, 1u);
+	VkSampleCountFlagBits msaaSamples = proc.getMaxSampleCount();
+	multisamplerManager multisamplerMngr(proc, msaaSamples);
+	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// The shader class is poorly optimized and fucking retarded at the moment
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/instancedShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
-	std::vector<VkVertexInputAttributeDescription> attributeDescriptions(7);
-	attributeDescriptions[0] = val::vertex3D::getAttributeDescriptions()[0];
-	attributeDescriptions[1] = val::vertex3D::getAttributeDescriptions()[1];
-	attributeDescriptions[2] = val::vertex3D::getAttributeDescriptions()[2];
+	shader vertShader("shaders-compiled/instancedShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	std::vector<VkVertexInputAttributeDescription> attributeDescriptions = val::vertex3D::getAttributeDescriptions(); 
+	attributeDescriptions.resize(attributeDescriptions.size() + 4);
 	// Instance Model Matrix (4 vec4s)
-	for (int i = 0; i < 4; i++) {
+	for (int i = 3; i < 7; i++) {
 		// 1 binding for each vec4 of the mat4
-		attributeDescriptions[3 + i].location = 3 + i;
-		attributeDescriptions[3 + i].binding = 1;
-		attributeDescriptions[3 + i].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-		attributeDescriptions[3 + i].offset = sizeof(glm::vec4) * i;
+		attributeDescriptions[i].location = i;
+		attributeDescriptions[i].binding = 1;
+		attributeDescriptions[i].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attributeDescriptions[i].offset = sizeof(glm::vec4) * (i-3);
 	}
 
 	vertShader.setVertexAttributes(attributeDescriptions);
@@ -285,14 +233,14 @@ int main() {
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::sampler imgSampler(mainProc, val::combinedImage);
+	val::sampler imgSampler(proc, val::combinedImage);
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders.push_back(&vertShader); // consolidate into a single function
-	pipelineInfo.shaders.push_back(&fragShader); // consolidate into a single function
-	setGraphicsPipelineInfo(pipelineInfo, msaaSamples);
+	val::graphicsPipelineCreateInfo pipeline;
+	pipeline.shaders.push_back(&vertShader); // consolidate into a single function
+	pipeline.shaders.push_back(&fragShader); // consolidate into a single function
+	setGraphicsPipelineInfo(pipeline, msaaSamples);
 
 	// FML uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -308,32 +256,29 @@ int main() {
 	depthFormatReqs.features = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	depthFormatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	VkFormat depthFormat = val::findSupportedImageFormat(mainProc._physicalDevice, depthFormatReqs);
+	VkFormat depthFormat = val::findSupportedImageFormat(proc._physicalDevice, depthFormatReqs);
 
 
-	val::renderPassInfo renderPassInfo;
-	setRenderPassInfo(renderPassInfo, imageFormat, depthFormat, msaaSamples);
-	pipelineInfo.renderPassInfo = &renderPassInfo;
-	// 1 renderPass per pipeline
-	std::vector<VkRenderPass> renderPasses;
-	mainProc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipelineInfo }, &renderPasses);
+	renderPassManager renderPassMngr(proc);
+	setRenderPass(renderPassMngr, imageFormat, depthFormat, msaaSamples);
+	pipeline.renderPass = &renderPassMngr;
+	proc.create(windowHDL_GLFW, &window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	// Create depth buffer
-	val::depthBuffer depthBuffer(mainProc, window._swapChainExtent, depthFormat, 1u, 1u, msaaSamples);
+	val::depthBuffer depthBuffer(proc, window._swapChainExtent, depthFormat, 1u, 1u, msaaSamples);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
-	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front(), colorImageView };
-	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], mainProc._device);
+	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front(), multisamplerMngr.getVkImageView()};
+	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), pipeline.getVkRenderPass() , proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER FML_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 	// Create mesh and texture, load object and apply texture to the image
-	val::image textureImg(mainProc, TEXTURE_PATH, imageFormat);
-	val::meshTextured mesh(mainProc);
-	mesh.loadFromDiskObj(mainProc, MODEL_PATH, true);
-	mesh.setTexture(mainProc, &textureImg);
+	image textureImg(proc, TEXTURE_PATH, imageFormat);
+	meshTextured mesh(proc);
+	mesh.loadFromDiskObj(proc, MODEL_PATH, true);
+	mesh.setTexture(proc, &textureImg);
 	imgSampler.bindImageView(mesh._textureImageView);
-	//fragShader._imageViews[0] = &mesh._textureImageView;
 
 	//////////////////////////////////////////////////////////////////
 	// create instance buffer
@@ -352,23 +297,14 @@ int main() {
 		instanceModels[i] = glm::translate(glm::mat4(1.0f), glm::vec3(x,y,z));
 	}
 	//////////////////////////////////////////////////////////////////
-
-	VkBuffer instanceBuffer;
-	VkDeviceMemory instanceBufferMemory;
-	mainProc.createBuffer(sizeof(instanceModels[0]) * MAX_INSTANCES,
-		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		instanceBuffer, instanceBufferMemory);
-
-	// Copy Data to buffer
-	void* data;
-	vkMapMemory(mainProc._device, instanceBufferMemory, 0, sizeof(instanceModels[0]) * MAX_INSTANCES, 0, &data);
-	memcpy(data, instanceModels.data(), sizeof(instanceModels[0]) * MAX_INSTANCES);
-	vkUnmapMemory(mainProc._device, instanceBufferMemory);
+	// buffer wrapper for instance Buffer
+	buffer instanceBuffer(proc, sizeof(instanceModels[0]) * MAX_INSTANCES, val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, FRAMES_IN_FLIGHT);
+	memcpy(instanceBuffer.getDataMapped(0), instanceModels.data(), sizeof(instanceModels[0]) * MAX_INSTANCES); // update for frame 0
+	memcpy(instanceBuffer.getDataMapped(1), instanceModels.data(), sizeof(instanceModels[0]) * MAX_INSTANCES); // update for frame 1
 
 	//////////////////////////////////////////////////////////////////
 
-	mainProc.createDescriptorSets(&pipelineInfo);
+	proc.createDescriptorSets(&pipeline);
 
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
@@ -379,7 +315,7 @@ int main() {
 		{.color { 0.0f, 0.0f, 0.0f, 1.0f } }
 	});
 	renderTarget.setIndexBuffer( mesh._indexBuffer , mesh._indices.size());
-	renderTarget.setVertexBuffers({ mesh._vertexBuffer, instanceBuffer }, mesh._vertices.size());
+	renderTarget.setVertexBuffers({ mesh._vertexBuffer, instanceBuffer.getVkBuffer()}, mesh._vertices.size());
 
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
@@ -388,29 +324,30 @@ int main() {
 		glfwPollEvents();
 		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
 		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
-
-		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = mainProc._currentFrame;
+		auto& currentFrame = proc._currentFrame;
 
-		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
+		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		updateUniformBuffer(mainProc, uboHdl);
+		updateUniformBuffer(proc, uboHdl);
+
+		renderTarget.setVertexBuffers({ mesh._vertexBuffer, instanceBuffer.getVkBuffer(currentFrame) }, mesh._vertices.size());
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.beginPass(mainProc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
-		renderTarget.update(mainProc, pipelineInfo);
-		renderTarget.render(mainProc, { viewport }, MAX_INSTANCES);
-		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.render(proc, MAX_INSTANCES);
+		renderTarget.endPass(proc);
+
+		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
-		mainProc.nextFrame();
-
-		window.waitForFences();
+		proc.nextFrame();
 	}
 
-	mainProc.cleanup();
+	proc.cleanup();
 
 	return EXIT_SUCCESS;
 }

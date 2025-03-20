@@ -38,7 +38,7 @@ namespace val {
 	public:
 		shader() = default;
 
-		shader(fs::path filepath, VkShaderStageFlags shaderStageFlags, std::string entryPoint) {
+		shader(fs::path filepath, VkShaderStageFlags shaderStageFlags, std::string entryPoint = "main") {
 			loadFromFile(filepath);
 			_entryPoint = entryPoint;
 			_shaderStageFlags = shaderStageFlags;
@@ -107,7 +107,7 @@ namespace val {
 		fs::path _filepath;
 
 		std::vector<descriptorBinding<specializationConstant*/*Constant*/>> _specializationConstants;
-		pushConstantHandle* _pushConstant;
+		pushConstantHandle* _pushConstant = NULL;
 		std::vector<descriptorBinding<UBO_Handle*>> _UBO_Handles;
 		std::vector<descriptorBinding<SSBO_Handle*>> _SSBO_Handles;
 		std::vector<descriptorBinding<val::sampler*>> _imageSamplers;

@@ -22,6 +22,18 @@ namespace val {
 		);
 	}
 
+	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer& cmdBuffer) {
+		vkCmdPushConstants(
+			cmdBuffer,
+			proc._pipelineLayouts[pipeline.pipelineIdx],
+			_stageFlags,
+			_offset,
+			_size,
+			data
+		);
+	}
+
+
 	VkPushConstantRange pushConstantHandle::toVkPushConstantRange() {
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = _stageFlags;  // Used in the vertex shader

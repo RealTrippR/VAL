@@ -110,13 +110,14 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 }
 
 int main() {
-	val::VAL_PROC proc;
+	using namespace val;
+	VAL_PROC proc;
 
 
-	val::imageView imgView1(proc);
-	val::imageView imgView2(proc);
+	imageView imgView1(proc);
+	imageView imgView2(proc);
 
-	val::pushConstantHandle PC_ImgScissor(sizeof(float));
+	pushConstantHandle PC_ImgScissor(sizeof(float));
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
@@ -125,21 +126,21 @@ int main() {
 
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
 
-	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements formatReqs;
+	imageFormatRequirements formatReqs;
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader.setUBOs({ {&uboHdl,0 } });
@@ -148,8 +149,8 @@ int main() {
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::shader fragShader("shaders-compiled/doubleImageShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
-	val::sampler imgSampler(proc, val::standalone);
+	shader fragShader("shaders-compiled/doubleImageShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	sampler imgSampler(proc, val::standalone);
 	imgSampler.bindImageView(imgView1);
 	// https://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
@@ -158,16 +159,16 @@ int main() {
 	//fragShader.setTextures({ {&imgView1, 2, 1 } });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipeline;
+	graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &fragShader, &vertShader };
 
 	setGraphicsPipelineInfo(pipeline);
 
 	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
+	VkFormat imageFormat =findSupportedImageFormat(proc._physicalDevice, formatReqs);
 	
-	val::renderPassManager renderPassManager(proc);
+	renderPassManager renderPassManager(proc);
 	setRenderPass(renderPassManager, imageFormat);
 	pipeline.renderPass = &renderPassManager;
 
@@ -181,10 +182,10 @@ int main() {
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 
-	val::image img1(proc, "testImage.jpg", imageFormat);
+	image img1(proc, "testImage.jpg", imageFormat);
 	imgView1.create(img1, VK_IMAGE_ASPECT_COLOR_BIT);
 
-	val::image img2(proc, "testImage2.png", imageFormat);
+	image img2(proc, "testImage2.png", imageFormat);
 	imgView2.create(img2, VK_IMAGE_ASPECT_COLOR_BIT);
 
 
@@ -197,13 +198,13 @@ int main() {
 	};
 
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 	bool imgNum = 0;
@@ -217,7 +218,7 @@ int main() {
 	proc.createDescriptorSets(&pipeline);
 
 	//////////////////////////////////////////////////////////////
-	val::renderTarget renderTarget;
+	renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setArea(window._swapChainExtent);
 	renderTarget.setScissorExtent(window._swapChainExtent);
