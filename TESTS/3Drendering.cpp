@@ -57,9 +57,10 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
+	const float CAM_DIST = 1.0f;
 	static uniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.model = glm::rotate(glm::mat4(1.0f), .5f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(glm::vec3(CAM_DIST, CAM_DIST, CAM_DIST), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
@@ -168,7 +169,7 @@ int main() {
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
 	//////////////////////////////////////////////////////////////////
 
-	VkExtent2D windowSize{ 800,800 }; // in pixels
+	VkExtent2D windowSize{ 1000,800 }; // in pixels
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(windowSize.width, windowSize.height, "Test", NULL, NULL);
 
 	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
@@ -192,6 +193,9 @@ int main() {
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, renderImageFormatReqs);
 
 	VkSampleCountFlagBits msaaSamples = proc.getMaxSampleCount();
+	VkPhysicalDeviceProperties deviceProperties;
+	vkGetPhysicalDeviceProperties(proc._physicalDevice, &deviceProperties);
+	std::cout << "Using GPU: " << deviceProperties.deviceName << std::endl;
 
 	multisamplerManager multisamplerMngr(proc, msaaSamples);
 	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);

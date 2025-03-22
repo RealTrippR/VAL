@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
-
+#include <Windows.h>
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
 
@@ -67,7 +67,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	static uniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.model = glm::rotate(glm::mat4(1.0f), .5f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(25.0f, 25.0f, 25.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.01f, 100.0f);
 	ubo.proj[1][1] *= -1;
@@ -242,14 +242,6 @@ int main()
 	pipeline.shaders.push_back(&fragShader); // consolidate into a single function
 	setGraphicsPipelineInfo(pipeline, msaaSamples);
 
-	// FML uses the image format requirements to pick the best image format
-	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements formatReqs;
-	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
-	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
-	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-
 	val::imageFormatRequirements depthFormatReqs;
 	depthFormatReqs.acceptedFormats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
 	depthFormatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -328,6 +320,8 @@ int main()
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
 
+		window.waitForFences();
+
 		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
 		updateUniformBuffer(proc, uboHdl);
@@ -335,6 +329,7 @@ int main()
 		renderTarget.setVertexBuffers({ mesh._vertexBuffer, instanceBuffer.getVkBuffer(currentFrame) }, mesh._vertices.size());
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+
 
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 		renderTarget.update(proc, pipeline, { viewport });

@@ -149,6 +149,18 @@
     <ClInclude Include="lib\system\multisamplerManager.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertex3Dsimple.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\physicalDeviceRequirements.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -216,6 +228,9 @@
     </ClCompile>
     <ClCompile Include="src\system\multisamplerManager.cpp">
       <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

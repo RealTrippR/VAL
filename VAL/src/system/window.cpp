@@ -188,7 +188,7 @@ namespace val {
 		}
 	}
 
-	/*void window::drawFrameExperimental(VkRenderPass renderPass, const VkBuffer& vertexBuffer, const VkBuffer& indexBuffer,
+	/*void window::drawFrameExperimental(VkRenderPass renderPadss, const VkBuffer& vertexBuffer, const VkBuffer& indexBuffer,
 		const uint16_t* indices, const uint16_t& indicesCount, const VkFormat& imageFormat)
 	{
 	}*/

@@ -1,10 +1,8 @@
-#include <VAL/lib/meshes&vertices/meshTextured.hpp>
 #include <VAL/lib/meshes&vertices/loadModels.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-
-	void meshTextured::loadFromDiskObj(VAL_PROC& proc, fs::path objPath, bool deduplicateVertices) {
+	void meshSimple::loadFromDiskObj(VAL_PROC& proc, fs::path objPath, bool deduplicateVertices) {
 
 		loadModelFromDiskAsUnifiedMesh(objPath, _vertices, _indices, _meshAttribs, deduplicateVertices);
 
@@ -13,7 +11,8 @@ namespace val {
 		proc.createIndexBuffer(_indices.data(), _indices.size(), &_indexBuffer, &_indexBufferMem);
 	}
 
-	void meshTextured::cleanup(VAL_PROC& proc) {
+	void meshSimple::cleanup(VAL_PROC& proc)
+	{
 		VkDevice& device = proc._device;
 
 #ifndef NDEBUG
@@ -32,11 +31,4 @@ namespace val {
 		}
 	}
 
-	void meshTextured::setTexture(VAL_PROC& proc, val::image* texture) {
-		_texture = texture;
-		if (_textureImageView) {
-			vkDestroyImageView(proc._device, _textureImageView, NULL);
-		}
-		_textureImageView.recreate(*texture, VK_IMAGE_ASPECT_COLOR_BIT);
-	}
 }

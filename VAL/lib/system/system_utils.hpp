@@ -26,6 +26,7 @@
 #include <VAL/lib/system/descriptorBinding.hpp>
 #include <VAL/lib/system/pipelineType.hpp>
 
+#include <VAL/lib/system/physicalDeviceRequirements.hpp>
 
 namespace val {
 
@@ -99,6 +100,10 @@ namespace val {
 	VkFormat findSupportedImageFormat(VAL_PROC& proc, imageFormatRequirements& requirements);
 
 	VkFormat findSupportedImageFormat(VkPhysicalDevice physicalDevice, imageFormatRequirements& requirements);
+
+	VkPhysicalDevice findOptimalPhysicalDevice(VAL_PROC& proc, physicalDeviceRequirements& requirements);
+
+	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance* vkInstance, physicalDeviceRequirements& requirements);
 
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 

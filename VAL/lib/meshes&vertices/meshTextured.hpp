@@ -1,12 +1,9 @@
-#ifndef VAL_MESH_HPP
-#define VAL_MESH_HPP
+#ifndef VAL_MESH_TEXTURED_HPP
+#define VAL_MESH_TEXTURED_HPP
 
 #include <VAL/lib/system/system_utils.hpp>
-#include <VAL/lib/meshes&vertices/vertex3Dtextured.hpp>
-#include <VAL/lib/meshes&vertices/loadModels.hpp>
-#include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/image.hpp>
-#include <ExternalLibraries/tiny_obj_loader.h>
+#include <VAL/lib/meshes&vertices/vertex3Dtextured.hpp>
 
 namespace val {
 	namespace fs = std::filesystem;
@@ -32,11 +29,11 @@ namespace val {
 		VkBuffer _indexBuffer = NULL;
 		VkDeviceMemory _indexBufferMem = NULL;
 
-		val::image* _texture;
+		val::image* _texture = NULL;
 		val::imageView _textureImageView;
 		val::VAL_PROC& _proc;
 		//mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(val::vertex3D), &vertexBuffer, &vertexBufferMem);
 	};
 }
 
-#endif // !VAL_MESH_HPP
+#endif // !VAL_MESH_TEXTURED_HPP

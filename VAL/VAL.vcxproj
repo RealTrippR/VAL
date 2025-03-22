@@ -199,10 +199,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp" />
     <ClInclude Include="lib\graphics\shader.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertex3Dsimple.hpp" />
     <ClInclude Include="lib\renderAttachments\attachmentEnums.hpp" />
     <ClInclude Include="lib\renderAttachments\colorAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\depthAttachment.hpp" />
@@ -217,6 +220,7 @@
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\multisamplerManager.hpp" />
+    <ClInclude Include="lib\system\physicalDeviceRequirements.hpp" />
     <ClInclude Include="lib\system\pipelineType.hpp" />
     <ClInclude Include="lib\system\renderPass.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
@@ -236,6 +240,7 @@
     <ClInclude Include="lib\system\window.hpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
+    <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />

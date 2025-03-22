@@ -10,6 +10,8 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [!] Add a new property to buffers, AUTO_FLUSH_MEMORY and MANUALLY_FLUSH_MEMORY (equivalent to  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, see https://registry.khronos.org/vulkan/specs/latest/man/html/VkMemoryPropertyFlagBits.html)
 
+[ ] Enable meshes to be loaded from positon data and index data (i.e. a vector of glm::vec3's and a vector of uint_32t's)
+
 [ ] Enable customizable frames per flight for UBOs and SSBOS.
 
 [✓] Enable customizable frames per flight count for the val::buffer class to allow them to be properly updated during rendering. Each buffer can be created with a frames in flight property.
@@ -141,5 +143,7 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 [ ] Add support for dynamic rendering. See: https://docs.vulkan.org/samples/latest/samples/extensions/dynamic_rendering/README.html
 
 [ ] Optimize the createUBOs and createSSBO functions
+
+[ ] Consider using: https://github.com/KhronosGroup/Vulkan-Hpp
 
 [ ] Consider purchasing https://www.oreilly.com/library/view/vulkantm-programming-guide/9780134464701/ch13.html

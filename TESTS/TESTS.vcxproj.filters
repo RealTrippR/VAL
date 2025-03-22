@@ -20,6 +20,7 @@
     <ClCompile Include="immutableSamplerTest.cpp" />
     <ClCompile Include="UBO_SSBO_ArrayTest.cpp" />
     <ClCompile Include="Z-PrepassTest.cpp" />
+    <ClCompile Include="forwardRendering.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
