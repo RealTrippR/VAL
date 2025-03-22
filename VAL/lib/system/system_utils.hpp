@@ -101,9 +101,9 @@ namespace val {
 
 	VkFormat findSupportedImageFormat(VkPhysicalDevice physicalDevice, imageFormatRequirements& requirements);
 
-	VkPhysicalDevice findOptimalPhysicalDevice(VAL_PROC& proc, physicalDeviceRequirements& requirements);
+	VkPhysicalDevice findOptimalPhysicalDevice(VAL_PROC& proc, physicalDeviceRequirements& requirements, VkSurfaceKHR surface);
 
-	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance* vkInstance, physicalDeviceRequirements& requirements);
+	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance vkInstance, physicalDeviceRequirements& requirements, VkSurfaceKHR surface);
 
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 

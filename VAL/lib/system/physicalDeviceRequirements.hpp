@@ -61,7 +61,6 @@ namespace val {
 		std::optional<uint32_t> deviceID;
 		std::optional<uint32_t> vendorID;
 		std::vector<const char*>& deviceExtensions;
-		bool swapChainSupport = true;
 	};
 }
 
