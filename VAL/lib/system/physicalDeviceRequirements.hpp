@@ -9,7 +9,8 @@ namespace val {
 	
 	enum DEVICE_TYPE_BITS
 	{
-		integrated_GPU = 0,
+		DEVICE_TYPE_UNDEFINED = 0,
+		integrated_GPU = 1 << 0,
 		dedicated_GPU = 1 << 1,
 		virtutal_GPU = 1 << 2,
 		CPU = 1 << 3
@@ -36,13 +37,13 @@ namespace val {
 	typedef uint8_t DEVICE_FEATURE_FLAGS;
 	enum DEVICE_FEATURE_BITS
 	{
-		UNDEFINED = 0,
-		raytracing = 1 << 1,
-		anisotropicFiltering = 1 << 2,
-		variableRateShading = 1 << 3,
-		geometryShader = 1 << 4,
-		tesselationShader = 1 << 5,
-		cubeMaps = 1 << 6
+		DEVICE_FEATURE_UNDEFINED = 0,
+		raytracing = 1 << 0,
+		anisotropicFiltering = 1 << 1,
+		variableRateShading = 1 << 2,
+		geometryShader = 1 << 3,
+		tesselationShader = 1 << 4,
+		cubeMaps = 1 << 5
 	};
 
 	struct physicalDevicePriorities
@@ -55,12 +56,17 @@ namespace val {
 
 	struct physicalDeviceRequirements
 	{
+		physicalDeviceRequirements() = default;
+		physicalDeviceRequirements(DEVICE_TYPE_FLAGS deviceTypes_) : deviceTypes(deviceTypes_) {};
+		physicalDeviceRequirements(DEVICE_TYPE_FLAGS deviceTypes_, DEVICE_FEATURE_FLAGS deviceFeatures_) : 
+			deviceTypes(deviceTypes_), deviceFeatures(deviceFeatures_) {};
+	//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
 		DEVICE_TYPE_FLAGS deviceTypes = integrated_GPU | dedicated_GPU;
 		DEVICE_FEATURE_FLAGS deviceFeatures{};
 		physicalDevicePriorities priorities{};
 		std::optional<uint32_t> deviceID;
 		std::optional<uint32_t> vendorID;
-		std::vector<const char*>& deviceExtensions;
+		std::vector<const char*> deviceExtensions;
 	};
 }
 
