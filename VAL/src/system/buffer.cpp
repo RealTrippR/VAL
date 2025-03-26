@@ -174,4 +174,28 @@ namespace val
 		return  &_proc;
 	}
 
+	////////////////////////////////////////////////////////////////////////////
+	void buffer::copy(const buffer& other) {
+		const uint32_t frameCount = other._buffers.size();
+		// cleanup old data.
+		this->destroy();
+
+		_size = other._size;
+		_space = other._space;
+		_proc = other._proc;
+
+		_buffers.resize(frameCount);
+		_memory.resize(frameCount);
+		_dataMapped.resize(frameCount);
+
+		
+		for (uint16_t fIdx = 0; fIdx < frameCount; ++fIdx) {
+			_proc.createBuffer(other._size, other._usage, bufferSpaceToVkMemoryProperty(_space), _buffers[fIdx], _memory[fIdx]);
+			// create mapped data memory
+			if (CPU_GPU == _space) {
+				vkMapMemory(_proc._device, _memory[fIdx], 0u, _size, 0u, &_dataMapped[fIdx]);
+			}
+			_proc.copyBuffer(other._buffers[fIdx], _buffers[fIdx], _size);
+		}
+	}
 }

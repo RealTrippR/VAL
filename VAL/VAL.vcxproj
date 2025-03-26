@@ -206,6 +206,10 @@
     <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dsimple.hpp" />
+    <ClInclude Include="lib\pipelineStateInfos\colorBlendStateAttachment.hpp" />
+    <ClInclude Include="lib\pipelineStateInfos\multisamplingStateInfo.hpp" />
+    <ClInclude Include="lib\pipelineStateInfos\rasterizerState.hpp" />
+    <ClInclude Include="lib\pipelineStateInfos\stateInfoEnums.hpp" />
     <ClInclude Include="lib\renderAttachments\attachmentEnums.hpp" />
     <ClInclude Include="lib\renderAttachments\colorAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\depthAttachment.hpp" />
@@ -242,10 +246,13 @@
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
+    <ClCompile Include="src\pipelineStateInfos\colorBlendStateAttachment.cpp" />
+    <ClCompile Include="src\pipelineStateInfos\rasterizerState.cpp" />
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
+    <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\multisamplerManager.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
@@ -265,6 +272,9 @@
     <ClCompile Include="src\system\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\pipelineStateInfos\colorBlendState.hpp">
+      <FileType>Text</FileType>
+    </ClInclude>
     <Text Include="notes\to-do-list.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -4,10 +4,8 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-
-	typedef uint8_t DEVICE_TYPE_FLAGS;
 	
-	enum DEVICE_TYPE_BITS
+	enum DEVICE_TYPE_FLAGS
 	{
 		DEVICE_TYPE_UNDEFINED = 0,
 		integrated_GPU = 1 << 0,
@@ -15,6 +13,7 @@ namespace val {
 		virtutal_GPU = 1 << 2,
 		CPU = 1 << 3
 	};
+	DEF_ENUM_BITWISE_OPERATORS(DEVICE_TYPE_FLAGS)
 
 	constexpr std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPE_FLAGS flag)
 	{
@@ -34,8 +33,7 @@ namespace val {
 		return ret;
 	}
 	
-	typedef uint8_t DEVICE_FEATURE_FLAGS;
-	enum DEVICE_FEATURE_BITS
+	enum DEVICE_FEATURE_FLAGS
 	{
 		DEVICE_FEATURE_UNDEFINED = 0,
 		raytracing = 1 << 0,
@@ -45,6 +43,23 @@ namespace val {
 		tesselationShader = 1 << 4,
 		cubeMaps = 1 << 5
 	};
+
+	/************************************************************************************/
+	inline DEVICE_FEATURE_FLAGS operator|(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
+	{return static_cast<DEVICE_FEATURE_FLAGS>(static_cast<int16_t>(a) | static_cast<int16_t>(b));}
+	/************************************************************************************/
+	inline DEVICE_FEATURE_FLAGS operator&(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
+	{return static_cast<DEVICE_FEATURE_FLAGS>(static_cast<int16_t>(a) & static_cast<int16_t>(b));}
+	/************************************************************************************/
+	inline DEVICE_FEATURE_FLAGS operator^(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
+	{return static_cast<DEVICE_FEATURE_FLAGS>(static_cast<int16_t>(a) ^ static_cast<int16_t>(b));}
+	/************************************************************************************/
+	inline DEVICE_TYPE_FLAGS operator<<(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
+	{return static_cast<DEVICE_TYPE_FLAGS>(static_cast<int16_t>(a) << static_cast<int16_t>(b));}
+	/************************************************************************************/
+	inline DEVICE_TYPE_FLAGS operator>>(DEVICE_TYPE_FLAGS a, DEVICE_TYPE_FLAGS b)
+	{return static_cast<DEVICE_TYPE_FLAGS>(static_cast<int16_t>(a) >> static_cast<int16_t>(b));}
+	/************************************************************************************/
 
 	struct physicalDevicePriorities
 	{

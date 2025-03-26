@@ -13,6 +13,7 @@ namespace val {
 		std::vector<VkDynamicState> dynamicStates;
 		//renderPassInfo* renderPassInfo;
 		renderPassManager* renderPass;
+		/*
 		VkPipelineDynamicStateCreateInfo dynamicState{};
 		VkPipelineRasterizationStateCreateInfo rasterizer{};
 		VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -20,7 +21,34 @@ namespace val {
 		VkPipelineColorBlendStateCreateInfo colorBlending{};
 		VkPipelineDepthStencilStateCreateInfo* depthStencil = NULL;
 		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		*/
 
+		void setRasterizer(val::rasterizerStateInfo* rasterizer);
+
+		rasterizerStateInfo* getRasterizer();
+
+		void setColorBlendState(val::colorBlendState* colorState);
+
+		colorBlendState* getColorBlendState();
+
+		void setMultisamplingLevel(const VkSampleCountFlags& samples);
+
+		const VkSampleCountFlags& getMultisamplingLevel();
+
+		void setSampleShadingEnabled(const bool& enabled);
+
+		const bool& getSampleShadingEnabled();
+
+		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	protected:
+		friend VAL_PROC;
+	protected:
+		rasterizerStateInfo* _rasterizerState = NULL;
+		colorBlendState* _colorBlendState = NULL;
+
+		VkSampleCountFlags _sampleCountMSAA = VK_SAMPLE_COUNT_1_BIT;
+		bool _sampleShadingEnabled = false;
+	protected:
 		inline VkRenderPass& getVkRenderPass() {
 			return renderPass->getVkRenderPass();
 		}
