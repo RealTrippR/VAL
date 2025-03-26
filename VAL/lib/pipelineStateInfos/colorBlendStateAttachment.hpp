@@ -1,5 +1,5 @@
-#ifndef VAL_COLOR_BLEND_STATE_HPP
-#define VAL_COLOR_BLEND_STATE_HPP
+#ifndef VAL_COLOR_BLEND_STATE_ATTACHMENT_HPP
+#define VAL_COLOR_BLEND_STATE_ATTACHMENT_HPP
 
 #include <VAL/lib/system/system_utils.hpp>
 
@@ -50,4 +50,4 @@ namespace val
 	};
 }
 
-#endif // !VAL_COLOR_BLEND_STATE_HPP
+#endif // !VAL_COLOR_BLEND_STATE_ATTACHMENT_HPP

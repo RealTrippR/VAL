@@ -246,6 +246,7 @@
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
+    <ClCompile Include="src\pipelineStateInfos\colorBlendState.cpp" />
     <ClCompile Include="src\pipelineStateInfos\colorBlendStateAttachment.cpp" />
     <ClCompile Include="src\pipelineStateInfos\rasterizerState.cpp" />
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />

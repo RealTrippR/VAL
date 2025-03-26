@@ -262,6 +262,9 @@
     <ClCompile Include="src\pipelineStateInfos\colorBlendStateAttachment.cpp">
       <Filter>src\pipelineStateInfos</Filter>
     </ClCompile>
+    <ClCompile Include="src\pipelineStateInfos\colorBlendState.cpp">
+      <Filter>src\pipelineStateInfos</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="notes\to-do-list.txt">

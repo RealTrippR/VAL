@@ -33,6 +33,7 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 
 #include <ExternalLibraries/stb_image.h>;
 #include <optional>
+#include <array>
 #include <set>
 #include <vector>
 #include <utility>
