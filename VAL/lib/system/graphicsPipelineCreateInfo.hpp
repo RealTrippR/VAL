@@ -40,6 +40,11 @@ namespace val {
 		const bool& getSampleShadingEnabled();
 
 		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+	public:
+		inline VkRenderPass& getVkRenderPass() {
+			return renderPass->getVkRenderPass();
+		}
 	protected:
 		friend VAL_PROC;
 	protected:
@@ -48,10 +53,6 @@ namespace val {
 
 		VkSampleCountFlags _sampleCountMSAA = VK_SAMPLE_COUNT_1_BIT;
 		bool _sampleShadingEnabled = false;
-	protected:
-		inline VkRenderPass& getVkRenderPass() {
-			return renderPass->getVkRenderPass();
-		}
 	};
 }
 
