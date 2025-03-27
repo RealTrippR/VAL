@@ -55,7 +55,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 {	using namespace val;
 
 	// state infos
-	static rasterizerStateInfo rasterizer;
+	static rasterizerState rasterizer;
 	rasterizer.setCullMode(CULL_MODE_ENUMS::BACK);
 	rasterizer.setPolygonMode(POLYGON_MODE_ENUM::FILL);
 	pipeline.setRasterizer(&rasterizer);

@@ -23,9 +23,9 @@ namespace val {
 		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		*/
 
-		void setRasterizer(val::rasterizerStateInfo* rasterizer);
+		void setRasterizer(val::rasterizerState* rasterizer);
 
-		rasterizerStateInfo* getRasterizer();
+		rasterizerState* getRasterizer();
 
 		void setColorBlendState(val::colorBlendState* colorState);
 
@@ -39,6 +39,8 @@ namespace val {
 
 		const bool& getSampleShadingEnabled();
 
+		VkPipelineMultisampleStateCreateInfo getVkPipelineMultisampleStateCreateInfo();
+
 		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
 	public:
@@ -48,8 +50,10 @@ namespace val {
 	protected:
 		friend VAL_PROC;
 	protected:
-		rasterizerStateInfo* _rasterizerState = NULL;
+		rasterizerState* _rasterizerState = NULL;
 		colorBlendState* _colorBlendState = NULL;
+
+		depthStencilState* depthStencil = NULL;
 
 		VkSampleCountFlags _sampleCountMSAA = VK_SAMPLE_COUNT_1_BIT;
 		bool _sampleShadingEnabled = false;

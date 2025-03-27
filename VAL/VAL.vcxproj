@@ -207,6 +207,7 @@
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dsimple.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\colorBlendStateAttachment.hpp" />
+    <ClInclude Include="lib\pipelineStateInfos\depthStencilState.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\multisamplingStateInfo.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\rasterizerState.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\stateInfoEnums.hpp" />
@@ -248,6 +249,7 @@
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
     <ClCompile Include="src\pipelineStateInfos\colorBlendState.cpp" />
     <ClCompile Include="src\pipelineStateInfos\colorBlendStateAttachment.cpp" />
+    <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp" />
     <ClCompile Include="src\pipelineStateInfos\rasterizerState.cpp" />
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />

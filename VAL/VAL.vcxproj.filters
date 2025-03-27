@@ -182,6 +182,9 @@
     <ClInclude Include="lib\pipelineStateInfos\colorBlendState.hpp">
       <Filter>lib\pipelineStateInfos</Filter>
     </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\depthStencilState.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -263,6 +266,9 @@
       <Filter>src\pipelineStateInfos</Filter>
     </ClCompile>
     <ClCompile Include="src\pipelineStateInfos\colorBlendState.cpp">
+      <Filter>src\pipelineStateInfos</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp">
       <Filter>src\pipelineStateInfos</Filter>
     </ClCompile>
   </ItemGroup>

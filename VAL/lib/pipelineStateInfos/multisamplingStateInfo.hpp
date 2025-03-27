@@ -4,7 +4,7 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	class multisamplingStateInfo
+	class multisamplingState
 	{
 	public:
 

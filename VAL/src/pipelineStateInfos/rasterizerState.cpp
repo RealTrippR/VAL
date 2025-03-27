@@ -1,69 +1,73 @@
-#include <VAL/lib/pipelineStateInfos/rasterizerStateInfo.hpp>
+#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
 
 namespace val
 {
-	void rasterizerStateInfo::setEnableDepthBias(const bool& enable) {
+	void rasterizerState::setEnableDepthBias(const bool& enable) {
 		_VKrasterizerState.depthBiasEnable = enable;
 	}
 
-	const bool& rasterizerStateInfo::getEnableDepthBias() {
+	const bool& rasterizerState::getEnableDepthBias() {
 		return _VKrasterizerState.depthBiasEnable;
 	}
 
-	void rasterizerStateInfo::setConstantDepthBias(const float& bias) {
+	void rasterizerState::setConstantDepthBias(const float& bias) {
 		_VKrasterizerState.depthBiasConstantFactor = bias;
 	}
 
-	const float& rasterizerStateInfo::getConstantDepthBias() {
+	const float& rasterizerState::getConstantDepthBias() {
 		return _VKrasterizerState.depthBiasConstantFactor;
 	}
 
-	void rasterizerStateInfo::setEnableDepthBiasClamp(const bool& enabled) {
+	void rasterizerState::setEnableDepthBiasClamp(const bool& enabled) {
 		_VKrasterizerState.depthClampEnable = enabled;
 	}
 
-	const bool& rasterizerStateInfo::getEnableDepthBiasClamp() {
+	const bool& rasterizerState::getEnableDepthBiasClamp() {
 		return _VKrasterizerState.depthClampEnable;
 	}
 
-	void rasterizerStateInfo::setDepthBiasClamp(const float& clamp) {
+	void rasterizerState::setDepthBiasClamp(const float& clamp) {
 		_VKrasterizerState.depthBiasClamp = clamp;
 	}
 
-	const float& rasterizerStateInfo::getDepthBiasClamp() {
+	const float& rasterizerState::getDepthBiasClamp() {
 		return _VKrasterizerState.depthBiasClamp;
 	}
 
-	void rasterizerStateInfo::setLineWidth(const float& width, const PIPELINE_PROPERTY_STATE& state) {
+	void rasterizerState::setLineWidth(const float& width, const PIPELINE_PROPERTY_STATE& state) {
 		_lineWidthState = state;
 		_VKrasterizerState.lineWidth = width;
 	}
 
-	const float& rasterizerStateInfo::getLineWidth() {
+	const float& rasterizerState::getLineWidth() {
 		return _VKrasterizerState.lineWidth;
 	}
 
-	void rasterizerStateInfo::setLineWidthState(const PIPELINE_PROPERTY_STATE& state) {
+	void rasterizerState::setLineWidthState(const PIPELINE_PROPERTY_STATE& state) {
 		_lineWidthState = state;
 	}
 
-	const PIPELINE_PROPERTY_STATE& rasterizerStateInfo::getLineWidthState() {
+	const PIPELINE_PROPERTY_STATE& rasterizerState::getLineWidthState() {
 		return _lineWidthState;
 	}
 
-	void rasterizerStateInfo::setPolygonMode(const POLYGON_MODE_ENUM& polygonMode) {
+	void rasterizerState::setPolygonMode(const POLYGON_MODE_ENUM& polygonMode) {
 		_VKrasterizerState.polygonMode = VkPolygonMode(polygonMode);
 	}
 
-	const POLYGON_MODE_ENUM& rasterizerStateInfo::getPolygonMode() {
+	const POLYGON_MODE_ENUM& rasterizerState::getPolygonMode() {
 		return (POLYGON_MODE_ENUM)_VKrasterizerState.polygonMode;
 	}
 
-	const CULL_MODE_ENUMS& rasterizerStateInfo::getCullMode() {
+	const CULL_MODE_ENUMS& rasterizerState::getCullMode() {
 		return CULL_MODE_ENUMS(_VKrasterizerState.cullMode);
 	}
 
-	void rasterizerStateInfo::setCullMode(const CULL_MODE_ENUMS& cullMode) {
+	void rasterizerState::setCullMode(const CULL_MODE_ENUMS& cullMode) {
 		_VKrasterizerState.cullMode = VkCullModeFlags(cullMode);
+	}
+
+	VkPipelineRasterizationStateCreateInfo* rasterizerState::getVkPipelineRasterizationStateCreateInfo() {
+		return &_VKrasterizerState;
 	}
 }

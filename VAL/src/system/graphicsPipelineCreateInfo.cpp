@@ -2,12 +2,12 @@
 
 namespace val
 {
-	void graphicsPipelineCreateInfo::setRasterizer(val::rasterizerStateInfo* rasterizer)
+	void graphicsPipelineCreateInfo::setRasterizer(val::rasterizerState* rasterizer)
 	{
 		_rasterizerState = rasterizer;
 	}
 
-	rasterizerStateInfo* graphicsPipelineCreateInfo::getRasterizer()
+	rasterizerState* graphicsPipelineCreateInfo::getRasterizer()
 	{
 		return _rasterizerState;
 	}
@@ -37,4 +37,12 @@ namespace val
 	const bool& graphicsPipelineCreateInfo::getSampleShadingEnabled() {
 		return _sampleShadingEnabled;
 	}
+
+	VkPipelineMultisampleStateCreateInfo graphicsPipelineCreateInfo::getVkPipelineMultisampleStateCreateInfo() {
+		VkPipelineMultisampleStateCreateInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+		info.rasterizationSamples = (VkSampleCountFlagBits)_sampleCountMSAA;
+		info.sampleShadingEnable = _sampleShadingEnabled;
+	}
+
 }

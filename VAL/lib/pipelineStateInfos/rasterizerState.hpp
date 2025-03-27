@@ -4,7 +4,7 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	class rasterizerStateInfo
+	class rasterizerState
 	{
 	public:
 
@@ -40,7 +40,11 @@ namespace val {
 
 		const CULL_MODE_ENUMS& getCullMode();
 
+		VkPipelineRasterizationStateCreateInfo* getVkPipelineRasterizationStateCreateInfo();
+
 	protected:
+		friend VAL_PROC;
+
 		PIPELINE_PROPERTY_STATE _lineWidthState = PIPELINE_PROPERTY_STATE::STATIC;
 		VkPipelineRasterizationStateCreateInfo _VKrasterizerState
 		{

@@ -53,6 +53,7 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 
 #include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
 #include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
+#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
 #include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
 #include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
 
