@@ -55,79 +55,44 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 
 	hdl.update(proc, &ubo);
 }
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+{	using namespace val;
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
-	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
-	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_FALSE;
-	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.lineWidth = 1.0f;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rasterizer.depthBiasEnable = VK_FALSE;
+	// state infos
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE_ENUMS::BACK);
+	rasterizer.setPolygonMode(POLYGON_MODE_ENUM::FILL);
+	pipeline.setRasterizer(&rasterizer);
 
-	VkPipelineMultisampleStateCreateInfo& multisampling = info.multisampling;
-	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampling.sampleShadingEnable = VK_FALSE;
-	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	// the color blend state affects how the output of the fragmennt shader is 
+	// blended into the existing content of the the framebuffer.
+	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
-	VkPipelineColorBlendAttachmentState& colorBlendAttachment = info.colorBlendAttachment;
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_FALSE;
+	pipeline.setSampleCount(VK_SAMPLE_COUNT_1_BIT);
 
-	VkPipelineColorBlendStateCreateInfo& colorBlending = info.colorBlending;
-	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlending.logicOpEnable = VK_FALSE;
-	colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+	static colorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
+}
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	using namespace val;
+	static colorAttachment colorAttach;
+	colorAttach.setImgFormat(imgFormat);
+	colorAttach.setLoadOperation(CLEAR);
+	colorAttach.setStoreOperation(STORE);
+	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+	static subpass subpass(renderPassMngr, GRAPHICS);
+	subpass.bindAttachment(&colorAttach);
 }
 
-void setRenderPassInfo(val::renderPassInfo& renderPassInfo, VkFormat colorAttachmentImageFormat) {
-	// attachments
-	static VkAttachmentDescription colorAttachment{};
-	colorAttachment.format = colorAttachmentImageFormat;
-	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+int main()
+{	using namespace val;
 
-	renderPassInfo.attachments = { colorAttachment };
-	//renderPassInfo.attachmentImageLayouts = { VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*This second value is the layout of the corresponding VkAttachmentReference*/ };
-
-	static VkAttachmentReference colorAttachmentRef{};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	// subpasses
-	static VkSubpassDescription subpass{};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-
-	renderPassInfo.subpasses = { subpass };
-
-	static VkSubpassDependency dependency{};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-	renderPassInfo.subpassDependencies = { dependency };
-}
-
-int main() {
-	val::VAL_PROC mainProc;
+	VAL_PROC proc;
+	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -137,13 +102,11 @@ int main() {
 
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
 
-	val::window window(windowHDL_GLFW, &mainProc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
-
-	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements formatReqs;
+	imageFormatRequirements formatReqs;
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
@@ -161,40 +124,38 @@ int main() {
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::sampler imgSampler(mainProc, val::combinedImage);
+	val::sampler imgSampler(proc, val::combinedImage);
+	imgSampler.setMaxAnisotropy(8.f);
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipelineInfo;
-	pipelineInfo.shaders = { &fragShader, &vertShader };
+	val::graphicsPipelineCreateInfo pipeline;
+	pipeline.shaders = { &fragShader, &vertShader };
 
-	setGraphicsPipelineInfo(pipelineInfo);
+	setGraphicsPipelineInfo(pipeline);
 
-	mainProc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat = val::findSupportedImageFormat(mainProc._physicalDevice, formatReqs);
+	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	val::renderPassInfo renderPassInfo;
-	setRenderPassInfo(renderPassInfo, imageFormat);
-	pipelineInfo.renderPassInfo = &renderPassInfo;
-	// 1 renderPass per pipeline
-	std::vector<VkRenderPass> renderPasses;
 
-	mainProc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipelineInfo }, &renderPasses);
+	val::renderPassManager renderPassMngr(proc);
+	setRenderPass(renderPassMngr, imageFormat);
+	pipeline.renderPass = &renderPassMngr;
+	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipeline });
 
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, renderPasses[0], mainProc._device);
-
+	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 
-	val::image img1(mainProc, "testImage.jpg", imageFormat);
-	val::imageView imgView1(mainProc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
+	val::image img1(proc, "testImage.jpg", imageFormat);
+	val::imageView imgView1(proc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
 
-	val::image img2(mainProc, "testImage2.png", imageFormat);
-	val::imageView imgView2(mainProc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
+	val::image img2(proc, "testImage2.png", imageFormat);
+	val::imageView imgView2(proc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
 
 
 
@@ -206,13 +167,13 @@ int main() {
 	};
 
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(mainProc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(mainProc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
@@ -226,10 +187,8 @@ int main() {
 	VkClearValue clearValues[1];
 	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
 
-
-
 	// this needs to be called only after the frag shader's image view has been set
-	mainProc.createDescriptorSets(&pipelineInfo);
+	proc.createDescriptorSets(&pipeline);
 
 	//////////////////////////////////////////////////////////////
 	val::renderTarget renderTarget;
@@ -244,42 +203,40 @@ int main() {
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
-		auto& graphicsQueue = mainProc._graphicsQueue;
+		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = mainProc._currentFrame;
+		auto& currentFrame = proc._currentFrame;
 
-		VkCommandBuffer cmdBuffer = mainProc._graphicsQueue._commandBuffers[currentFrame];
+		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-		updateUniformBuffer(mainProc, uboHdl);
+		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.render(proc);
+		renderTarget.endPass(proc);
 
-		renderTarget.beginPass(mainProc, renderPasses[pipelineInfo.pipelineIdx], framebuffer);
-		renderTarget.update(mainProc, pipelineInfo);
-		renderTarget.render(mainProc, { viewport });
-		renderTarget.submit(mainProc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
-
+		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
-		mainProc.nextFrame();
+		proc.nextFrame();
 
 		timer++;
-		if (timer > 200) {
+		if (timer > 2000) {
 			timer = 0;
 			imgNum = !imgNum;
 			std::cout << "IMAGE SWAPPED!\n\n";
 			if (imgNum) {
 				imgSampler.bindImageView(imgView2);
+				imgSampler.updateDescriptors(proc,pipeline, 1);
 			}
 			else {
 				imgSampler.bindImageView(imgView1);
+				imgSampler.updateDescriptors(proc, pipeline, 1);
 			}
 		}
 	}
-
-	imgView1.destroy();
-	imgView2.destroy();
-	mainProc.cleanup();
 
 	return EXIT_SUCCESS;
 }

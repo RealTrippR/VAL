@@ -11,6 +11,7 @@ namespace val {
 		if (vkCreateSampler(_proc._device, &_samplerCreateInfo, nullptr, &_sampler) != VK_SUCCESS) {
 			throw std::runtime_error("FAILED TO CREATE TEXTURE SAMPLER!");
 		}
+		_VKdescriptorInfo.sampler = _sampler;
 	}
 
 	void sampler::destroy() {
@@ -22,6 +23,8 @@ namespace val {
 
 	void sampler::bindImageView(imageView& imageView) {
 		_imgView = &imageView;
+		_VKdescriptorInfo.imageView = _imgView->getImageView();
+		_VKdescriptorInfo.sampler = _sampler;
 	}
 
 	imageView* sampler::getImageView() {
@@ -138,5 +141,46 @@ namespace val {
 
 	VkSampler& sampler::getVkSampler() {
 		return _sampler;
+	}
+
+	VkDescriptorImageInfo sampler::getVkDescriptorImageInfo() {
+		return _VKdescriptorInfo;
+	}
+
+	/************************************************************************************************/
+
+	void sampler::updateDescriptors(val::VAL_PROC& proc, val::graphicsPipelineCreateInfo& pipeline, uint8_t bindingIdx)
+	{
+
+		VkWriteDescriptorSet* dWrites = (VkWriteDescriptorSet*)malloc(proc._MAX_FRAMES_IN_FLIGHT * sizeof(VkWriteDescriptorSet));
+
+		for (uint_fast8_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
+			VkWriteDescriptorSet& descriptorWrite = dWrites[i];
+			descriptorWrite.pNext = NULL;
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = pipeline.getDescriptorSets(proc)[i];
+			descriptorWrite.dstBinding = bindingIdx;
+			descriptorWrite.descriptorType = (VkDescriptorType)_samplerType;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.pImageInfo = &_VKdescriptorInfo;
+		}
+
+		vkUpdateDescriptorSets(proc._device, proc._MAX_FRAMES_IN_FLIGHT, dWrites, 0, NULL);
+		free(dWrites);
+	}
+
+	void sampler::updateDescriptorAtFrame(val::VAL_PROC& proc, val::graphicsPipelineCreateInfo& pipeline, uint8_t bindingIdx, uint8_t frame)
+	{
+		VkWriteDescriptorSet descriptorWrite;
+		descriptorWrite.pNext = NULL;
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = pipeline.getDescriptorSets(proc)[frame];
+		descriptorWrite.dstBinding = bindingIdx;
+		descriptorWrite.descriptorType = (VkDescriptorType)_samplerType;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.pImageInfo = &_VKdescriptorInfo;
+		vkUpdateDescriptorSets(proc._device, 1u, &descriptorWrite, 0, NULL);
 	}
 }

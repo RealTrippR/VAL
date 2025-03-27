@@ -28,11 +28,9 @@ struct uniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
-
 
 void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
@@ -50,6 +48,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 
 	hdl.update(proc, &ubo);
 }
+
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const VkSampleCountFlagBits& msaaSamples)
 {	using namespace val;
 
@@ -97,7 +96,7 @@ int main() {
 	VAL_PROC proc;
 	graphicsPipelineCreateInfo pipeline;
 
-	val::physicalDeviceRequirements deviceRequirements(val::dedicated_GPU | val::integrated_GPU);
+	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	imageView imgView(proc);

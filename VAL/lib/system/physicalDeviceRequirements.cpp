@@ -4,19 +4,19 @@
 namespace val
 {
 
-	std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPE_FLAGS flag)
+	std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPES flag)
 	{
 		std::vector<VkPhysicalDeviceType> ret;
-		if (flag & integrated_GPU) {
+		if (bool(flag & DEVICE_TYPES::integrated_GPU)) {
 			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU);
 		}
-		if (flag & dedicated_GPU) {
+		if (bool(flag & DEVICE_TYPES::dedicated_GPU)) {
 			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
 		}
-		if (flag & virtutal_GPU) {
+		if (bool(flag & DEVICE_TYPES::virtual_GPU)) {
 			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU);
 		}
-		if (flag & CPU) {
+		if (bool(flag & DEVICE_TYPES::CPU)) {
 			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_CPU);
 		}
 		return ret;

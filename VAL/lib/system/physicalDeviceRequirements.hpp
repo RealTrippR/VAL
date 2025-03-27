@@ -27,23 +27,24 @@ DEF_ENUM_BITWISE_OR_ASSIGN(TYPE)\
 DEF_ENUM_BITWISE_AND_ASSIGN(TYPE)\
 DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 
-
 namespace val {
 	
-	enum DEVICE_TYPE_FLAGS
+	enum class DEVICE_TYPES : uint8_t
 	{
 		DEVICE_TYPE_UNDEFINED = 0,
 		integrated_GPU = 1 << 0,
 		dedicated_GPU = 1 << 1,
-		virtutal_GPU = 1 << 2,
+		virtual_GPU = 1 << 2,
 		CPU = 1 << 3
 	};
 
-	DEF_ENUM_BITWISE_OPERATORS(DEVICE_TYPE_FLAGS);
+#ifndef DEVICE_TYPE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(DEVICE_TYPES);
+#endif
 	
-	std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPE_FLAGS flag);
+	std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPES flag);
 	
-	enum DEVICE_FEATURE_FLAGS
+	enum class DEVICE_FEATURES : uint8_t
 	{
 		DEVICE_FEATURE_UNDEFINED = 0,
 		raytracing = 1 << 0,
@@ -54,7 +55,9 @@ namespace val {
 		cubeMaps = 1 << 5
 	};
 
-	DEF_ENUM_BITWISE_OPERATORS(DEVICE_FEATURE_FLAGS);
+#ifndef DEVICE_FEATURE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(DEVICE_FEATURES);
+#endif
 
 
 	struct physicalDevicePriorities
@@ -68,12 +71,12 @@ namespace val {
 	struct physicalDeviceRequirements
 	{
 		physicalDeviceRequirements() = default;
-		physicalDeviceRequirements(DEVICE_TYPE_FLAGS deviceTypes_) : deviceTypes(deviceTypes_) {};
-		physicalDeviceRequirements(DEVICE_TYPE_FLAGS deviceTypes_, DEVICE_FEATURE_FLAGS deviceFeatures_) : 
+		physicalDeviceRequirements(DEVICE_TYPES deviceTypes_) : deviceTypes(deviceTypes_) {};
+		physicalDeviceRequirements(DEVICE_TYPES deviceTypes_, DEVICE_FEATURES deviceFeatures_) : 
 			deviceTypes(deviceTypes_), deviceFeatures(deviceFeatures_) {};
 	//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
-		DEVICE_TYPE_FLAGS deviceTypes = (integrated_GPU | dedicated_GPU);
-		DEVICE_FEATURE_FLAGS deviceFeatures{};
+		DEVICE_TYPES deviceTypes = (DEVICE_TYPES::integrated_GPU | DEVICE_TYPES::dedicated_GPU);
+		DEVICE_FEATURES deviceFeatures{};
 		physicalDevicePriorities priorities{};
 		std::optional<uint32_t> deviceID;
 		std::optional<uint32_t> vendorID;

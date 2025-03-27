@@ -4,15 +4,22 @@
 [✓] - Complete
 
 ----------------------------------------------------------------------------------------------------------------
-VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
+VULKAN ABSTRACTION LIBRARY, PROTOTYPE V1.00.0:
 ----------------------------------------------------------------------------------------------------------------
-[!] Add support for another buffer space: GPU_LOCAL_CPU (this is only a recommendation, as not all GPU's support this. If it's not supported, it will be replaced by GPU_CPU)
+
+[~] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
+
+[!] Add support for another buffer space: GPU_LOCAL_CPU (this is only a recommendation, as not all GPU's support this. If it's not supported, it will be automatically replaced by GPU_CPU)
+
+[!] Add support and complete tests for multiple windows. (see: https://community.khronos.org/t/multiple-glfw-windows-with-single-context/108421)
+
+[ ] Add support for immutable samplers
+
+[ ] Allow for the customization of the number frames in flight of descriptor sets for pipelines, as sometimes it's not nessecary to have different descriptors for some pipelines.
 
 [!] Add a new property to buffers, AUTO_FLUSH_MEMORY and MANUALLY_FLUSH_MEMORY (equivalent to  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, see https://registry.khronos.org/vulkan/specs/latest/man/html/VkMemoryPropertyFlagBits.html)
 
 [ ] Enable meshes to be loaded from positon data and index data (i.e. a vector of glm::vec3's and a vector of uint_32t's)
-
-[ ] Enable customizable frames per flight for UBOs and SSBOS.
 
 [✓] Enable customizable frames per flight count for the val::buffer class to allow them to be properly updated during rendering. Each buffer can be created with a frames in flight property.
 
@@ -20,15 +27,13 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [✓] Rename to VAL (Vulkan Abstraction Library)
 
-[ ] Simplify the configuration and setup of pipelines
+[✓] Simplify the configuration and setup of pipelines
 
 [✓] Simplify multisampling implementation
 
 [ ] Complete the Raytracing test
 
 [ ] Check if inputAttachments work as expected
-
-[ ] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
 
 [ ] Optimize pipelineCreateInfo functions (cache and pass by reference instead of value)
 
@@ -62,7 +67,8 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 [!] Optimize buffers - for better performance they should be close together in memory
 	This can be done with UBOs as it has already been done with push constants.
 
-[ ] Consider loading pixels from a seperate function rather than as a part of createTextureImage funciton.
+[ ] Consider loading pixels from a seperate function rather than as a part of createTextureImage funciton, 
+	or just add the ability to create images given a pixel array and channel count.
 	This would give developers flexibility to load images with whatever loading/saving system they choose.
 	Write a test to ensure that VAL supports more than just .jpg and .png images.
 	OpenImageIO might be a good alternative. (https://github.com/AcademySoftwareFoundation/OpenImageIO)
@@ -71,17 +77,13 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 	simplify the process of uploading data to shaders
 
 [✓] Add dedicated compute and transfer queues.
- 
-[ ] create shaderTest.cpp to test uploading UBOs, push constants, and SSBOs.
-
-[ ] Optimize buffers. Create a chunked or packed buffer class for this purpose.
 
 [ ] Change the mipmap value passed through function from uint32_t to uint8_t.
 	Using 32 bits for such a value is absurd, as even an image a million by a million pixels across will only need a mipmap level of 20.
 
 [~] Improve transitionImageLayout
 
-[ ] Add support for glsl Vulkan "sets." See: https://community.khronos.org/t/what-is-set-and-binding-in-glsl/109509
+[✓] Add support for glsl Vulkan "sets." See: https://community.khronos.org/t/what-is-set-and-binding-in-glsl/109509
 
 [✓] Check if VAL_PROC::createSwapChainFrameBuffers is actually needed (I believe that the windowVAL class are has an implementation)
 
@@ -94,11 +96,7 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [ ] Create a simplified image class that has less featured and variables (i.e. no mipmapping, no multisampling), but takes up less space in Memory
 
-[ ] Create a resource manager to manage things like vertex buffers, index buffers, etc
-
 [ ] Add multiple command pools for multithreading, as command pools are not thread safe.
-
-[ ] add a recreateGraphicsPipeline function; might not be nessecary
 
 [~] Update the descriptor set and graphicsPipelineCreateInfo: the descriptor set currently only supports vertex shaders for UBO binding, 
 	and the descriptor set has no way to access all of the shaders in a single vector from the graphicsPipelineCreateInfo
@@ -109,11 +107,7 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 
 [✓] Add the ability to set the MAX_FRAMES_IN_FLIGHT upon initialization of VAL_PROC
 
-[ ] Allow framebuffers to take more than 1 color input from frag shaders
-
 [!] mainProc.drawFrameExperimental(vertexBuffer, indexBuffer, indices); - This only allows for the binding of 3 different buffers - not suitable for practical use.
-
-[ ] multiple window support - https://community.khronos.org/t/multiple-glfw-windows-with-single-context/108421
 
 [!] update the createImageView function to take aspect flags as an input to allow for depth buffering support (https://vulkan-tutorial.com/Depth_buffering)
 	It's more complicated than just updating createImageView - check the transitionImageLayout and renderPass and frameBuffer creation functions as well as the recordCommandBuffer function.
@@ -121,8 +115,6 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE:
 	recreateSwapChain will have to be modified as well.
 
 [✓] Ensure that window resizing works properly.
-
-[!] Complete Shader Input Test.
 
 [✓] Ensure that multiple shaders can be used simultaneously.
 	! YOU CAN ONLY HAVE ONE OF EACH TYPE OF SHADER PER GRAPHICS PIPELINE !
