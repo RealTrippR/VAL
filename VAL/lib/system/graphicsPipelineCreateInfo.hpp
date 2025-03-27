@@ -13,18 +13,10 @@ namespace val {
 	class graphicsPipelineCreateInfo : public pipelineCreateInfo {
 	public:		
 		uint32_t subpassIndex = 0u;
-		std::vector<VkDynamicState> dynamicStates;
-		//renderPassInfo* renderPassInfo;
+
+		std::vector<VkDynamicState> dynamicStates; /*WIP*/
+
 		renderPassManager* renderPass;
-		/*
-		VkPipelineDynamicStateCreateInfo dynamicState{};
-		VkPipelineRasterizationStateCreateInfo rasterizer{};
-		VkPipelineMultisampleStateCreateInfo multisampling{};
-		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-		VkPipelineColorBlendStateCreateInfo colorBlending{};
-		VkPipelineDepthStencilStateCreateInfo* depthStencil = NULL;
-		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-		*/
 
 		void setRasterizer(val::rasterizerState* rasterizer);
 
@@ -34,9 +26,9 @@ namespace val {
 
 		colorBlendState* getColorBlendState();
 
-		void setMultisamplingLevel(const VkSampleCountFlags& samples);
+		void setSampleCount(const VkSampleCountFlags& samples);
 
-		const VkSampleCountFlags& getMultisamplingLevel();
+		const VkSampleCountFlags& getSampleCount();
 
 		void setSampleShadingEnabled(const bool& enabled);
 

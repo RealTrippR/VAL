@@ -5,7 +5,7 @@ namespace val
 	VkAttachmentDescription renderAttachment::toVkAttachmentDescription() {
 		VkAttachmentDescription desc{};
 		desc.format = _imgFormat;
-		desc.samples = VkSampleCountFlagBits(_MSAA_Samples);
+		desc.samples = VK_SAMPLE_COUNT_1_BIT;
 		desc.loadOp = RENDER_ATTACHMENT_OPERATION_TYPE_TO_VkAttachmentLoadOp(_loadOp);
 		desc.storeOp = RENDER_ATTACHMENT_OPERATION_TYPE_TO_VkAttachmentStoreOp(_storeOp);
 		desc.stencilLoadOp = RENDER_ATTACHMENT_OPERATION_TYPE_TO_VkAttachmentLoadOp(_stencilLoadOp);
@@ -14,22 +14,6 @@ namespace val
 		desc.finalLayout = _finalLayout;
 
 		return desc;
-	}
-
-	uint8_t renderAttachment::getMSAA_Samples() {
-		return uint8_t(_MSAA_Samples);
-	}
-
-	void renderAttachment::setMSAA_Samples(uint8_t sampleCount /*Must be a power of 2*/) {
-#ifndef NDEBUG
-		if ((sampleCount & (sampleCount - 1)) != 0) {
-			printf("VAL: ERROR: Invalid sample count of %u; the sample count must be a power of two!\n", sampleCount);
-			throw std::runtime_error("VAL: ERROR: Invalid sample count; the sample count must be a power of two!");
-
-		}
-#endif // !NDEBUG
-
-		_MSAA_Samples = VkSampleCountFlags(sampleCount);
 	}
 
 	void renderAttachment::setLoadOperation(const RENDER_ATTACHMENT_OPERATION_TYPE& opType) {

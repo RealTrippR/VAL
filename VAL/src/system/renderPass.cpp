@@ -19,14 +19,35 @@ namespace val {
 
 	void renderPassManager::update() {
 		_VkSubpasses.clear();
-		uint32_t attachIdx = 0u;
+
 		// create std::vector<VkSubpassDescription> _VkSubpasses;
 		for (subpass* sp : _subpasses) {
 			sp->update();
 			_VkSubpasses.push_back(sp->_subpassDesc);
 		}
 
+		// note that _VkAttachments and _attachments have corresponding indices (i.e. _VkAttachments[0] corresponds to _attachments[0] and so on.)
+		for (uint_fast32_t i = 0; i < _VkAttachments.size(); ++i)
+		{
+			VkAttachmentDescription& VKattachment = _VkAttachments[i];
+			renderAttachment* VALattachment = _attachments[i];
+			if (dynamic_cast<colorAttachment*>(VALattachment) != NULL
+				or dynamic_cast<depthAttachment*>(VALattachment) != NULL)
+			{
+				VKattachment.samples = (VkSampleCountFlagBits)_MSAAsamples;
+			}
+		}
+
 		createSubpassDependencies();
+	}
+
+
+	void renderPassManager::setMSAAsamples(VkSampleCountFlags MSAAsamples) {
+		_MSAAsamples = (VkSampleCountFlagBits)MSAAsamples;
+	}
+
+	VkSampleCountFlagBits renderPassManager::getMSAAsamples() {
+		return _MSAAsamples;
 	}
 
 	const std::vector<VkSubpassDependency>& renderPassManager::createSubpassDependencies() {

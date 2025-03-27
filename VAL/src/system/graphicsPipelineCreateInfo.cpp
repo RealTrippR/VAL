@@ -21,12 +21,12 @@ namespace val
 		return _colorBlendState;
 	}
 
-	void graphicsPipelineCreateInfo::setMultisamplingLevel(const VkSampleCountFlags& samples)
+	void graphicsPipelineCreateInfo::setSampleCount(const VkSampleCountFlags& samples)
 	{
 		_sampleCountMSAA = samples;
 	}
 
-	const VkSampleCountFlags& graphicsPipelineCreateInfo::getMultisamplingLevel()
+	const VkSampleCountFlags& graphicsPipelineCreateInfo::getSampleCount()
 	{
 		return _sampleCountMSAA;
 	}

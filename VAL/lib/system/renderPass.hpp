@@ -10,6 +10,8 @@ namespace val {
 	{
 	public:
 		renderPassManager(VAL_PROC& proc) { _procVAL = &proc; };
+		renderPassManager(VAL_PROC& proc, VkSampleCountFlagBits MSAAsamples) { _procVAL = &proc; _MSAAsamples = MSAAsamples; };
+
 		~renderPassManager() {
 			destroy();
 		}
@@ -25,6 +27,10 @@ namespace val {
 
 		void update();
 
+		void setMSAAsamples(VkSampleCountFlags MSAAsamples);
+
+		VkSampleCountFlagBits getMSAAsamples();
+
 	protected:
 		// returns the index of the attachment
 		// if the attachment is already in the list of attachments, it won't be added,
@@ -38,6 +44,9 @@ namespace val {
 		/******************************************/
 		VAL_PROC* _procVAL = NULL;
 		/******************************************/
+
+		VkSampleCountFlagBits _MSAAsamples = VK_SAMPLE_COUNT_1_BIT;
+
 		// these must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
 		std::vector<subpass*> _subpasses;
 

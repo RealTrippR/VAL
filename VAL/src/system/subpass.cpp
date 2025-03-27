@@ -108,10 +108,11 @@ namespace val
 	*/
 
 	void subpass::update() {
+
 		// Color attachments
 		_subpassDesc.pColorAttachments = _colorAttachments.data();
 		_subpassDesc.colorAttachmentCount = _colorAttachments.size();
-
+		
 		// Depth attachment
 		if (_depthStencilAttachment.has_value()) {
 			_subpassDesc.pDepthStencilAttachment = &(_depthStencilAttachment.value());
