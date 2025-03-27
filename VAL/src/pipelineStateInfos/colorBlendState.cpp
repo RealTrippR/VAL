@@ -55,17 +55,20 @@ namespace val
 	}
 
 
-	void colorBlendState::toVkPipelineColorblendStateCreateInfo(VkPipelineColorBlendStateCreateInfo* stateInfo, std::vector<VkPipelineColorBlendAttachmentState>* VKattachments)
+	VkPipelineColorBlendStateCreateInfo colorBlendState::toVkPipelineColorblendStateCreateInfo(VkPipelineColorBlendStateCreateInfo* stateInfo, std::vector<VkPipelineColorBlendAttachmentState>* VKattachments)
 	{	
 		for (auto& attachment : _attachments) {
 			VKattachments->push_back(attachment->getVkColorBlendAttachmentState());
 		}
 		VkPipelineColorBlendStateCreateInfo info;
+		info.flags = VkPipelineColorBlendStateCreateFlags(0);
+		info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		info.pNext = VK_NULL_HANDLE;
 		info.attachmentCount = VKattachments->size();
 		info.pAttachments = VKattachments->data();
 		memcpy(info.blendConstants, _blendConstantsColors, sizeof(info.blendConstants));
 		info.logicOpEnable = _logicOpEnabled;
 		info.logicOp = _logicOp;
+		return info;
 	}
 }

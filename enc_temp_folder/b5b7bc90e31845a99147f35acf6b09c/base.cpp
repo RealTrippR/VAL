@@ -31,7 +31,9 @@ struct uniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+const std::vector<const char*> validationLayers = {
+	"VK_LAYER_KHRONOS_validation"
+};
 
 void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
 {	using namespace val;

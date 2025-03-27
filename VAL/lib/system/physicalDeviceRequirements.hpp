@@ -1,7 +1,32 @@
 #ifndef VAL_DEVICE_REQUIREMENTS_HPP
 #define VAL_DEVICE_REQUIREMENTS_HPP
 
-#include <VAL/lib/system/system_utils.hpp>
+#include <stdint.h>
+#include <vector>
+#include <optional>
+
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+#define DEF_ENUM_BITWISE_OR(TYPE) inline TYPE operator|(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) | static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_AND(TYPE) inline TYPE operator&(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) & static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_XOR(TYPE) inline TYPE operator^(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_NOT(TYPE) inline TYPE operator~(TYPE a) { return static_cast<TYPE>(~static_cast<std::underlying_type_t<TYPE>>(a));}
+
+#define DEF_ENUM_BITWISE_OR_ASSIGN(TYPE) inline TYPE operator|=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) | static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_AND_ASSIGN(TYPE) inline TYPE operator&=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) & static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE) inline TYPE operator^=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
+
+#define DEF_ENUM_BITWISE_OPERATORS(TYPE)\
+DEF_ENUM_BITWISE_OR(TYPE)\
+DEF_ENUM_BITWISE_AND(TYPE)\
+DEF_ENUM_BITWISE_XOR(TYPE)\
+DEF_ENUM_BITWISE_NOT(TYPE)\
+DEF_ENUM_BITWISE_OR_ASSIGN(TYPE)\
+DEF_ENUM_BITWISE_AND_ASSIGN(TYPE)\
+DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
+
 
 namespace val {
 	
@@ -13,25 +38,10 @@ namespace val {
 		virtutal_GPU = 1 << 2,
 		CPU = 1 << 3
 	};
-	DEF_ENUM_BITWISE_OPERATORS(DEVICE_TYPE_FLAGS)
 
-	constexpr std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPE_FLAGS flag)
-	{
-		std::vector<VkPhysicalDeviceType> ret;
-		if (flag & integrated_GPU) {
-			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU);
-		}
-		if (flag & dedicated_GPU) {
-			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
-		}
-		if (flag & virtutal_GPU) {
-			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU);
-		}
-		if (flag & CPU) {
-			ret.push_back(VK_PHYSICAL_DEVICE_TYPE_CPU);
-		}
-		return ret;
-	}
+	DEF_ENUM_BITWISE_OPERATORS(DEVICE_TYPE_FLAGS);
+	
+	std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPE_FLAGS flag);
 	
 	enum DEVICE_FEATURE_FLAGS
 	{
@@ -44,22 +54,8 @@ namespace val {
 		cubeMaps = 1 << 5
 	};
 
-	/************************************************************************************/
-	inline DEVICE_FEATURE_FLAGS operator|(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
-	{return static_cast<DEVICE_FEATURE_FLAGS>(static_cast<int16_t>(a) | static_cast<int16_t>(b));}
-	/************************************************************************************/
-	inline DEVICE_FEATURE_FLAGS operator&(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
-	{return static_cast<DEVICE_FEATURE_FLAGS>(static_cast<int16_t>(a) & static_cast<int16_t>(b));}
-	/************************************************************************************/
-	inline DEVICE_FEATURE_FLAGS operator^(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
-	{return static_cast<DEVICE_FEATURE_FLAGS>(static_cast<int16_t>(a) ^ static_cast<int16_t>(b));}
-	/************************************************************************************/
-	inline DEVICE_TYPE_FLAGS operator<<(DEVICE_FEATURE_FLAGS a, DEVICE_FEATURE_FLAGS b)
-	{return static_cast<DEVICE_TYPE_FLAGS>(static_cast<int16_t>(a) << static_cast<int16_t>(b));}
-	/************************************************************************************/
-	inline DEVICE_TYPE_FLAGS operator>>(DEVICE_TYPE_FLAGS a, DEVICE_TYPE_FLAGS b)
-	{return static_cast<DEVICE_TYPE_FLAGS>(static_cast<int16_t>(a) >> static_cast<int16_t>(b));}
-	/************************************************************************************/
+	DEF_ENUM_BITWISE_OPERATORS(DEVICE_FEATURE_FLAGS);
+
 
 	struct physicalDevicePriorities
 	{
@@ -76,7 +72,7 @@ namespace val {
 		physicalDeviceRequirements(DEVICE_TYPE_FLAGS deviceTypes_, DEVICE_FEATURE_FLAGS deviceFeatures_) : 
 			deviceTypes(deviceTypes_), deviceFeatures(deviceFeatures_) {};
 	//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
-		DEVICE_TYPE_FLAGS deviceTypes = integrated_GPU | dedicated_GPU;
+		DEVICE_TYPE_FLAGS deviceTypes = (integrated_GPU | dedicated_GPU);
 		DEVICE_FEATURE_FLAGS deviceFeatures{};
 		physicalDevicePriorities priorities{};
 		std::optional<uint32_t> deviceID;

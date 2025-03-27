@@ -1,71 +1,66 @@
 #include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
 
-#define stencilState depthStencilState
 namespace val
 {
-	void stencilState::enableDepthTesting(bool enable) {
+	void depthStencilState::enableDepthTesting(bool enable) {
 		_VKdepthState.depthTestEnable = enable;
 	}
 
-	void stencilState::enableStencilTesting(bool enable) {
+	void depthStencilState::enableStencilTesting(bool enable) {
 		_VKdepthState.stencilTestEnable = enable;
 	}
 
-	void stencilState::enableDepthBoundsTesting(bool enable) {
+	void depthStencilState::enableDepthBoundsTesting(bool enable) {
 		_VKdepthState.depthBoundsTestEnable = enable;
 	}
 
-	bool stencilState::getDepthBoundsTesting() {
+	bool depthStencilState::getDepthBoundsTesting() {
 		return _VKdepthState.depthBoundsTestEnable;
 	}
 
-	void stencilState::enableStencilTesting(bool enable) {
-		_VKdepthState.stencilTestEnable = enable;
-	}
-
-	bool stencilState::getStencilTesting() {
+	bool depthStencilState::getStencilTesting() {
 		return _VKdepthState.stencilTestEnable;
 	}
 
-	void stencilState::setDepthBounds(float lowerBound, float upperBound) {
+	void depthStencilState::setDepthBounds(float lowerBound, float upperBound) {
 		_VKdepthState.minDepthBounds = lowerBound;
 		_VKdepthState.maxDepthBounds = upperBound;
 	}
 
-	void stencilState::setLowerDepthBound(float lowerBound) {
+	void depthStencilState::setLowerDepthBound(float lowerBound) {
 		_VKdepthState.minDepthBounds = lowerBound;
 	}
 
-	float stencilState::getLowerDepthBound() {
+	float depthStencilState::getLowerDepthBound() {
 		return _VKdepthState.minDepthBounds;
 	}
 
-	void stencilState::setUpperDepthBound(float upperBound) {
+	void depthStencilState::setUpperDepthBound(float upperBound) {
 		_VKdepthState.maxDepthBounds = upperBound;
 	}
 
-	float stencilState::getUpperDepthBound() {
+	float depthStencilState::getUpperDepthBound() {
 		return _VKdepthState.maxDepthBounds;
 	}
 
 
-	void stencilState::setFront(const VkStencilOpState& front) {
+	void depthStencilState::setFront(const VkStencilOpState& front) {
 		_VKdepthState.front = front;
 	}
 
-	VkStencilOpState& stencilState::getFront() {
+	VkStencilOpState& depthStencilState::getFront() {
 		return _VKdepthState.front;
 	}
 
-	void stencilState::setBack(const VkStencilOpState& back) {
+	void depthStencilState::setBack(const VkStencilOpState& back) {
 		_VKdepthState.back = back;
 	}
 
-	VkStencilOpState& stencilState::getBack() {
+	VkStencilOpState& depthStencilState::getBack() {
 		return _VKdepthState.back;
 	}
 
-	VkPipelineDepthStencilStateCreateInfo& stencilState::getVkPipelineDepthStencilStateCreateInfo() {
+	VkPipelineDepthStencilStateCreateInfo& depthStencilState::getVkPipelineDepthStencilStateCreateInfo() {
 		return _VKdepthState;
 	}
 }

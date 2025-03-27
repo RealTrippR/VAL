@@ -208,9 +208,9 @@
     <ClInclude Include="lib\meshes&amp;vertices\vertex3Dsimple.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\colorBlendStateAttachment.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\depthStencilState.hpp" />
-    <ClInclude Include="lib\pipelineStateInfos\multisamplingStateInfo.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\rasterizerState.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\stateInfoEnums.hpp" />
+    <ClInclude Include="lib\pipelineStateInfos\stateInfos.hpp" />
     <ClInclude Include="lib\renderAttachments\attachmentEnums.hpp" />
     <ClInclude Include="lib\renderAttachments\colorAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\depthAttachment.hpp" />
@@ -243,6 +243,7 @@
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
+    <ClCompile Include="lib\system\physicalDeviceRequirements.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp" />

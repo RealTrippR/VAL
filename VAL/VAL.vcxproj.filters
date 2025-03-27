@@ -170,9 +170,6 @@
     <ClInclude Include="lib\pipelineStateInfos\colorBlendStateAttachment.hpp">
       <Filter>lib\pipelineStateInfos</Filter>
     </ClInclude>
-    <ClInclude Include="lib\pipelineStateInfos\multisamplingStateInfo.hpp">
-      <Filter>lib\pipelineStateInfos</Filter>
-    </ClInclude>
     <ClInclude Include="lib\pipelineStateInfos\rasterizerState.hpp">
       <Filter>lib\pipelineStateInfos</Filter>
     </ClInclude>
@@ -183,6 +180,9 @@
       <Filter>lib\pipelineStateInfos</Filter>
     </ClInclude>
     <ClInclude Include="lib\pipelineStateInfos\depthStencilState.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\stateInfos.hpp">
       <Filter>lib\pipelineStateInfos</Filter>
     </ClInclude>
   </ItemGroup>
@@ -270,6 +270,9 @@
     </ClCompile>
     <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp">
       <Filter>src\pipelineStateInfos</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\system\physicalDeviceRequirements.cpp">
+      <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

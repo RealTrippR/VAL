@@ -3,6 +3,9 @@
 
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
 #include <VAL/lib/system/renderPass.hpp>
+#include <VAL/lib/system/system_utils.hpp>
+
+#include <VAL/lib/pipelineStateInfos/stateInfos.hpp>
 
 namespace val {
 	class shader;

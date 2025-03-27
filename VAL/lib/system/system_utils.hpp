@@ -1,7 +1,9 @@
 #ifndef VAL_SYSTEM_UTILS_HPP
 #define VAL_SYSTEM_UTILS_HPP
 
+
 // for C++ class enums
+
 #define DEF_ENUM_BITWISE_OR(TYPE) inline TYPE operator|(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) | static_cast<std::underlying_type_t<TYPE>>(b));}
 #define DEF_ENUM_BITWISE_AND(TYPE) inline TYPE operator&(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) & static_cast<std::underlying_type_t<TYPE>>(b));}
 #define DEF_ENUM_BITWISE_XOR(TYPE) inline TYPE operator^(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
@@ -31,6 +33,8 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <stdlib.h>
+
 #include <ExternalLibraries/stb_image.h>;
 #include <optional>
 #include <array>
@@ -52,11 +56,6 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 #include <VAL/lib/system/physicalDeviceRequirements.hpp>
 
 #include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-
 
 namespace val {
 

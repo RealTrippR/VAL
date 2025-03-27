@@ -1,4 +1,5 @@
 #include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
+#include <VAL/lib/pipelineStateInfos/stateInfos.hpp>
 
 namespace val
 {
@@ -43,6 +44,6 @@ namespace val
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		info.rasterizationSamples = (VkSampleCountFlagBits)_sampleCountMSAA;
 		info.sampleShadingEnable = _sampleShadingEnabled;
+		return info;
 	}
-
 }

@@ -1,7 +1,7 @@
 #ifndef VAL_COLOR_BLEND_STATE_HPP
 #define VAL_COLOR_BLEND_STATE_HPP
 
-#include <VAL/lib/system/system_utils.hpp>
+#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
 
 namespace val
 {
@@ -30,7 +30,8 @@ namespace val
 
 		const VkLogicOp& getLogicOp();
 
-		void toVkPipelineColorblendStateCreateInfo(VkPipelineColorBlendStateCreateInfo* stateInfo, std::vector<VkPipelineColorBlendAttachmentState>* VKattachments);
+		VkPipelineColorBlendStateCreateInfo toVkPipelineColorblendStateCreateInfo(VkPipelineColorBlendStateCreateInfo* stateInfo,
+			std::vector<VkPipelineColorBlendAttachmentState>* VKattachments);
 
 	public:
 		std::vector<colorBlendStateAttachment*> _attachments;

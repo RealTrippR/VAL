@@ -43,7 +43,7 @@ namespace val {
 		VkPipelineRasterizationStateCreateInfo* getVkPipelineRasterizationStateCreateInfo();
 
 	protected:
-		friend VAL_PROC;
+		friend class VAL_PROC;
 
 		PIPELINE_PROPERTY_STATE _lineWidthState = PIPELINE_PROPERTY_STATE::STATIC;
 		VkPipelineRasterizationStateCreateInfo _VKrasterizerState
