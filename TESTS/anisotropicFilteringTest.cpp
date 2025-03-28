@@ -231,11 +231,11 @@ int main()
 			std::cout << "IMAGE SWAPPED!\n\n";
 			if (imgNum) {
 				imgSampler.bindImageView(imgView2);
-				imgSampler.updateDescriptors(proc, pipeline, 1);
+				imgSampler.updateDescriptors(proc, pipeline, 1/*BINDING IDX*/);
 			}
 			else {
 				imgSampler.bindImageView(imgView1);
-				imgSampler.updateDescriptors(proc, pipeline, 1);
+				imgSampler.updateDescriptors(proc, pipeline, 1/*BINDING IDX*/);
 			}
 		}
 	}
