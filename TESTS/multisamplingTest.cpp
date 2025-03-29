@@ -49,8 +49,10 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const VkSampleCountFlagBits& msaaSamples)
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const VkSampleCountFlagBits& MSAAsamples)
 {	using namespace val;
+
+	pipeline.setSampleCount(MSAAsamples);
 
 	// state infos (MUST BE STATIC IN MEMORY!)
 	static rasterizerState rasterizer;
@@ -67,10 +69,10 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const Vk
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 }
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, uint8_t MSAA_Samples) {
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, uint8_t MSAAsamples) {
 	using namespace val;
 
-	renderPassMngr.setMSAAsamples(MSAA_Samples);
+	renderPassMngr.setMSAAsamples(MSAAsamples);
 
 	static subpass subpass(renderPassMngr, GRAPHICS);
 	{
@@ -135,7 +137,6 @@ int main() {
 	multisamplerManager multisamplerMngr(proc, MSAAsamples);
 	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);
 	multisamplerMngr.setSampleCount(MSAAsamples);
-	pipeline.setSampleCount(MSAAsamples);
 
 
 	UBO_Handle uboHdl(sizeof(uniformBufferObject));

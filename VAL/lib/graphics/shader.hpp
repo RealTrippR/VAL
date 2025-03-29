@@ -99,6 +99,12 @@ namespace val {
 	public:
 		void updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler);
 
+		void updateImageSamplerAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight);
+		
+		void updateTexture(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx = 0);
+
+		void updateTextureAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
+
 	public:
 		VkShaderStageFlags _shaderStageFlags;
 

@@ -391,21 +391,71 @@ namespace val {
 	void shader::updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler) {
 		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
 			VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][i];
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageView = *(sampler.first.getImageView());
-			imageInfo.sampler = sampler.first.getVkSampler();
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			VkWriteDescriptorSet descriptorWrite{};
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrite.dstSet = descriptorSet;
 			descriptorWrite.dstBinding = sampler.second; // THIS MUST MATCH THE BINDING
 			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite.descriptorType = (VkDescriptorType)sampler.first.getSamplerType();;
 			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pImageInfo = &imageInfo;
+			descriptorWrite.pImageInfo = &sampler.first.getVkDescriptorImageInfo();
 
 			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 		}
+	}
+	;
+	void shader::updateImageSamplerAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight)
+	{
+		VkWriteDescriptorSet descriptorWrite;
+		descriptorWrite.pNext = NULL;
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = pipeline.getDescriptorSets(proc)[frameInFlight];
+		descriptorWrite.dstBinding = sampler.second;
+		descriptorWrite.descriptorType = (VkDescriptorType)sampler.first.getSamplerType();
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.pImageInfo = &sampler.first.getVkDescriptorImageInfo();
+		vkUpdateDescriptorSets(proc._device, 1u, &descriptorWrite, 0, NULL);
+	}
+
+	void shader::updateTexture(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx)
+	{
+
+		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
+			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][i];
+
+			VkDescriptorImageInfo imgInfo = { NULL, texture.first.getImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = texture.second; // THIS MUST MATCH THE BINDING
+			descriptorWrite.dstArrayElement = arrIdx;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pImageInfo = &imgInfo;
+			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
+	void shader::updateTextureAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx)
+	{
+			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameInFlight];
+
+			VkDescriptorImageInfo imgInfo = { NULL, texture.first.getImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = texture.second; // THIS MUST MATCH THE BINDING
+			descriptorWrite.dstArrayElement = arrIdx;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pImageInfo = &imgInfo;
+			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 	}
 }

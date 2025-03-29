@@ -65,38 +65,28 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
-	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
-	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_FALSE;
-	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.lineWidth = 1.0f;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rasterizer.depthBiasEnable = VK_FALSE;
 
-	VkPipelineMultisampleStateCreateInfo& multisampling = info.multisampling;
-	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampling.sampleShadingEnable = VK_FALSE;
-	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+{
+	using namespace val;
 
-	VkPipelineColorBlendAttachmentState& colorBlendAttachment = info.colorBlendAttachment;
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_FALSE;
+	// state infos
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE_ENUMS::BACK);
+	rasterizer.setPolygonMode(POLYGON_MODE_ENUM::FILL);
+	pipeline.setRasterizer(&rasterizer);
 
-	VkPipelineColorBlendStateCreateInfo& colorBlending = info.colorBlending;
-	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlending.logicOpEnable = VK_FALSE;
-	colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+	// the color blend state affects how the output of the fragmennt shader is 
+	// blended into the existing content of the the framebuffer.
+	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+
+	pipeline.setSampleCount(VK_SAMPLE_COUNT_1_BIT);
+
+	static colorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
 }
-
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
 	static colorAttachment colorAttach;
@@ -109,10 +99,14 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	subpass.bindAttachment(&colorAttach);
 }
 
+
 int main() {
 	using namespace val;
 	VAL_PROC proc;
 
+	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	deviceRequirements.deviceFeatures = DEVICE_FEATURES::anisotropicFiltering;
+	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	imageView imgView1(proc);
 	imageView imgView2(proc);
@@ -152,11 +146,12 @@ int main() {
 	shader fragShader("shaders-compiled/doubleImageShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	sampler imgSampler(proc, val::standalone);
 	imgSampler.bindImageView(imgView1);
+	imgSampler.setMaxAnisotropy(4.f);
+
 	// https://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 	fragShader.setTextures({ {{&imgView1, &imgView2 }, 2} });
 	fragShader.setPushConstant(&PC_ImgScissor);
-	//fragShader.setTextures({ {&imgView1, 2, 1 } });
 
 	// config grahics pipeline
 	graphicsPipelineCreateInfo pipeline;
@@ -164,9 +159,9 @@ int main() {
 
 	setGraphicsPipelineInfo(pipeline);
 
-	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
 
-	VkFormat imageFormat =findSupportedImageFormat(proc._physicalDevice, formatReqs);
+	VkFormat imageFormat = findSupportedImageFormat(proc._physicalDevice, formatReqs);
 	
 	renderPassManager renderPassManager(proc);
 	setRenderPass(renderPassManager, imageFormat);
@@ -189,7 +184,6 @@ int main() {
 	imgView2.create(img2, VK_IMAGE_ASPECT_COLOR_BIT);
 
 
-
 	const std::vector<res::vertex> vertices = {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
@@ -201,7 +195,6 @@ int main() {
 	buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
-
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
 	buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
@@ -211,8 +204,6 @@ int main() {
 
 	VkClearValue clearValues[1];
 	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
-
-
 
 	// this needs to be called only after the frag shader's image view has been set
 	proc.createDescriptorSets(&pipeline);
@@ -253,6 +244,19 @@ int main() {
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
 		proc.nextFrame();
+
+		// swap image views at regular intervals
+		static uint16_t timer = 0;
+		timer++;
+		if (timer > 4000) {
+			fragShader.updateTexture(proc, pipeline, { imgView2,2 }, 1);
+			fragShader.updateTexture(proc, pipeline, { imgView1,2 }, 0);
+			timer = 0;
+		}
+		else if (timer==2000) {
+			fragShader.updateTexture(proc, pipeline, { imgView1,2 }, 1);
+			fragShader.updateTexture(proc, pipeline, { imgView2,2 }, 0);
+		}
 	}
 
 	imgView1.destroy();

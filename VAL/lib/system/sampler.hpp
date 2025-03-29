@@ -85,11 +85,7 @@ namespace val {
 
 		VkSampler& getVkSampler();
 
-		VkDescriptorImageInfo getVkDescriptorImageInfo();
-
-		void updateDescriptors(val::VAL_PROC& proc, val::graphicsPipelineCreateInfo& pipeline, uint8_t bindingIdx);
-
-		void updateDescriptorAtFrame(val::VAL_PROC& proc, val::graphicsPipelineCreateInfo& pipeline, uint8_t bindingIdx, uint8_t frame);
+		VkDescriptorImageInfo& getVkDescriptorImageInfo();
 
 	private:
 		inline void initDefaultValues() {
