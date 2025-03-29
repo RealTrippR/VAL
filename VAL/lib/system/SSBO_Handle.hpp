@@ -29,6 +29,9 @@ namespace val {
 		std::vector<VkBuffer> getBuffers(VAL_PROC& proc);
 
 		VkMemoryPropertyFlags getMemoryPropertyFlags();
+
+		static inline VkDescriptorType getVkDescriptorType() { return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; }
+
 	public:
 		uint64_t _size = 0;
 		int _index = 0;

@@ -1,4 +1,6 @@
-﻿'''
+﻿# TODO: THIS PROGRAM IS INCOMPLETE
+
+'''
 ┌───────────────────────────────────────────┐ 
 │VAL_CPPcheck.py                            │
 │Author: Tripp R.                           │
