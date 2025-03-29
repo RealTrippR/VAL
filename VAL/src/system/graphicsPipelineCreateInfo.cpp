@@ -46,4 +46,12 @@ namespace val
 		info.sampleShadingEnable = _sampleShadingEnabled;
 		return info;
 	}
+
+	void graphicsPipelineCreateInfo::setTopology(const VkPrimitiveTopology& topolgy) {
+		_topology = topolgy;
+	}
+
+	VkPrimitiveTopology graphicsPipelineCreateInfo::getTopology() {
+		return _topology;
+	}
 }

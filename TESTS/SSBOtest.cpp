@@ -81,45 +81,32 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& UBO_HDL) {
 	UBO_HDL.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
-	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
-	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_FALSE;
-	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.lineWidth = 1.0f;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rasterizer.depthBiasEnable = VK_FALSE;
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+{
+	using namespace val;
 
-	VkPipelineMultisampleStateCreateInfo& multisampling = info.multisampling;
-	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampling.sampleShadingEnable = VK_FALSE;
-	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	// state infos (MUST BE STATIC IN MEMORY!)
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE_ENUMS::BACK);
+	rasterizer.setPolygonMode(POLYGON_MODE_ENUM::FILL);
+	pipeline.setRasterizer(&rasterizer);
 
-	VkPipelineColorBlendAttachmentState& colorBlendAttachment = info.colorBlendAttachment;
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_TRUE;
-	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-
-	VkPipelineColorBlendStateCreateInfo& colorBlending = info.colorBlending;
-	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlending.logicOpEnable = VK_FALSE;
-	colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+	// the color blend state affects how the output of the fragment shader is 
+	// blended into the existing content of the the framebuffer.
+	static colorBlendStateAttachment colorBlendAttachment(true/*Enable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+	colorBlendAttachment.setColorBlendFactor(BLEND_POS::SOURCE, VK_BLEND_FACTOR_SRC_ALPHA);
+	colorBlendAttachment.setColorBlendFactor(BLEND_POS::DEST, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+	colorBlendAttachment.setAlphaOp(VK_BLEND_OP_ADD);
+	colorBlendAttachment.setAlphaBlendFactor(BLEND_POS::SOURCE, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+	colorBlendAttachment.setAlphaBlendFactor(BLEND_POS::DEST, VK_BLEND_FACTOR_ZERO);
 
 
-	info.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+	static colorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
+
+	pipeline.setTopology(VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
 }
 
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
@@ -154,7 +141,13 @@ void initParticles(std::vector<Particle>& particles, VkExtent2D displayExtent) {
 }
 
 int main() {
-	val::VAL_PROC proc;
+	using namespace val;
+	VAL_PROC proc;
+	graphicsPipelineCreateInfo pipeline;
+	val::computePipelineCreateInfo computePipeline;
+
+	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -167,8 +160,6 @@ int main() {
 
 	// The creation of the swapchain is handled in the window
 	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
-
-	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	// VAL uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -202,18 +193,12 @@ int main() {
 
 
 	//////////////////////////////////////////////////////////////
-
-	val::graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &vertShader, &fragShader };
-
-	val::computePipelineCreateInfo computePipeline;
 	computePipeline.shaders = { &computeShader };
 
 	setGraphicsPipelineInfo(pipeline);
 
-	// creates Vulkan logical and physical devices
-	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 

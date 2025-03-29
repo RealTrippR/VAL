@@ -36,7 +36,9 @@ namespace val {
 
 		VkPipelineMultisampleStateCreateInfo getVkPipelineMultisampleStateCreateInfo();
 
-		VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		void setTopology(const VkPrimitiveTopology& topolgy);
+
+		VkPrimitiveTopology getTopology();
 
 	public:
 		inline VkRenderPass& getVkRenderPass() {
@@ -45,6 +47,8 @@ namespace val {
 	protected:
 		friend VAL_PROC;
 	protected:
+		VkPrimitiveTopology _topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
 		rasterizerState* _rasterizerState = NULL;
 		colorBlendState* _colorBlendState = NULL;
 
