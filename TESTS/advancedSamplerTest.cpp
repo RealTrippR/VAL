@@ -249,8 +249,8 @@ int main() {
 		static uint16_t timer = 0;
 		timer++;
 		if (timer > 4000) {
-			fragShader.updateTexture(proc, pipeline, { imgView2,2 }, 1);
 			fragShader.updateTexture(proc, pipeline, { imgView1,2 }, 0);
+			fragShader.updateTexture(proc, pipeline, { imgView2,2 }, 1);
 			timer = 0;
 		}
 		else if (timer==2000) {
