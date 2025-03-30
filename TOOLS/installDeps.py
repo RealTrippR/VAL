@@ -113,12 +113,12 @@ def get_platform_info():
         return "Unknown OS"
 
 
+
 '''
 ┌──────────────────────────────────────────────────────────┐ 
 │                           MAIN                           │
 └──────────────────────────────────────────────────────────┘ 
 '''
-
 
 files = {
     "stb_image.h": "https://raw.githubusercontent.com/nothings/stb/refs/heads/master/stb_image.h",
@@ -127,18 +127,18 @@ files = {
 
 codebases = {"glm": "https://github.com/g-truc/glm/releases/download/1.0.1/glm-1.0.1-light.zip"}
 if (get_platform_info() == "Windows x64"):
-    codebases = {"GLFW": "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.WIN64.zip"}
+    codebases["GLFW"] ="https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.WIN64.zip"
 elif (get_platform_info() == "Windows x32"):
-    codebases = {"GLFW": "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.WIN32.zip"}
+    codebases["GLFW"] = "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.WIN32.zip"
 elif (get_platform_info() == "macOS"):
-    codebases = {"GLFW": "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.MACOS.zip"}
+    codebases["GLFW"] = "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.MACOS.zip"
 elif(get_platform_info() == "Linux"):
     print("GLFW will not be installed as it is not available as a prebuilt binary for Linux. You will have to build it from source, read more here: https://www.glfw.org/docs/3.3/compile.html")
 
 
 # Create the External Libraries path if it doesn't yet exist
 if (os.path.isdir(EXTERNAL_DEPENDENCY_DIR) == False):
-    os.makedir(EXTERNAL_DEPENDENCY_DIR)
+    os.mkdir(EXTERNAL_DEPENDENCY_DIR)
 
 
 # Zip files will be downloaded to this temp dir and then deleted
