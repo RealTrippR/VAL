@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b6c8dd60-4e5a-4608-bcc6-ada4a910772f</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>VAL_CPPcheck.py</StartupFile>
+    <StartupFile>installDeps.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -26,6 +26,7 @@
     <OutputPath>bin\Debug-Static\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="installDeps.py" />
     <Compile Include="VAL_CPPcheck.py" />
   </ItemGroup>
   <ItemGroup>
