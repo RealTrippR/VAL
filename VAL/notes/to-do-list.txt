@@ -15,6 +15,9 @@ VULKAN ABSTRACTION LIBRARY, PROTOTYPE V1.00.0:
 
 [!] Add support and complete tests for multiple windows. (see: https://community.khronos.org/t/multiple-glfw-windows-with-single-context/108421)
 
+[ ] Give the window class to be created without a GLFW window handle, but also provide support 
+	to create one from a GLFW window handle if given as an argument to the create function.
+
 [ ] Add support for immutable samplers
 
 [ ] Allow for the customization of the number frames in flight of descriptor sets for pipelines, as sometimes it's not nessecary to have different descriptors for some pipelines.

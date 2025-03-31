@@ -32,7 +32,7 @@ def update_download_progress_bar(percent):
     for i in range(0,round(totalLen*percent)):
         bar[i] = "█"
 
-    bar_str = "".join(bar) #convert list to str
+    bar_str = "".join(bar)
     print(f"\rDownloading: {bar_str} {(percent*100):.1f}%", end="", flush=True)
 
         
@@ -46,7 +46,7 @@ def download_file(url, save_path):
             downloaded_size = 0
             downloaded_size = 0
             while True:
-                chunk = response.read(1024)  # 1 KB
+                chunk = response.read(1024)
                 if not chunk:
                     break
                 file.write(chunk)
@@ -72,7 +72,7 @@ def download_and_extract(url, save_path, extract_to, rename_top_folder = None):
             f.write(response.content)
         print(f"Downloaded to {save_path}")
 
-        # keep track of the files that already existed in the dir
+        # keep track of the files that already existed in the dir find which files are from the zip file
         before_files = set(os.listdir(extract_to)) if os.path.exists(extract_to) else set()
 
 
@@ -100,8 +100,8 @@ def download_and_extract(url, save_path, extract_to, rename_top_folder = None):
         print(f"Failed to download the file. Status code: {response.status_code}")
 
 def get_platform_info():
-    system = platform.system()  # Get OS name
-    architecture = "x64" if sys.maxsize > 2**32 else "x32"  # Determine 32-bit or 64-bit
+    system = platform.system()
+    architecture = "x64" if sys.maxsize > 2**32 else "x32"
 
     if system == "Windows":
         return f"Windows {architecture}"
@@ -134,7 +134,7 @@ elif (get_platform_info() == "macOS"):
     codebases["GLFW"] = "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.bin.MACOS.zip"
 elif(get_platform_info() == "Linux"):
     print("GLFW will not be installed as it is not available as a prebuilt binary for Linux. You will have to build it from source, read more here: https://www.glfw.org/docs/3.3/compile.html")
-
+    print("When you finish building it, place GLFW under " + EXTERNAL_DEPENDENCY_DIR + " GLFW")
 
 # Create the External Libraries path if it doesn't yet exist
 if (os.path.isdir(EXTERNAL_DEPENDENCY_DIR) == False):

@@ -1,5 +1,3 @@
-// https://snorristurluson.github.io/TextRenderingWithFreetype/ - FreeType con Vulkan
-
 #include <iostream>
 #include <string>
 #include <chrono>
@@ -12,10 +10,6 @@ const bool enableValidationLayers = true;
 #endif //!NDEBUG
 
 #include <VAL/lib/system/VAL_PROC.hpp>
-#include <VAL/lib/system/window.hpp>
-#include <VAL/lib/system/system_utils.hpp>
-#include <VAL/lib/system/UBO_Handle.hpp>
-#include <VAL/lib/graphics/shader.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
