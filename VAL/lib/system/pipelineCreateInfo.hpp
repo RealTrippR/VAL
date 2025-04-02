@@ -21,17 +21,17 @@ namespace val {
 		uint32_t pipelineIdx = 0u;
 		uint32_t descriptorsIdx = 0u; // index of descriptor sets and layouts
 	public:
-		virtual std::vector<UBO_Handle*> getUniqueUBOs();
+		virtual std::vector<UBO_Handle*> getUniqueUBOs() const;
 
-		virtual std::vector<pushConstantHandle*> getUniquePushConstants();
+		virtual std::vector<pushConstantHandle*> getUniquePushConstants() const;
 
-		virtual std::vector<SSBO_Handle*> getUniqueSSBOs();
+		virtual std::vector<SSBO_Handle*> getUniqueSSBOs() const;
 
-		virtual std::vector<VkDescriptorSet> getDescriptorSets(VAL_PROC& proc);
+		virtual std::vector<VkDescriptorSet> getDescriptorSets(VAL_PROC& proc) const;
 
 		//std::vector<VkPipelineStageFlags> getPipelineStages();
 
-		virtual const std::vector<VkShaderStageFlags> getShaderStages();
+		virtual const std::vector<VkShaderStageFlags> getShaderStages()const;
 
 	};
 }

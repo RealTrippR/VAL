@@ -1,6 +1,30 @@
 #ifndef VAL_SYSTEM_UTILS_HPP
 #define VAL_SYSTEM_UTILS_HPP
 
+
+// for C++ class enums
+
+#define DEF_ENUM_BITWISE_OR(TYPE) inline TYPE operator|(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) | static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_AND(TYPE) inline TYPE operator&(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) & static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_XOR(TYPE) inline TYPE operator^(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_NOT(TYPE) inline TYPE operator~(TYPE a) { return static_cast<TYPE>(~static_cast<std::underlying_type_t<TYPE>>(a));}
+
+#define DEF_ENUM_BITWISE_OR_ASSIGN(TYPE) inline TYPE operator|=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) | static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_AND_ASSIGN(TYPE) inline TYPE operator&=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) & static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE) inline TYPE operator^=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
+
+#define DEF_ENUM_BITWISE_OPERATORS(TYPE)\
+DEF_ENUM_BITWISE_OR(TYPE)\
+DEF_ENUM_BITWISE_AND(TYPE)\
+DEF_ENUM_BITWISE_XOR(TYPE)\
+DEF_ENUM_BITWISE_NOT(TYPE)\
+DEF_ENUM_BITWISE_OR_ASSIGN(TYPE)\
+DEF_ENUM_BITWISE_AND_ASSIGN(TYPE)\
+DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
+
+
+
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -9,8 +33,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <stdlib.h>
+
 #include <ExternalLibraries/stb_image.h>;
 #include <optional>
+#include <array>
 #include <set>
 #include <vector>
 #include <utility>
@@ -27,6 +54,8 @@
 #include <VAL/lib/system/pipelineType.hpp>
 
 #include <VAL/lib/system/physicalDeviceRequirements.hpp>
+
+#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
 
 namespace val {
 

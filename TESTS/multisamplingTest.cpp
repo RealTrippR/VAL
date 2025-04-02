@@ -28,11 +28,9 @@ struct uniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
-
 
 void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	using namespace val;
@@ -51,50 +49,34 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info, const VkSampleCountFlagBits& msaaSamples) {
-	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
-	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_FALSE;
-	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.lineWidth = 1.0f;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rasterizer.depthBiasEnable = VK_FALSE;
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const VkSampleCountFlagBits& MSAAsamples)
+{	using namespace val;
 
-	VkPipelineMultisampleStateCreateInfo& multisampling = info.multisampling;
-	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	VkPhysicalDeviceFeatures f;
+	pipeline.setSampleCount(MSAAsamples);
 
-	// for sampleShadingEnable to be valid, set: deviceFeatures.sampleRateShading = VK_TRUE; // enable sample shading feature for the device
-	//multisampling.sampleShadingEnable = VK_TRUE;
-	//multisampling.minSampleShading = .75f; // min fraction for sample shading; closer to one is smoother
+	// state infos (MUST BE STATIC IN MEMORY!)
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE::BACK);
+	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
+	pipeline.setRasterizer(&rasterizer);
 
-	multisampling.rasterizationSamples = msaaSamples;
+	// the color blend state affects how the output of the fragment shader is 
+	// blended into the existing content of the the framebuffer.
+	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
-	VkPipelineColorBlendAttachmentState& colorBlendAttachment = info.colorBlendAttachment;
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_FALSE;
-
-	VkPipelineColorBlendStateCreateInfo& colorBlending = info.colorBlending;
-	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlending.logicOpEnable = VK_FALSE;
-	colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+	static colorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
 }
-
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, uint8_t MSAA_Samples) {
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, uint8_t MSAAsamples) {
 	using namespace val;
+
+	renderPassMngr.setMSAAsamples(MSAAsamples);
 
 	static subpass subpass(renderPassMngr, GRAPHICS);
 	{
 		static colorAttachment colorAttach;
-		colorAttach.setMSAA_Samples(MSAA_Samples);
 		colorAttach.setImgFormat(imgFormat);
 		colorAttach.setLoadOperation(CLEAR);
 		colorAttach.setStoreOperation(STORE);
@@ -114,6 +96,10 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, u
 int main() {
 	using namespace val;
 	VAL_PROC proc;
+	graphicsPipelineCreateInfo pipeline;
+
+	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	imageView imgView(proc);
 
@@ -122,7 +108,6 @@ int main() {
 	imgSampler.bindImageView(imgView);
 
 	VkFormat imageFormat;
-	VkSampleCountFlagBits msaaSamples;
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -132,12 +117,9 @@ int main() {
 
 	VkExtent2D windowSize{ 800,800 }; // in pixels
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(windowSize.width, windowSize.height, "Test", NULL, NULL);
-
 	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
-	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-
-	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
 
 	// VAL uses image format requirements to pick the best image format out of a list of the formats input
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -148,13 +130,15 @@ int main() {
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
 	imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
-	msaaSamples = proc.getMaxSampleCount();
+	VkSampleCountFlagBits MSAAsamples = proc.getMaxSampleCount();
+		
+	printf("\n>-- MSAA Sample count: %d\n\n", MSAAsamples);
 
-	printf("\n>-- MSAA Sample count: %d\n\n", msaaSamples);
-
-	multisamplerManager multisamplerMngr(proc, msaaSamples);
+	multisamplerManager multisamplerMngr(proc, MSAAsamples);
 	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);
-	
+	multisamplerMngr.setSampleCount(MSAAsamples);
+
+
 	UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
 	shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
@@ -167,12 +151,11 @@ int main() {
 
 
 	// config grahics pipeline
-	graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &vertShader, &fragShader };
-	setGraphicsPipelineInfo(pipeline, msaaSamples);
+	setGraphicsPipelineInfo(pipeline, MSAAsamples);
 
 	renderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat, msaaSamples);
+	setRenderPass(renderPassMngr, imageFormat, MSAAsamples);
 	pipeline.renderPass = &renderPassMngr;
 
 	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline });

@@ -3,19 +3,20 @@
 
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/system/imageView.hpp>
+#include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
 
 namespace val {
 	enum samplerType {
-		combinedImage, // equivalent to VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
-		standalone, // equivalent to VK_DESCRIPTOR_TYPE_SAMPLER 
-		immutable //  // equivalent to combinedImage except it cannot be changed and is baked into the graphics pipeline
+		combinedImage = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, // equivalent to VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
+		standalone = VK_DESCRIPTOR_TYPE_SAMPLER, // equivalent to VK_DESCRIPTOR_TYPE_SAMPLER 
+		immutable = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER //  // equivalent to combinedImage except it cannot be changed and is baked into the graphics pipeline
 	};
 
 	class sampler {
 	public:
 		sampler(VAL_PROC& proc) : _proc(proc) { initDefaultValues(); };
 		sampler(VAL_PROC& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
-		sampler(VAL_PROC& proc, val::imageView* imgView, samplerType samplerType = combinedImage) : _proc(proc), _imgView(imgView), _samplerType(samplerType) { initDefaultValues(); };
+		sampler(VAL_PROC& proc, val::imageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
 
 		~sampler() {
 			destroy();
@@ -32,10 +33,11 @@ namespace val {
 	public:
 		void setSamplerType(const samplerType& type);
 
+		// An anisoLevel greater than 0 will enable anisotropic filtering, if it's equal to 0 it will be disabled.
 		void setMaxAnisotropy(const float& anisoLevel);
-		
+
 		void setMagnificationFilter(const VkFilter& filterType);
-		
+
 		void setMinificationFilter(const VkFilter& filterType);
 
 		void setMipmapMode(VkSamplerMipmapMode mipMapMode);
@@ -83,18 +85,20 @@ namespace val {
 
 		VkSampler& getVkSampler();
 
+		VkDescriptorImageInfo& getVkDescriptorImageInfo();
+
 	private:
 		inline void initDefaultValues() {
 			_samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 			_samplerCreateInfo.anisotropyEnable = VK_FALSE;  // Enable anisotropic filtering
-			_samplerCreateInfo.maxAnisotropy = 16.0f;
+			_samplerCreateInfo.maxAnisotropy = 0.0f;
 			_samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 			_samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 			_samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 			_samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
 			_samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
 			_samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-			_samplerCreateInfo.compareEnable = VK_FALSE; 
+			_samplerCreateInfo.compareEnable = VK_FALSE;
 			_samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
 			_samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;  // Use normalized coordinates
 			_samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
@@ -107,6 +111,7 @@ namespace val {
 		VkSampler _sampler = VK_NULL_HANDLE;
 		VkSamplerCreateInfo _samplerCreateInfo{};
 		imageView* _imgView;
+		VkDescriptorImageInfo _VKdescriptorInfo{.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
 	};
 }
 

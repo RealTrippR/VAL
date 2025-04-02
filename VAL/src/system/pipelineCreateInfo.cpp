@@ -3,7 +3,7 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	std::vector<UBO_Handle*> pipelineCreateInfo::getUniqueUBOs() {
+	std::vector<UBO_Handle*> pipelineCreateInfo::getUniqueUBOs() const {
 		std::vector<UBO_Handle*> UBO_Handles;
 		for (shader* shdr : shaders) {
 			for (auto& UBO_Write : shdr->_UBO_Handles) {
@@ -18,7 +18,7 @@ namespace val {
 		return UBO_Handles;
 	}
 
-	std::vector<pushConstantHandle*> pipelineCreateInfo::getUniquePushConstants() {
+	std::vector<pushConstantHandle*> pipelineCreateInfo::getUniquePushConstants() const {
 		std::vector<pushConstantHandle*> PC_Handles;
 		for (shader* shdr : shaders) {
 			if (shdr->_pushConstant != NULL) {
@@ -32,7 +32,7 @@ namespace val {
 		return PC_Handles;
 	}
 
-	std::vector<SSBO_Handle*> pipelineCreateInfo::getUniqueSSBOs() {
+	std::vector<SSBO_Handle*> pipelineCreateInfo::getUniqueSSBOs() const {
 		std::vector<SSBO_Handle*> SSBO_Handles;
 		for (shader* shdr : shaders) {
 			for (auto SSBO_Write : shdr->_SSBO_Handles) {
@@ -47,7 +47,7 @@ namespace val {
 		return SSBO_Handles;
 	}
 
-	std::vector<VkDescriptorSet> pipelineCreateInfo::getDescriptorSets(VAL_PROC& proc) {
+	std::vector<VkDescriptorSet> pipelineCreateInfo::getDescriptorSets(VAL_PROC& proc) const {
 		return proc._descriptorSets[descriptorsIdx];
 	}
 
@@ -79,7 +79,7 @@ namespace val {
 
 	//	return stages;
 	//};
-	const std::vector<VkShaderStageFlags> pipelineCreateInfo::getShaderStages() {
+	const std::vector<VkShaderStageFlags> pipelineCreateInfo::getShaderStages() const {
 		std::vector<VkShaderStageFlags> stages;
 		for (auto shdr : shaders) {
 			stages.push_back(shdr->getStageFlags());

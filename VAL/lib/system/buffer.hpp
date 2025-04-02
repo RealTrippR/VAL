@@ -20,8 +20,12 @@ namespace val
 			destroy();
 		}
 
-		buffer(const buffer&) = delete;
-		buffer& operator=(const buffer&) = delete;
+		buffer(const buffer& other) : _proc(other._proc) {
+			this->copy(other);
+		}
+		buffer& operator=(const buffer& other) {
+			this->copy(other);
+		}
 
 	public:
 		void create(VAL_PROC& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u);
@@ -63,12 +67,15 @@ namespace val
 		VAL_PROC* getVAL_Proc();
 
 	protected:
+		void copy(const buffer& other);
+
+	protected:
 		VAL_PROC& _proc;  // Store a reference
 		uint32_t _size = 0u;
 		bufferSpace _space{};
 		VkBufferUsageFlags _usage = 0;
 		// each vector has a size equivalent to the frame count that it was initialized with
-		std::vector<VkBuffer> _buffers;
+		std::vector<VkBuffer> _buffers; // it would be more efficient to pack this data into just 1 buffer. i.e. VkBuffer* (which includes the data for both frames that can be accessed with an offset)
 		std::vector<VkDeviceMemory> _memory;
 		std::vector<void*> _dataMapped;
 	};

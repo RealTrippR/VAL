@@ -211,7 +211,7 @@ namespace val {
 			// pack the value index into the puffer info, it will be used later to update descriptor sets
 			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descWrite.dstBinding = _UBO_Handles[i].bindingIndex;
-			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descWrite.descriptorType = _UBO_Handles[i].values[0]->getVkDescriptorType();
 			descWrite.descriptorCount = _UBO_Handles[i].values.size();
 			descWrite.pBufferInfo = VK_NULL_HANDLE;
 		}
@@ -225,7 +225,7 @@ namespace val {
 			// pack the value index into the puffer info, it will be used later to update descriptor sets
 			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descWrite.dstBinding = _SSBO_Handles[i].bindingIndex;
-			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			descWrite.descriptorType = _SSBO_Handles[i].values[0]->getVkDescriptorType();
 			descWrite.descriptorCount = _SSBO_Handles[i].values.size();
 			descWrite.pBufferInfo = VK_NULL_HANDLE;
 		}
@@ -313,7 +313,6 @@ namespace val {
 				buffInfoArr.resize(uboHDL.values.size());
 				for (size_t j = 0; j < buffInfoArr.size(); ++j) {
 					VkDescriptorBufferInfo& buffInfo = buffInfoArr[j];
-					memset(&buffInfo, 0, sizeof(VkDescriptorBufferInfo)); // 0 out memory
 					buffInfo.buffer = uboHDL.values[j]->getBuffers(proc)[frame];
 					buffInfo.range = uboHDL.values[j]->_size;
 					buffInfo.offset = 0;
@@ -391,21 +390,155 @@ namespace val {
 	void shader::updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler) {
 		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
 			VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][i];
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageView = *(sampler.first.getImageView());
-			imageInfo.sampler = sampler.first.getVkSampler();
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			VkWriteDescriptorSet descriptorWrite{};
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
 			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrite.dstSet = descriptorSet;
 			descriptorWrite.dstBinding = sampler.second; // THIS MUST MATCH THE BINDING
 			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite.descriptorType = (VkDescriptorType)sampler.first.getSamplerType();;
 			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pImageInfo = &imageInfo;
+			descriptorWrite.pImageInfo = &sampler.first.getVkDescriptorImageInfo();
 
 			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 		}
+	}
+	;
+	void shader::updateImageSamplerAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight)
+	{
+		VkWriteDescriptorSet descriptorWrite;
+		descriptorWrite.pNext = NULL;
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = pipeline.getDescriptorSets(proc)[frameInFlight];
+		descriptorWrite.dstBinding = sampler.second;
+		descriptorWrite.descriptorType = (VkDescriptorType)sampler.first.getSamplerType();
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.pImageInfo = &sampler.first.getVkDescriptorImageInfo();
+		vkUpdateDescriptorSets(proc._device, 1u, &descriptorWrite, 0, NULL);
+	}
+
+	void shader::updateTexture(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx)
+	{
+
+		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
+			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][i];
+
+			VkDescriptorImageInfo imgInfo = { NULL, texture.first.getImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = texture.second; // THIS MUST MATCH THE BINDING
+			descriptorWrite.dstArrayElement = arrIdx;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pImageInfo = &imgInfo;
+			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
+	void shader::updateTextureAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx)
+	{
+			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameInFlight];
+
+			VkDescriptorImageInfo imgInfo = { NULL, texture.first.getImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = texture.second; // THIS MUST MATCH THE BINDING
+			descriptorWrite.dstArrayElement = arrIdx;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pImageInfo = &imgInfo;
+			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+	}
+
+	void shader::updateUBO(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx)
+	{
+		for (int_fast8_t frameIdx = 0; frameIdx < proc._MAX_FRAMES_IN_FLIGHT; ++frameIdx) {
+			VkDescriptorBufferInfo buffInfo;
+			buffInfo.buffer = UBO.first.getBuffers(proc)[frameIdx];
+			buffInfo.range = UBO.first._size;
+			buffInfo.offset = 0;
+
+			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameIdx];
+
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = UBO.second; // THIS MUST MATCH THE BINDING
+			descriptorWrite.dstArrayElement = arrIdx;
+			descriptorWrite.descriptorType = UBO.first.getVkDescriptorType();
+			descriptorWrite.descriptorCount = 1;
+			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
+	void shader::updateUBOatFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint8_t frameInFlight, const uint16_t arrIdx)
+	{
+		VkDescriptorBufferInfo buffInfo;
+		buffInfo.buffer = UBO.first.getBuffers(proc)[frameInFlight];
+		buffInfo.range = UBO.first._size;
+		buffInfo.offset = 0;
+
+		const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameInFlight];
+
+		VkWriteDescriptorSet descriptorWrite;
+		descriptorWrite.pNext = NULL;
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = descriptorSet;
+		descriptorWrite.dstBinding = UBO.second; // THIS MUST MATCH THE BINDING
+		descriptorWrite.dstArrayElement = arrIdx;
+		descriptorWrite.descriptorType = UBO.first.getVkDescriptorType();
+		descriptorWrite.descriptorCount = 1;
+		vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+	}
+
+	void shader::updateSSBO(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint16_t arrIdx)
+	{
+		for (int_fast8_t frameIdx = 0; frameIdx < proc._MAX_FRAMES_IN_FLIGHT; ++frameIdx) {
+			VkDescriptorBufferInfo buffInfo;
+			buffInfo.buffer = SSBO.first.getBuffers(proc)[frameIdx];
+			buffInfo.range = SSBO.first._size;
+			buffInfo.offset = 0;
+
+			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameIdx];
+
+			VkWriteDescriptorSet descriptorWrite;
+			descriptorWrite.pNext = NULL;
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = SSBO.second; // THIS MUST MATCH THE BINDING
+			descriptorWrite.dstArrayElement = arrIdx;
+			descriptorWrite.descriptorType = SSBO.first.getVkDescriptorType();
+			descriptorWrite.descriptorCount = 1;
+			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
+		}
+	}
+
+	void shader::updateSSBOatFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint8_t frameInFlight, const uint16_t arrIdx)
+	{
+		VkDescriptorBufferInfo buffInfo;
+		buffInfo.buffer = SSBO.first.getBuffers(proc)[frameInFlight];
+		buffInfo.range = SSBO.first._size;
+		buffInfo.offset = 0;
+
+		const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameInFlight];
+
+		VkWriteDescriptorSet descriptorWrite;
+		descriptorWrite.pNext = NULL;
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = descriptorSet;
+		descriptorWrite.dstBinding = SSBO.second; // THIS MUST MATCH THE BINDING
+		descriptorWrite.dstArrayElement = arrIdx;
+		descriptorWrite.descriptorType = SSBO.first.getVkDescriptorType();
+		descriptorWrite.descriptorCount = 1;
+		vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 	}
 }

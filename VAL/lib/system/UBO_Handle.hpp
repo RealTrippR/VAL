@@ -27,6 +27,8 @@ namespace val {
 
 		VkMemoryPropertyFlags getMemoryPropertyFlags();
 
+		static inline VkDescriptorType getVkDescriptorType() { return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; }
+
 	public:
 		uint16_t _size = 0; // Vulkan allows for 16000 as the max size in bytes of a UBO buffer
 		int _index = 0;

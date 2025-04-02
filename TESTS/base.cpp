@@ -25,24 +25,18 @@ const bool enableValidationLayers = true;
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
 
-
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
 };
 
+const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
-const std::vector<const char*> validationLayers = {
-	"VK_LAYER_KHRONOS_validation"
-};
-
-
-void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
-	using namespace val;
+void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
+{	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
-
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
@@ -55,36 +49,25 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
-	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
-	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_FALSE;
-	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.lineWidth = 1.0f;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rasterizer.depthBiasEnable = VK_FALSE;
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+{	using namespace val;
 
-	VkPipelineMultisampleStateCreateInfo& multisampling = info.multisampling;
-	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampling.sampleShadingEnable = VK_FALSE;
-	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	// state infos
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE::BACK);
+	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
+	pipeline.setRasterizer(&rasterizer);
 
-	VkPipelineColorBlendAttachmentState& colorBlendAttachment = info.colorBlendAttachment;
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_FALSE;
+	// the color blend state affects how the output of the fragmennt shader is 
+	// blended into the existing content of the the framebuffer.
+	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
-	VkPipelineColorBlendStateCreateInfo& colorBlending = info.colorBlending;
-	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlending.logicOpEnable = VK_FALSE;
-	colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+	static colorBlendState blendState; 
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
+
+	//pipeline.setDynamicStates();
 }
 
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
@@ -99,11 +82,12 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	subpass.bindAttachment(&colorAttach);
 }
 
-int main() {
+int main()
+{	namespace v = val;
 
-	val::VAL_PROC proc;
+	v::VAL_PROC proc;
 	
-	val::physicalDeviceRequirements deviceRequirements (val::dedicated_GPU | val::integrated_GPU);
+	val::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
 	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	/////////// consider moving this into the window class ///////////
@@ -180,8 +164,7 @@ int main() {
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setArea(window._swapChainExtent);
-	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setRenderArea(window._swapChainExtent);
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
@@ -202,6 +185,9 @@ int main() {
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.updatePipeline(proc, pipeline);
+		renderTarget.updateViewports(proc, { viewport });
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 

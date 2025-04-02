@@ -11,6 +11,7 @@ namespace val {
 		if (vkCreateSampler(_proc._device, &_samplerCreateInfo, nullptr, &_sampler) != VK_SUCCESS) {
 			throw std::runtime_error("FAILED TO CREATE TEXTURE SAMPLER!");
 		}
+		_VKdescriptorInfo.sampler = _sampler;
 	}
 
 	void sampler::destroy() {
@@ -22,6 +23,8 @@ namespace val {
 
 	void sampler::bindImageView(imageView& imageView) {
 		_imgView = &imageView;
+		_VKdescriptorInfo.imageView = _imgView->getImageView();
+		_VKdescriptorInfo.sampler = _sampler;
 	}
 
 	imageView* sampler::getImageView() {
@@ -139,4 +142,10 @@ namespace val {
 	VkSampler& sampler::getVkSampler() {
 		return _sampler;
 	}
+
+	VkDescriptorImageInfo& sampler::getVkDescriptorImageInfo() {
+		return _VKdescriptorInfo;
+	}
+
+	/************************************************************************************************/
 }

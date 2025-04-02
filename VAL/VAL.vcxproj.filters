@@ -42,6 +42,12 @@
     <Filter Include="src\renderAttachments">
       <UniqueIdentifier>{e9c43b77-edf6-459d-934b-393fef2a70dc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\pipelineStateInfos">
+      <UniqueIdentifier>{f23fa5e6-6e5e-4331-a020-564d9e21e510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\pipelineStateInfos">
+      <UniqueIdentifier>{f8534d2c-f76d-4da6-af58-3447f40e9edc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\VAL_PROC.hpp">
@@ -161,6 +167,24 @@
     <ClInclude Include="lib\system\physicalDeviceRequirements.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\colorBlendStateAttachment.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\rasterizerState.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\stateInfoEnums.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\colorBlendState.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\depthStencilState.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\pipelineStateInfos\stateInfos.hpp">
+      <Filter>lib\pipelineStateInfos</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -231,6 +255,24 @@
     </ClCompile>
     <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp">
       <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipelineStateInfos\rasterizerState.cpp">
+      <Filter>src\pipelineStateInfos</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipelineStateInfos\colorBlendStateAttachment.cpp">
+      <Filter>src\pipelineStateInfos</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipelineStateInfos\colorBlendState.cpp">
+      <Filter>src\pipelineStateInfos</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp">
+      <Filter>src\pipelineStateInfos</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\system\physicalDeviceRequirements.cpp">
+      <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
