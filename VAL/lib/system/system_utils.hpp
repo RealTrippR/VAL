@@ -58,6 +58,19 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 #include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
 
 namespace val {
+	// VAL::DYNAMIC_STATE maps directly to VkDynamicState
+	enum class DYNAMIC_STATE
+	{ // https://registry.khronos.org/vulkan/specs/latest/man/html/VkDynamicState.html
+		SCISSOR = VK_DYNAMIC_STATE_SCISSOR,
+		VIEWPORT = VK_DYNAMIC_STATE_VIEWPORT,
+		LINE_WIDTH = VK_DYNAMIC_STATE_LINE_WIDTH,
+		DEPTH_BIAS = VK_DYNAMIC_STATE_DEPTH_BIAS,
+		DEPTH_BOUNDS = VK_DYNAMIC_STATE_DEPTH_BOUNDS,
+		BLEND_CONSTANTS = VK_DYNAMIC_STATE_BLEND_CONSTANTS,
+		/*Vk 1.3 and up:*/
+		CULL_MODE = VK_DYNAMIC_STATE_CULL_MODE, 
+		TOPOLOGY = VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY
+	};
 
 	enum bufferSpace {
 		GPU_ONLY,

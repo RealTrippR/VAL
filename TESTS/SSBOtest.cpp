@@ -101,6 +101,8 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	pipeline.setColorBlendState(&blendState);
 
 	pipeline.setTopology(VK_PRIMITIVE_TOPOLOGY_POINT_LIST);
+
+	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {

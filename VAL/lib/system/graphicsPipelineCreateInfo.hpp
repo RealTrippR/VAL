@@ -14,8 +14,6 @@ namespace val {
 	public:		
 		uint32_t subpassIndex = 0u;
 
-		std::vector<VkDynamicState> dynamicStates; /*WIP*/
-
 		renderPassManager* renderPass;
 
 		void setRasterizer(val::rasterizerState* rasterizer);
@@ -40,6 +38,10 @@ namespace val {
 
 		VkPrimitiveTopology getTopology();
 
+		void setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates);
+
+		const std::vector<DYNAMIC_STATE>& getDynamicStates();
+
 	public:
 		inline VkRenderPass& getVkRenderPass() {
 			return renderPass->getVkRenderPass();
@@ -56,6 +58,9 @@ namespace val {
 
 		VkSampleCountFlags _sampleCountMSAA = VK_SAMPLE_COUNT_1_BIT;
 		bool _sampleShadingEnabled = false;
+		
+		// VAL::DYNAMIC_STATE maps directly to VkDynamicState
+		std::vector<DYNAMIC_STATE> _dynamicStates;
 	};
 }
 

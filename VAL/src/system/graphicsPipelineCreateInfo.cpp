@@ -54,4 +54,12 @@ namespace val
 	VkPrimitiveTopology graphicsPipelineCreateInfo::getTopology() {
 		return _topology;
 	}
+
+	void graphicsPipelineCreateInfo::setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates) {
+		_dynamicStates = dynamicStates;
+	}
+
+	const std::vector<DYNAMIC_STATE>& graphicsPipelineCreateInfo::getDynamicStates() {
+		return _dynamicStates;
+	}
 }
