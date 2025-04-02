@@ -29,6 +29,10 @@ namespace val
 
 		float getUpperDepthBound();
 
+		void setCompareOp(VkCompareOp op);
+
+		VkCompareOp getCompareOp();
+
 		void setFront(const VkStencilOpState& front);
 
 		VkStencilOpState& getFront();

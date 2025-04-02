@@ -43,6 +43,13 @@ namespace val
 		return _VKdepthState.maxDepthBounds;
 	}
 
+	void depthStencilState::setCompareOp(VkCompareOp op) {
+		_VKdepthState.depthCompareOp = op;
+	}
+
+	VkCompareOp depthStencilState::getCompareOp() {
+		return _VKdepthState.depthCompareOp;
+	}
 
 	void depthStencilState::setFront(const VkStencilOpState& front) {
 		_VKdepthState.front = front;

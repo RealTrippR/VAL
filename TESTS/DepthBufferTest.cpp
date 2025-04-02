@@ -59,58 +59,34 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& info) {
-	// RASTERIZER
-	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
-	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterizer.depthClampEnable = VK_FALSE;
-	rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterizer.lineWidth = 1.0f;
-	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-	rasterizer.depthBiasEnable = VK_FALSE;
-	
+void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+{
+	using namespace val;
 
-	// MULTISAMPLING
-	VkPipelineMultisampleStateCreateInfo& multisampling = info.multisampling;
-	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampling.sampleShadingEnable = VK_FALSE;
-	multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	// state infos
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE::BACK);
+	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
+	pipeline.setRasterizer(&rasterizer);
 
-	VkPipelineColorBlendAttachmentState& colorBlendAttachment = info.colorBlendAttachment;
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_FALSE;
+	// the color blend state affects how the output of the fragmennt shader is 
+	// blended into the existing content of the the framebuffer.
+	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
-	// COLOR BLENDING
-	VkPipelineColorBlendStateCreateInfo& colorBlending = info.colorBlending;
-	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlending.logicOpEnable = VK_FALSE;
-	colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+	static depthStencilState depthState;
+	depthState.enableDepthTesting(true);
+	depthState.setCompareOp(VK_COMPARE_OP_LESS);
 
-	// DEPTH STENCIL
-	static VkPipelineDepthStencilStateCreateInfo depthStencil{};
-	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	depthStencil.depthTestEnable = VK_TRUE;
-	depthStencil.depthWriteEnable = VK_TRUE;
+	static colorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
 
-	depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-	depthStencil.depthBoundsTestEnable = VK_FALSE;
+	pipeline.setDepthBlendState(&depthState);
 
-	depthStencil.minDepthBounds = 0.0f; // Optional
-	depthStencil.maxDepthBounds = 1.0f; // Optional
-	depthStencil.stencilTestEnable = VK_FALSE;
 
-	depthStencil.front = {}; // Optional
-	depthStencil.back = {}; // Optional
+	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 
-	info.depthStencil = &depthStencil;
 }
 
 
@@ -137,8 +113,14 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, V
 	}
 }
 
-int main() {
-	val::VAL_PROC proc;
+int main()
+{
+	namespace v = val;
+
+	v::VAL_PROC proc;
+
+	val::physicalDeviceRequirements deviceRequirements(v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
+	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	val::imageView imgView(proc);
 
@@ -151,13 +133,12 @@ int main() {
 
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
 
-	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	v::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
-	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	// VAL uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements formatReqs;
+	v::imageFormatRequirements formatReqs;
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
@@ -165,29 +146,29 @@ int main() {
 
 
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	v::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ val::vertex3D::getBindingDescription() });
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	v::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	v::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::sampler imgSampler(proc, val::combinedImage);
+	v::sampler imgSampler(proc, v::combinedImage);
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipeline;
+	v::graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders.push_back(&vertShader); // consolidate into a single function
 	pipeline.shaders.push_back(&fragShader); // consolidate into a single function
 	setGraphicsPipelineInfo(pipeline);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
@@ -203,16 +184,15 @@ int main() {
 	setRenderPass(renderPassMngr, imageFormat, depthFormat);
 	pipeline.renderPass = &renderPassMngr;
 
-	// 1 renderPass per pipeline
-	std::vector<VkRenderPass> renderPasses;
-	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline }, &renderPasses);
+
+	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline });
 
 
 	// Create depth buffer
 	val::depthBuffer depthBuffer(proc, window._swapChainExtent, depthFormat, 1u);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front()};
-	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), renderPasses[0], proc._device);
+	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), pipeline.getVkRenderPass(), proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER FML_PROC INIT //////////////////////////////////////////////////
@@ -253,8 +233,7 @@ int main() {
 
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setArea(window._swapChainExtent);
-	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setRenderArea(window._swapChainExtent);
 	renderTarget.setClearValues({ 
 		{.depthStencil { 1.0f, 0 } },
 		{.color { 0.0f, 0.0f, 0.0f, 1.0f } }
@@ -276,9 +255,13 @@ int main() {
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.beginPass(proc, renderPasses[pipeline.pipelineIdx], framebuffer);
-		renderTarget.update(proc, pipeline);
-		renderTarget.render(proc, { viewport });
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
+		renderTarget.render(proc);
+		renderTarget.endPass(proc);
+
+
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 

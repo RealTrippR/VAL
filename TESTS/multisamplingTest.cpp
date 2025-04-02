@@ -71,6 +71,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const Vk
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
+
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, uint8_t MSAAsamples) {
 	using namespace val;
 

@@ -24,6 +24,10 @@ namespace val {
 
 		colorBlendState* getColorBlendState();
 
+		void setDepthBlendState(val::depthStencilState* blendState);
+
+		depthStencilState* getDepthBlendState();
+
 		void setSampleCount(const VkSampleCountFlags& samples);
 
 		const VkSampleCountFlags& getSampleCount();
@@ -54,7 +58,7 @@ namespace val {
 		rasterizerState* _rasterizerState = NULL;
 		colorBlendState* _colorBlendState = NULL;
 
-		depthStencilState* depthStencil = NULL;
+		depthStencilState* _depthStencilState = NULL;
 
 		VkSampleCountFlags _sampleCountMSAA = VK_SAMPLE_COUNT_1_BIT;
 		bool _sampleShadingEnabled = false;

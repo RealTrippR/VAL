@@ -21,6 +21,14 @@ namespace val
 		return _colorBlendState;
 	}
 
+	void graphicsPipelineCreateInfo::setDepthBlendState(val::depthStencilState* blendState) {
+		_depthStencilState = blendState;
+	}
+
+	depthStencilState* graphicsPipelineCreateInfo::getDepthBlendState() {
+		return _depthStencilState;
+	}
+
 	void graphicsPipelineCreateInfo::setSampleCount(const VkSampleCountFlags& samples)
 	{
 		_sampleCountMSAA = samples;
