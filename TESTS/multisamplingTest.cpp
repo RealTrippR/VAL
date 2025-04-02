@@ -68,6 +68,8 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const Vk
 	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
+
+	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, uint8_t MSAAsamples) {
 	using namespace val;
@@ -105,7 +107,6 @@ int main() {
 
 	sampler imgSampler(proc, combinedImage);
 	imgSampler.setMaxAnisotropy(0.f);
-	imgSampler.bindImageView(imgView);
 
 	VkFormat imageFormat;
 
@@ -171,6 +172,8 @@ int main() {
 	val::image img(proc, "testImage.jpg", imageFormat);
 	imgView.create(img, VK_IMAGE_ASPECT_COLOR_BIT);
 
+	imgSampler.bindImageView(imgView); // it is imperative that this is called AFTER the image view is created
+
 	const std::vector<res::vertex> vertices = {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
@@ -193,8 +196,7 @@ int main() {
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setArea(window._swapChainExtent);
-	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setRenderArea(window._swapChainExtent);
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
@@ -214,6 +216,7 @@ int main() {
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.beginPass(proc,pipeline.getVkRenderPass(), framebuffer);
 		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.updateScissor(proc, { VkRect2D{ {0,0}, window._swapChainExtent } });
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
