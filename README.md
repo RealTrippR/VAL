@@ -44,6 +44,7 @@ To get started with development, refer to VAL/notes/to-do.txt and the issues pag
 
 The Vulkan Abstraction Library is missing the following key features:
 ```
+- Proper Queue Ownership Transfer
 - Proper optimization for Semaphore wait stages
 - Raytracing support
 - Multi-threaded rendering
