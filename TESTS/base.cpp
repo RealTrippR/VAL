@@ -9,7 +9,7 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
 
-#define FRAMES_IN_FLIGHT 2u;
+#define FRAMES_IN_FLIGHT 2u
 
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
