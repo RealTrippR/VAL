@@ -96,6 +96,7 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 int main() {
 	val::VAL_PROC proc;
 
+	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
@@ -107,7 +108,9 @@ int main() {
 	// The creation of the swapchain is handled in the window
 	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
-	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+	val::physicalDeviceRequirements deviceRequirements(val::DEVICE_TYPES::dedicated_GPU | val::DEVICE_TYPES::integrated_GPU);
+	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	// VAL uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -117,7 +120,6 @@ int main() {
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
@@ -141,7 +143,7 @@ int main() {
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceExtensions, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
@@ -162,13 +164,13 @@ int main() {
 	};
 
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
 	// buffer wrapper for index Buffer
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), val::CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 
@@ -182,8 +184,7 @@ int main() {
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setArea(window._swapChainExtent);
-	renderTarget.setScissorExtent(window._swapChainExtent);
+	renderTarget.setRenderArea(window._swapChainExtent);
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
@@ -204,6 +205,7 @@ int main() {
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 

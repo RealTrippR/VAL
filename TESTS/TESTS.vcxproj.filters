@@ -89,6 +89,7 @@
     <None Include="shaders\empty.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="README.MD" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\viking_room.png">
