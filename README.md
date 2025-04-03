@@ -5,8 +5,8 @@ The Vulkan Abstraction Library is an experimental abstraction layer written atop
 
 <img src="https://github.com/user-attachments/assets/fdfbd756-829b-446d-a9b2-ecf52f594aab" 
         alt="Picture" 
-        width="800" 
-        height="600" 
+        width="500" 
+        height="500" 
         style="display: block; margin: 0 auto" />
         
 
