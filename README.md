@@ -3,7 +3,8 @@
 
 The Vulkan Abstraction Library is an experimental abstraction layer written atop the Vulkan Graphics API written almost exclusively in C++. It was built to simplify the process of developing and maintaining Vulkan programs while still keeping most of the functionality and performance that Vulkan provides.
 
-![image](https://github.com/user-attachments/assets/485f9961-2550-483e-aa65-8dea303c9df3)
+![image](https://github.com/user-attachments/assets/fdfbd756-829b-446d-a9b2-ecf52f594aab)
+
 
 # Examples
 VAL/Tests contains several basic examples of the features provided by VAL, including but not limited to:
