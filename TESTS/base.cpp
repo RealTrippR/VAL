@@ -99,6 +99,10 @@ int main()
 	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 
+	// creates Vulkan logical and physical devices
+	// if a window is passed through, the windowSurface is also created
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+
 	// VAL uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
 	val::imageFormatRequirements formatReqs;
@@ -106,6 +110,7 @@ int main()
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
@@ -121,12 +126,6 @@ int main()
 	val::graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &vertShader,&fragShader };
 	setGraphicsPipelineInfo(pipeline);
-
-	// creates Vulkan logical and physical devices
-	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
-
-	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
 	val::renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
