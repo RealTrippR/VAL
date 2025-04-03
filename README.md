@@ -37,7 +37,6 @@ VAL\TOOLS> py installDeps.py
 VAL builds to a linked library titled "VAL.lib" located in your configuration directory.
 For example, if you're building for x64 and debug, the VAL .lib will be located under "VAL/x64/Debug"
 
-See VAL/Tests or VAL-Samples
 # Contributing
 The Vulkan Abstraction Library is in a relatively early stage of development and help is greatly appreciated.
 To get started with development, refer to VAL/notes/to-do.txt and the issues page.
