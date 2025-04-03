@@ -13,7 +13,6 @@
     <ClCompile Include="MipMapTest.cpp" />
     <ClCompile Include="raytracingTest.cpp" />
     <ClCompile Include="instancingTest.cpp" />
-    <ClCompile Include="multimeshRenderTest.cpp" />
     <ClCompile Include="SSBOtest.cpp" />
     <ClCompile Include="specializationConstantsTest.cpp" />
     <ClCompile Include="advancedSamplerTest.cpp" />
