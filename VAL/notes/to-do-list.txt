@@ -6,10 +6,19 @@
 ----------------------------------------------------------------------------------------------------------------
 VULKAN ABSTRACTION LIBRARY, PROTOTYPE V1.00.0:
 ----------------------------------------------------------------------------------------------------------------
+The Vulkan Abstraction Library is missing the following key features:
+
+- Raytracing support
+- Multi-threaded rendering
+- SSBO & UBO array binding
+- Externally Sourced Buffers
+- Dynamic Rendering
+
+----------------------------------------------------------------------------------------------------------------
 
 [!] Add shader updateUBO and updateSSBO functions to update their descriptor sets
 
-[~] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
+[✓] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
 
 [!] Add support for another buffer space: GPU_LOCAL_CPU (this is only a recommendation, as not all GPU's support this. If it's not supported, it will be automatically replaced by GPU_CPU)
 
