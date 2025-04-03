@@ -24,9 +24,9 @@ namespace val {
 
 		colorBlendState* getColorBlendState();
 
-		void setDepthBlendState(val::depthStencilState* blendState);
+		void setDepthStencilState(val::depthStencilState* blendState);
 
-		depthStencilState* getDepthBlendState();
+		depthStencilState* getDepthStencilState();
 
 		void setSampleCount(const VkSampleCountFlags& samples);
 

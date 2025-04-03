@@ -66,6 +66,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 
 	hdl.update(proc, &ubo);
 }
+
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const VkSampleCountFlagBits& MSAAsamples)
 {
 	using namespace val;
@@ -79,6 +80,11 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const Vk
 	// blended into the existing content of the the framebuffer.
 	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+
+	static depthStencilState depthState;
+	depthState.enableDepthTesting(true);
+	depthState.setCompareOp(VK_COMPARE_OP_LESS);
+	pipeline.setDepthStencilState(&depthState);
 
 	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);

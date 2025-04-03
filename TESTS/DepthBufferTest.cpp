@@ -77,12 +77,12 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static depthStencilState depthState;
 	depthState.enableDepthTesting(true);
 	depthState.setCompareOp(VK_COMPARE_OP_LESS);
+	pipeline.setDepthStencilState(&depthState);
 
 	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDepthBlendState(&depthState);
 
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });

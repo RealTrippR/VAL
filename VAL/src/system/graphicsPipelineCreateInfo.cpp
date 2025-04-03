@@ -21,11 +21,11 @@ namespace val
 		return _colorBlendState;
 	}
 
-	void graphicsPipelineCreateInfo::setDepthBlendState(val::depthStencilState* blendState) {
+	void graphicsPipelineCreateInfo::setDepthStencilState(val::depthStencilState* blendState) {
 		_depthStencilState = blendState;
 	}
 
-	depthStencilState* graphicsPipelineCreateInfo::getDepthBlendState() {
+	depthStencilState* graphicsPipelineCreateInfo::getDepthStencilState() {
 		return _depthStencilState;
 	}
 

@@ -89,6 +89,11 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const Vk
 	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
+	static depthStencilState depthState;
+	depthState.enableDepthTesting(true);
+	depthState.setCompareOp(VK_COMPARE_OP_LESS);
+	pipeline.setDepthStencilState(&depthState);
+
 	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
@@ -221,8 +226,10 @@ int main()
 
 
 	renderPassManager renderPassMngr(proc);
+	renderPassMngr.setMSAAsamples(msaaSamples);
 	setRenderPass(renderPassMngr, imageFormat, depthFormat, msaaSamples);
 	pipeline.renderPass = &renderPassMngr;
+
 	proc.create(windowHDL_GLFW, &window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	// Create depth buffer

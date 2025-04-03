@@ -52,7 +52,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const VkSampleCountFlagBits& MSAAsamples)
 {	using namespace val;
 
-	pipeline.setSampleCount(MSAAsamples);
+	pipeline.setSampleCount(MSAAsamples);  // required for multisampling
 
 	// state infos (MUST BE STATIC IN MEMORY!)
 	static rasterizerState rasterizer;
@@ -75,7 +75,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const Vk
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, uint8_t MSAAsamples) {
 	using namespace val;
 
-	renderPassMngr.setMSAAsamples(MSAAsamples);
+	renderPassMngr.setMSAAsamples(MSAAsamples);  // required for multisampling
 
 	static subpass subpass(renderPassMngr, GRAPHICS);
 	{
@@ -133,9 +133,8 @@ int main() {
 
 	imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 	VkSampleCountFlagBits MSAAsamples = proc.getMaxSampleCount();
-		
-	printf("\n>-- MSAA Sample count: %d\n\n", MSAAsamples);
-
+	
+	// required for multisampling
 	multisamplerManager multisamplerMngr(proc, MSAAsamples);
 	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);
 	multisamplerMngr.setSampleCount(MSAAsamples);
@@ -162,12 +161,11 @@ int main() {
 
 	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline });
 
-	std::vector<VkImageView> attachments = { multisamplerMngr.getVkImageView()};
+	std::vector<VkImageView> attachments = { multisamplerMngr.getVkImageView()};  // required for multisampling
 	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), pipeline.getVkRenderPass(), proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
-	//////////////////////////////////////////////////
 
 	// CREATE IMAGE & IMAGE VIEW //
 	val::image img(proc, "testImage.jpg", imageFormat);
