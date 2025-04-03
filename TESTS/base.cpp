@@ -9,6 +9,8 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
 
+#define FRAMES_IN_FLIGHT 2u;
+
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
 #include <VAL/lib/system/system_utils.hpp>
@@ -131,7 +133,7 @@ int main()
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
 
-	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline });
+	proc.create(windowHDL_GLFW, &window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 	
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
