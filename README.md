@@ -30,7 +30,7 @@ VAL/Tests contains several basic examples of the features provided by VAL, inclu
 - Specialization Constants
 
 # Building and Linking
-Compiling VAL is rather straighforward; included a python script to install all external dependencies (except for the Vulkan SDK, the instructions to install this are given in the dependency installer)
+Compiling VAL is rather straighforward; included is a python script to install all external dependencies (except for the Vulkan SDK, the instructions to install this are given in the dependency installer)
 ```
 VAL\TOOLS> py installDeps.py
 ```
