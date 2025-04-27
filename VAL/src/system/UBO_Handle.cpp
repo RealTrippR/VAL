@@ -2,28 +2,31 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
+
+	void* UBO_Handle::getData(VAL_PROC& proc) {
+		return (char*)_arrSubset->getMappedDataOfFrame(proc._currentFrame) + _offset;
+	}
+
+	void* UBO_Handle::getData(VAL_PROC& proc, const uint8_t frameIdx) {
+		return (char*)_arrSubset->getMappedDataOfFrame(frameIdx) + _offset;
+	}
+
+	VkBuffer UBO_Handle::getBuffer(VAL_PROC& proc) {
+		return _arrSubset->_vkBuff;
+	}
+
 	void UBO_Handle::update(VAL_PROC& proc, void* data) {
-#ifndef NDEBUG
-		if (_usage != CPU_GPU) {
-			printf("VAL: A BUFFER WITH A USAGE BIT OF CPU_GPU CANNOT BE WRITTEN TO OR READ BY THE CPU!\n");
-			throw std::runtime_error("VAL: A BUFFER WITH A USAGE BIT OF CPU_GPU CANNOT BE WRITTEN TO OR READ BY THE CPU!");
-		}
-#endif // !NDEBUG
-		memcpy(proc._uniformBuffersMapped[proc._currentFrame][_index],data,_size);
+		uint8_t* tmp = (uint8_t*)_arrSubset->getMappedDataOfFrame(proc._currentFrame);
+		memcpy((uint8_t*)_arrSubset->getMappedDataOfFrame(proc._currentFrame) + _offset, data, _size);
 	}
 
-	VkBuffer UBO_Handle::getCurrentBuffer(VAL_PROC& proc) {
-		return proc._uniformBuffers[proc._currentFrame][_index];
+	void UBO_Handle::update(VAL_PROC& proc, void* data, const uint8_t frameIdx) {
+		memcpy((char*)_arrSubset->getMappedDataOfFrame(frameIdx) + _offset, data, _size);
 	}
 
-	std::vector<VkBuffer> UBO_Handle::getBuffers(VAL_PROC& proc) {
-		std::vector<VkBuffer> buffers;
-		for (uint_fast8_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
-			buffers.push_back(proc._uniformBuffers[i][_index]);
-		}
-		return buffers;
+	uboArraySubset* UBO_Handle::getUBOarraySubset(VAL_PROC& proc) {
+		return _arrSubset;
 	}
-
 
 	VkMemoryPropertyFlags UBO_Handle::getMemoryPropertyFlags() {
 		if (GPU_ONLY) {

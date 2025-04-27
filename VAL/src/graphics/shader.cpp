@@ -313,9 +313,9 @@ namespace val {
 				buffInfoArr.resize(uboHDL.values.size());
 				for (size_t j = 0; j < buffInfoArr.size(); ++j) {
 					VkDescriptorBufferInfo& buffInfo = buffInfoArr[j];
-					buffInfo.buffer = uboHDL.values[j]->getBuffers(proc)[frame];
+					buffInfo.buffer = uboHDL.values[j]->getBuffer(proc);
 					buffInfo.range = uboHDL.values[j]->_size;
-					buffInfo.offset = 0;
+					buffInfo.offset = uboHDL.values[j]->_offset;
 				}
 			
 			}
@@ -458,13 +458,14 @@ namespace val {
 			vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 	}
 
+
 	void shader::updateUBO(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx)
 	{
 		for (int_fast8_t frameIdx = 0; frameIdx < proc._MAX_FRAMES_IN_FLIGHT; ++frameIdx) {
 			VkDescriptorBufferInfo buffInfo;
-			buffInfo.buffer = UBO.first.getBuffers(proc)[frameIdx];
+			buffInfo.buffer = UBO.first.getBuffer(proc);
 			buffInfo.range = UBO.first._size;
-			buffInfo.offset = 0;
+			buffInfo.offset = UBO.first._offset;
 
 			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameIdx];
 
@@ -483,9 +484,9 @@ namespace val {
 	void shader::updateUBOatFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint8_t frameInFlight, const uint16_t arrIdx)
 	{
 		VkDescriptorBufferInfo buffInfo;
-		buffInfo.buffer = UBO.first.getBuffers(proc)[frameInFlight];
+		buffInfo.buffer = UBO.first.getBuffer(proc);
 		buffInfo.range = UBO.first._size;
-		buffInfo.offset = 0;
+		buffInfo.offset = UBO.first._offset;
 
 		const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameInFlight];
 
