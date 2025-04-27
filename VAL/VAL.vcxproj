@@ -238,6 +238,7 @@
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\subpass.hpp" />
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp" />
+    <ClInclude Include="lib\system\UBO_arr_manager.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
     <ClInclude Include="lib\system\UBO_Handle.hpp" />
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
@@ -271,6 +272,7 @@
     <ClCompile Include="src\system\system_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\system\UBO_arr_manager.cpp" />
     <ClCompile Include="src\system\UBO_Handle.cpp" />
     <ClCompile Include="src\system\VAL_PROC.cpp" />
     <ClCompile Include="src\system\window.cpp" />

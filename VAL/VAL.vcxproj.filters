@@ -185,6 +185,9 @@
     <ClInclude Include="lib\pipelineStateInfos\stateInfos.hpp">
       <Filter>lib\pipelineStateInfos</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\UBO_arr_manager.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -272,6 +275,9 @@
       <Filter>src\pipelineStateInfos</Filter>
     </ClCompile>
     <ClCompile Include="lib\system\physicalDeviceRequirements.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\UBO_arr_manager.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
