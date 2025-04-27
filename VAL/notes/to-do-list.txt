@@ -22,6 +22,8 @@ The Vulkan Abstraction Library is missing the following key features:
 
 [!] Add support for another buffer space: GPU_LOCAL_CPU (this is only a recommendation, as not all GPU's support this. If it's not supported, it will be automatically replaced by GPU_CPU)
 
+[ ] Add support for push descriptors
+
 [!] Add support and complete tests for multiple windows. (see: https://community.khronos.org/t/multiple-glfw-windows-with-single-context/108421)
 
 [ ] Give the window class to be created without a GLFW window handle, but also provide support 
