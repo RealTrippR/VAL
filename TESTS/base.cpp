@@ -171,7 +171,8 @@ int main()
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
+	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
+	renderTarget.setIndexBuffer(indexBuffer, indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
 
 	// config viewport, covers the entire size of the window
@@ -189,7 +190,8 @@ int main()
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
-		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.updatePipeline(proc, pipeline);
+		renderTarget.updateViewport(proc, viewport, 0);
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);

@@ -57,12 +57,33 @@ namespace val {
 		void updateBlendConstants(VAL_PROC& proc, const std::array<float, 4>& depthConstants);
 
 		void updateTopologyMode(VAL_PROC& proc, const TOPOLOGY_MODE topologyMode);
-		
+
 		void updateCullMode(VAL_PROC&, const CULL_MODE cullMode);
 
 		void updateDepthBias(VAL_PROC& proc, const float depthBiasConstant, const float depthBiasClamp, const float depthBiasSlopeFactor);
 
 		void updateBuffers(VAL_PROC& proc);
+
+		/************************************************************************************************************/
+		/* BUFFER MANIPULATION */
+
+		void updateIndexBuffer(VAL_PROC& proc);
+
+		void updateVertexBuffers(VAL_PROC& proc);
+
+		void updateAndSetIndexBuffer(VAL_PROC& proc, val::buffer& buffer, const uint32_t& indexCount);
+
+		void updateAndSetIndexBuffer(VAL_PROC& proc, const VkBuffer&& buffer, const uint32_t& indexCount);
+
+		void updateAndSetVertexBuffer(VAL_PROC& proc, const VkBuffer& buffer, const uint32_t& vertexCount);
+
+		void updateAndSetVertexBuffer(VAL_PROC& proc, val::buffer& buffer, const uint32_t& vertexCount);
+
+		void updateAndSetVertexBuffers(VAL_PROC& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount);
+
+		void updateAndSetVertexBuffers(VAL_PROC& proc, const std::vector<val::buffer&>& vertexBuffers, const uint32_t& vertexCount);
+
+		/************************************************************************************************************/
 
 		void update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline, const std::vector<VkViewport>& viewports);
 
@@ -73,17 +94,51 @@ namespace val {
 		void submit(VAL_PROC& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence = VK_NULL_HANDLE);
 
 	public:
+		inline void setVertexBuffer(const VkBuffer& buffer, const uint32_t& vertexCount) {
+			_vertexBuffers = { buffer };
+			_vertexCount = vertexCount;
+
+
+			_vertexBufferOffsets.resize(_vertexBuffers.size());
+		}
+
+		inline void setVertexBuffer(val::buffer& buffer, const uint32_t& vertexCount) {
+			_vertexBuffers = { buffer.getVkBuffer()};
+			_vertexCount = vertexCount;
+
+
+			_vertexBufferOffsets.resize(_vertexBuffers.size());
+		}
+
 		inline void setVertexBuffers(const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount) {
 			_vertexBuffers = vertexBuffers;
 			_vertexCount = vertexCount;
 
 
 			_vertexBufferOffsets.resize(vertexBuffers.size());
-			memset(_vertexBufferOffsets.data(), 0u, sizeof(VkDeviceSize) * vertexBuffers.size());
+			//memset(_vertexBufferOffsets.data(), 0u, sizeof(VkDeviceSize) * vertexBuffers.size());
 		}
+
+		inline void setVertexBuffers(const std::vector<val::buffer&>& vertexBuffers, const uint32_t& vertexCount) {
+			_vertexBuffers.resize(vertexBuffers.size());
+			for (uint_fast16_t i = 0; i < vertexBuffers.size(); ++i) {
+				_vertexBuffers[i] = vertexBuffers[i].getVkBuffer();
+			}
+			_vertexCount = vertexCount;
+
+
+			_vertexBufferOffsets.resize(vertexBuffers.size());
+			//memset(_vertexBufferOffsets.data(), 0u, sizeof(VkDeviceSize) * vertexBuffers.size());
+		}
+
 
 		inline const std::vector<VkBuffer>& getVertexBuffer() const {
 			return _vertexBuffers;
+		}
+
+		inline void setIndexBuffer(val::buffer& buffer, const uint32_t& indexCount) {
+			_indexBuffer = buffer.getVkBuffer();
+			_indexCount = indexCount;
 		}
 
 		inline void setIndexBuffer(const VkBuffer& indexBuffer, const uint32_t& indexCount) {
