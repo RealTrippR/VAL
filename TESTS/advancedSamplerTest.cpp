@@ -1,3 +1,20 @@
+/*
+Copyright © 2025 Tripp Robins
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the “Software”), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 // test to validate standalone samplers (Sampling from an External Image),
 // & multiple image views used on a single sampler
 /*
@@ -86,6 +103,8 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
+
+	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
@@ -105,8 +124,8 @@ int main() {
 	VAL_PROC proc;
 
 	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
-	deviceRequirements.deviceFeatures = DEVICE_FEATURES::anisotropicFiltering;
-	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	deviceRequirements.addFeature(DEVICE_FEATURES::anisotropicFiltering);
+	deviceRequirements.addExtension(VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
 
 	imageView imgView1(proc);
 	imageView imgView2(proc);
@@ -121,8 +140,6 @@ int main() {
 	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
 
 	window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
-
-	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -150,12 +167,20 @@ int main() {
 
 	// https://kylehalladay.com/blog/tutorial/vulkan/2018/01/28/Textue-Arrays-Vulkan.html
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
-	fragShader.setTextures({ {{&imgView1, &imgView2 }, 2} });
+	//fragShader.setTextures({ {{&imgView1, &imgView2 }, 2} });
 	fragShader.setPushConstant(&PC_ImgScissor);
+	pushDescriptor pd(2, 2, DESC_TYPE::SAMPLED_IMAGE);
+	fragShader.addPushDescriptor(pd);
 
 	// config grahics pipeline
 	graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &fragShader, &vertShader };
+
+	VkResult result;
+	uint32_t apiVersion = 0;
+
+	// Get the Vulkan API version supported by the system
+	result = vkEnumerateInstanceVersion(&apiVersion);
 
 	setGraphicsPipelineInfo(pipeline);
 
@@ -211,11 +236,10 @@ int main() {
 	//////////////////////////////////////////////////////////////
 	renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setArea(window._swapChainExtent);
-	renderTarget.setScissorExtent(window._swapChainExtent);
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
+	renderTarget.setRenderArea(window.getSize());
 
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
@@ -224,6 +248,9 @@ int main() {
 
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
 		glfwPollEvents();
+
+		static uint16_t timer = 0;
+		timer++;
 
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
@@ -235,8 +262,19 @@ int main() {
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+
+		if (timer > 4000) {timer = 0;}
+		if (timer > 2000) {
+			pipeline.pushDescriptor_SAMPLED_IMAGE(proc, cmdBuffer, 2, 0, imgView1);
+			pipeline.pushDescriptor_SAMPLED_IMAGE(proc, cmdBuffer, 2, 1, imgView2);
+		} else {
+			pipeline.pushDescriptor_SAMPLED_IMAGE(proc, cmdBuffer, 2, 0, imgView2);
+			pipeline.pushDescriptor_SAMPLED_IMAGE(proc, cmdBuffer, 2, 1, imgView1);
+		}
+
 		PC_ImgScissor.update(proc, &tmp, pipeline, fragShader, cmdBuffer);
 		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
@@ -245,18 +283,9 @@ int main() {
 
 		proc.nextFrame();
 
-		// swap image views at regular intervals
-		static uint16_t timer = 0;
-		timer++;
-		if (timer > 4000) {
-			fragShader.updateTexture(proc, pipeline, { imgView1,2 }, 0);
-			fragShader.updateTexture(proc, pipeline, { imgView2,2 }, 1);
-			timer = 0;
-		}
-		else if (timer==2000) {
-			fragShader.updateTexture(proc, pipeline, { imgView1,2 }, 1);
-			fragShader.updateTexture(proc, pipeline, { imgView2,2 }, 0);
-		}
+		
+		/*fragShader.updateTexture(proc, pipeline, { imgView1,2 }, 1);
+		fragShader.updateTexture(proc, pipeline, { imgView2,2 }, 0);*/
 	}
 
 	imgView1.destroy();

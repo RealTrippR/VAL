@@ -12,6 +12,11 @@ namespace val {
 		memcpy(proc._SSBO_DataMapped[proc._currentFrame][_index],data,_size);
 	}
 
+	VkBuffer SSBO_Handle::getBuffer(VAL_PROC& proc) {
+		return proc._SSBO_Buffers[proc._currentFrame][_index];
+
+	}
+
 	std::vector<VkBuffer> SSBO_Handle::getBuffers(VAL_PROC& proc) {
 		std::vector<VkBuffer> buffers;
 		for (uint_fast8_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {

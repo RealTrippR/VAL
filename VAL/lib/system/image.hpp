@@ -19,7 +19,10 @@ namespace val {
 		image(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : image() {
 			create(proc, path, format, mipLevels, MSAA_samples);
 		}
-
+		image(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, VkImageLayout imgLayout, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : image() {
+			_imgLayout = imgLayout;
+			create(proc, path, format, mipLevels, MSAA_samples);
+		}
 		~image() {
 			destroy();
 		}
@@ -70,6 +73,11 @@ namespace val {
 			}
 		}
 
+		void transitionImgLayout(VAL_PROC& proc, VkCommandBuffer cmdbuff, VkImageLayout newLayout);
+
+		inline const VkImageLayout getLayout() {
+			return _imgLayout;
+		}
 	public:
 
 		void create(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U, const VkSampleCountFlagBits& MSAA_samples = VK_SAMPLE_COUNT_1_BIT);
@@ -79,6 +87,7 @@ namespace val {
 	protected:
 		stbi_uc* _pixels = NULL;
 		VkImage _image{};
+		VkImageLayout _imgLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
 		VkFormat _format{};
 		int32_t _width{}; // source image width
 		int32_t _height{}; // source image height

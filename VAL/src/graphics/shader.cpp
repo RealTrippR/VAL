@@ -171,35 +171,28 @@ namespace val {
 			_layoutBindings.push_back(textureLayoutBinding);
 		}
 
-		/*
-		for (uint32_t i = 0; i < _imageSamplers.size(); ++i) {
-			VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-			samplerLayoutBinding.binding = _imageSamplers[i].bindingIndex;
-			samplerLayoutBinding.descriptorCount = _imageSamplers[i].count;
-			if (_imageSamplers[i].values[0]->getSamplerType() == combinedImage) {
-				samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				samplerLayoutBinding.pImmutableSamplers = NULL;
-
-			}
-			else if (_imageSamplers[i].values[0]->getSamplerType() == standalone) {
-				samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-				//samplerLayoutBinding.pImmutableSamplers = &(_imageSamplers[i].values[0]->getVkSampler());
-				samplerLayoutBinding.pImmutableSamplers = NULL;
-			}
-			else {
-				printf("VAL: Unsupported sampler type. The type of _imageSampler # %d is invalid!", i);
-				throw std::runtime_error("VAL: Unsupported sampler type. The type of _imageSampler #" + std::to_string(i) + "is invalid!");
-			}
-			samplerLayoutBinding.stageFlags = getStageFlags();
-			_layoutBindings.push_back(samplerLayoutBinding);
-		}
-		*/
-
 		return &_layoutBindings;
 	}
+	
+	std::vector<VkDescriptorSetLayoutBinding>* shader::getPushDescriptorLayoutBindings() noexcept {
+		auto& pdlb_v = _pushDescriptorLayoutBindings;
+		pdlb_v.resize(_pushDescriptors.size()); /*resize pd layouts to match the number of push descriptor*/
 
-	// THE DESCRIPTOR WRITE IS INCOMPLETE, MUST BE FURTHER CONFIGURED IN FML_PROC
-	std::vector<VkWriteDescriptorSet>* val::shader::getDescriptorWrites() {
+		for (uint_fast32_t i = 0; i < pdlb_v.size(); ++i) {
+			const auto& pushDescriptor = _pushDescriptors[i];
+			VkDescriptorSetLayoutBinding& textureLayoutBinding = pdlb_v[i];
+			memset(&textureLayoutBinding, 0, sizeof(textureLayoutBinding)); /*0 init*/
+			textureLayoutBinding.binding = pushDescriptor->getBindingIndex();
+			textureLayoutBinding.descriptorCount = pushDescriptor->getValueCount();
+			textureLayoutBinding.descriptorType = (VkDescriptorType)pushDescriptor->getDescType();
+			textureLayoutBinding.stageFlags = getStageFlags();
+		}
+		return &pdlb_v;
+	}
+
+
+	// THE DESCRIPTOR WRITE IS INCOMPLETE, MUST BE FURTHER CONFIGURED IN VAL_PROC
+	std::vector<VkWriteDescriptorSet>* shader::getDescriptorWrites() {
 		_descriptorWrites.clear();
 
 		uint32_t idx = 0;
@@ -361,6 +354,14 @@ namespace val {
 
 	pushConstantHandle* shader::getPushConstant() noexcept {
 		return _pushConstant;
+	}
+
+	void shader::addPushDescriptor(val::pushDescriptor& pushDesc) {
+		_pushDescriptors.push_back(&pushDesc);
+	}
+
+	void shader::setPushDescriptors(const std::vector<val::pushDescriptor*> pushDescriptors) {
+		_pushDescriptors = pushDescriptors;
 	}
 
 	void shader::setTextures(const std::vector<descriptorBinding<val::imageView*>> textures) {

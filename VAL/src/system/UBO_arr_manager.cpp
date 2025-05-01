@@ -45,7 +45,7 @@ namespace val {
 		const uint8_t frameCount = proc._MAX_FRAMES_IN_FLIGHT;
 		const uint64_t totalSize = sizePerFrame * frameCount;
 
-		proc.createBuffer(totalSize, additionalUsages, bufferSpaceToVkMemoryProperty(space), _vkBuff, _vkMem);
+		proc.createBuffer(totalSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | additionalUsages, bufferSpaceToVkMemoryProperty(space), _vkBuff, _vkMem);
 
 		if (space == CPU_GPU) {
 			vkMapMemory(proc._device, _vkMem, 0, totalSize, 0, &_dataMapped);

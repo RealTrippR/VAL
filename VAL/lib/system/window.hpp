@@ -83,6 +83,10 @@ namespace val {
 		VkFramebuffer& beginDraw(const VkFormat& imageFormat);
 
 		VkFence getPresentFence();
+
+		inline VkExtent2D getSize() {
+			return {_swapChainExtent.width, _swapChainExtent.height};
+		}
 	public:
 
 		uint32_t _currentSwapChainImageIndex = 0;

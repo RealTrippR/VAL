@@ -3,7 +3,6 @@
 
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/system/imageView.hpp>
-#include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
 
 namespace val {
 	enum samplerType {

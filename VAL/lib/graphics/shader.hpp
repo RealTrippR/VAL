@@ -1,3 +1,20 @@
+/*
+Copyright © 2025 Tripp Robins
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the “Software”), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #ifndef VAL_SHADER_HPP
 #define VAL_SHADER_HPP
 
@@ -10,6 +27,8 @@
 #include <VAL/lib/system/SSBO_Handle.hpp>
 #include <VAL/lib/system/specializationConstant.hpp>
 #include <VAL/lib/system/sampler.hpp>
+
+#include <VAL/lib/system/pushDescriptor.hpp>
 
 #include <optional>
 #include <string.h>
@@ -67,6 +86,8 @@ namespace val {
 
 		virtual std::vector<VkDescriptorSetLayoutBinding>* getLayoutBindings() noexcept;
 
+		virtual std::vector<VkDescriptorSetLayoutBinding>* getPushDescriptorLayoutBindings() noexcept;
+
 		virtual std::vector<VkWriteDescriptorSet>* getDescriptorWrites();
 
 		// outer vector is for each frame in flight, second is for the buffer info for that frame
@@ -83,6 +104,10 @@ namespace val {
 		void setPushConstant(pushConstantHandle* pushConstant);
 
 		pushConstantHandle* getPushConstant() noexcept;
+
+		void addPushDescriptor(val::pushDescriptor& pushDesc);
+
+		void setPushDescriptors(const std::vector<val::pushDescriptor*> pushDescriptors);
 
 		void setTextures(const std::vector<descriptorBinding<val::imageView*>> textures);
 
@@ -122,14 +147,18 @@ namespace val {
 
 		std::vector<descriptorBinding<specializationConstant*/*Constant*/>> _specializationConstants;
 		pushConstantHandle* _pushConstant = NULL;
+
+		std::vector<pushDescriptor*> _pushDescriptors;
 		std::vector<descriptorBinding<UBO_Handle*>> _UBO_Handles;
 		std::vector<descriptorBinding<SSBO_Handle*>> _SSBO_Handles;
 		std::vector<descriptorBinding<val::sampler*>> _imageSamplers;
 		std::vector<descriptorBinding<val::imageView*>> _textures;
 		//std::vector<VkImageView*> _imageViews;
 
-		std::vector< VkDescriptorSetLayoutBinding> _layoutBindings;
+		std::vector<VkDescriptorSetLayoutBinding> _layoutBindings;
 		std::vector<VkWriteDescriptorSet> _descriptorWrites; // stored as part of the class for optimization (avoids excess copying), as well as scope
+
+		std::vector<VkDescriptorSetLayoutBinding> _pushDescriptorLayoutBindings;
 		// outer vector is for each frame in flight, second is for the buffer info for that frame, third is to represent the buffer infos as an array
 		std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>> _descriptorWriteBufferInfos; // stored as part of the class for optimization (avoids excess copying), as well as scope
 

@@ -2,7 +2,23 @@
 #include <VAL/lib/graphics/shader.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 
+#ifndef NDEBUG 
+#define VAL_VALIDATE_PUSH_DESCRIPTOR_EXT if (vkCmdPushDescriptorSetKHR == VK_NULL_HANDLE) {printf("VAL: ERROR: Attempted to use push descriptors, but the push descriptor extension (VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME) was not enabled in the physicalDeviceRequirements!\n");}
+#else
+#define VAL_VALIDATE_PUSH_DESCRIPTOR_EXT
+#endif
+
 namespace val {
+
+	PFN_vkCmdPushDescriptorSetKHR vkCmdPushDescriptorSetKHR = VK_NULL_HANDLE;
+
+	void pipelineCreateInfo_loadvkCmdPushDescriptorSetKHR(VkDevice device) {
+		if (vkCmdPushDescriptorSetKHR == VK_NULL_HANDLE) {
+			vkCmdPushDescriptorSetKHR = (PFN_vkCmdPushDescriptorSetKHR)vkGetDeviceProcAddr(device, "vkCmdPushDescriptorSetKHR");
+		}
+	}
+
+
 	std::vector<UBO_Handle*> pipelineCreateInfo::getUniqueUBOs() const {
 		std::vector<UBO_Handle*> UBO_Handles;
 		for (shader* shdr : shaders) {
@@ -86,4 +102,248 @@ namespace val {
 		}
 		return stages;
 	}
+
+
+	void pipelineCreateInfo::pushDescriptor_SAMPLER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		VkDescriptorImageInfo imageInfo = sampler.getVkDescriptorImageInfo();
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = 0;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+		write.pImageInfo = &(sampler.getVkDescriptorImageInfo());
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			getBindPoint(),
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+	void pipelineCreateInfo::pushDescriptor_COMBINED_SAMPLER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		VkDescriptorImageInfo imageInfo = sampler.getVkDescriptorImageInfo();
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = 0;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write.pImageInfo = &(sampler.getVkDescriptorImageInfo());
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			getBindPoint(),
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(),imgView.getImage().getLayout() };
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = 0;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		write.pImageInfo = &imgInfo;
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			getBindPoint(),
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(),imgView.getImage().getLayout() };
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstSet = VK_NULL_HANDLE;  // handled by vkCmdPushDescriptorSetKHR
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = arrIdx;
+		write.descriptorCount = 1;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		write.pImageInfo = &imgInfo;
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			getBindPoint(),
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		VkDescriptorImageInfo imageInfo;
+		imageInfo.sampler = VK_NULL_HANDLE;
+		imageInfo.imageView = imgView.getImageView();
+		imageInfo.imageLayout = imgView.getImage().getLayout();
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = 0;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		write.descriptorCount = 1;
+		write.pImageInfo = &imageInfo;
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			getBindPoint(),
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		VkDescriptorImageInfo imageInfo;
+		imageInfo.sampler = VK_NULL_HANDLE;
+		imageInfo.imageView = imgView.getImageView();
+		imageInfo.imageLayout = imgView.getImage().getLayout();
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = arrIndex;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		write.descriptorCount = 1;
+		write.pImageInfo = &imageInfo;
+
+		vkCmdPushDescriptorSet(
+			cmdBuffer,
+			getBindPoint(),
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+	void pipelineCreateInfo::pushDescriptor_UNIFORM_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, UBO_Handle& ubo) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		const VkDescriptorBufferInfo bufferInfo{ ubo.getBuffer(proc), ubo._offset, ubo._size };
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = 0;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write.descriptorCount = 1;
+		write.pBufferInfo = &bufferInfo;
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+	void pipelineCreateInfo::pushDescriptor_UNIFORM_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, UBO_Handle& ubo) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		const VkDescriptorBufferInfo bufferInfo{ ubo.getBuffer(proc), ubo._offset, ubo._size };
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = arrIndex;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write.descriptorCount = 1;
+		write.pBufferInfo = &bufferInfo;
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			proc._pipelineLayouts[pipelineIdx],
+			pushDescriptorsSetNo,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, SSBO_Handle& ssbo) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		const VkDescriptorBufferInfo bufferInfo{ ssbo.getBuffer(proc), 0, ssbo._size };
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstSet = VK_NULL_HANDLE;  // handled by vkCmdPushDescriptorSetKHR
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = 0;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		write.descriptorCount = 1;
+		write.pBufferInfo = &bufferInfo;
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			proc._pipelineLayouts[pipelineIdx],
+			descriptorsIdx,
+			write.descriptorCount,
+			&write
+		);
+	}
+	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, SSBO_Handle& ssbo) {
+		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
+
+		const VkDescriptorBufferInfo bufferInfo{ ssbo.getBuffer(proc), 0, ssbo._size };
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstSet = VK_NULL_HANDLE;  // handled by vkCmdPushDescriptorSetKHR
+		write.dstBinding = bindingIdx;
+		write.dstArrayElement = arrIndex;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		write.descriptorCount = 1;
+		write.pBufferInfo = &bufferInfo;
+
+		vkCmdPushDescriptorSetKHR(
+			cmdBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			proc._pipelineLayouts[pipelineIdx],
+			descriptorsIdx,
+			write.descriptorCount,
+			&write
+		);
+	}
+
+	bool pipelineCreateInfo::hasPushDescriptorLayout() {
+		return !(pushDescriptorsSetNo == UINT32_MAX);
+	}
+
 }

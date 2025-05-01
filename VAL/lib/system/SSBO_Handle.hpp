@@ -26,6 +26,8 @@ namespace val {
 
 		//void* getMappedData(VAL_PROC& pro);
 
+		VkBuffer getBuffer(VAL_PROC& proc);
+
 		std::vector<VkBuffer> getBuffers(VAL_PROC& proc);
 
 		VkMemoryPropertyFlags getMemoryPropertyFlags();

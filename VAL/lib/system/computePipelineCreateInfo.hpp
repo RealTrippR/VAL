@@ -9,6 +9,10 @@ namespace val {
 
 	class computePipelineCreateInfo : public pipelineCreateInfo {
 	public:
+	public:
+		computePipelineCreateInfo() { _bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE; }
+	public:
+		inline VkPipelineBindPoint getBindPoint() { return _bindPoint; };
 	};
 }
 

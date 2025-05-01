@@ -84,12 +84,16 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 }
 
 int main()
-{	namespace v = val;
+{
+#ifndef NDEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
+	namespace v = val;
 
 	v::VAL_PROC proc;
 	
 	val::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
-	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -164,13 +168,13 @@ int main()
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window._swapChainExtent);
+	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
 
 	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
 
 	
 	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
@@ -194,6 +198,10 @@ int main()
 
 		proc.nextFrame();
 	}
+
+#ifndef NDEBUG
+	_CrtDumpMemoryLeaks();
+#endif // !NDEBUG
 
 	return EXIT_SUCCESS;
 }

@@ -186,7 +186,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External Libraries\Vulkan\Include;$(SolutionDir)External Libraries\GLFW\include;$(SolutionDir)External Libraries\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -195,7 +195,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)External Libraries\GLFW\lib-vc2022;$(SolutionDir)External Libraries\Vulkan\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\GLFW\lib-vc2022</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -222,11 +222,13 @@
     <ClInclude Include="lib\system\computeTarget.hpp" />
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
+    <ClInclude Include="lib\system\descType.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\multisamplerManager.hpp" />
     <ClInclude Include="lib\system\physicalDeviceRequirements.hpp" />
     <ClInclude Include="lib\system\pipelineType.hpp" />
+    <ClInclude Include="lib\system\pushDescriptor.hpp" />
     <ClInclude Include="lib\system\renderPass.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
     <ClInclude Include="lib\system\imageView.hpp" />
@@ -263,6 +265,7 @@
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
+    <ClCompile Include="src\system\pushDescriptor.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
     <ClCompile Include="src\system\renderPass.cpp" />
     <ClCompile Include="src\system\renderTarget.cpp" />

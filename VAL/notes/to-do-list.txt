@@ -20,6 +20,9 @@ The Vulkan Abstraction Library is missing the following key features:
 
 [✓] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
 
+[ ] Room for optimization: If multiple pipelines share exactly the same descriptor set layouts and push
+	constant ranges, they can share a pipeline layout.
+
 [!] Add support for another buffer space: GPU_LOCAL_CPU (this is only a recommendation, as not all GPU's support this. If it's not supported, it will be automatically replaced by GPU_CPU)
 
 [ ] Add support for push descriptors

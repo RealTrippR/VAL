@@ -20,6 +20,9 @@
     <ClCompile Include="UBO_SSBO_ArrayTest.cpp" />
     <ClCompile Include="Z-PrepassTest.cpp" />
     <ClCompile Include="forwardRendering.cpp" />
+    <ClCompile Include="pushDescriptorTest.cpp" />
+    <ClCompile Include="texelBufferTest.cpp" />
+    <ClCompile Include="inlineUBOtest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
