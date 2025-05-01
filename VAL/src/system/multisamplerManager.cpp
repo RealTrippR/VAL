@@ -9,6 +9,16 @@ namespace val
 		_procVAL->createImageView(_colorImage, imgFormat, VK_IMAGE_ASPECT_COLOR_BIT, &_colorImageView, mipMapLevel);
 	}
 
+	void multisamplerManager::create(const VkSampleCountFlagBits MSAA_samples, const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits, const bufferSpace& space, const uint8_t& mipMapLevel) {
+		
+		setSampleCount(MSAA_samples);
+
+		_procVAL->createImage(width, height, imgFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+			bufferSpaceToVkMemoryProperty(space), _colorImage, _colorImageMemory, mipMapLevel, _sampleCount);
+		_procVAL->createImageView(_colorImage, imgFormat, VK_IMAGE_ASPECT_COLOR_BIT, &_colorImageView, mipMapLevel);
+	}
+
+
 	void multisamplerManager::destroy() {
 		const auto& device = _procVAL->_device;
 		if (_colorImage) {

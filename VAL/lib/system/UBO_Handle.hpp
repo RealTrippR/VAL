@@ -62,7 +62,7 @@ namespace val {
 		// IF GPU-CPU: MUST BE MAPPED TO MEMORY
 		const bufferSpace _space;
 
-		VkShaderStageFlagBits stageFlags = VK_SHADER_STAGE_ALL;
+		VkShaderStageFlags stageFlags = VK_SHADER_STAGE_ALL;
 	};
 }
 

@@ -68,6 +68,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static colorBlendState blendState; 
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
+
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 

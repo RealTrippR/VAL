@@ -11,7 +11,9 @@ namespace val {
 		multisamplerManager(VAL_PROC& proc, const VkSampleCountFlagBits& sampleCount) { _procVAL = &proc; _sampleCount = sampleCount; }
 
 	public:
+		
 		void create(const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits = VK_IMAGE_ASPECT_COLOR_BIT, const bufferSpace& space = GPU_ONLY, const uint8_t& mipMapLevel = 1u);
+		void create(const VkSampleCountFlagBits MSAA_samples, const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits = VK_IMAGE_ASPECT_COLOR_BIT, const bufferSpace& space = GPU_ONLY, const uint8_t& mipMapLevel = 1u);
 
 		void destroy();
 	public:

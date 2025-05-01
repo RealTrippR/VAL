@@ -89,6 +89,8 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
+
+	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
@@ -107,7 +109,6 @@ int main()
 
 	VAL_PROC proc;
 	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
-	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	/////////// consider moving this into the window class ///////////
 	glfwInit();
@@ -209,6 +210,7 @@ int main()
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
 	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
 
