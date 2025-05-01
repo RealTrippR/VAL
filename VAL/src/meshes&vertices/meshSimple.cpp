@@ -4,7 +4,7 @@
 namespace val {
 	void meshSimple::loadFromDiskObj(VAL_PROC& proc, fs::path objPath, bool deduplicateVertices) {
 
-		loadModelFromDiskAsUnifiedMesh(objPath, _vertices, _indices, _meshAttribs, deduplicateVertices);
+		loadModelFromDiskAsUnifiedMesh(objPath, _vertices, _indices, &_meshAttribs, deduplicateVertices);
 
 		proc.createVertexBuffer(_vertices.data(), _vertices.size(), sizeof(val::vertex3D), &_vertexBuffer, &_vertexBufferMem);
 
