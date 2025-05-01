@@ -29,6 +29,7 @@ VAL/Tests contains several basic examples of the features provided by VAL, inclu
 - Array bindings
 - Utilities for loading .obj meshes
 - Specialization Constants
+- Push Descriptors
 
 # Building and Linking
 Compiling VAL is rather straighforward; included is a python script to install all external dependencies (except for the Vulkan SDK, the instructions to install this are given in the dependency installer)
