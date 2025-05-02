@@ -50,21 +50,21 @@ namespace val
 		void destroy();
 
 	public:
-		const bufferSpace& getBufferSpace();
+		const bufferSpace& getBufferSpace() const;
 
-		const uint32_t& getFrameCount();
+		const uint32_t& getFrameCount() const;
 
-		const uint32_t& size();
+		const uint32_t& size() const;
 
-		const VkBuffer& getVkBuffer(const uint8_t frameIdx = 0);
+		VkBuffer& getVkBuffer(const uint8_t frameIdx = 0);
 
 		const VkDeviceMemory& getDeviceMemory(const uint8_t frameIdx);
 
 		void* getDataMapped(const uint8_t frameIdx = 0u);
 
-		const VkBufferUsageFlags& getUsageFlags();
+		const VkBufferUsageFlags& getUsageFlags() const;
 
-		VAL_PROC* getVAL_Proc();
+		VAL_PROC* getVAL_Proc() const;
 
 	protected:
 		void copy(const buffer& other);

@@ -160,19 +160,19 @@ namespace val
 		_memory.clear();
 	}
 
-	const bufferSpace& buffer::getBufferSpace() {
+	const bufferSpace& buffer::getBufferSpace() const  {
 		return _space;
 	}
 
-	const uint32_t& buffer::getFrameCount() {
+	const uint32_t& buffer::getFrameCount() const {
 		return _buffers.size();
 	}
 
-	const uint32_t& buffer::size() {
+	const uint32_t& buffer::size() const {
 		return _size;
 	}
 
-	const VkBuffer& buffer::getVkBuffer(const uint8_t frameIdx) {
+	VkBuffer& buffer::getVkBuffer(const uint8_t frameIdx) {
 		return _buffers[frameIdx];
 	}
 
@@ -184,11 +184,11 @@ namespace val
 		return _dataMapped[frameIdx];
 	}
 
-	const VkBufferUsageFlags& buffer::getUsageFlags() {
+	const VkBufferUsageFlags& buffer::getUsageFlags() const {
 		return _usage;
 	}
 
-	VAL_PROC* buffer::getVAL_Proc() {
+	VAL_PROC* buffer::getVAL_Proc() const {
 		return  &_proc;
 	}
 
