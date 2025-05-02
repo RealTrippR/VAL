@@ -20,6 +20,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/system/system_utils.hpp>
 
+#include <VAL/lib/system/buffer.hpp>
+
 namespace val {
 	class queueManager; // forward declaration
 	class graphicsPipelineCreateInfo; // forward declaration
@@ -73,7 +75,7 @@ namespace val {
 
 		void updateAndSetIndexBuffer(VAL_PROC& proc, val::buffer& buffer, const uint32_t& indexCount);
 
-		void updateAndSetIndexBuffer(VAL_PROC& proc, const VkBuffer&& buffer, const uint32_t& indexCount);
+		void updateAndSetIndexBuffer(VAL_PROC& proc, const VkBuffer& buffer, const uint32_t& indexCount);
 
 		void updateAndSetVertexBuffer(VAL_PROC& proc, const VkBuffer& buffer, const uint32_t& vertexCount);
 
@@ -81,7 +83,15 @@ namespace val {
 
 		void updateAndSetVertexBuffers(VAL_PROC& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBuffers(VAL_PROC& proc, const std::vector<val::buffer&>& vertexBuffers, const uint32_t& vertexCount);
+		void updateAndSetVertexBuffers(VAL_PROC& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount);
+
+		void updateAndSetVertexBufferAndIndexBuffer(VAL_PROC& proc, val::buffer& vertexBuffer, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount);
+
+		void updateAndSetVertexBufferAndIndexBuffer(VAL_PROC& proc, const VkBuffer& vertexBuffer, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
+
+		void updateAndSetVertexBuffersAndIndexBuffer(VAL_PROC& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount);
+		
+		void updateAndSetVertexBuffersAndIndexBuffer(VAL_PROC& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
 
 		/************************************************************************************************************/
 
@@ -116,19 +126,17 @@ namespace val {
 
 
 			_vertexBufferOffsets.resize(vertexBuffers.size());
-			//memset(_vertexBufferOffsets.data(), 0u, sizeof(VkDeviceSize) * vertexBuffers.size());
 		}
 
-		inline void setVertexBuffers(const std::vector<val::buffer&>& vertexBuffers, const uint32_t& vertexCount) {
+		inline void setVertexBuffers(const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount) {
 			_vertexBuffers.resize(vertexBuffers.size());
 			for (uint_fast16_t i = 0; i < vertexBuffers.size(); ++i) {
-				_vertexBuffers[i] = vertexBuffers[i].getVkBuffer();
+				_vertexBuffers[i] = vertexBuffers[i]->getVkBuffer();
 			}
 			_vertexCount = vertexCount;
 
 
 			_vertexBufferOffsets.resize(vertexBuffers.size());
-			//memset(_vertexBufferOffsets.data(), 0u, sizeof(VkDeviceSize) * vertexBuffers.size());
 		}
 
 
