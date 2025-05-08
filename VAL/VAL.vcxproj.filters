@@ -48,6 +48,18 @@
     <Filter Include="src\pipelineStateInfos">
       <UniqueIdentifier>{f8534d2c-f76d-4da6-af58-3447f40e9edc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\renderGraph">
+      <UniqueIdentifier>{90ac42fd-b9ab-45c4-93b1-8222b2667aa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderGraph">
+      <UniqueIdentifier>{98ef4482-3d99-48ee-9ca6-c75ab3b75a0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\ext">
+      <UniqueIdentifier>{c35ec39f-fe36-42d0-881e-3cde798f6f39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ext">
+      <UniqueIdentifier>{8bc9da4d-b78b-48b2-8a8c-9ca91e460e31}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\VAL_PROC.hpp">
@@ -194,6 +206,36 @@
     <ClInclude Include="lib\system\descType.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderGraph.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderGraphOp.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderGraphBlock.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\windowProperties.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\DLL_Compiler.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\VALreturnCode.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\compileArgs.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\loadDLL.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\hashmap.h">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\classEnumBitOps.hpp">
+      <Filter>lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -288,6 +330,15 @@
     </ClCompile>
     <ClCompile Include="src\system\pushDescriptor.cpp">
       <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\renderGraph.c">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\loadDLL.c">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\hashmap.c">
+      <Filter>src\ext</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

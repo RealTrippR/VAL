@@ -21,11 +21,14 @@ const bool enableValidationLayers = true;
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "vertex.hpp"
+#include "../vertex.hpp"
 
 // it is important that this comes last
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
+
+#define VAL_ENABLE_EXPIREMENTAL
+#include <VAL/lib/renderGraph/renderGraph.hpp>
 
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
@@ -33,10 +36,11 @@ struct uniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
-{	using namespace val;
+{
+	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -52,7 +56,8 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
 }
 
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
-{	using namespace val;
+{
+	using namespace val;
 
 	// state infos
 	static rasterizerState rasterizer;
@@ -65,7 +70,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
-	static colorBlendState blendState; 
+	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
@@ -90,20 +95,16 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	namespace v = val;
+	using namespace val;
 
-	v::VAL_PROC proc;
-	
-	val::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
+	VAL_PROC proc;
 
-	/////////// consider moving this into the window class ///////////
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
-	//////////////////////////////////////////////////////////////////
+	val::physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
-	val::window window(windowHDL_GLFW, 800,800, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
-
+	// Configure and create window
+	val::windowProperties windowConfig;
+	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
+	val::window window(windowConfig, 800,800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
@@ -122,7 +123,7 @@ int main()
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
-	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
@@ -137,8 +138,8 @@ int main()
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
 
-	proc.create(windowHDL_GLFW, &window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
-	
+	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
 	const std::vector<res::vertex> vertices = {
@@ -159,8 +160,6 @@ int main()
 
 
 	//////////////////////////////////////////////////////////////
-	// create descriptor sets - this should be merged into the
-	// pipeline creation function
 	proc.createDescriptorSets(&pipeline);
 	//////////////////////////////////////////////////////////////
 
@@ -170,37 +169,23 @@ int main()
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
+
+	// Note that simply setting the index and vertex buffers does not automatically update
+	// them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
+	// every frame that the command buffer is reset
 	renderTarget.setIndexBuffer(indexBuffer, indices.size());
 	renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
 
-	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
 
-	
-	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
-		auto& graphicsQueue = proc._graphicsQueue;
-		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = proc._currentFrame;
 
-		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
-		glfwPollEvents();
-		updateUniformBuffer(proc, uboHdl);
 
-		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
-		renderTarget.updateBuffers(proc);
-		renderTarget.updatePipeline(proc, pipeline);
-		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
-		renderTarget.render(proc);
-		renderTarget.endPass(proc);
 
-		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
-		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
-		proc.nextFrame();
-	}
+
+
+
+
 
 #ifndef NDEBUG
 	_CrtDumpMemoryLeaks();

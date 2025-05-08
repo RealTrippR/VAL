@@ -23,6 +23,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/queueManager.hpp>
+#include <VAL/lib/system/windowProperties.hpp>
 #include <vector>
 
 
@@ -41,6 +42,19 @@ namespace val {
 				throw std::runtime_error("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
 			}
 			_window = windowHDL;
+			_procVAL = valProc;
+			_colorSpace = colorSpace;
+		}
+
+		window(windowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, VAL_PROC* valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL) {
+			glfwInit(); // (it's safe to call init more than once. Refer to: https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init)
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
+			
+			initProperties.applyToGLFW();
+
+			_window = glfwCreateWindow(width, height, name.c_str(), monitor, NULL);
+			if (!_window) { printf("VAL: ERROR: Failed to initialize GLFW window, window is: %p \n", _window); }
+
 			_procVAL = valProc;
 			_colorSpace = colorSpace;
 		}
@@ -86,6 +100,10 @@ namespace val {
 
 		inline VkExtent2D getSize() {
 			return {_swapChainExtent.width, _swapChainExtent.height};
+		}
+
+		inline bool shouldClose() {
+			return glfwWindowShouldClose(_window);
 		}
 	public:
 

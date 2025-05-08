@@ -228,6 +228,7 @@ int main()
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.updateBuffers(proc);
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
 		renderTarget.update(proc, pipeline, { viewport });
 		renderTarget.render(proc);

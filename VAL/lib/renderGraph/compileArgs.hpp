@@ -15,38 +15,36 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_CULL_MODE_ENUM_HPP
-#define VAL_CULL_MODE_ENUM_HPP
+#ifndef VAL_COMPILE_ARGS_HPP
+#define VAL_COMPILE_ARGS_HPP
 
-#include <stdint.h>
-
+#include <vector>
+#include "compileEnums.h"
+#include <string>
 
 namespace val {
-	/**********************************************************/
-	enum class BLEND_POS : uint8_t
-	{
-		SOURCE,
-		DEST
+	using std::string;
+
+	struct COMPILE_INCLUDE_INFO {
+		std::vector<string> includeDirs;
+		std::vector<string> includeFiles;
 	};
-	/**********************************************************/
-	enum class CULL_MODE : uint8_t
-	{
-		NONE = VK_CULL_MODE_NONE,
-		FRONT = VK_CULL_MODE_FRONT_BIT,
-		BACK = VK_CULL_MODE_BACK_BIT,
-		BACK_AND_FRONT = VK_CULL_MODE_FRONT_AND_BACK,
+	struct COMPILE_LINKER_INFO {
+		std::vector<string> linkDirs; /*Search dirs for libs*/
+		std::vector<string> linkLibs;
 	};
-	/**********************************************************/
-	enum class TOPOLOGY_MODE : uint8_t {
-		LINE = VK_POLYGON_MODE_LINE,
-		POINT = VK_POLYGON_MODE_POINT,
-		FILL = VK_POLYGON_MODE_FILL
-	};
-	/**********************************************************/
-	enum class PIPELINE_PROPERTY_STATE : uint8_t {
-		STATIC,
-		DYNAMIC
+	struct COMPILE_ARGS {
+		std::vector<string> additionalCmdLineArguments;
+		std::vector<string> preprocessorDefinitions;
+		CPP_STANDARD cppStandard = CPP_20;
+#ifndef NDEBUG
+		OPTIMIZATION_LEVEL optimizationLvl = DISABLED;
+#else 
+		OPTIMIZATION_LEVEL optimizationLvl = O2;
+#endif // !NDEBUG
+		COMPILE_INCLUDE_INFO includeInfo{};
+		COMPILE_LINKER_INFO linkerInfo{};
 	};
 }
 
-#endif //!VAL_CULL_MODE_ENUM_HPP
+#endif // !VAL_COMPILE_ARGS_HPP

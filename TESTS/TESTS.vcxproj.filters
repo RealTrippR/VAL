@@ -23,10 +23,16 @@
     <ClCompile Include="pushDescriptorTest.cpp" />
     <ClCompile Include="texelBufferTest.cpp" />
     <ClCompile Include="inlineUBOtest.cpp" />
+    <ClCompile Include="experimental-features\renderGraphTest.cpp">
+      <Filter>experimental-features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
     <ClInclude Include="polygonVertex.hpp" />
+    <ClInclude Include="External Libraries\renderGraph.vrg">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -40,6 +46,9 @@
     </Filter>
     <Filter Include="shaders-compiled">
       <UniqueIdentifier>{cc159bea-ab3f-4d77-9442-59a9a432d569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features">
+      <UniqueIdentifier>{5da3f189-593b-4200-9966-21486f953649}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
