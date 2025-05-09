@@ -19,7 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_COMPILE_ARGS_HPP
 
 #include <vector>
-#include "compileEnums.h"
+#include <VAL/lib/renderGraph/compileEnums.hpp>
 #include <string>
 
 namespace val {

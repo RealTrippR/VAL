@@ -15,28 +15,48 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//#ifdef VAL_ENABLE_EXPIREMENTAL
+#ifndef VAL_PASS_FUNCTIONS_HPP
+#define VAL_PASS_FUNCTIONS_HPP
 
-#ifndef VAL_RENDER_GRAPH_H
-#define VAL_RENDER_GRAPH_H
+#include <VAL/lib/system/VAL_PROC.hpp>
 
-#include <VAL/lib/renderGraph/renderGraphBlock.h>
-#include <VAL/lib/renderGraph/loadDLL.h>
+static val::VAL_PROC* pass_proc;
 
 namespace val {
-	class RENDER_GRAPH {
-	public:
-		RENDER_GRAPH() {
-			val::C_DLL_LOADER::incDLLloaderRefCount();
-		}
-		~RENDER_GRAPH() {
-			val::C_DLL_LOADER::decDLLloaderRefCount();
-		}
-	public:
-	};
+	inline void setPipeline(graphicsPipelineCreateInfo& pipeline);
+
+	inline void setViewport(const VkViewport& viewport);
+
+	inline void setScissor(const VkRect2D& scissor);
+
+	inline void setScissor(const VkExtent2D& scissor);
+
+	//inline void setLineWidth();
+
+	//inline void setBlendConstants();
+
+	//inline void setTopologyMode();
+
+	//inline void setCullMode();
+
+	//inline void setDepthBias();
+
+	//inline void copyImage(val::image& dst, val::image& src);
+
+	//inline void copyImage(val::image& dst, val::image& src, val::imageCopyInfo& copyInfo);
+
+	//inline void copyBuffer(val::image& dst, val::image& src);
+
+	inline void setVertexBuffer(val::buffer& buffer);
+
+	//inline void setVertexBuffers();
+
+	inline void setIndexBuffer(val::buffer& buffer);
+
+	//inline void setIndexAndVertexBuffers();
 }
 
+#include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
 
-#endif // !VAL_RENDER_GRAPH_H
 
-//#endif // !VAL_ENABLE_EXPIREMENTAL
+#endif // !VAL_PASS_FUNCTIONS_HPP

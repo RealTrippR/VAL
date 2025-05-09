@@ -220,11 +220,14 @@
     <ClInclude Include="lib\renderAttachments\renderAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\resolveAttachment.hpp" />
     <ClInclude Include="lib\renderGraph\compileArgs.hpp" />
+    <ClInclude Include="lib\renderGraph\compileEnums.hpp" />
     <ClInclude Include="lib\renderGraph\DLL_Compiler.h" />
     <ClInclude Include="lib\renderGraph\loadDLL.h" />
+    <ClInclude Include="lib\renderGraph\pass.hpp" />
+    <ClInclude Include="lib\renderGraph\passFunctionDefinitions.hpp" />
+    <ClInclude Include="lib\renderGraph\passFunctions.hpp" />
     <ClInclude Include="lib\renderGraph\renderGraph.hpp" />
     <ClInclude Include="lib\renderGraph\renderGraphBlock.h" />
-    <ClInclude Include="lib\renderGraph\renderGraphOp.h" />
     <ClInclude Include="lib\system\buffer.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />

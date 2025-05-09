@@ -209,9 +209,6 @@
     <ClInclude Include="lib\renderGraph\renderGraph.hpp">
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
-    <ClInclude Include="lib\renderGraph\renderGraphOp.h">
-      <Filter>lib\renderGraph</Filter>
-    </ClInclude>
     <ClInclude Include="lib\renderGraph\renderGraphBlock.h">
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
@@ -235,6 +232,18 @@
     </ClInclude>
     <ClInclude Include="lib\classEnumBitOps.hpp">
       <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\compileEnums.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\pass.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passFunctions.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passFunctionDefinitions.hpp">
+      <Filter>lib\renderGraph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

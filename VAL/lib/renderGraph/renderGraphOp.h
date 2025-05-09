@@ -1,8 +1,0 @@
-#ifndef VAL_RENDER_GRAPH_OP_H
-#define VAL_RENDER_GRAPH_OP_H
-
-struct RENDER_GRAPH_OP {
-	
-};
-
-#endif // !VAL_RENDER_GRAPH_OP_H

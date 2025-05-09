@@ -288,9 +288,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="External Libraries\renderGraph.vrg">
+    <ClCompile Include="External Libraries\renderGraph_Draft.hpp">
       <FileType>Document</FileType>
-    </ClInclude>
+    </ClCompile>
     <None Include="README.MD" />
     <None Include="shaders\colorshader.frag" />
     <None Include="shaders\doubleImageShader.frag" />

@@ -23,7 +23,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #ifdef _WIN32
 #include <Windows.h>
-#elif __APPLE__ /*not yet supported*/
 #elif __linux__
 #include <dlfcn.h> 
 #else
@@ -86,15 +85,23 @@ uint64_t DLL_HANDLE_hash(const void** item, uint64_t seed0, uint64_t seed1) {
 }
 
 
+
+bool VAL_isDLL_loaderInitialized() {
+    return loadedDLLmap;
+}
+
 enum VAL_RETURN_CODE VAL_initDLL_loader() {
-    loadedDLLmap = hashmap_new(sizeof(struct DLL_HANDLE*), 0, 0, 0,
-        DLL_HANDLE_hash, DLL_HANDLE_compare, NULL, NULL);
     if (loadedDLLmap == NULL) {
-        return VAL_FAILURE;
+        loadedDLLmap = hashmap_new(sizeof(struct DLL_HANDLE*), 0, 0, 0,
+            DLL_HANDLE_hash, DLL_HANDLE_compare, NULL, NULL);
+        if (loadedDLLmap == NULL) {
+            return VAL_FAILURE;
+        }
+        else {
+            return VAL_SUCCESS;
+        }
     }
-    else {
-        return VAL_SUCCESS;
-    }
+    return VAL_SUCCESS;
 }
 
 enum VAL_RETURN_CODE VAL_cleanupDLL_loader() {
@@ -173,7 +180,6 @@ struct DLL_HANDLE* loadDLLtoCache(const char* DLL_filepath) {
     return dll;
 }
 
-#ifdef _WIN32
 // returns null if it fails
 // if hinstLib is passed as NULL it will be ignored, otherwise it is used to pass a handle to an already loaded library
 VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName) {
@@ -198,4 +204,3 @@ VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName) {
         return NULL;
     }
 }
-#endif

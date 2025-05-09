@@ -15,52 +15,63 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_LOAD_DLL_H
-#define VAL_LOAD_DLL_H
+#ifndef VAL_COMPILE_ENUMS_H
+#define VAL_COMPILE_ENUMS_H
+#include <string>
 
-#ifdef __cplusplus
-#define VAL_LOAD_DLL_H_BINDING extern "C"
-#else
-#define VAL_LOAD_DLL_H_BINDING
-#endif // __cplusplus
-
-typedef void(__cdecl* VAL_F_ADDRESS)(void);
-
-#include <VAL/lib/VALreturnCode.h>
-#include <stdbool.h>
-#include <stdint.h>
-
-// returns true if the loader is initialized, otherwise returns false
-VAL_LOAD_DLL_H_BINDING bool VAL_isDLL_loaderInitialized();
-
-VAL_LOAD_DLL_H_BINDING enum VAL_RETURN_CODE VAL_initDLL_loader();
-
-VAL_LOAD_DLL_H_BINDING enum VAL_RETURN_CODE VAL_cleanupDLL_loader();
-
-VAL_LOAD_DLL_H_BINDING VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName);
-
-
-#ifdef __cplusplus
 namespace val {
-	namespace C_DLL_LOADER {
-		uint16_t dllLoaderRefCount;
+	enum COMPILE_RETURN_CODE {
+		COMPILE_SUCCESS,
+		COMPILE_FAILURE_SRC_FILE_INVALID,
+		COMPILE_FAILURE_UNSUPPORTED_COMPILER,
+		COMPILE_FAILURE_CMD_FAIL,
+		COMPILE_FAILURE_INVALID_CPP_VER
+	};
 
-		void incDLLloaderRefCount() {
-			if (dllLoaderRefCount == 0) {
-				VAL_initDLL_loader();
-			}
-			dllLoaderRefCount++;
-		}
-		void decDLLloaderRefCount() {
-			// prevent integer unflow and deallocate
-			if (dllLoaderRefCount > 0) {
-				dllLoaderRefCount--;
-				VAL_cleanupDLL_loader();
-			}
-		}
+	enum CPP_STANDARD {
+		CPP_14,
+		CPP_17,
+		CPP_20,
+		CPP_23,
+		CPP_DRAFT,
+		INVALID_VER
+	};
 
+	const std::string CPP_StandardToString(const CPP_STANDARD& cppStd)
+	{
+		const std::string cpp14 = "c++14";
+		const std::string cpp17 = "c++17";
+		const std::string cpp20 = "c++20";
+		const std::string cpp23 = "c++23";
+		const std::string invalid = "invalid";
+
+		switch (cppStd)
+		{
+		case CPP_14:
+			return cpp14;
+		case CPP_17:
+			return cpp17;
+		case CPP_20:
+			return cpp20;
+		case CPP_23:
+			return cpp23;
+		default:
+			return invalid;
+		};
 	}
-}
-#endif // __cplusplus
 
-#endif // !VAL_LOAD_DLL_H
+	enum SUPPORTED_COMPILER {
+		MSVC,
+		GPLUSPLUS,
+		CLANG
+	};
+
+	enum OPTIMIZATION_LEVEL {
+		DISABLED,
+		O1,
+		O2,
+		Ox
+	};
+}
+
+#endif // !VAL_COMPILE_ENUMS_H

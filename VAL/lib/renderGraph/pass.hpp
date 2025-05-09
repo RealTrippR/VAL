@@ -15,52 +15,27 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_LOAD_DLL_H
-#define VAL_LOAD_DLL_H
-
-#ifdef __cplusplus
-#define VAL_LOAD_DLL_H_BINDING extern "C"
-#else
-#define VAL_LOAD_DLL_H_BINDING
-#endif // __cplusplus
-
-typedef void(__cdecl* VAL_F_ADDRESS)(void);
-
-#include <VAL/lib/VALreturnCode.h>
-#include <stdbool.h>
-#include <stdint.h>
-
-// returns true if the loader is initialized, otherwise returns false
-VAL_LOAD_DLL_H_BINDING bool VAL_isDLL_loaderInitialized();
-
-VAL_LOAD_DLL_H_BINDING enum VAL_RETURN_CODE VAL_initDLL_loader();
-
-VAL_LOAD_DLL_H_BINDING enum VAL_RETURN_CODE VAL_cleanupDLL_loader();
-
-VAL_LOAD_DLL_H_BINDING VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName);
+#ifndef VAL_RENDER_GRAPH_PASS_HPP
+#define VAL_RENDER_GRAPH_PASS_HPP
 
 
-#ifdef __cplusplus
+#include <VAL/lib/renderGraph/renderGraphBlock.h>
+#include <VAL/lib/system/renderTarget.hpp>
+#include <VAL/lib/renderGraph/passFunctions.hpp>
+
+#define PASS_BEGIN(NAME) void PASS_##NAME(
+#define PASS_END }
+
+#define READ(...) __VA_ARGS__ ,
+#define WRITE(...) __VA_ARGS__ ,
+#define READ_WRITE(...) __VA_ARGS__ ,
+#define INPUT(...) __VA_ARGS__ ) {
+#define EXEC(v)
+
 namespace val {
-	namespace C_DLL_LOADER {
-		uint16_t dllLoaderRefCount;
+	class pass {
 
-		void incDLLloaderRefCount() {
-			if (dllLoaderRefCount == 0) {
-				VAL_initDLL_loader();
-			}
-			dllLoaderRefCount++;
-		}
-		void decDLLloaderRefCount() {
-			// prevent integer unflow and deallocate
-			if (dllLoaderRefCount > 0) {
-				dllLoaderRefCount--;
-				VAL_cleanupDLL_loader();
-			}
-		}
-
-	}
+	};
 }
-#endif // __cplusplus
 
-#endif // !VAL_LOAD_DLL_H
+#endif // !VAL_RG_PASS_HPP

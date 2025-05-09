@@ -94,17 +94,17 @@ int main()
 #ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
+	_CrtSetBreakAlloc(1006);
 	using namespace val;
 
 	VAL_PROC proc;
 
-	val::physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
-	val::windowProperties windowConfig;
+	windowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
-	val::window window(windowConfig, 800,800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	window window(windowConfig, 800,800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
@@ -165,27 +165,24 @@ int main()
 
 
 	// configure the render target, setting vertex buffers, scissors, area, etc
-	val::renderTarget renderTarget;
-	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window.getSize());
-	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	//val::renderTarget renderTarget;
+	//renderTarget.setFormat(imageFormat);
+	//renderTarget.setRenderArea(window.getSize());
+	//renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 
-	// Note that simply setting the index and vertex buffers does not automatically update
-	// them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
-	// every frame that the command buffer is reset
-	renderTarget.setIndexBuffer(indexBuffer, indices.size());
-	renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
+	//// Note that simply setting the index and vertex buffers does not automatically update
+	//// them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
+	//// every frame that the command buffer is reset
+	//renderTarget.setIndexBuffer(indexBuffer, indices.size());
+	//renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
+	
+	RENDER_GRAPH renderGraph;
+	//renderGraph.loadFromFile();
+	//renderGraph.compile(proc, etc, etc);
 
-	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
-
-
-
-
-
-
-
-
-
+	//while (!window.shouldClose()) {
+		//renderGraph.nextFrame();
+	//}
 
 #ifndef NDEBUG
 	_CrtDumpMemoryLeaks();

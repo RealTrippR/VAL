@@ -94,15 +94,13 @@ int main()
 
 	v::VAL_PROC proc;
 	
-	val::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
+	v::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
 
-	/////////// consider moving this into the window class ///////////
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
-	//////////////////////////////////////////////////////////////////
 
-	val::window window(windowHDL_GLFW, 800,800, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	// Configure and create window
+	v::windowProperties windowConfig;
+	windowConfig.setProperty(v::WN_BOOL_PROPERTY::RESIZABLE, true);
+	v::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 
 	// creates Vulkan logical and physical devices
@@ -137,7 +135,7 @@ int main()
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
 
-	proc.create(windowHDL_GLFW, &window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 	
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
@@ -178,7 +176,7 @@ int main()
 	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
 
 	
-	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+	while (!window.shouldClose()) {
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
@@ -192,7 +190,7 @@ int main()
 		renderTarget.updateBuffers(proc);
 		renderTarget.updatePipeline(proc, pipeline);
 		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize()});
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 

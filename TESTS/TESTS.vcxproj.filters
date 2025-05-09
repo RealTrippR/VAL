@@ -26,13 +26,13 @@
     <ClCompile Include="experimental-features\renderGraphTest.cpp">
       <Filter>experimental-features</Filter>
     </ClCompile>
+    <ClCompile Include="External Libraries\renderGraph_Draft.hpp">
+      <Filter>experimental-features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
     <ClInclude Include="polygonVertex.hpp" />
-    <ClInclude Include="External Libraries\renderGraph.vrg">
-      <Filter>experimental-features</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
