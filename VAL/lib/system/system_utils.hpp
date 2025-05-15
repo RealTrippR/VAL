@@ -68,6 +68,8 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 #include <filesystem>
 #include <math.h>
 
+#include <VAL/lib/ext/tiny_vector.hpp>
+
 #include <VAL/lib/system/descriptorBinding.hpp>
 #include <VAL/lib/system/pipelineType.hpp>
 

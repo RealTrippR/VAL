@@ -15,12 +15,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+#include <VAL/lib/C_compatibleBinding.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+/// streql() - Tests equality between two strings
+/// @name streql
+/// @brief Tests equality between two C strings. It differs from strcmp in 
+/// the fact that it stops once immediately after a mismatch is detected, 
+/// thus it is more efficient for certain use cases.
+VAL_C_COMPATIBLE_BINDING bool streql(const char* str1, const char* str2);
+
+/// strneql() - Tests equality between two strings within range n
+/// @name strneql
+/// @brief Tests equality between two C strings within range n. It differs from strncmp in 
+/// the fact that it stops once immediately after a mismatch is detected, 
+/// thus it is more efficient for certain use cases.
+VAL_C_COMPATIBLE_BINDING bool strneql(const char* str1, const char* str2, const uint64_t n);

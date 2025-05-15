@@ -94,7 +94,7 @@ int main()
 #ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	_CrtSetBreakAlloc(1006);
+	//_CrtSetBreakAlloc(1216);
 	using namespace val;
 
 	VAL_PROC proc;
@@ -177,8 +177,8 @@ int main()
 	//renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
 	
 	RENDER_GRAPH renderGraph;
-	//renderGraph.loadFromFile();
-	//renderGraph.compile(proc, etc, etc);
+	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
+	renderGraph.compile(MSVC);
 
 	//while (!window.shouldClose()) {
 		//renderGraph.nextFrame();

@@ -37,29 +37,6 @@ namespace val {
 		INVALID_VER
 	};
 
-	const std::string CPP_StandardToString(const CPP_STANDARD& cppStd)
-	{
-		const std::string cpp14 = "c++14";
-		const std::string cpp17 = "c++17";
-		const std::string cpp20 = "c++20";
-		const std::string cpp23 = "c++23";
-		const std::string invalid = "invalid";
-
-		switch (cppStd)
-		{
-		case CPP_14:
-			return cpp14;
-		case CPP_17:
-			return cpp17;
-		case CPP_20:
-			return cpp20;
-		case CPP_23:
-			return cpp23;
-		default:
-			return invalid;
-		};
-	}
-
 	enum SUPPORTED_COMPILER {
 		MSVC,
 		GPLUSPLUS,
@@ -72,6 +49,17 @@ namespace val {
 		O2,
 		Ox
 	};
+
+
+
+	/*****************************************/
+	/* Function declarations */
+
+	const std::string CPP_StandardToString(const CPP_STANDARD& cppStd);
+
+
+
+	/*****************************************/
 }
 
 #endif // !VAL_COMPILE_ENUMS_H

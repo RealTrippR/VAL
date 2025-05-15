@@ -15,12 +15,32 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+#include <VAL/lib/ext/streql.h>
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+bool streql(const char* str1, const char* str2) {
+	uint64_t i = 0u;
+	while (true) {
+		if (str1[i] != str2[i]) {
+			return false;
+		}
+		if (str1[i] == '\0' || str2[i] == '\0') {
+			return true;
+		}
+		i++;
+	}
+	return true;
+}
+
+bool strneql(const char* str1, const char* str2, const uint64_t n) {
+	uint64_t i = 0u;
+	while (i < n) {
+		if (str1[i] != str2[i]) {
+			return false;
+		}
+		if (str1[i] == '\0' || str2[i] == '\0') {
+			return true;
+		}
+		i++;
+	}
+	return true;
+}

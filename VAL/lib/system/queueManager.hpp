@@ -6,6 +6,7 @@
 
 #include <optional>
 #include <vector>
+#include <VAL/lib/ext/tiny_vector.hpp>
 
 namespace val
 {
@@ -28,10 +29,10 @@ namespace val
 		VkQueueFlags _queueFlags;
 		uint32_t _queueFamily;
 
-		std::vector<VkCommandBuffer> _commandBuffers;
+		tiny_vector<VkCommandBuffer, uint32_t> _commandBuffers;
 
-		std::vector<VkSemaphore> _semaphores;
-		std::vector<VkFence> _fences;
+		tiny_vector<VkSemaphore, uint32_t> _semaphores;
+		tiny_vector<VkFence, uint32_t> _fences;
 
 	};
 }

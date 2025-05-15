@@ -11,6 +11,7 @@ PASS_BEGIN(DRAW_RECT)
 READ(buffer& vertexBuffer, buffer& indexBuffer)
 //WRITE(NULL)
 //READ_WRITE(NULL)
+//FIXED
 INPUT(graphicsPipelineCreateInfo& pipeline, window& wind)
 {
 	/*Consider adding a FIXED flag to "bake" the command buffers, 

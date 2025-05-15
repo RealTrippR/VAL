@@ -14,13 +14,29 @@ THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRI
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#include <VAL/lib/renderGraph/compileEnums.hpp>
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+namespace val {
+	const std::string CPP_StandardToString(const CPP_STANDARD& cppStd)
+	{
+		const std::string cpp14 = "c++14";
+		const std::string cpp17 = "c++17";
+		const std::string cpp20 = "c++20";
+		const std::string cpp23 = "c++23";
+		const std::string invalid = "invalid";
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+		switch (cppStd)
+		{
+		case CPP_14:
+			return cpp14;
+		case CPP_17:
+			return cpp17;
+		case CPP_20:
+			return cpp20;
+		case CPP_23:
+			return cpp23;
+		default:
+			return invalid;
+		};
+	}
+}

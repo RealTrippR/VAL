@@ -16,6 +16,8 @@ The Vulkan Abstraction Library is missing the following key features:
 
 ----------------------------------------------------------------------------------------------------------------
 
+[!] Optimize the createGraphicsPipelines function of VAL_PROC, and allow customization of the VkPipelineViewportStateCreateInfo
+
 [!] Add shader updateUBO and updateSSBO functions to update their descriptor sets
 
 [✓] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)

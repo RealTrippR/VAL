@@ -25,6 +25,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/queueManager.hpp>
 #include <VAL/lib/system/windowProperties.hpp>
 #include <vector>
+#include <VAL/lib/ext/tiny_vector.hpp>
 
 
 namespace val {
@@ -41,6 +42,7 @@ namespace val {
 				printf("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
 				throw std::runtime_error("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
 			}
+			_ownsGLFWwindow = false;
 			_window = windowHDL;
 			_procVAL = valProc;
 			_colorSpace = colorSpace;
@@ -116,22 +118,25 @@ namespace val {
 		VkColorSpaceKHR _colorSpace;
 
 		queueManager _presentQueue;
-		//VkQueue _presentQueue;
 
 		VkSurfaceKHR _surface{};
 		////////////////// SWAPCHAIN //////////////////
 
 		VkSwapchainKHR _swapChain{};
-		std::vector<VkImage> _swapChainImages;
+		tiny_vector<VkImage, uint8_t> _swapChainImages;
 		//VkFormat _swapChainImageFormat;
 		VkExtent2D _swapChainExtent{};
-		std::vector<VkImageView> _swapChainImageViews;
-		std::vector<VkFramebuffer> _swapChainFrameBuffers;
+		tiny_vector<VkImageView, uint8_t> _swapChainImageViews;
+		tiny_vector<VkFramebuffer, uint8_t> _swapChainFrameBuffers;
 
 		// this data is used to recreate the swap chain when it's out of date.
 		VkImageView* _swapChainAttachments;
 		uint16_t _swapChainAttachmentCount;
 		VkRenderPass _swapChainRenderPass{};
+
+		// Because windows can be created from an existing GLFW handle,
+		// this is used to avoid the destruction of a window that it doesn't own.
+		bool _ownsGLFWwindow = true;
 	};
 }
 

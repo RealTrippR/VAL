@@ -15,12 +15,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+#ifndef VAL_C_COMPATIBLE_BINDING_H
+#define VAL_C_COMPATIBLE_BINDING_H
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+#ifdef __cplusplus
+#define VAL_C_COMPATIBLE_BINDING extern "C"
+#else
+#define VAL_C_COMPATIBLE_BINDING
+#endif // __cplusplus
+
+#endif // !VAL_C_COMPATIBLE_BINDING_H

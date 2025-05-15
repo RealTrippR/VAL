@@ -14,13 +14,16 @@ THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRI
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#ifndef VAL_ARG_BLOCK_H
+#define VAL_ARG_BLOCK_H
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+#include <stdint.h>
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+struct ARG_BLOCK {
+	// A contiguous block of memory, laid out like so: "arg1\0arg2\0";
+	char* args;
+	// The number of arguments in char* args.
+	uint16_t argCount;
+};
+
+#endif // !VAL_ARG_BLOCK_H

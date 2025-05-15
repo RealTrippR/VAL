@@ -20,19 +20,44 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef VAL_RENDER_GRAPH_H
 #define VAL_RENDER_GRAPH_H
 
+#include <VAL/lib/renderGraph/passInfo.h>
 #include <VAL/lib/renderGraph/renderGraphBlock.h>
+#include <VAL/lib/renderGraph/DLL_Compiler.hpp>
 #include <VAL/lib/renderGraph/loadDLL.h>
 
+#include <VAL/lib/renderGraph/compileArgs.hpp>
+#include <filesystem>
+
 namespace val {
+
 	class RENDER_GRAPH {
 	public:
 		RENDER_GRAPH() {
-			val::C_DLL_LOADER::incDLLloaderRefCount();
+			VAL_incDLLloaderRefCount();
 		}
 		~RENDER_GRAPH() {
-			val::C_DLL_LOADER::decDLLloaderRefCount();
+			VAL_decDLLloaderRefCount();
+			cleanup();
 		}
 	public:
+		VAL_RETURN_CODE loadFromFile(const std::filesystem::path& srcPath);
+
+		VAL_RETURN_CODE compile(SUPPORTED_COMPILER compiler, const COMPILE_ARGS& extraArgs = {});
+
+	private:
+		void cleanup();
+
+		VAL_RETURN_CODE readPass(struct PASS_INFO* __passInfo__, char* passBegin, const uint32_t* passStrLen, char** error);
+
+		VAL_RETURN_CODE preprocess(char** processed_src, uint64_t* processed_src_len, char** errorMsg);
+
+	private:
+
+		char* preprocessFileName = NULL;
+		char* srcFileContents = NULL;
+		uint32_t srcContentLen = 0u;
+		std::string srcFileName;
+		uint64_t srcFileContentsLen = 0u;
 	};
 }
 

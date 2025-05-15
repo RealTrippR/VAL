@@ -15,12 +15,43 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+#include <VAL/lib/renderGraph/passInfo.h>
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+#include <stdio.h>
+
+void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
+	printf("-- ARG BLOCK: %h --\n", argblock);
+	printf("Args:\n");
+	uint32_t i = 0u;
+	uint32_t j = 0u;
+	while (i < argblock->argCount) {
+		if (j == 0 || argblock->args[j]=='\0') {
+			if (argblock->args[j] == '\0') { j++; }
+			printf("| %s |\n", argblock->args+j);
+			i++;
+		}
+		++j;
+	}
+	printf("-------------------");
+}
+
+void PASS_INFO_CLEANUP(struct PASS_INFO* pass) {
+	if (pass->readBlock.args) {
+		free(pass->readBlock.args);
+	}
+	if (pass->writeBlock.args) {
+		free(pass->writeBlock.args);
+	}
+	if (pass->readWriteBlock.args) {
+		free(pass->readWriteBlock.args);
+	}
+
+	if (pass->passName) {
+		free(pass->passName);
+		pass->passName = NULL;
+	}
+	if (pass->execSrc) {
+		free(pass->execSrc);
+		pass->execSrc = NULL;
+	}
+}

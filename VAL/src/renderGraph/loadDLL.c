@@ -108,28 +108,30 @@ enum VAL_RETURN_CODE VAL_cleanupDLL_loader() {
     enum VAL_RETURN_CODE retcode = VAL_SUCCESS;
     size_t iter = 0;
     void* item;
-    while (hashmap_iter(loadedDLLmap, &iter, &item)) {
-        const struct DLL_HANDLE** hdl = item;
-        if ((*hdl)->DLLfilepath != NULL) {
-            free((*hdl)->DLLfilepath);
-        }
-        if ((*hdl)->DLL != NULL) {
+    if (loadedDLLmap) {
+        while (hashmap_iter(loadedDLLmap, &iter, &item)) {
+            const struct DLL_HANDLE** hdl = item;
+            if ((*hdl)->DLLfilepath != NULL) {
+                free((*hdl)->DLLfilepath);
+            }
+            if ((*hdl)->DLL != NULL) {
 #ifdef _WIN32
-            int fFreeResult = FreeLibrary((*hdl)->DLL);
-            if (fFreeResult == 0) { // https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-freelibrary
-                fprintf(stderr, "VAL: ERROR: Could not free library, error id: %d\n", fFreeResult);
-                retcode = VAL_FAILURE;
-            }
+                int fFreeResult = FreeLibrary((*hdl)->DLL);
+                if (fFreeResult == 0) { // https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-freelibrary
+                    fprintf(stderr, "VAL: ERROR: Could not free library, error id: %d\n", fFreeResult);
+                    retcode = VAL_FAILURE;
+                }
 #elif __linux__
-            int fFreeResult = dlclose((*hdl)->DLL);
-            if (dlclose(handle) != 0) {
-                fprintf(stderr, "VAL: ERROR: Could not free library: %s\n", dlerror());
-                retcode = VAL_FAILURE;
-            }
+                int fFreeResult = dlclose((*hdl)->DLL);
+                if (dlclose(handle) != 0) {
+                    fprintf(stderr, "VAL: ERROR: Could not free library: %s\n", dlerror());
+                    retcode = VAL_FAILURE;
+                }
 #endif // _WIN32
 
+            }
+            free(*hdl);
         }
-        free(*hdl);
     }
 
     // free items inside hashmap the and the dll.DLLfilepath string
@@ -202,5 +204,26 @@ VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName) {
     }
     else {
         return NULL;
+    }
+}
+
+
+
+/************************************************************************/
+
+// a sentinel to determine when to create or destroy the DLL loader
+uint16_t VAL_dllLoaderRefCount = 0u;
+
+void VAL_incDLLloaderRefCount() {
+    if (VAL_dllLoaderRefCount == 0) {
+        VAL_initDLL_loader();
+    }
+    VAL_dllLoaderRefCount++;
+}
+void VAL_decDLLloaderRefCount() {
+    // prevent integer underflow and deallocate resources
+    if (VAL_dllLoaderRefCount > 0) {
+        VAL_dllLoaderRefCount--;
+        VAL_cleanupDLL_loader();
     }
 }

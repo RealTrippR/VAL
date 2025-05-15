@@ -31,7 +31,9 @@ namespace val {
 
 	void window::cleanup() {
 		if (_procVAL) {
-			glfwDestroyWindow(_window);
+			if (_ownsGLFWwindow) {
+				glfwDestroyWindow(_window);
+			}
 			glfwTerminate();
 			_presentQueue.destroy(*_procVAL);
 			cleanupSwapChain();

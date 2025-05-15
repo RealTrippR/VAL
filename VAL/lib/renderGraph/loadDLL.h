@@ -18,11 +18,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef VAL_LOAD_DLL_H
 #define VAL_LOAD_DLL_H
 
-#ifdef __cplusplus
-#define VAL_LOAD_DLL_H_BINDING extern "C"
-#else
-#define VAL_LOAD_DLL_H_BINDING
-#endif // __cplusplus
+#include <VAL/lib/C_compatibleBinding.h>
 
 typedef void(__cdecl* VAL_F_ADDRESS)(void);
 
@@ -31,36 +27,16 @@ typedef void(__cdecl* VAL_F_ADDRESS)(void);
 #include <stdint.h>
 
 // returns true if the loader is initialized, otherwise returns false
-VAL_LOAD_DLL_H_BINDING bool VAL_isDLL_loaderInitialized();
+VAL_C_COMPATIBLE_BINDING bool VAL_isDLL_loaderInitialized();
 
-VAL_LOAD_DLL_H_BINDING enum VAL_RETURN_CODE VAL_initDLL_loader();
+VAL_C_COMPATIBLE_BINDING enum VAL_RETURN_CODE VAL_initDLL_loader();
 
-VAL_LOAD_DLL_H_BINDING enum VAL_RETURN_CODE VAL_cleanupDLL_loader();
+VAL_C_COMPATIBLE_BINDING enum VAL_RETURN_CODE VAL_cleanupDLL_loader();
 
-VAL_LOAD_DLL_H_BINDING VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName);
+VAL_C_COMPATIBLE_BINDING VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName);
 
+VAL_C_COMPATIBLE_BINDING void VAL_incDLLloaderRefCount();
 
-#ifdef __cplusplus
-namespace val {
-	namespace C_DLL_LOADER {
-		uint16_t dllLoaderRefCount;
-
-		void incDLLloaderRefCount() {
-			if (dllLoaderRefCount == 0) {
-				VAL_initDLL_loader();
-			}
-			dllLoaderRefCount++;
-		}
-		void decDLLloaderRefCount() {
-			// prevent integer unflow and deallocate
-			if (dllLoaderRefCount > 0) {
-				dllLoaderRefCount--;
-				VAL_cleanupDLL_loader();
-			}
-		}
-
-	}
-}
-#endif // __cplusplus
+VAL_C_COMPATIBLE_BINDING void VAL_decDLLloaderRefCount();
 
 #endif // !VAL_LOAD_DLL_H

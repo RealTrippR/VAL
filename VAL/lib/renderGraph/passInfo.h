@@ -15,12 +15,31 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+#ifndef VAL_PASS_INFO_H
+#define VAL_PASS_INFO_H
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+#include <VAL/lib/C_compatibleBinding.h>
+#include <VAL/lib/renderGraph/argBlock.h>
+#include <stdlib.h>
+
+enum PASS_FLAGS {
+	FIXED = 1
+};
+
+struct PASS_INFO {
+	enum PASS_FLAGS flags;
+	
+	struct ARG_BLOCK readBlock;
+	struct ARG_BLOCK writeBlock;
+	struct ARG_BLOCK readWriteBlock;
+
+	char* passName;
+	char* execSrc;
+	uint32_t execSrcLen;
+};
+
+VAL_C_COMPATIBLE_BINDING void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock);
+
+VAL_C_COMPATIBLE_BINDING void PASS_INFO_CLEANUP(struct PASS_INFO* pass);
+
+#endif // !VAL_PASS_INFO_H

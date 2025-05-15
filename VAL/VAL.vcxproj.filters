@@ -215,7 +215,7 @@
     <ClInclude Include="lib\system\windowProperties.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\renderGraph\DLL_Compiler.h">
+    <ClInclude Include="lib\renderGraph\DLL_Compiler.hpp">
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
     <ClInclude Include="lib\VALreturnCode.h">
@@ -243,6 +243,21 @@
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
     <ClInclude Include="lib\renderGraph\passFunctionDefinitions.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\tiny_vector.hpp">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passInfo.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\C_compatibleBinding.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\streql.h">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\argBlock.h">
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
   </ItemGroup>
@@ -340,13 +355,25 @@
     <ClCompile Include="src\system\pushDescriptor.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderGraph\renderGraph.c">
+    <ClCompile Include="src\renderGraph\renderGraph.cpp">
       <Filter>src\renderGraph</Filter>
     </ClCompile>
     <ClCompile Include="src\renderGraph\loadDLL.c">
       <Filter>src\renderGraph</Filter>
     </ClCompile>
     <ClCompile Include="src\ext\hashmap.c">
+      <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\DLL_Compiler.cpp">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\compileEnums.cpp">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\passInfo.c">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\streql.c">
       <Filter>src\ext</Filter>
     </ClCompile>
   </ItemGroup>

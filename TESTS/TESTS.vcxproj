@@ -276,6 +276,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="experimental-features\renderGraph_Draft.hpp" />
     <ClInclude Include="polygonVertex.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
@@ -288,9 +289,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="External Libraries\renderGraph_Draft.hpp">
-      <FileType>Document</FileType>
-    </ClCompile>
     <None Include="README.MD" />
     <None Include="shaders\colorshader.frag" />
     <None Include="shaders\doubleImageShader.frag" />

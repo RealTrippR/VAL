@@ -15,12 +15,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_GRAPHICS_STATE_INFOS
-#define VAL_GRAPHICS_STATE_INFOS
+#ifndef VAL_RENDER_GRAPH_DLL_COMPILER_H
+#define VAL_RENDER_GRAPH_DLL_COMPILER_H
 
-#include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
-#include <VAL/lib/pipelineStateInfos/rasterizerState.hpp>
-#include <VAL/lib/pipelineStateInfos/depthStencilState.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendStateAttachment.hpp>
-#include <VAL/lib/pipelineStateInfos/colorBlendState.hpp>
-#endif // !VAL_GRAPHICS_STATE_INFOS
+#include "compileArgs.hpp"
+#include "VALreturnCode.h"
+
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <filesystem>
+
+namespace val {
+	using std::string;
+	using filepath = std::filesystem::path;
+
+	COMPILE_RETURN_CODE compileToDLL(filepath srcPath, string DLLname, SUPPORTED_COMPILER compiler, const string EXPORT_FLAG, const COMPILE_ARGS& extraArgs = {});
+}
+
+#endif /*!VAL_RENDER_GRAPH_DLL_COMPILER_H*/
