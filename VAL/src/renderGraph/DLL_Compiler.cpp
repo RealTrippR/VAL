@@ -1,8 +1,10 @@
 #include <VAL/lib/renderGraph/DLL_Compiler.hpp>
 
 namespace val {
+	using std::string;
 
 	COMPILE_RETURN_CODE compileToDLL(filepath srcPath, string DLLname, SUPPORTED_COMPILER compiler, const string EXPORT_FLAG, const COMPILE_ARGS& extraArgs) {
+
 		COMPILE_RETURN_CODE retCode = COMPILE_SUCCESS;
 		// first check if the file exists
 		FILE* fptr = NULL;

@@ -27,10 +27,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <filesystem>
 
 namespace val {
-	using std::string;
 	using filepath = std::filesystem::path;
 
-	COMPILE_RETURN_CODE compileToDLL(filepath srcPath, string DLLname, SUPPORTED_COMPILER compiler, const string EXPORT_FLAG, const COMPILE_ARGS& extraArgs = {});
+	COMPILE_RETURN_CODE compileToDLL(filepath srcPath, string DLLname, SUPPORTED_COMPILER compiler, const std::string EXPORT_FLAG, const COMPILE_ARGS& extraArgs = {});
 }
 
 #endif /*!VAL_RENDER_GRAPH_DLL_COMPILER_H*/

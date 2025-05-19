@@ -178,11 +178,12 @@ int main()
 	
 	RENDER_GRAPH renderGraph;
 	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
-	renderGraph.compile(MSVC);
+	renderGraph.compile(MSVC, "test_graph.dll", "experimental-features");
 
-	//while (!window.shouldClose()) {
-		//renderGraph.nextFrame();
-	//}
+
+	while (!window.shouldClose()) {
+		renderGraph.nextFrame();
+	}
 
 #ifndef NDEBUG
 	_CrtDumpMemoryLeaks();

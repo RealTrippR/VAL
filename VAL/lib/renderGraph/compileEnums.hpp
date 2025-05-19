@@ -50,6 +50,11 @@ namespace val {
 		Ox
 	};
 
+	enum COMMENT_TYPE {
+		NONE,
+		SINGLE_LINE,
+		MULTI_LINE
+	};
 
 
 	/*****************************************/

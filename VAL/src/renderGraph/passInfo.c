@@ -32,7 +32,7 @@ void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
 		}
 		++j;
 	}
-	printf("-------------------");
+	printf("-------------------\n");
 }
 
 void PASS_INFO_CLEANUP(struct PASS_INFO* pass) {

@@ -42,14 +42,20 @@ namespace val {
 	public:
 		VAL_RETURN_CODE loadFromFile(const std::filesystem::path& srcPath);
 
-		VAL_RETURN_CODE compile(SUPPORTED_COMPILER compiler, const COMPILE_ARGS& extraArgs = {});
+		VAL_RETURN_CODE compile(SUPPORTED_COMPILER compiler, const string& DLL_file_name, filepath compileToDir, const COMPILE_ARGS& extraArgs = {});
+
+		void nextFrame();
+
+		void(__cdecl* get_pass_main())() {
+			return passMain;
+		}
 
 	private:
 		void cleanup();
 
-		VAL_RETURN_CODE readPass(struct PASS_INFO* __passInfo__, char* passBegin, const uint32_t* passStrLen, char** error);
+		VAL_RETURN_CODE readPass(struct PASS_INFO* __passInfo__, char* passBegin, uint32_t* passStrLen, char** error);
 
-		VAL_RETURN_CODE preprocess(char** processed_src, uint64_t* processed_src_len, char** errorMsg);
+		VAL_RETURN_CODE preprocess(string* processed_src_out, char** errorMsg);
 
 	private:
 
@@ -58,6 +64,8 @@ namespace val {
 		uint32_t srcContentLen = 0u;
 		std::string srcFileName;
 		uint64_t srcFileContentsLen = 0u;
+
+		void(__cdecl* passMain)();
 	};
 }
 

@@ -183,14 +183,16 @@ struct DLL_HANDLE* loadDLLtoCache(const char* DLL_filepath) {
 }
 
 // returns null if it fails
-// if hinstLib is passed as NULL it will be ignored, otherwise it is used to pass a handle to an already loaded library
 VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName) {
     VAL_F_ADDRESS funcAdd = NULL;
 
 
     // Get a handle to the DLL module.
     struct DLL_HANDLE* dllHdl = loadDLLtoCache(DLL_file);
-    //hinstLib = LoadLibrary(DLL_file);
+    if (!dllHdl) {
+        printf("VAL: ERROR: Failed to load DLL: %s\n", DLL_file);
+        return NULL;
+    }
 
     // If the handle is valid, try to get the function address.
     if (dllHdl != NULL)
