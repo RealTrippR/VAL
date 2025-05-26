@@ -183,6 +183,8 @@ int main()
 
 		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
+
+		// Update view information, stored in a UBO
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);

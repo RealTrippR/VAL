@@ -98,15 +98,19 @@ namespace val {
 
 		VkFramebuffer& beginDraw(const VkFormat& imageFormat);
 
-		VkFence getPresentFence();
+		inline VkFence& getPresentFence();
 
-		inline VkExtent2D getSize() {
-			return {_swapChainExtent.width, _swapChainExtent.height};
-		}
+		inline queueManager& getPresentQueue();
 
-		inline bool shouldClose() {
-			return glfwWindowShouldClose(_window);
-		}
+		inline uint32_t getHeight();
+
+		inline uint32_t getWidth();
+		
+		inline VkExtent2D getSize();
+
+		inline VkRect2D getSizeAsRect2D();
+
+		inline bool shouldClose();
 	public:
 
 		uint32_t _currentSwapChainImageIndex = 0;

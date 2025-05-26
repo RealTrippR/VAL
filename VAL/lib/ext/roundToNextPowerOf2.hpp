@@ -15,36 +15,55 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_COMPILE_ARGS_HPP
-#define VAL_COMPILE_ARGS_HPP
+#ifndef ROUND_TO_NEXT_POWER_OF_TWO
+#define ROUND_TO_NEXT_POWER_OF_TWO
 
-#include <vector>
-#include <VAL/lib/renderGraph/compileEnums.hpp>
-#include <string>
+#include <stdint.h>
 
-namespace val {
-	using std::string;
-
-	struct COMPILE_INCLUDE_INFO {
-		std::vector<string> includeDirs;
-		std::vector<string> includeFiles;
-	};
-	struct COMPILE_LINKER_INFO {
-		std::vector<string> linkDirs; /*Search dirs for libs*/
-		std::vector<string> linkLibs;
-	};
-	struct COMPILE_ARGS {
-		std::vector<string> additionalCmdLineArguments;
-		std::vector<string> preprocessorDefinitions;
-		CPP_STANDARD cppStandard = CPP_20;
-#ifndef NDEBUG
-		OPTIMIZATION_LEVEL optimizationLvl = DISABLED;
-#else 
-		OPTIMIZATION_LEVEL optimizationLvl = O2;
-#endif // !NDEBUG
-		COMPILE_INCLUDE_INFO includeInfo{};
-		COMPILE_LINKER_INFO linkerInfo{};
-	};
+// https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
+inline uint8_t roundToNextPowerOfTwo(uint8_t x) {
+	x--;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x++;
+	return x;
 }
 
-#endif // !VAL_COMPILE_ARGS_HPP
+
+inline uint16_t roundToNextPowerOfTwo(uint16_t x) {
+	x--;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x++;
+	return x;
+}
+
+
+inline uint32_t roundToNextPowerOfTwo(uint32_t x) {
+	x--;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+	x++;
+	return x;
+}
+
+
+inline uint64_t roundToNextPowerOfTwo(uint64_t x) {
+	x--;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+	x |= x >> 32;
+	x++;
+	return x;
+}
+
+#endif // !ROUND_TO_NEXT_POWER_OF_TWO

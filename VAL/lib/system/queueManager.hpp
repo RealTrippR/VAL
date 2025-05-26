@@ -24,16 +24,31 @@ namespace val
 
 		void destroy(VAL_PROC& proc);
 
+		inline void submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, queueManager& waitFor);
+
+		inline VkQueue getVkQueue();
+
+		inline VkQueueFlags getVkQueueFlags() const;
+
+		inline uint32_t getQueueFamily() const;
+
+		inline VkCommandBuffer& getCommandBuffer(const uint32_t& frameIdx);
+
+		inline VkSemaphore& getSemaphore(const uint32_t& frameIdx);
 	public:
 		VkQueue _queue;
 		VkQueueFlags _queueFlags;
 		uint32_t _queueFamily;
 
-		tiny_vector<VkCommandBuffer, uint32_t> _commandBuffers;
+		tiny_vector<VkCommandBuffer> _commandBuffers;
 
-		tiny_vector<VkSemaphore, uint32_t> _semaphores;
-		tiny_vector<VkFence, uint32_t> _fences;
+		tiny_vector<VkSemaphore> _semaphores;
+		tiny_vector<VkFence> _fences;
 
 	};
 }
 #endif // !VAL_QUEUE_HANDLER_HPP
+
+
+
+#include <VAL/lib/system/queueManager.inl>

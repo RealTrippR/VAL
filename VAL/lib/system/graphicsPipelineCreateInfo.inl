@@ -14,22 +14,18 @@ THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRI
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#ifndef VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
+#define VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
 
-#ifndef VAL_RENDER_GRAPH_DLL_COMPILER_H
-#define VAL_RENDER_GRAPH_DLL_COMPILER_H
-
-#include "compileArgs.hpp"
-#include "VALreturnCode.h"
-
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <filesystem>
+#include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
 
 namespace val {
-	using filepath = std::filesystem::path;
+	inline VkPipeline& graphicsPipelineCreateInfo::getVkPipeline(VAL_PROC& proc) {
+		return proc._graphicsPipelines[pipelineIdx];
+	}
 
-	COMPILE_RETURN_CODE compileToDLL(filepath srcPath, string DLLname, SUPPORTED_COMPILER compiler, const std::string EXPORT_FLAG, const COMPILE_ARGS& extraArgs = {});
+	inline VkRenderPass& graphicsPipelineCreateInfo::getVkRenderPass() {
+		return renderPass->getVkRenderPass();
+	}
 }
-
-#endif /*!VAL_RENDER_GRAPH_DLL_COMPILER_H*/
+#endif // !VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE

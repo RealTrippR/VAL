@@ -15,40 +15,53 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//#ifdef VAL_ENABLE_EXPIREMENTAL
+// EXPERIMENTAL
+#ifdef VAL_ENABLE_EXPIREMENTAL
 
 #ifndef VAL_RENDER_GRAPH_H
 #define VAL_RENDER_GRAPH_H
 
+#include <VAL/lib/VALreturnCode.h>
+#include <VAL/lib/renderGraph/graphEnums.hpp>
 #include <VAL/lib/renderGraph/passInfo.h>
 #include <VAL/lib/renderGraph/renderGraphBlock.h>
-#include <VAL/lib/renderGraph/DLL_Compiler.hpp>
-#include <VAL/lib/renderGraph/loadDLL.h>
 
-#include <VAL/lib/renderGraph/compileArgs.hpp>
+#include <VAL/lib/renderGraph/argHandleList.hpp>
 #include <filesystem>
+#include <unordered_map>
+#include <cstdarg>
+
+#include <VAL/lib/renderGraph/pass.hpp>
+
+
+#define __CONCAT2__(a, b) a##b
+#define __CONCAT__(a, b) __CONCAT2__(a, b)
+
+#define __STR2__(x) #x
+#define __STR__(x) __STR2__(x)
+
+#ifdef VAL_RENDER_PASS_COMPILE_MODE
+#define GRAPH_FILE(...) <VAL\lib\renderGraph\blank.h>
+#else
+#define GRAPH_FILE(x) __STR__(__CONCAT__(x, __processed.hpp))
+#endif
+
 
 namespace val {
 
+	using std::string;
+	typedef std::filesystem::path filepath;
+
 	class RENDER_GRAPH {
 	public:
-		RENDER_GRAPH() {
-			VAL_incDLLloaderRefCount();
-		}
 		~RENDER_GRAPH() {
-			VAL_decDLLloaderRefCount();
 			cleanup();
 		}
 	public:
+
 		VAL_RETURN_CODE loadFromFile(const std::filesystem::path& srcPath);
 
-		VAL_RETURN_CODE compile(SUPPORTED_COMPILER compiler, const string& DLL_file_name, filepath compileToDir, const COMPILE_ARGS& extraArgs = {});
-
-		void nextFrame();
-
-		void(__cdecl* get_pass_main())() {
-			return passMain;
-		}
+		VAL_RETURN_CODE compile(const filepath& compileToDir = "");
 
 	private:
 		void cleanup();
@@ -58,18 +71,15 @@ namespace val {
 		VAL_RETURN_CODE preprocess(string* processed_src_out, char** errorMsg);
 
 	private:
-
 		char* preprocessFileName = NULL;
 		char* srcFileContents = NULL;
 		uint32_t srcContentLen = 0u;
 		std::string srcFileName;
 		uint64_t srcFileContentsLen = 0u;
-
-		void(__cdecl* passMain)();
 	};
 }
 
 
 #endif // !VAL_RENDER_GRAPH_H
 
-//#endif // !VAL_ENABLE_EXPIREMENTAL
+#endif // !VAL_ENABLE_EXPIREMENTAL

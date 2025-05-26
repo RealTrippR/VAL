@@ -19,17 +19,27 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_PASS_FUNCTIONS_HPP
 
 #include <VAL/lib/system/VAL_PROC.hpp>
-
-static val::VAL_PROC* pass_proc;
+#include <VAL/lib/renderGraph/passContext.hpp>
 
 namespace val {
-	inline void setPipeline(graphicsPipelineCreateInfo& pipeline);
 
-	inline void setViewport(const VkViewport& viewport);
+	inline void RESET_COMMAND_BUFFER(VkCommandBuffer& cmd);
 
-	inline void setScissor(const VkRect2D& scissor);
+	inline void BEGIN_COMMAND_BUFFER(VkCommandBuffer& cmd);
 
-	inline void setScissor(const VkExtent2D& scissor);
+	inline void END_COMMAND_BUFFER(VkCommandBuffer& cmd);
+
+	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, graphicsPipelineCreateInfo& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd);
+
+	inline void END_RENDER_PASS(VkCommandBuffer& cmd);
+
+	inline void setPipeline(graphicsPipelineCreateInfo& pipeline, VAL_PROC& proc, VkCommandBuffer& commandBuffer);
+
+	inline void setViewport(const VkViewport& viewport, VkCommandBuffer& commandBuffer);
+
+	inline void setScissor(const VkRect2D& scissor, VkCommandBuffer& commandBuffer);
+
+	inline void setScissor(const VkExtent2D& scissor, VkCommandBuffer& commandBuffer);
 
 	//inline void setLineWidth();
 
@@ -47,16 +57,21 @@ namespace val {
 
 	//inline void copyBuffer(val::image& dst, val::image& src);
 
-	inline void setVertexBuffer(val::buffer& buffer);
+	inline void setVertexBuffer(VkBuffer& buffer, VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset = 0u);
 
 	//inline void setVertexBuffers();
 
-	inline void setIndexBuffer(val::buffer& buffer);
+	inline void setIndexBuffer(VkBuffer& buffer, VkCommandBuffer& commandBuffer);
 
+	inline void drawInstanced(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd,
+		const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
+
+	inline void drawInstanced(val::buffer& vertexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
+
+	inline void drawIndexed(const uint32_t& indexCount, VkCommandBuffer& cmd, const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u);
+
+	inline void draw(const uint32_t& vertexCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u);
 	//inline void setIndexAndVertexBuffers();
 }
-
-#include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
-
 
 #endif // !VAL_PASS_FUNCTIONS_HPP

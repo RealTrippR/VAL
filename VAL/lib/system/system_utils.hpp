@@ -77,6 +77,7 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 
 #include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
 
+
 namespace val {
 
 	// VAL::DYNAMIC_STATE maps directly to VkDynamicState

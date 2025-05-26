@@ -201,7 +201,8 @@
   <ItemGroup>
     <ClInclude Include="lib\classEnumBitOps.hpp" />
     <ClInclude Include="lib\C_compatibleBinding.h" />
-    <ClInclude Include="lib\ext\hashmap.h" />
+    <ClInclude Include="lib\ext\gpu_vector.hpp" />
+    <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp" />
     <ClInclude Include="lib\ext\streql.h" />
     <ClInclude Include="lib\ext\tiny_vector.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp" />
@@ -223,11 +224,11 @@
     <ClInclude Include="lib\renderAttachments\renderAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\resolveAttachment.hpp" />
     <ClInclude Include="lib\renderGraph\argBlock.h" />
-    <ClInclude Include="lib\renderGraph\compileArgs.hpp" />
-    <ClInclude Include="lib\renderGraph\compileEnums.hpp" />
-    <ClInclude Include="lib\renderGraph\DLL_Compiler.hpp" />
-    <ClInclude Include="lib\renderGraph\loadDLL.h" />
+    <ClInclude Include="lib\renderGraph\argHandleList.hpp" />
+    <ClInclude Include="lib\renderGraph\fixedBlock.h" />
+    <ClInclude Include="lib\renderGraph\graphEnums.hpp" />
     <ClInclude Include="lib\renderGraph\pass.hpp" />
+    <ClInclude Include="lib\renderGraph\passContext.hpp" />
     <ClInclude Include="lib\renderGraph\passFunctionDefinitions.hpp" />
     <ClInclude Include="lib\renderGraph\passFunctions.hpp" />
     <ClInclude Include="lib\renderGraph\passInfo.h" />
@@ -263,7 +264,6 @@
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
     <ClCompile Include="lib\system\physicalDeviceRequirements.cpp" />
-    <ClCompile Include="src\ext\hashmap.c" />
     <ClCompile Include="src\ext\streql.c" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
@@ -274,9 +274,8 @@
     <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp" />
     <ClCompile Include="src\pipelineStateInfos\rasterizerState.cpp" />
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
-    <ClCompile Include="src\renderGraph\compileEnums.cpp" />
-    <ClCompile Include="src\renderGraph\DLL_Compiler.cpp" />
-    <ClCompile Include="src\renderGraph\loadDLL.c" />
+    <ClCompile Include="src\renderGraph\argBlock.c" />
+    <ClCompile Include="src\renderGraph\bakedCommandBuffer.c" />
     <ClCompile Include="src\renderGraph\passInfo.c" />
     <ClCompile Include="src\renderGraph\renderGraph.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />
@@ -310,6 +309,21 @@
       <FileType>Text</FileType>
     </ClInclude>
     <Text Include="notes\to-do-list.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\queueManager.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\window.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,20 +15,40 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_ARG_BLOCK_H
-#define VAL_ARG_BLOCK_H
 
-#include <VAL/lib/C_compatibleBinding.h>
-#include <stdint.h>
+#ifndef VAL_WINDOW_INLINE
+#define VAL_WINDOW_INLINE
 
-struct ARG_BLOCK {
-	// A contiguous block of memory, laid out like so: "arg1\0arg2\0";
-	char* args;
-	// The number of arguments in char* args.
-	uint16_t argCount;
-};
+#include <VAL/lib/system/window.hpp>
 
+namespace val {
+	inline VkFence& window::getPresentFence() {
+		return _presentQueue._fences[_procVAL->_currentFrame];
+	}
 
-VAL_C_COMPATIBLE_BINDING void ARG_BLOCK_DESTROY(struct ARG_BLOCK* block);
+	inline queueManager& window::getPresentQueue() {
+		return _presentQueue;
+	}
 
-#endif // !VAL_ARG_BLOCK_H
+	inline uint32_t window::getHeight() {
+		return _swapChainExtent.height;
+	}
+	
+	inline uint32_t window::getWidth() {
+		return _swapChainExtent.width;
+	}
+
+	inline VkExtent2D window::getSize() {
+		return { _swapChainExtent.width, _swapChainExtent.height };
+	}
+
+	inline VkRect2D window::getSizeAsRect2D() {
+		return { 0,0, _swapChainExtent.width, _swapChainExtent.height };
+	}
+
+	inline bool window::shouldClose() {
+		return glfwWindowShouldClose(_window);
+	}
+}
+
+#endif

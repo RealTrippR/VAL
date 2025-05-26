@@ -33,6 +33,9 @@
     <ClInclude Include="experimental-features\renderGraph_Draft.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
+    <ClInclude Include="experimental-features\renderGraph_Draft__processed.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">

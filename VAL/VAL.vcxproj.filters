@@ -215,25 +215,13 @@
     <ClInclude Include="lib\system\windowProperties.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\renderGraph\DLL_Compiler.hpp">
-      <Filter>lib\renderGraph</Filter>
-    </ClInclude>
     <ClInclude Include="lib\VALreturnCode.h">
       <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\renderGraph\compileArgs.hpp">
-      <Filter>lib\renderGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\renderGraph\loadDLL.h">
-      <Filter>lib\renderGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\ext\hashmap.h">
-      <Filter>lib\ext</Filter>
     </ClInclude>
     <ClInclude Include="lib\classEnumBitOps.hpp">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="lib\renderGraph\compileEnums.hpp">
+    <ClInclude Include="lib\renderGraph\graphEnums.hpp">
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
     <ClInclude Include="lib\renderGraph\pass.hpp">
@@ -259,6 +247,30 @@
     </ClInclude>
     <ClInclude Include="lib\renderGraph\argBlock.h">
       <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\argHandleList.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\fixedBlock.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passContext.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\queueManager.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\window.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\gpu_vector.hpp">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp">
+      <Filter>lib\ext</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -358,23 +370,17 @@
     <ClCompile Include="src\renderGraph\renderGraph.cpp">
       <Filter>src\renderGraph</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderGraph\loadDLL.c">
-      <Filter>src\renderGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ext\hashmap.c">
-      <Filter>src\ext</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderGraph\DLL_Compiler.cpp">
-      <Filter>src\renderGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderGraph\compileEnums.cpp">
-      <Filter>src\renderGraph</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderGraph\passInfo.c">
       <Filter>src\renderGraph</Filter>
     </ClCompile>
     <ClCompile Include="src\ext\streql.c">
       <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\bakedCommandBuffer.c">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\argBlock.c">
+      <Filter>src\renderGraph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

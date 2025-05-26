@@ -15,56 +15,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_COMPILE_ENUMS_H
-#define VAL_COMPILE_ENUMS_H
-#include <string>
 
-namespace val {
-	enum COMPILE_RETURN_CODE {
-		COMPILE_SUCCESS,
-		COMPILE_FAILURE_SRC_FILE_INVALID,
-		COMPILE_FAILURE_UNSUPPORTED_COMPILER,
-		COMPILE_FAILURE_CMD_FAIL,
-		COMPILE_FAILURE_INVALID_CPP_VER
-	};
+#ifndef VAL_BAKED_CMD_BUFFER_H
+#define VAL_BAKED_CMD_BUFFER_H
 
-	enum CPP_STANDARD {
-		CPP_14,
-		CPP_17,
-		CPP_20,
-		CPP_23,
-		CPP_DRAFT,
-		INVALID_VER
-	};
+#include <vulkan/vulkan.h>
 
-	enum SUPPORTED_COMPILER {
-		MSVC,
-		GPLUSPLUS,
-		CLANG
-	};
-
-	enum OPTIMIZATION_LEVEL {
-		DISABLED,
-		O1,
-		O2,
-		Ox
-	};
-
-	enum COMMENT_TYPE {
-		NONE,
-		SINGLE_LINE,
-		MULTI_LINE
-	};
-
-
-	/*****************************************/
-	/* Function declarations */
-
-	const std::string CPP_StandardToString(const CPP_STANDARD& cppStd);
-
-
-
-	/*****************************************/
-}
-
-#endif // !VAL_COMPILE_ENUMS_H
+struct bakedCmdBuffer {
+	VkCommandBuffer buff;
+};
+#endif // !VAL_BAKED_CMD_BUFFER_h

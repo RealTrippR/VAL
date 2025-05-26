@@ -20,23 +20,27 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/C_compatibleBinding.h>
 #include <VAL/lib/renderGraph/argBlock.h>
+#include <VAL/lib/renderGraph/fixedBlock.h>
 #include <stdlib.h>
 
-enum PASS_FLAGS {
-	FIXED = 1
-};
 
 struct PASS_INFO {
-	enum PASS_FLAGS flags;
 	
 	struct ARG_BLOCK readBlock;
 	struct ARG_BLOCK writeBlock;
 	struct ARG_BLOCK readWriteBlock;
+	struct ARG_BLOCK inputBlock;
 
-	char* passName;
-	char* execSrc;
+	char* passName; // owned by PASS_INFO
+	char* execSrc; // owned by PASS_INFO
 	uint32_t execSrcLen;
+
+	uint16_t fixedBlockCount;
+
+	struct FIXED_BLOCK* fixedBlocks;
 };
+
+VAL_C_COMPATIBLE_BINDING char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t argIndex);
 
 VAL_C_COMPATIBLE_BINDING void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock);
 

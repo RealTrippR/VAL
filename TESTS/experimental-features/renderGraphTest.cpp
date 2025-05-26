@@ -2,6 +2,8 @@
 #include <string>
 #include <chrono>
 
+#define VAL_ENABLE_EXPIREMENTAL // for render graphs and gpu_vector
+
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
 
@@ -13,10 +15,7 @@ const bool enableValidationLayers = true;
 
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
-#include <VAL/lib/system/system_utils.hpp>
-#include <VAL/lib/system/UBO_Handle.hpp>
-#include <VAL/lib/graphics/shader.hpp>
-#include <VAL/lib/system/renderPass.hpp>
+#include <VAL/lib/ext/gpu_vector.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -27,8 +26,13 @@ const bool enableValidationLayers = true;
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
 
-#define VAL_ENABLE_EXPIREMENTAL
+#define VAL_RENDER_PASS_COMPILE_MODE
 #include <VAL/lib/renderGraph/renderGraph.hpp>
+#include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
+
+/************************************************/
+#include GRAPH_FILE(renderGraph_Draft);
+/************************************************/
 
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
@@ -37,7 +41,6 @@ struct uniformBufferObject {
 };
 
 const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-
 void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
 {
 	using namespace val;
@@ -142,33 +145,22 @@ int main()
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
-	const std::vector<res::vertex> vertices = {
+
+
+	gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
+	});
 
-	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
-
-	std::vector<uint32_t> indices = {
-		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), val::CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
-
+	gpu_vector<uint32_t> indices(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 
+		{0, 1, 2, 2, 3, 0 }
+	);
 
 	//////////////////////////////////////////////////////////////
 	proc.createDescriptorSets(&pipeline);
 	//////////////////////////////////////////////////////////////
-
-
-	// configure the render target, setting vertex buffers, scissors, area, etc
-	//val::renderTarget renderTarget;
-	//renderTarget.setFormat(imageFormat);
-	//renderTarget.setRenderArea(window.getSize());
-	//renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 
 	//// Note that simply setting the index and vertex buffers does not automatically update
 	//// them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
@@ -178,11 +170,66 @@ int main()
 	
 	RENDER_GRAPH renderGraph;
 	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
-	renderGraph.compile(MSVC, "test_graph.dll", "experimental-features");
 
+	int test = 5;
+	renderGraph.compile(filepath("experimental-features"));
+
+
+	PASS_CONTEXT passContext = {
+		proc,
+		window.getSizeAsRect2D(),
+		{ { 0.0f, 0.04f, 0.2f, 1.0f } } /*clear values*/
+	};
+
+	auto& graphicsQueue = proc._graphicsQueue;
+
+	VkCommandBuffer& cmd = graphicsQueue._commandBuffers[0];
+
+	BAKE_RENDER_PASS(DRAW_RECT, proc,
+		READ(vertices, indices)
+		INPUT(pipeline, window, cmd)
+	);
 
 	while (!window.shouldClose()) {
-		renderGraph.nextFrame();
+		auto& graphicsQueue = proc._graphicsQueue;
+		auto& presentQueue = window._presentQueue;
+		auto& currentFrame = proc._currentFrame;
+
+		glfwPollEvents();
+
+		VkCommandBuffer& cmd = graphicsQueue._commandBuffers[currentFrame];
+
+		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+
+
+
+
+		// Update view information, stored in a UBO
+		updateUniformBuffer(proc, uboHdl);
+
+		/* * * * * * * * * * * * * * * * * */
+
+		RESET_COMMAND_BUFFER(cmd);
+		BEGIN_COMMAND_BUFFER(cmd);
+
+		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd);
+
+		CALL_RENDER_PASS(DRAW_RECT, proc,
+			READ(vertices, indices)
+			INPUT(pipeline, window, cmd)
+		);
+
+		END_RENDER_PASS(cmd);
+
+		END_COMMAND_BUFFER(cmd);
+
+		/* * * * * * * * * * * * * * * * * */
+
+		graphicsQueue.submit(currentFrame, cmd, window.getPresentFence(), window.getPresentQueue());
+
+		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame)});
+
+		proc.nextFrame();
 	}
 
 #ifndef NDEBUG

@@ -15,20 +15,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_ARG_BLOCK_H
-#define VAL_ARG_BLOCK_H
+#ifndef VAL_COMPILE_ENUMS_H
+#define VAL_COMPILE_ENUMS_H
+#include <string>
 
-#include <VAL/lib/C_compatibleBinding.h>
-#include <stdint.h>
+namespace val {
+	enum COMMENT_TYPE {
+		NONE,
+		SINGLE_LINE,
+		MULTI_LINE
+	};
+}
 
-struct ARG_BLOCK {
-	// A contiguous block of memory, laid out like so: "arg1\0arg2\0";
-	char* args;
-	// The number of arguments in char* args.
-	uint16_t argCount;
-};
-
-
-VAL_C_COMPATIBLE_BINDING void ARG_BLOCK_DESTROY(struct ARG_BLOCK* block);
-
-#endif // !VAL_ARG_BLOCK_H
+#endif // !VAL_COMPILE_ENUMS_H

@@ -94,6 +94,7 @@ public:
 
     tiny_vector<t>& operator=(const tiny_vector<t>& other) {
         if (this != &other) {  // Prevent self-assignment
+            resize(other._size);
             for (size_type i = 0; i < other._size; ++i) {
                 _data[i] = other._data[i];
             }
@@ -101,7 +102,10 @@ public:
         return *this;
     }
 
-public:
+    void push_back(const t& val) {
+        resize(_size + 1);
+        back() = val;
+    }
 
     /**********************************************/
     /* iterators */
@@ -278,10 +282,14 @@ public:
 
     // getters
     t* data() {
-        return _data;
+        return (t*)_data;
     }
 
-    size_type size() {
+    bool empty() const {
+        return _size == 0;
+    }
+
+    size_type size() const {
         return _size;
     }
 
@@ -293,7 +301,7 @@ public:
         return *(_data + (_size - 1));
     }
 private:
-    const t& get(const size_type idx) {
+    const t& get(const size_type idx) const {
 #ifndef NDEBUG
         if (_size == 0u || idx > _size - 1) {
             throw std::out_of_range("BAD ACCESS: index exceeds vector size");

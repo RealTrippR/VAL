@@ -14,29 +14,15 @@ THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRI
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include <VAL/lib/renderGraph/compileEnums.hpp>
 
-namespace val {
-	const std::string CPP_StandardToString(const CPP_STANDARD& cppStd)
-	{
-		const std::string cpp14 = "c++14";
-		const std::string cpp17 = "c++17";
-		const std::string cpp20 = "c++20";
-		const std::string cpp23 = "c++23";
-		const std::string invalid = "invalid";
+#ifndef VAL_FIXED_BLOCK_H
+#define VAL_FIXED_BLOCK_H
 
-		switch (cppStd)
-		{
-		case CPP_14:
-			return cpp14;
-		case CPP_17:
-			return cpp17;
-		case CPP_20:
-			return cpp20;
-		case CPP_23:
-			return cpp23;
-		default:
-			return invalid;
-		};
-	}
-}
+#include <stdint.h>
+
+struct FIXED_BLOCK {
+	uint32_t srcOffset;
+	uint32_t srcLength;
+};
+
+#endif // !VAL_FIXED_BLOCK_H

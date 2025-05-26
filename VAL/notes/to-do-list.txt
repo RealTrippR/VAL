@@ -160,3 +160,5 @@ The Vulkan Abstraction Library is missing the following key features:
 [ ] Consider using: https://github.com/KhronosGroup/Vulkan-Hpp
 
 [ ] Consider purchasing https://www.oreilly.com/library/view/vulkantm-programming-guide/9780134464701/ch13.html
+
+[ ] Execution graphs? This is AMD specific and might not be very useful. (https://docs.vulkan.org/spec/latest/chapters/executiongraphs.html)

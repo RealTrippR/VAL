@@ -18,6 +18,21 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/renderGraph/passInfo.h>
 
 #include <stdio.h>
+char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t argIndex) {
+	uint32_t i = 0u;
+	uint32_t j = 0u;
+	while (i < argblock->argCount) {
+		if (j == 0 || argblock->args[j] == '\0') {
+			if (argblock->args[j] == '\0') { j++; }
+			if (i == argIndex) {
+				return argblock->args + j;
+			}
+			i++;
+		}
+		++j;
+	}
+	return NULL;
+}
 
 void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
 	printf("-- ARG BLOCK: %h --\n", argblock);
@@ -25,7 +40,7 @@ void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
 	uint32_t i = 0u;
 	uint32_t j = 0u;
 	while (i < argblock->argCount) {
-		if (j == 0 || argblock->args[j]=='\0') {
+		if (j == 0 || argblock->args[j] == '\0') {
 			if (argblock->args[j] == '\0') { j++; }
 			printf("| %s |\n", argblock->args+j);
 			i++;
@@ -36,14 +51,15 @@ void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
 }
 
 void PASS_INFO_CLEANUP(struct PASS_INFO* pass) {
-	if (pass->readBlock.args) {
-		free(pass->readBlock.args);
-	}
-	if (pass->writeBlock.args) {
-		free(pass->writeBlock.args);
-	}
-	if (pass->readWriteBlock.args) {
-		free(pass->readWriteBlock.args);
+	ARG_BLOCK_DESTROY(&pass->readBlock);
+	ARG_BLOCK_DESTROY(&pass->writeBlock);
+	ARG_BLOCK_DESTROY(&pass->readWriteBlock);
+	ARG_BLOCK_DESTROY(&pass->inputBlock);
+
+	if (pass->fixedBlocks) {
+		free(pass->fixedBlocks);
+		pass->fixedBlocks = NULL;
+		pass->fixedBlockCount = NULL;
 	}
 
 	if (pass->passName) {

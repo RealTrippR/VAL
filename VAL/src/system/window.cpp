@@ -1,4 +1,4 @@
-#include <VAL/lib/system/window.hpp>
+#include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
 	void window::setWindowHandleGLFW(GLFWwindow* window) {
@@ -252,9 +252,5 @@ namespace val {
 		vkResetFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame]);
 		VkFramebuffer& framebuffer = getSwapchainFramebuffer(imageFormat); // gets the swapchain framebuffer to be rendered to
 		return framebuffer;
-	}
-
-	VkFence window::getPresentFence() {
-		return _presentQueue._fences[_procVAL->_currentFrame];
 	}
 }

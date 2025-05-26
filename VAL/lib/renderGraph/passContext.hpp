@@ -15,20 +15,17 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_ARG_BLOCK_H
-#define VAL_ARG_BLOCK_H
+#ifndef VAL_PASS_CONTEXT_HPP
+#define VAL_PASS_CONTEXT_HPP
 
-#include <VAL/lib/C_compatibleBinding.h>
-#include <stdint.h>
+#include <VAL/lib/system/system_utils.hpp>
 
-struct ARG_BLOCK {
-	// A contiguous block of memory, laid out like so: "arg1\0arg2\0";
-	char* args;
-	// The number of arguments in char* args.
-	uint16_t argCount;
-};
+namespace val {
+	struct PASS_CONTEXT {
+		VAL_PROC& proc;
+		VkRect2D renderArea;
+		tiny_vector<VkClearValue> clearValues = {};
+	};
+}
 
-
-VAL_C_COMPATIBLE_BINDING void ARG_BLOCK_DESTROY(struct ARG_BLOCK* block);
-
-#endif // !VAL_ARG_BLOCK_H
+#endif // !VAL_PASS_CONTEXT_HPP

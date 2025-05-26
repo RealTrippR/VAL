@@ -15,28 +15,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_LOAD_DLL_H
-#define VAL_LOAD_DLL_H
+#include <VAL/lib/renderGraph/argBlock.h>
 
-#include <VAL/lib/C_compatibleBinding.h>
+void ARG_BLOCK_DESTROY(struct ARG_BLOCK* block) {
+	if (NULL == block) 
+		return;
 
-typedef void(__cdecl* VAL_F_ADDRESS)(void);
+	block->argCount = 0;
 
-#include <VAL/lib/VALreturnCode.h>
-#include <stdbool.h>
-#include <stdint.h>
-
-// returns true if the loader is initialized, otherwise returns false
-VAL_C_COMPATIBLE_BINDING bool VAL_isDLL_loaderInitialized();
-
-VAL_C_COMPATIBLE_BINDING enum VAL_RETURN_CODE VAL_initDLL_loader();
-
-VAL_C_COMPATIBLE_BINDING enum VAL_RETURN_CODE VAL_cleanupDLL_loader();
-
-VAL_C_COMPATIBLE_BINDING VAL_F_ADDRESS VAL_loadDLLfunction(const char* DLL_file, const char* funcName);
-
-VAL_C_COMPATIBLE_BINDING void VAL_incDLLloaderRefCount();
-
-VAL_C_COMPATIBLE_BINDING void VAL_decDLLloaderRefCount();
-
-#endif // !VAL_LOAD_DLL_H
+	if (block->args) {
+		free(block->args);
+		block->args = NULL;
+	}
+}

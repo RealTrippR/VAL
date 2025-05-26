@@ -15,27 +15,39 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+
 #ifndef VAL_RENDER_GRAPH_PASS_HPP
 #define VAL_RENDER_GRAPH_PASS_HPP
 
-
+#include <VAL/lib/system/VAL_PROC.hpp>
+#include <VAL/lib/renderGraph/passContext.hpp>
+#include <VAL/lib/system/window.hpp>
 #include <VAL/lib/renderGraph/renderGraphBlock.h>
 #include <VAL/lib/system/renderTarget.hpp>
 #include <VAL/lib/renderGraph/passFunctions.hpp>
 
-#define PASS_BEGIN(NAME) void PASS_##NAME(
-#define PASS_END }
+#define PASS_BEGIN(NAME) void PASS_##NAME(val::VAL_PROC& V_PROC,
+#define PASS_END
 
-#define READ(...) __VA_ARGS__ ,
-#define WRITE(...) __VA_ARGS__ ,
-#define READ_WRITE(...) __VA_ARGS__ ,
-#define INPUT(...) __VA_ARGS__ ) {
+#define FIXED_BEGIN
+#define FIXED_END
+
+#define READ(...) __VA_ARGS__,
+#define WRITE(...) __VA_ARGS__,
+#define READ_WRITE(...) __VA_ARGS__,
+#define INPUT(...) __VA_ARGS__ 
 #define EXEC(v)
 
-namespace val {
-	class pass {
+#ifndef VAL_RENDER_PASS_COMPILE_MODE
 
-	};
-}
+#define CALL_RENDER_PASS(NAME, ...) pass_main##NAME(__VA_ARGS__)
+#define BAKE_RENDER_PASS(NAME, ...) pass_bake##NAME(__VA_ARGS__)
+
+#else
+
+#define CALL_RENDER_PASS(...)
+#define BAKE_RENDER_PASS(...)
+
+#endif // !VAL_RENDER_PASS_COMPILE_MODE
 
 #endif // !VAL_RG_PASS_HPP
