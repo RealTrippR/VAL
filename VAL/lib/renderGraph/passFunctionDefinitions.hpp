@@ -46,7 +46,7 @@ namespace val {
 		vkEndCommandBuffer(cmd);
 	}
 
-	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, graphicsPipelineCreateInfo& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd) 
+	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, graphicsPipelineCreateInfo& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType)
 	{
 
 		VkRenderPassBeginInfo renderPassBeginInfo{ 
@@ -58,7 +58,7 @@ namespace val {
 			passContext.clearValues.size(),
 			passContext.clearValues.data()
 		};
-		vkCmdBeginRenderPass(cmd, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(cmd, &renderPassBeginInfo, VkSubpassContents(beginType));
 	}
 
 	inline void END_RENDER_PASS(VkCommandBuffer& cmd) {

@@ -145,6 +145,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -201,7 +202,11 @@
   <ItemGroup>
     <ClInclude Include="lib\classEnumBitOps.hpp" />
     <ClInclude Include="lib\C_compatibleBinding.h" />
+    <ClInclude Include="lib\debugReporting\debugCallbacks.hpp" />
+    <ClInclude Include="lib\debugReporting\VAL_DebugCallbacks.h" />
+    <ClInclude Include="lib\debugReporting\VAL_DebugIntercept.h" />
     <ClInclude Include="lib\ext\gpu_vector.hpp" />
+    <ClInclude Include="lib\ext\hashmap.h" />
     <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp" />
     <ClInclude Include="lib\ext\streql.h" />
     <ClInclude Include="lib\ext\tiny_vector.hpp" />
@@ -234,6 +239,7 @@
     <ClInclude Include="lib\renderGraph\passInfo.h" />
     <ClInclude Include="lib\renderGraph\renderGraph.hpp" />
     <ClInclude Include="lib\renderGraph\renderGraphBlock.h" />
+    <ClInclude Include="lib\renderGraph\renderPassBeginType.hpp" />
     <ClInclude Include="lib\system\buffer.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />
@@ -264,6 +270,9 @@
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
     <ClCompile Include="lib\system\physicalDeviceRequirements.cpp" />
+    <ClCompile Include="src\debugReporting\debugCallbacks.cpp" />
+    <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c" />
+    <ClCompile Include="src\ext\hashmap.c" />
     <ClCompile Include="src\ext\streql.c" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />

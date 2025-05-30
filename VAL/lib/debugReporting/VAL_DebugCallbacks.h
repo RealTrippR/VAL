@@ -15,36 +15,34 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_PASS_INFO_H
-#define VAL_PASS_INFO_H
+#ifndef VAL_DEBUG_CALLBACKS_H
+#define VAL_DEBUG_CALLBACKS_H
 
 #include <VAL/lib/C_compatibleBinding.h>
-#include <VAL/lib/renderGraph/argBlock.h>
-#include <VAL/lib/renderGraph/fixedBlock.h>
-#include <stdlib.h>
+#include <stdbool.h>
 
+#include <VAL/lib/debugReporting/VAL_DebugIntercept.h>
 
-struct PASS_INFO {
-	
-	struct ARG_BLOCK readBlock;
-	struct ARG_BLOCK writeBlock;
-	struct ARG_BLOCK readWriteBlock;
-	struct ARG_BLOCK inputBlock;
+VAL_C_COMPATIBLE_BINDING void VAL_INITIALIZE_DEBUG_CALLBACK_SYSTEM();
 
-	char* passName; // owned by PASS_INFO
-	char* execSrc; // owned by PASS_INFO
-	uint32_t execSrcLen;
+VAL_C_COMPATIBLE_BINDING void VAL_DESTROY_DEBUG_CALLBACK_SYSTEM();
 
-	uint16_t fixedBlockCount;
+VAL_C_COMPATIBLE_BINDING void VAL_NOTE_DEBUG_ADD_INTERCEPT(VAL_DEBUG_INTERCEPT intercept);
 
-	struct FIXED_BLOCK* fixedBlocks;
-};
+VAL_C_COMPATIBLE_BINDING void VAL_WARN_DEBUG_ADD_INTERCEPT(VAL_DEBUG_INTERCEPT intercept);
 
-// returns a reference to an argument at the given index.
-VAL_C_COMPATIBLE_BINDING char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t argIndex);
+VAL_C_COMPATIBLE_BINDING void VAL_ERROR_DEBUG_ADD_INTERCEPT(VAL_DEBUG_INTERCEPT intercept);
 
-VAL_C_COMPATIBLE_BINDING void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock);
+VAL_C_COMPATIBLE_BINDING void VAL_NOTE_DEBUG_REMOVE_INTERCEPT(VAL_DEBUG_INTERCEPT intercept);
 
-VAL_C_COMPATIBLE_BINDING void PASS_INFO_CLEANUP(struct PASS_INFO* pass);
+VAL_C_COMPATIBLE_BINDING void VAL_WARN_DEBUG_REMOVE_INTERCEPT(VAL_DEBUG_INTERCEPT intercept);
 
-#endif // !VAL_PASS_INFO_H
+VAL_C_COMPATIBLE_BINDING void VAL_ERROR_DEBUG_REMOVE_INTERCEPT(VAL_DEBUG_INTERCEPT intercept);
+
+VAL_C_COMPATIBLE_BINDING void VAL_NOTE_DEBUG_PRINT(const char* msg);
+
+VAL_C_COMPATIBLE_BINDING void VAL_WARN_DEBUG_PRINT(const char* msg);
+
+VAL_C_COMPATIBLE_BINDING void VAL_ERROR_DEBUG_PRINT(const char* msg);
+
+#endif // !VAL_DEBUG_CALLBACKS_H

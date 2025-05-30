@@ -63,7 +63,7 @@ namespace val {
 		~gpu_vector() {
 #ifndef NBDEUG
 			if (_memory) {
-				printf("VAL: ERROR: Gpu_vector at address %h has not been properly destroyed.\n", this);
+				val::dbg::printError("Gpu_vector at address %h has not been properly destroyed.\n", this);
 				throw std::runtime_error("VAL: ERROR: A gpu_vector has not been properly destroyed");
 			}
 #endif // !NBDEUG

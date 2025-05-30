@@ -32,7 +32,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <cstdarg>
 
 #include <VAL/lib/renderGraph/pass.hpp>
-
+#include <VAL/lib/renderGraph/renderPassBeginType.hpp>
 
 #define __CONCAT2__(a, b) a##b
 #define __CONCAT__(a, b) __CONCAT2__(a, b)
@@ -61,14 +61,14 @@ namespace val {
 
 		VAL_RETURN_CODE loadFromFile(const std::filesystem::path& srcPath);
 
-		VAL_RETURN_CODE compile(const filepath& compileToDir = "");
+		VAL_RETURN_CODE compile(const uint8_t framesInFlight, const filepath& compileToDir = "");
 
 	private:
 		void cleanup();
 
 		VAL_RETURN_CODE readPass(struct PASS_INFO* __passInfo__, char* passBegin, uint32_t* passStrLen, char** error);
 
-		VAL_RETURN_CODE preprocess(string* processed_src_out, char** errorMsg);
+		VAL_RETURN_CODE preprocess(string* processed_src_out, char** errorMsg, const uint8_t framesInFlight);
 
 	private:
 		char* preprocessFileName = NULL;

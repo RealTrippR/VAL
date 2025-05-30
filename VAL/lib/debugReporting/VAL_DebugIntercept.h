@@ -15,36 +15,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_PASS_INFO_H
-#define VAL_PASS_INFO_H
 
-#include <VAL/lib/C_compatibleBinding.h>
-#include <VAL/lib/renderGraph/argBlock.h>
-#include <VAL/lib/renderGraph/fixedBlock.h>
-#include <stdlib.h>
+#ifndef VAL_DEBUG_INTERCEPT_H
 
+typedef void(*VAL_DEBUG_INTERCEPT)(const char* msg, bool* blockDefaultPrint); // https://www.geeksforgeeks.org/how-to-create-typedef-for-function-pointer-in-c/
 
-struct PASS_INFO {
-	
-	struct ARG_BLOCK readBlock;
-	struct ARG_BLOCK writeBlock;
-	struct ARG_BLOCK readWriteBlock;
-	struct ARG_BLOCK inputBlock;
-
-	char* passName; // owned by PASS_INFO
-	char* execSrc; // owned by PASS_INFO
-	uint32_t execSrcLen;
-
-	uint16_t fixedBlockCount;
-
-	struct FIXED_BLOCK* fixedBlocks;
-};
-
-// returns a reference to an argument at the given index.
-VAL_C_COMPATIBLE_BINDING char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t argIndex);
-
-VAL_C_COMPATIBLE_BINDING void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock);
-
-VAL_C_COMPATIBLE_BINDING void PASS_INFO_CLEANUP(struct PASS_INFO* pass);
-
-#endif // !VAL_PASS_INFO_H
+#endif // !VAL_DEBUG_INTERCEPT_H

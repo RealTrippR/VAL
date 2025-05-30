@@ -66,4 +66,5 @@ inline uint64_t roundToNextPowerOfTwo(uint64_t x) {
 	return x;
 }
 
+
 #endif // !ROUND_TO_NEXT_POWER_OF_TWO

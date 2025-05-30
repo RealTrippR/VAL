@@ -29,8 +29,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define PASS_BEGIN(NAME) void PASS_##NAME(val::VAL_PROC& V_PROC,
 #define PASS_END
 
-#define FIXED_BEGIN
-#define FIXED_END
+#define FIXED_BEGIN(...) { __VA_ARGS__ 
+#define FIXED_END }
 
 #define READ(...) __VA_ARGS__,
 #define WRITE(...) __VA_ARGS__,

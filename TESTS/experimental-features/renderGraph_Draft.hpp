@@ -18,20 +18,19 @@ READ(gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices)
 //READ_WRITE(NULL)
 INPUT(graphicsPipelineCreateInfo& pipeline, window& wind, VkCommandBuffer& cmd)
 ){
-	/*Consider adding a FIXED flag to "bake" the command buffers, 
-	that way they won't have to be redone every frame,
-	but can not be changed at runtime*/
-	
-	// a fixed subroutine
-	FIXED_BEGIN // https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
+	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
+	FIXED_BEGIN(
+		VkRenderPass pass;
+		uint32_t subpassIndex;
+	)		
 	{
+		static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
 		setPipeline(pipeline, V_PROC, cmd);
 
 		setVertexBuffer(vertices, cmd);
 		setIndexBuffer(indices, cmd);
 
 
-		static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
 		setViewport(viewport, cmd);
 		setScissor(wind.getSize(), cmd);
 

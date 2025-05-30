@@ -18,11 +18,15 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef VAL_FIXED_BLOCK_H
 #define VAL_FIXED_BLOCK_H
 
+#include <VAL/lib/C_compatibleBinding.h>
 #include <stdint.h>
 
 struct FIXED_BLOCK {
 	uint32_t srcOffset;
 	uint32_t srcLength;
+
+	char renderPassArgName[256];
+	char subpassArgName[256];
 };
 
 #endif // !VAL_FIXED_BLOCK_H

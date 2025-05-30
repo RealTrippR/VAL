@@ -20,6 +20,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/renderGraph/passContext.hpp>
+#include <VAL/lib/renderGraph/renderPassBeginType.hpp>
 
 namespace val {
 
@@ -29,7 +30,7 @@ namespace val {
 
 	inline void END_COMMAND_BUFFER(VkCommandBuffer& cmd);
 
-	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, graphicsPipelineCreateInfo& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd);
+	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, graphicsPipelineCreateInfo& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType);
 
 	inline void END_RENDER_PASS(VkCommandBuffer& cmd);
 

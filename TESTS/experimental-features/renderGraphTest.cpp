@@ -26,7 +26,7 @@ const bool enableValidationLayers = true;
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
 
-#define VAL_RENDER_PASS_COMPILE_MODE
+//#define VAL_RENDER_PASS_COMPILE_MODE
 #include <VAL/lib/renderGraph/renderGraph.hpp>
 #include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
 
@@ -80,24 +80,44 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
-	using namespace val;
-	static colorAttachment colorAttach;
+
+val::subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	namespace v = val;
+	static v::colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(CLEAR);
-	colorAttach.setStoreOperation(STORE);
+	colorAttach.setLoadOperation(v::CLEAR);
+	colorAttach.setStoreOperation(v::STORE);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	static subpass subpass(renderPassMngr, GRAPHICS);
+	static v::subpass subpass(renderPassMngr, v::GRAPHICS);
 	subpass.bindAttachment(&colorAttach);
+	return subpass;
 }
 
+void intercept(const char* msg, bool* block) {
+	printf("bar, bar: ");
+	printf(msg);
+	printf("\n");
+	*block = false;
+}
+
+
+void interceptNo2(const char* msg, bool* block) {
+	printf("foo, foo");
+	printf(msg);
+	printf("\n");
+
+	*block = false;
+}
 int main()
 {
 #ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	//_CrtSetBreakAlloc(1216);
+	
+	val::dbg::addNoteIntercept(intercept);
+	val::dbg::addNoteIntercept(interceptNo2);
+
 	using namespace val;
 
 	VAL_PROC proc;
@@ -137,15 +157,17 @@ int main()
 	pipeline.shaders = { &vertShader,&fragShader };
 	setGraphicsPipelineInfo(pipeline);
 
+	/* * * * * * * * * * * * * * * * * * * */
+	// configure render pass and subpass
 	val::renderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat);
+	val::subpass subpass = setRenderPass(renderPassMngr, imageFormat);
+	/* * * * * * * * * * * * * * * * * * * */
+
 	pipeline.renderPass = &renderPassMngr;
 
 	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
-
-
 
 	gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
@@ -171,8 +193,7 @@ int main()
 	RENDER_GRAPH renderGraph;
 	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
 
-	int test = 5;
-	renderGraph.compile(filepath("experimental-features"));
+	renderGraph.compile(proc._MAX_FRAMES_IN_FLIGHT,filepath("experimental-features"));
 
 
 	PASS_CONTEXT passContext = {
@@ -183,12 +204,15 @@ int main()
 
 	auto& graphicsQueue = proc._graphicsQueue;
 
-	VkCommandBuffer& cmd = graphicsQueue._commandBuffers[0];
 
+	VkCommandBuffer cmd;
 	BAKE_RENDER_PASS(DRAW_RECT, proc,
 		READ(vertices, indices)
-		INPUT(pipeline, window, cmd)
+		INPUT(pipeline, window, cmd),
+		pipeline.getVkRenderPass(),
+		0
 	);
+
 
 	while (!window.shouldClose()) {
 		auto& graphicsQueue = proc._graphicsQueue;
@@ -212,7 +236,7 @@ int main()
 		RESET_COMMAND_BUFFER(cmd);
 		BEGIN_COMMAND_BUFFER(cmd);
 
-		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd);
+		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd, FIXED);
 
 		CALL_RENDER_PASS(DRAW_RECT, proc,
 			READ(vertices, indices)

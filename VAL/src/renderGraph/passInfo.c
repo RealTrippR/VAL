@@ -35,7 +35,7 @@ char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t ar
 }
 
 void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
-	printf("-- ARG BLOCK: %h --\n", argblock);
+	printf("-- ARG BLOCK @ %p: --\n", argblock);
 	printf("Args:\n");
 	uint32_t i = 0u;
 	uint32_t j = 0u;
@@ -59,7 +59,7 @@ void PASS_INFO_CLEANUP(struct PASS_INFO* pass) {
 	if (pass->fixedBlocks) {
 		free(pass->fixedBlocks);
 		pass->fixedBlocks = NULL;
-		pass->fixedBlockCount = NULL;
+		pass->fixedBlockCount = 0;
 	}
 
 	if (pass->passName) {

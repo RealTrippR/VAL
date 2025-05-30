@@ -14,6 +14,7 @@ THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRI
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
 // EXPERIMENTAL
 #define VAL_ENABLE_EXPIREMENTAL
 
@@ -38,7 +39,19 @@ typedef const char* KEYWORD;
 
 namespace val {
 
-	void removeTrailingComma(string& processedSrc) {
+	bool isCharBlank(const char c) {
+		if (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\0') {
+			return true;
+		}
+		return false;
+	}
+
+	string getCurrentFrameIndexArgName() {
+		return "__current_frame_index__";
+	}
+
+	void removeTrailingComma(string& processedSrc) 
+	{
 		// Start from the end and skip whitespace
 		size_t i = processedSrc.size();
 		while (i > 0 && std::isspace(static_cast<unsigned char>(processedSrc[i - 1]))) {
@@ -51,7 +64,8 @@ namespace val {
 		}
 	}
 
-	string argBlockToString(const ARG_BLOCK& argblock) {
+	string argBlockToString(const ARG_BLOCK& argblock) 
+	                 {
 		string str;
 		for (uint16_t i = 0; i < argblock.argCount; ++i) {
 			const string tmp = string(GET_ARG_FROM_ARG_BLOCK(&argblock, i));
@@ -122,14 +136,38 @@ namespace val {
 			return false;
 		}
 
+		if (*(matchBegin - 1) == '\t') {
+			return false;
+		}
+
+		if (*(matchBegin - 1) == '\r') {
+			return false;
+		}
+
 		if (*(matchBegin - 1) == '\n') {
 			return false;
 		}
 
 		return true;
 	}
+	
+	bool discardMatchIfNoLeadingBlankAndNoTrailingBlank(const char* searchBegin, const char* matchBegin, const char* matchTarget) {
+		bool leadDisc = discardMatchIfNoLeadingSpaceOrNewline(searchBegin, matchBegin, matchTarget);
+		bool trailDisc = false;
 
+		if (isCharBlank(*(matchBegin + strlen(matchTarget))) == false) {
+			trailDisc = true;
+		}
+		return leadDisc || trailDisc;
+	}
 
+	// ignores newlines, tabs, and spaces
+	bool ignoreCharactersNewlineTabAndSpace(const char c, uint32_t i) {
+		if (c == '\n' || c == '\t' || c == ' ') {
+			return true;
+		}
+		return false;
+	}
 
 	// searches for the first match of the target string as it scans backwards from beforeStr until it reaches cstrBegin.
 	// if a match is found, it will return the distance from beforeStr to cstr begin,
@@ -200,12 +238,22 @@ namespace val {
 	//												char* matchBegin, <- this is where the beginning of the match is
 	//												char* targ) <- this is the match target
 	char* findNextMatch(const char* cstr, const char* targ, const bool ignoreCommented = true,
-		uint32_t limit = UINT32_MAX, bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL) {
+		uint32_t limit = UINT32_MAX, bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL,
+		bool (*ignoreCharacterConditional)(const char /*char*/, const uint32_t /*char index*/) = NULL)
+	{
 		const uint32_t targlen = strlen(targ);
 		COMMENT_TYPE comment = NONE;
-		for (uint16_t i = 0; i < limit; ++i) {
+		for (uint32_t i = 0; i < limit; ++i) {
 			if (cstr[i] == '\0') {
 				return NULL;
+			}
+
+			if (ignoreCharacterConditional) {
+				bool ignoreChar = ignoreCharacterConditional(cstr[i], i);
+				if (ignoreChar)
+				{
+					continue;
+				}
 			}
 
 			if (ignoreCommented) {
@@ -239,61 +287,40 @@ namespace val {
 	// except it will return a pointer to the character just after
 	// the of the next occurance of the target string.
 	char* findNextMatchAdditive(const char* cstr, const char* targ, uint32_t limit = UINT32_MAX, const bool ignoreCommented = true,
-		bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL) {
-		char* nextMatch = findNextMatch(cstr, targ, ignoreCommented, limit, discardMatchConditional);
+		bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL,
+		bool (*ignoreCharacterConditional)(const char /*char*/, const uint32_t /*char index*/) = NULL)
+	{
+		char* nextMatch = findNextMatch(cstr, targ, ignoreCommented, limit, discardMatchConditional, ignoreCharacterConditional);
 		if (nextMatch) {
 			return nextMatch + strlen(targ);
 		}
 		return NULL;
 	}
 
-	int64_t getClosingFigureOffset(const char* cstr, const char openingFig, const char closingFig, const bool ignoreComments = true) {
+	int64_t getClosingFigureOffset(const char* cstr, const char openingFig, const char closingFig, const bool ignoreCommented = true) {
 		uint32_t nestCount = 0u;
 		uint32_t i = 0;
+		COMMENT_TYPE comment = NONE;
 		while (true)
 		{
-			if (cstr[i] == '\0') { 
+			if (cstr[i] == '\0') {
 				return -1;
 			}
 
+			if (ignoreCommented) {
+				handleComment(&comment, cstr + i);
+			}
 
-			if (ignoreComments && cstr[i] == '/' && cstr[i + 1] == '/') {
-				while (true) // for single line comments, continue until the next line
-				{
-					if (cstr[i] == '\0') {
-						return -1;
-					}
-
-					if (cstr[i] == '\n') {
-						break;
-					}
-					i++;
+			if (comment == NONE) {
+				if (cstr[i] == openingFig) {
+					nestCount++;
 				}
-				continue;
-			}
-			else if (ignoreComments && cstr[i] == '/' && cstr[i + 1] == '*') {
-				while (true) // for multiline comments, continue until closing */
+				else if (cstr[i] == closingFig)
 				{
-					if (cstr[i] == '\0') {
-						return -1; 
+					nestCount--;
+					if (nestCount == 0) {
+						return i;
 					}
-
-					if (cstr[i] == '*' && cstr[i + 1] == '/') {
-						break;
-					}
-					i++;
-				}
-				continue;
-			}
-
-			if (cstr[i] == openingFig) {
-				nestCount++;
-			}
-			else if (cstr[i] == closingFig)
-			{
-				nestCount--;
-				if (nestCount == 0) {
-					return i;
 				}
 			}
 
@@ -309,7 +336,11 @@ namespace val {
 		if (cstr[0] != '(') {
 			throw std::exception("The cstr of getClosingParenthesis must be a pointer to '('");
 		}
-		return cstr + getClosingFigureOffset(cstr, '(', ')', ignoreComments);
+		int64_t tmp = getClosingFigureOffset(cstr, '(', ')', ignoreComments);
+		if (tmp < 0) {
+			return NULL;
+		}
+		return cstr + tmp;
 	}
 
 	// returns a pointer to the closing bracket. '}'
@@ -319,7 +350,11 @@ namespace val {
 		if (cstr[0] != '{') {
 			throw std::exception("The cstr of getClosingParenthesis must be a pointer to '{'");
 		}
-		return cstr + getClosingFigureOffset(cstr, '{', '}', ignoreComments);
+		int64_t tmp = getClosingFigureOffset(cstr, '{', '}', ignoreComments);
+		if (tmp < 0) {
+			return NULL;
+		}
+		return cstr + tmp;
 	}
 
 
@@ -424,7 +459,7 @@ namespace val {
 	// note that the argsOut is a contigious block of memory, like so:
 	// argsOuts = "arg1\0arg2\0"
 	// the null terminators tell you how to seperate this data.
-	void readArgs(const char* str, struct ARG_BLOCK* argBlock, const uint32_t charLimit) {
+	void readArgs(const char* str, struct ARG_BLOCK* argBlock, const uint32_t charLimit, char seperatingCharacter = ',') {
 		// reads arguments seperated by ,
 		// note that double commas ',,' will be treated as ','. This aligns with C standards.
 
@@ -446,7 +481,7 @@ namespace val {
 		for (uint32_t i = 0; i < charLimit; i++) {
 
 			if (str[i] == '\0') {
-				printf("VAL: WARNING: Stopped before char limit for readArgs!\n");
+				dbg::printWarning("Stopped before char limit for readArgs");
 				return;
 			}
 
@@ -478,7 +513,7 @@ namespace val {
 
 				// ignore any leading or trailing spaces, but mind that spacing in-between words are important and must be kept
 				const char tmp = str[i];
-				if (str[i] == ',' || i == charLimit - 1) {
+				if (str[i] == seperatingCharacter || i == charLimit - 1) {
 
 					if (argclen > 0) {
 
@@ -486,7 +521,7 @@ namespace val {
 						// wind back argclen until they 
 						// are not considered as part of the arg
 						uint16_t j = 0;
-						while (str[i - j] == ' ') {
+						while (isCharBlank(str[i - j])) {
 							j++;
 							argclen--;
 						}
@@ -511,7 +546,9 @@ namespace val {
 
 					i++; //increment i to after ','
 				}
-				if (!(str[i] == ' ' && argclen == 0)/*ignore leading spaces*/) {
+				// note that blank chars, like spaces, are allowed inside an argument,
+				// but any leading blank characters must be ignoreed
+				if (!(isCharBlank(str[i]) && argclen==0)) {
 					argclen++;
 				}
 			}
@@ -548,12 +585,12 @@ namespace val {
 			srcContentLen = f_len;
 
 			if (fclose(fptr) == EOF) {
-				printf("VAL: ERROR: Failed to close render graph source file\n");
+				dbg::printError("Failed to close render graph source file");
 				retCode = VAL_FAILURE;
 			}
 		}
 		else {
-			printf("VAL: ERROR: Failed to load render graph source file %s.\n", srcFileName.c_str());
+			dbg::printError("Failed to load render graph source file %s", srcFileName.c_str());
 			retCode = VAL_FAILURE;
 		}
 
@@ -562,11 +599,10 @@ namespace val {
 
 
 
-	VAL_RETURN_CODE RENDER_GRAPH::compile(const filepath& compileToDir) {
+	VAL_RETURN_CODE RENDER_GRAPH::compile(const uint8_t framesInFlight, const filepath& compileToDir) {
 
 		if (strlen(srcFileContents)==0) {
-			printf("VAL: ERROR: Failed to compile render graph, the src file has not been loaded. Perhaps you forgot to call loadFromFile?\n");
-
+			dbg::printError("Failed to compile render graph, the src file has not been loaded. Perhaps you forgot to call loadFromFile?");
 			return VAL_FAILURE;
 		}
 
@@ -574,7 +610,7 @@ namespace val {
 
 		char* errorMsg;
 		string processed_src;
-		const VAL_RETURN_CODE preprocess_res = preprocess(&processed_src, &errorMsg);
+		const VAL_RETURN_CODE preprocess_res = preprocess(&processed_src, &errorMsg, framesInFlight);
 		if (preprocess_res == VAL_FAILURE) {
 			printf("Failed to compile render pass: %s\n", errorMsg);
 			cleanup();
@@ -604,7 +640,7 @@ namespace val {
 				if (processedSrcFptr) {
 					fclose(processedSrcFptr);
 				}
-				printf("VAL:ERROR: Failed to open processed header file for writing, this file already exists or is locked! %s\n", processedFileName.c_str());
+				dbg::printError("Failed to open processed header file for writing, this file already exists or is locked!% s\n", processedFileName.c_str());
 				return VAL_FAILURE;
 			}
 
@@ -637,11 +673,12 @@ namespace val {
 		}
 	}
 
-	VAL_RETURN_CODE RENDER_GRAPH::readPass(struct PASS_INFO* __passInfo__, char* passBegin, uint32_t* passStrLen, char** __error__) {
-		const char* error = *(__error__);
+	VAL_RETURN_CODE RENDER_GRAPH::readPass(struct PASS_INFO* __passInfo__,
+		char* passBegin, uint32_t* passStrLen, char** error)
+	{
 #ifndef NDEBUG
 		if (!__passInfo__ || !passBegin) {
-			error = "Failed to read pass, missing arguments!";
+			*error = (char*)"Failed to read pass, missing arguments!";
 			return VAL_FAILURE;
 		}
 #endif // !NDEBUG
@@ -657,12 +694,12 @@ namespace val {
 
 			const char* nameOpeningParen = findNextMatch(cur, "(");
 			if (nameOpeningParen == NULL) {
-				error = "Name opening parenthesis '(' is missing";
+				*error = (char*)"Name opening parenthesis '(' is missing";
 				return VAL_FAILURE;
 			}
 			const char* nameClosingBracket = getClosingParenthesis(nameOpeningParen);
 			if (nameClosingBracket == NULL) {
-				error = "Name closing parenthesis ')' is missing";
+				*error = (char*)"Name closing parenthesis ')' is missing";
 				return VAL_FAILURE;
 			}
 			uint8_t passNameLen = nameClosingBracket - nameOpeningParen - 1;
@@ -670,7 +707,7 @@ namespace val {
 			// alloc pass name
 			passInfo.passName = (char*)realloc(passInfo.passName, passNameLen + 1);
 			if (passInfo.passName == NULL) {
-				error = "Out of memory for pass name!";
+				*error = (char*)"Out of memory for pass name!";
 				return VAL_FAILURE;
 			}
 			
@@ -693,7 +730,7 @@ namespace val {
 				// search for closing ')'
 				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
 				if (argsEndParenthesis == NULL) {
-					error = "Closing ')' is missing";
+					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
 				}
 
@@ -717,7 +754,7 @@ namespace val {
 				// search for closing ')'
 				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
 				if (argsEndParenthesis == NULL) {
-					error = "Closing ')' is missing";
+					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
 				}
 
@@ -740,7 +777,7 @@ namespace val {
 				// search for closing ')'
 				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
 				if (argsEndParenthesis == NULL) {
-					error = "Closing ')' is missing";
+					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
 				}
 
@@ -760,7 +797,7 @@ namespace val {
 				// search for closing ')'
 				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
 				if (argsEndParenthesis == NULL) {
-					error = "Closing ')' is missing";
+					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
 				}
 
@@ -775,9 +812,9 @@ namespace val {
 		KEYWORD passEnd = NULL;
 		// check for end
 		{
-			passEnd = findNextMatch(cur, PASS_END_KEYWORD);
+			passEnd = findNextMatch(cur, PASS_END_KEYWORD, true, UINT32_MAX, discardMatchIfNoLeadingSpaceOrNewline, NULL);
 			if (passEnd == NULL) {
-				error = "PASS_BEGIN is missing END_PASS";
+				*error = (char*)"PASS_BEGIN is missing END_PASS";
 				return VAL_FAILURE;
 			}
 
@@ -789,11 +826,12 @@ namespace val {
 
 		// the exec src opening bracket '{' should be directly after the last keyword.
 		if (!execBegin) {
-			error = "Failed to find the beginning of the pass exec src";
+			*error = (char*)"Failed to find the beginning of the pass exec src";
 			return VAL_FAILURE;
 		}
 		const char* execBeginBracket = execBegin - 1;
 
+		///////////////////////////////////////////////////////////////////////
 		// get fixed subroutines
 		{
 			char* cur = passBegin;
@@ -802,20 +840,43 @@ namespace val {
 					break;
 				}
 				uint32_t distToEnd = passEnd - cur;
-				const char* fixedBegin = findNextMatchAdditive(cur, FIXED_BEGIN_KEYWORD, distToEnd);
+				const char* fixedBegin = findNextMatchAdditive(cur, FIXED_BEGIN_KEYWORD, distToEnd, true, discardMatchIfNoLeadingSpaceOrNewline);
 				if (!fixedBegin) {
 					break; // no more fixed passes
 				}
 
+				const char* fixedArgBeginParen = findNextMatch(fixedBegin, "(");
+				if (NULL == fixedArgBeginParen) {
+					*error = (char*)"Failed to parse fixed subroutine: missing '(' of arg-begin";
+					return VAL_FAILURE;
+				}
+				const char* fixedArgEndParen = getClosingParenthesis(fixedArgBeginParen);
+				
+				if (NULL == fixedArgEndParen) {
+					*error = (char*)"'(' is missing respective ')'";
+					return VAL_FAILURE;
+				}
+				
+				// read fixed arguments
+
+				ARG_BLOCK fixedArgs{};
+				readArgs(fixedArgBeginParen+1, &fixedArgs, fixedArgEndParen - fixedArgBeginParen - 2, ';');
+
+				// read fixed source
+				const char* fixedSrcBegin = fixedArgEndParen + 1;
+				if (*fixedSrcBegin == '\0');
+
 				char* fixedEnd = findNextMatch(cur, FIXED_END_KEYWORD, distToEnd);
 				if (!fixedEnd)
-				{error = "FIXED_BEGIN is missing FIXED_END";
-				return VAL_FAILURE;}
+				{
+					*error = (char*)"FIXED_BEGIN is missing FIXED_END";
+					return VAL_FAILURE;
+				}
 				fixedEnd -= 1; //-1 because fixedEnd points to the 'F' in FIXED_NED
 
 				cur = (char*)fixedEnd;
 
-				const uint64_t fixedSubroutineLength = fixedEnd - fixedBegin;
+				const uint64_t fixedSubroutineLength = fixedEnd - fixedSrcBegin;
 				
 				// add the block to passInfo
 				passInfo.fixedBlockCount++;
@@ -824,16 +885,41 @@ namespace val {
 					(FIXED_BLOCK*)realloc(passInfo.fixedBlocks, 
 						sizeof(tmpFixedBlocks[0]) * passInfo.fixedBlockCount);
 
+				FIXED_BLOCK* lastFixedBlock = NULL;
 				if (tmpFixedBlocks) {
 					passInfo.fixedBlocks = tmpFixedBlocks;
-					FIXED_BLOCK* lastFixedBlock = &(passInfo.fixedBlocks[passInfo.fixedBlockCount - 1]);
-					lastFixedBlock->srcOffset = fixedBegin - execBeginBracket;
+					lastFixedBlock = &(passInfo.fixedBlocks[passInfo.fixedBlockCount - 1]);
+
+					lastFixedBlock->srcOffset = fixedSrcBegin - execBeginBracket;
 					lastFixedBlock->srcLength = fixedSubroutineLength;
 				}
 				else {
 					passInfo.fixedBlockCount--;
-					error = "Out of system memory, could not allocate FIXED_BLOCKS information!";
+					*error = (char*)"Out of system memory, could not allocate FIXED_BLOCKS information!";
 					return VAL_FAILURE;
+				}
+
+				// add fixed args to fixed block info
+				if (fixedArgs.argCount != 2) {
+					ARG_BLOCK_DESTROY(&fixedArgs);
+					*error = (char*)"Invalid argument count for fixed subroutine: every fixed subroutine must have exactly 3 arguments,"
+						"a VkRenderPass, val::subpass, and a framesInFlight value, in that respective order.";
+					return VAL_FAILURE;
+				}
+				else {
+
+					const char* framebuffer_A_name = GET_ARG_FROM_ARG_BLOCK(&fixedArgs, 0);
+					strcpy_s(lastFixedBlock->renderPassArgName, sizeof(lastFixedBlock->renderPassArgName)-1, framebuffer_A_name);
+
+
+					const char* subpass_A_name = GET_ARG_FROM_ARG_BLOCK(&fixedArgs, 1);
+					strcpy_s(lastFixedBlock->subpassArgName, sizeof(lastFixedBlock->subpassArgName) - 1, subpass_A_name);
+
+					//const char* framesInFlight_A_name = GET_ARG_FROM_ARG_BLOCK(&fixedArgs, 2);
+					//strcpy_s(lastFixedBlock->framesInFlightArgName, sizeof(lastFixedBlock->framesInFlightArgName) - 1, framesInFlight_A_name);
+
+					ARG_BLOCK_DESTROY(&fixedArgs);
+
 				}
  			}
 		}
@@ -844,7 +930,7 @@ namespace val {
 			const char* execClosingBracket = getClosingBracket(execBeginBracket);
 
 			if (execBegin == NULL || execBeginBracket == NULL || execClosingBracket == NULL) {
-				error = "Error parsing pass exec, possible missing '(' or ')'";
+				*error = (char*)"Error parsing pass exec, possible missing '(' or ')'";
 				// failed to find exec src
 				return VAL_FAILURE;
 			}
@@ -862,7 +948,7 @@ namespace val {
 				passInfo.execSrc[passInfo.execSrcLen] = '\0';
 			}
 			else {
-				error = "Out of system memory, could not allocate memory for passInfo.execSrc";
+				*error = (char*)"Out of system memory, could not allocate memory for passInfo.execSrc";
 				return VAL_FAILURE;
 			}
 
@@ -894,7 +980,9 @@ namespace val {
 		buff[buffSize-1] = '\0';
 	}
 
-	VAL_RETURN_CODE processFixedPass(const PASS_INFO* passInfo, string& processedSrc, const char* fixedBlockSrc, uint32_t blockSrcLen, uint32_t fixedBlockIndex) {
+	VAL_RETURN_CODE processFixedPass(const PASS_INFO* passInfo, string& processedSrc, const char* fixedBlockSrc, uint32_t blockSrcLen, uint32_t fixedBlockIndex, uint8_t framesInFlight) {
+
+		FIXED_BLOCK& fixedBlock = passInfo->fixedBlocks[fixedBlockIndex];
 
 		const string passMainName = getPassMainFuncName(passInfo->passName);
 		// choose a name for the fixed cmd buffer.
@@ -903,7 +991,7 @@ namespace val {
 
 
 		char* passBeginPTR = findNextMatch(processedSrc.c_str(),
-			getPassMainFuncSig(passInfo->passName).c_str());
+			getPassMainFuncSig(passInfo->passName).c_str(), true, UINT32_MAX, discardMatchIfNoLeadingSpaceOrNewline);
 
 		if (passBeginPTR == NULL) return VAL_FAILURE;
 
@@ -911,7 +999,7 @@ namespace val {
 
 		// add command buffer just above pass_main
 		processedSrc.insert(passBeginOffset, ";\n");
-		processedSrc.insert(passBeginOffset, cmdBuffName);
+		processedSrc.insert(passBeginOffset, string(cmdBuffName) + string("[") + std::to_string(framesInFlight) + string("]"));
 		processedSrc.insert(passBeginOffset, "VkCommandBuffer ");
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -924,20 +1012,46 @@ namespace val {
 				"allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;\n"
 				"allocInfo.pNext = VK_NULL_HANDLE;\n"
 				"allocInfo.commandPool = V_PROC._commandPool;\n"
-				"allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;\n"
-				"allocInfo.commandBufferCount = 1;\n"
-				"if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo, &") + cmdBuffName + string(") != VK_SUCCESS) {"
-					"throw std::runtime_error(\"Failed to allocate command buffers!\");"
-			"}")
+				"allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;\n"));
+		processedSrc.append(
+			string("allocInfo.commandBufferCount = ") + std::to_string(framesInFlight) + string(";\n")
+		);
+		processedSrc.append(
+			string("if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo,") + cmdBuffName + string(") != VK_SUCCESS) {\n"
+					"throw std::runtime_error(\"Failed to allocate command buffers!\");\n"
+			"}\n")
 		);
 		processedSrc.append("\n}\n");
 
 
+		
+		processedSrc.append("for (uint8_t " + getCurrentFrameIndexArgName() + " = 0;"
+			+ getCurrentFrameIndexArgName() + " < " + std::to_string(framesInFlight) 
+			+ ";++" + getCurrentFrameIndexArgName() + ") { \n");
+
 		// begin command buffer recording
 		processedSrc.append(
 			"\n{\n"
-			"VkCommandBufferBeginInfo beginInfo{}; beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;\n"
-			"vkBeginCommandBuffer(" + string(cmdBuffName) + ", &beginInfo);"
+			"/* BEGIN RECORDING */\n"
+			"VkCommandBufferInheritanceInfo inheritanceInfo = {\n"
+			".sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO,\n"
+		);
+
+
+		size_t spacePos = string(fixedBlock.renderPassArgName).find(' ');
+		std::string renderpass_a_name = string(fixedBlock.renderPassArgName).substr(spacePos + 1);
+		spacePos = string(fixedBlock.subpassArgName).find(' ');
+		std::string subpass_a_name = string(fixedBlock.subpassArgName).substr(spacePos + 1);
+
+		processedSrc.append(string(".renderPass = ") + renderpass_a_name + string(",\n"));
+		processedSrc.append(string(".subpass = ") + subpass_a_name + "};\n");
+
+		processedSrc.append(
+			"VkCommandBufferBeginInfo beginInfo{};\n"
+			"beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;\n"
+			"beginInfo.pInheritanceInfo = &inheritanceInfo;\n"
+			"beginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;  // Or 0 if outside render pass\n\n"
+			"vkBeginCommandBuffer(" + string(cmdBuffName) + "[" + getCurrentFrameIndexArgName() + "]" + ", &beginInfo);\n"
 			"\n}\n"
 		);
 		// find render graph functions and replace any instances of command buffers with the fixed command buffer
@@ -951,7 +1065,15 @@ namespace val {
 			("setIndexBuffer(*,c)"),
 			("setIndexBuffer("),
 			("setVertexBuffer(*,c)"),
-			("setVertexBuffer(")
+			("setVertexBuffer("),
+			("drawInstanced(*,*,*,c)"),
+			("drawInstanced("),
+			("drawInstanced(*,*,c)"),
+			("drawInstanced("),
+			("drawIndexed(*,c)"),
+			("drawIndexed("),
+			("draw(*,c)"),
+			("draw(")
 		};
 
 	#ifndef NDEBUG
@@ -1024,7 +1146,7 @@ namespace val {
 				char* cmdArg = GET_ARG_FROM_ARG_BLOCK(&f_args, j);
 				if (j == expectedCmdArgIdx) {
 				// remove existing cmd buffer and replace it with fixed command buffer
-					processedSrc.append(cmdBuffName); 
+					processedSrc.append(string(cmdBuffName) + "[" + getCurrentFrameIndexArgName() + "]");
 				}
 				else {
 					processedSrc.append(cmdArg);
@@ -1046,9 +1168,13 @@ namespace val {
 		// end command buffer recording
 		processedSrc.append(
 			"\n{\n"
-			"vkEndCommandBuffer(" + string(cmdBuffName) + ");"
+			"/* END RECORDING */\n"
+			"vkEndCommandBuffer(" + string(cmdBuffName) + "[" + getCurrentFrameIndexArgName() + "]" + ");"
 			"\n}\n"
 		);
+
+		// close for loop
+		processedSrc.append("}\n");
 
 		// if there's anything left other, append it
 		if (!(cur >= (char*)fixedBlockSrc + blockSrcLen)) {
@@ -1059,12 +1185,12 @@ namespace val {
 		return VAL_SUCCESS;
 	}
 
-	VAL_RETURN_CODE RENDER_GRAPH::preprocess(string* processed_src_out, char** errorMsg)
+	VAL_RETURN_CODE RENDER_GRAPH::preprocess(string* processed_src_out, char** errorMsg, const uint8_t framesInFlight)
 	{
 		char* src = srcFileContents;
 
 		if (!src || !processed_src_out || !(*errorMsg)) {
-			printf("VAL: ERROR: Failed to preprocess file, invalid arguments!\n");
+			dbg::printError("Failed to preprocess file, invalid arguments!\n");
 			return VAL_FAILURE;
 		}
 
@@ -1130,8 +1256,7 @@ namespace val {
 				uint32_t jmpLen = 0u;
 				char* readerr = NULL;
 				if (VAL_FAILURE==readPass(curPassInfo, src + cur, &jmpLen, &readerr)) {
-					printf("VAL: Error preprocessing render pass: %s\n", readerr);
-
+					dbg::printError("Failed to preprocess render pass: %s", readerr);
 					goto bail;
 
 					return VAL_FAILURE;
@@ -1174,7 +1299,13 @@ namespace val {
 			// PASS MAIN //
 			const auto& passInfo = passInfos[i];
 			{
-				processedSrc.append(getPassMainFuncSig(passInfo.passName) + string("(val::VAL_PROC& V_PROC,"));
+				// main pass function begin
+				processedSrc.append(getPassMainFuncSig(passInfo.passName) + "(");
+
+
+				//////////////////////////////////////////////////////////////////////
+				// add V_PROC
+				processedSrc.append("val::VAL_PROC& V_PROC,");
 
 				//////////////////////////////////////////////////////////////////////
 				// add read args
@@ -1205,7 +1336,8 @@ namespace val {
 					// https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 					char cmdBuffName[128];
 					getCommandBufferName(cmdBuffName, sizeof(cmdBuffName), passInfo.passName, j);
-					processedSrc.append(string("\n\t\tvkCmdExecuteCommands(") + string("cmd,1, &(") + string(cmdBuffName) +  string("));\n"));
+					processedSrc.append(string("\n\t\tvkCmdExecuteCommands(") + string("cmd,1, &(") +
+						string(cmdBuffName) + "[V_PROC.getCurrentFrame()]" + string("));\n"));
 					//processFixedPass(&passInfo, processedSrc, fixedBlockSrc, fixedBlock.srcLength, i);
 
 					last_exec = passInfo.execSrc + fixedBlock.srcOffset + fixedBlock.srcLength;
@@ -1222,10 +1354,13 @@ namespace val {
 			// PASS BAKING //
 			{
 				if (passInfo.fixedBlockCount > 0) {
-					processedSrc.append(getPassBakeFuncSig(passInfo.passName) + string("("));
+					// pass bake function begin
+					processedSrc.append(getPassBakeFuncSig(passInfo.passName) + "(");
+
 					//////////////////////////////////////////////////////////////////////
 					// add V_PROC
 					processedSrc.append("val::VAL_PROC& V_PROC,");
+
 					// add read args
 					processedSrc.append(argBlockToString(passInfo.readBlock));
 					// add write args
@@ -1234,12 +1369,52 @@ namespace val {
 					processedSrc.append(argBlockToString(passInfo.readWriteBlock));
 					// add input args
 					processedSrc.append(argBlockToString(passInfo.inputBlock));
+
+					processedSrc.append(passInfo.fixedBlocks[0].renderPassArgName);
+					processedSrc.append(",");
+					processedSrc.append(passInfo.fixedBlocks[0].subpassArgName);
+					//processedSrc.append(",");
+					//processedSrc.append(passInfo.fixedBlocks[0].framesInFlightArgName);
+
 					//////////////////////////////////////////////////////////////////////
 
 					removeTrailingComma(processedSrc);
 
 					processedSrc.append(") {\n");
 
+
+					const auto filterExecGap = [](string& execGap) {
+						// remove any FIXED_BEGIN (args...) or FIXED_END Keywords 
+						// and replace them with '{' and '}' respectively
+
+						// remove FIXED_BEGIN
+						const char* beginKeywordStart = findNextMatch(execGap.c_str(), FIXED_BEGIN_KEYWORD, true, UINT32_MAX, discardMatchIfNoLeadingSpaceOrNewline, NULL);
+						if (beginKeywordStart != NULL) {
+							const char* pBegin = findNextMatch(beginKeywordStart + strlen(FIXED_BEGIN_KEYWORD), "(");
+							if (!pBegin) {
+								return false;
+							}
+							const char* pEnd = getClosingParenthesis(pBegin);
+							if (!pEnd) {
+								return false;
+							}
+							size_t start = beginKeywordStart - execGap.c_str();
+							size_t end = pEnd - execGap.c_str();
+
+							execGap.replace(start, end - start + 1, "{");
+						}
+
+						// remove FIXED_END
+						const char* endKeywordStart = findNextMatch(execGap.c_str(), FIXED_END_KEYWORD, true, UINT32_MAX, discardMatchIfNoLeadingSpaceOrNewline, NULL);
+						if (endKeywordStart) {
+							size_t start = endKeywordStart - execGap.c_str();
+							size_t end = (endKeywordStart + strlen(FIXED_END_KEYWORD)) - execGap.c_str();
+
+							execGap.replace(start, end - start + 1, "}");
+						}
+
+						return true;
+					};
 
 					// this allows to preprocessor to seperate exec src from fixed subroutines. 
 					char* last_exec = passInfo.execSrc;
@@ -1250,13 +1425,25 @@ namespace val {
 
 						char* fixedBlockSrc = passInfo.execSrc + fixedBlock.srcOffset;
 						string execGap(last_exec, fixedBlockSrc);
+						
+						bool res = filterExecGap(execGap);
+						if (res == false) {
+							goto bail;
+						}
+
+
+
 						processedSrc.append(execGap);
 
-						processFixedPass(&passInfo, processedSrc, fixedBlockSrc, fixedBlock.srcLength, j);
+						processFixedPass(&passInfo, processedSrc, fixedBlockSrc, fixedBlock.srcLength, j, framesInFlight);
 
 						last_exec = passInfo.execSrc + fixedBlock.srcOffset + fixedBlock.srcLength;
 					}
 					string execGap(last_exec, passInfo.execSrc + passInfo.execSrcLen);
+					bool res = filterExecGap(execGap);
+					if (res == false) {
+						goto bail;
+					}
 					processedSrc.append(execGap);
 
 					processedSrc.append("\n}");
