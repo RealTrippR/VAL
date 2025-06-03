@@ -256,6 +256,10 @@ int main()
 		proc.nextFrame();
 	}
 
+	vertices.destroy(proc);
+	indices.destroy(proc);
+
+	glfwTerminate();
 #ifndef NDEBUG
 	_CrtDumpMemoryLeaks();
 #endif // !NDEBUG

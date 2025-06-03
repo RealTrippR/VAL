@@ -69,7 +69,7 @@ namespace val {
 	/***************************************************/
 	/* UBO ARRAY */
 
-	void uboArray::create(VAL_PROC& proc, UBO_Handle* uboHandles, uint32_t uboCount) {
+	void uboArray::create(VAL_PROC& proc, UBO_Handle** uboHandles, uint32_t uboCount) {
 	
 		{ // create host local buffers (GPU Only)
 			VkBufferUsageFlags optionalFlags = 0x0;
@@ -80,7 +80,7 @@ namespace val {
 			std::vector<UBO_Handle*> validLocalDstAndSrcTransfer;
 			std::vector<UBO_Handle*> validLocalOther;
 			for (uint32_t i = 0; i < uboCount; ++i) {
-				UBO_Handle* Hdl = &uboHandles[i];
+				UBO_Handle* Hdl = uboHandles[i];
 				if (Hdl->_space != GPU_ONLY) {
 					continue; // device local space only
 				}
@@ -135,7 +135,7 @@ namespace val {
 			std::vector<UBO_Handle*> validGlobalDstAndSrcTransfer;
 			std::vector<UBO_Handle*> validGlobalOther;
 			for (uint32_t i = 0; i < uboCount; ++i) {
-				UBO_Handle* Hdl = &uboHandles[i];
+				UBO_Handle* Hdl = uboHandles[i];
 				if (Hdl->_space != CPU_GPU) {
 					continue; // device local space only
 				}

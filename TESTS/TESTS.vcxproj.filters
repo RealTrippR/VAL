@@ -15,15 +15,17 @@
     <ClCompile Include="instancingTest.cpp" />
     <ClCompile Include="SSBOtest.cpp" />
     <ClCompile Include="specializationConstantsTest.cpp" />
-    <ClCompile Include="advancedSamplerTest.cpp" />
+    <ClCompile Include="pushDescriptorAndPushConstantTest.cpp" />
     <ClCompile Include="immutableSamplerTest.cpp" />
     <ClCompile Include="UBO_SSBO_ArrayTest.cpp" />
     <ClCompile Include="Z-PrepassTest.cpp" />
     <ClCompile Include="forwardRendering.cpp" />
-    <ClCompile Include="pushDescriptorTest.cpp" />
     <ClCompile Include="texelBufferTest.cpp" />
     <ClCompile Include="inlineUBOtest.cpp" />
     <ClCompile Include="experimental-features\renderGraphTest.cpp">
+      <Filter>experimental-features</Filter>
+    </ClCompile>
+    <ClCompile Include="experimental-features\renderGraph_WriteToAndReadImg.cpp">
       <Filter>experimental-features</Filter>
     </ClCompile>
   </ItemGroup>
@@ -34,6 +36,9 @@
       <Filter>experimental-features</Filter>
     </ClInclude>
     <ClInclude Include="experimental-features\renderGraph_Draft__processed.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
   </ItemGroup>

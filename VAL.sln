@@ -11,8 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VAL", "VAL\VAL.vcxproj", "{
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TOOLS", "TOOLS\TOOLS.pyproj", "{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RG_TOOLS", "RG_TOOLS\RG_TOOLS.vcxproj", "{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,24 +87,6 @@ Global
 		{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}.Release|x64.ActiveCfg = Release|Any CPU
 		{B6C8DD60-4E5A-4608-BCC6-ADA4A910772F}.Release|x86.ActiveCfg = Release|Any CPU
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug|Any CPU.Build.0 = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug|x64.ActiveCfg = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug|x64.Build.0 = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug|x86.ActiveCfg = Debug|Win32
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug|x86.Build.0 = Debug|Win32
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug-Static|Any CPU.ActiveCfg = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug-Static|Any CPU.Build.0 = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug-Static|x64.ActiveCfg = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug-Static|x64.Build.0 = Debug|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug-Static|x86.ActiveCfg = Debug|Win32
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Debug-Static|x86.Build.0 = Debug|Win32
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Release|Any CPU.ActiveCfg = Release|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Release|Any CPU.Build.0 = Release|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Release|x64.ActiveCfg = Release|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Release|x64.Build.0 = Release|x64
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Release|x86.ActiveCfg = Release|Win32
-		{28AA4A6F-EA7F-4D6A-ABE9-A195129C913F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

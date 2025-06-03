@@ -164,7 +164,7 @@ namespace val {
 	VkDescriptorImageInfo& sampler::getVkDescriptorImageInfo() {
 		_VKdescriptorInfo.imageView = _imgView->getImageView();
 		_VKdescriptorInfo.sampler = _sampler;
-		_VKdescriptorInfo.imageLayout = _imgView->getImage().getLayout();
+		_VKdescriptorInfo.imageLayout = _imgView->getLayout();
 		return _VKdescriptorInfo;
 	}
 

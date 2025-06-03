@@ -1,6 +1,4 @@
-#include <iostream>
-#include <string>
-#include <chrono>
+#define VAL_ENABLE_EXPIREMENTAL // for render graphs and gpu_vector
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -18,11 +16,22 @@ const bool enableValidationLayers = true;
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "vertex.hpp"
+#include "../vertex.hpp"
+
+
+#include "../vertex.hpp"
 
 // it is important that this comes last
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
+
+//#define VAL_RENDER_PASS_COMPILE_MODE
+#include <VAL/lib/renderGraph/renderGraph.hpp>
+#include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
+
+/************************************************/
+#include GRAPH_FILE(renderGraph_Draft);
+/************************************************/
 
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
@@ -30,10 +39,10 @@ struct uniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
-{	using namespace val;
+{
+	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -49,7 +58,8 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
 }
 
 void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
-{	using namespace val;
+{
+	using namespace val;
 
 	// state infos
 	static rasterizerState rasterizer;
@@ -62,44 +72,61 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
-	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
-	static colorBlendState blendState; 
+	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
-	using namespace val;
-	static colorAttachment colorAttach;
+
+val::subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	namespace v = val;
+	static v::colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(CLEAR);
-	colorAttach.setStoreOperation(STORE);
+	colorAttach.setLoadOperation(v::CLEAR);
+	colorAttach.setStoreOperation(v::STORE);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	static subpass subpass(renderPassMngr, GRAPHICS);
+	static v::subpass subpass(renderPassMngr, v::GRAPHICS);
 	subpass.bindAttachment(&colorAttach);
+	return subpass;
 }
 
+void intercept(const char* msg, bool* block) {
+	printf("bar, bar: ");
+	printf(msg);
+	printf("\n");
+	*block = false;
+}
+
+
+void interceptNo2(const char* msg, bool* block) {
+	printf("foo, foo");
+	printf(msg);
+	printf("\n");
+
+	*block = false;
+}
 int main()
 {
 #ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	namespace v = val;
+	val::dbg::addNoteIntercept(intercept);
+	val::dbg::addNoteIntercept(interceptNo2);
 
-	v::VAL_PROC proc;
-	
-	v::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
+	using namespace val;
 
+	VAL_PROC proc;
+
+	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
-	v::windowProperties windowConfig;
-	windowConfig.setProperty(v::WN_BOOL_PROPERTY::RESIZABLE, true);
-	v::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
-
+	windowProperties windowConfig;
+	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
+	window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
@@ -118,7 +145,7 @@ int main()
 	// load and configure vert shader
 	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
-	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
@@ -129,81 +156,112 @@ int main()
 	pipeline.shaders = { &vertShader,&fragShader };
 	setGraphicsPipelineInfo(pipeline);
 
+	/* * * * * * * * * * * * * * * * * * * */
+	// configure render pass and subpass
 	val::renderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat);
+	val::subpass subpass = setRenderPass(renderPassMngr, imageFormat);
+	/* * * * * * * * * * * * * * * * * * * */
+
 	pipeline.renderPass = &renderPassMngr;
 
 	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
-	
 
-
-
-	// why is this still here? - for attachments?
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
-
-
-
-	val::gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
+	gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 		});
 
-	val::gpu_vector<uint32_t> indices(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+	gpu_vector<uint32_t> indices(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 		{ 0, 1, 2, 2, 3, 0 }
 	);
 
-
 	//////////////////////////////////////////////////////////////
-	// create descriptor sets - this should be merged into the
-	// pipeline creation function
 	proc.createDescriptorSets(&pipeline);
 	//////////////////////////////////////////////////////////////
 
+	//// Note that simply setting the index and vertex buffers does not automatically update
+	//// them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
+	//// every frame that the command buffer is reset
+	//renderTarget.setIndexBuffer(indexBuffer, indices.size());
+	//renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
 
-	// configure the render target, setting vertex buffers, scissors, area, etc
-	val::renderTarget renderTarget;
-	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window.getSize());
-	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
-	renderTarget.setIndexBuffer(indices, indices.size());
-	renderTarget.setVertexBuffer(vertices, vertices.size());
+	RENDER_GRAPH renderGraph;
+	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
 
-	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
+	renderGraph.compile(proc._MAX_FRAMES_IN_FLIGHT, filepath("experimental-features"));
 
-	
+
+	PASS_CONTEXT passContext = {
+		proc,
+		window.getSizeAsRect2D(),
+		{ { 0.0f, 0.04f, 0.2f, 1.0f } } /*clear values*/
+	};
+
+	auto& graphicsQueue = proc._graphicsQueue;
+
+
+	VkCommandBuffer cmd;
+	BAKE_RENDER_PASS(DRAW_RECT, proc,
+		READ(vertices, indices)
+		INPUT(pipeline, window, cmd),
+		pipeline.getVkRenderPass(),
+		0
+	);
+
+
 	while (!window.shouldClose()) {
-		glfwPollEvents();
-
-
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
 
-		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
+		glfwPollEvents();
+
+		VkCommandBuffer& cmd = graphicsQueue._commandBuffers[currentFrame];
+
+		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+
+
+
+
 		// Update view information, stored in a UBO
 		updateUniformBuffer(proc, uboHdl);
 
-		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
-		renderTarget.updateBuffers(proc);
-		renderTarget.updatePipeline(proc, pipeline);
-		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize()});
-		renderTarget.render(proc);
-		renderTarget.endPass(proc);
+		/* * * * * * * * * * * * * * * * * */
 
-		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, window.getPresentFence());
-		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+		RESET_COMMAND_BUFFER(cmd);
+		BEGIN_COMMAND_BUFFER(cmd);
+
+		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd, FIXED);
+
+		CALL_RENDER_PASS(WRITE_TO_IMG, proc,
+			READ(vertices, indices)
+			INPUT(pipeline, window, cmd)
+		);
+
+
+		CALL_PIPELINE_BARRIER(WRITE_TO_IMG, RENDER_IMG);
+
+		CALL_RENDER_PASS(RENDER_IMG, proc,
+			READ(vertices, indices),
+			INPUT(pipeline, window, cmd)
+		);
+		END_RENDER_PASS(cmd);
+
+		END_COMMAND_BUFFER(cmd);
+
+		/* * * * * * * * * * * * * * * * * */
+
+		graphicsQueue.submit(currentFrame, cmd, window.getPresentFence(), window.getPresentQueue());
+
+		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame) });
 
 		proc.nextFrame();
 	}
 
-	glfwTerminate();
 #ifndef NDEBUG
 	_CrtDumpMemoryLeaks();
 #endif // !NDEBUG

@@ -293,6 +293,18 @@
     <ClInclude Include="lib\ext\hashmap.h">
       <Filter>lib\ext</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\framebuffer.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\framebuffer.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\texture2d.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\texture2d.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -379,9 +391,6 @@
     <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp">
       <Filter>src\pipelineStateInfos</Filter>
     </ClCompile>
-    <ClCompile Include="lib\system\physicalDeviceRequirements.cpp">
-      <Filter>src\system</Filter>
-    </ClCompile>
     <ClCompile Include="src\system\UBO_arr_manager.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
@@ -411,6 +420,12 @@
     </ClCompile>
     <ClCompile Include="src\ext\hashmap.c">
       <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\physicalDeviceRequirements.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\texture2d.cpp">
+      <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

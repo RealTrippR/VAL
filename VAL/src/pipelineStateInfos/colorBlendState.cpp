@@ -57,8 +57,10 @@ namespace val
 
 	VkPipelineColorBlendStateCreateInfo colorBlendState::toVkPipelineColorblendStateCreateInfo(VkPipelineColorBlendStateCreateInfo* stateInfo, std::vector<VkPipelineColorBlendAttachmentState>* VKattachments)
 	{	
-		for (auto& attachment : _attachments) {
-			VKattachments->push_back(attachment->getVkColorBlendAttachmentState());
+		if (_attachments.size() > 0) {
+			for (auto& attachment : _attachments) {
+				VKattachments->push_back(attachment->getVkColorBlendAttachmentState());
+			}
 		}
 		VkPipelineColorBlendStateCreateInfo info;
 		info.flags = VkPipelineColorBlendStateCreateFlags(0);

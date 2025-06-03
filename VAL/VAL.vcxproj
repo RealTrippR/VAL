@@ -246,6 +246,7 @@
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\descType.hpp" />
+    <ClInclude Include="lib\system\framebuffer.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\multisamplerManager.hpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="lib\system\specializationConstant.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\subpass.hpp" />
+    <ClInclude Include="lib\system\texture2d.hpp" />
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp" />
     <ClInclude Include="lib\system\UBO_arr_manager.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
@@ -269,7 +271,6 @@
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
-    <ClCompile Include="lib\system\physicalDeviceRequirements.cpp" />
     <ClCompile Include="src\debugReporting\debugCallbacks.cpp" />
     <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c" />
     <ClCompile Include="src\ext\hashmap.c" />
@@ -293,6 +294,7 @@
     <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\multisamplerManager.cpp" />
+    <ClCompile Include="src\system\physicalDeviceRequirements.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
@@ -308,6 +310,7 @@
     <ClInclude Include="lib\VALreturnCode.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\system\texture2d.cpp" />
     <ClCompile Include="src\system\UBO_arr_manager.cpp" />
     <ClCompile Include="src\system\UBO_Handle.cpp" />
     <ClCompile Include="src\system\VAL_PROC.cpp" />
@@ -331,6 +334,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\window.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\framebuffer.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\texture2d.inl">
       <FileType>Document</FileType>
     </ClInclude>
   </ItemGroup>

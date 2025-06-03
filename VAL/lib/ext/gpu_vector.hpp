@@ -15,10 +15,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#define VAL_ENABLE_EXPIREMENTAL
-
-#ifdef VAL_ENABLE_EXPIREMENTAL
-
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/ext/roundToNextPowerOf2.hpp>
 #include <initializer_list>
@@ -225,6 +221,10 @@ namespace val {
 			return _size * sizeof(T);
 		}
 
+		const VkDeviceSize& sizeInBytes() const {
+			return _size * sizeof(T);
+		}
+
 		const VkBuffer& getVkBuffer() const {
 			return _buffer;
 		}
@@ -249,6 +249,3 @@ namespace val {
 }
 
 #endif // !VAL_GPU_VECTOR_HPP
-
-
-#endif // VAL_ENABLE_EXPIREMENTAL

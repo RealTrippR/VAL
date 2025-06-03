@@ -29,9 +29,10 @@ texture with different samplers (e.g., different filtering or addressing modes).
 #include <string>
 #include <chrono>
 
+#define FRAMES_IN_FLIGHT 2u
+
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
-
 #else
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
@@ -192,7 +193,7 @@ int main() {
 	setRenderPass(renderPassManager, imageFormat);
 	pipeline.renderPass = &renderPassManager;
 
-	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipeline });
+	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u,pipeline.getVkRenderPass(), proc._device);
 

@@ -34,7 +34,6 @@ namespace val {
 			if (_ownsGLFWwindow) {
 				glfwDestroyWindow(_window);
 			}
-			glfwTerminate();
 			_presentQueue.destroy(*_procVAL);
 			cleanupSwapChain();
 			vkDestroySurfaceKHR(_procVAL->_instance, _surface, NULL);
@@ -61,7 +60,15 @@ namespace val {
 	}
 
 
-	void window::createSwapChain(const VkFormat swapchainFormat) {
+	void window::createSwapChain(const VkFormat swapchainFormat) 
+	{
+#ifndef NDEBUG
+		if (_swapChain != VK_NULL_HANDLE)
+		{
+			dbg::printWarning("createSwapChain was called on window %h that already has an initialized swapchain, calling this function more than once may lead to undefined behavior or program crashes.", this);
+		}
+#endif // !NDEBUG
+
 		swapChainSupportDetails swapChainSupport = querySwapChainSupport(_procVAL->_physicalDevice, _surface);
 
 		VkSurfaceFormatKHR surfaceFormat{};

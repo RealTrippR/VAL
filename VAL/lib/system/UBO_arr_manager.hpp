@@ -42,7 +42,7 @@ namespace val {
 	};
 
 	struct uboArray {
-		void create(VAL_PROC& proc, UBO_Handle* uboHandles, uint32_t uboCount);
+		void create(VAL_PROC& proc, UBO_Handle** uboHandles, uint32_t uboCount);
 		void destroy(VAL_PROC& proc);
 		/*************************************/
 		/* GPU-only memory                   */
