@@ -29,7 +29,7 @@ namespace val {
 	class UBO_Handle; // forward declaration
 
 	struct uboArraySubset {
-		void create(VAL_PROC& proc, VkBufferUsageFlags additionalUsages, bufferSpace space, UBO_Handle* uboHandles, uint32_t uboCount);
+		void create(VAL_PROC& proc, VkBufferUsageFlags additionalUsages, bufferSpace space, UBO_Handle** uboHandles, uint32_t uboCount);
 		void destroy(VAL_PROC& proc);
 		void* getMappedDataOfFrame(const uint8_t& frameIdx);
 
