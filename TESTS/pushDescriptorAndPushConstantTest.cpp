@@ -265,6 +265,8 @@ int main() {
 		float tmp = (sin(ftimeSec) + 1.f) / 2.f;
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		renderTarget.begin(proc);
+
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 
 		if (timer > 4000) {timer = 0;}
