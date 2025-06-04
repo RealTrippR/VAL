@@ -165,10 +165,11 @@ namespace val {
 	}
 
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView, const VkImageLayout layout) {
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView) 
+	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
-		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(), layout };
+		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(), imgView.getLayout()};
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -188,11 +189,11 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView, const VkImageLayout layout) 
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView) 
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
-		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(), layout };
+		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(), imgView.getLayout()};
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -213,14 +214,14 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView, const VkImageLayout layout)
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo;
 		imageInfo.sampler = VK_NULL_HANDLE;
 		imageInfo.imageView = imgView.getImageView();
-		imageInfo.imageLayout = layout;
+		imageInfo.imageLayout = imgView.getLayout();
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -240,14 +241,14 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView, const VkImageLayout layout)
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo;
 		imageInfo.sampler = VK_NULL_HANDLE;
 		imageInfo.imageView = imgView.getImageView();
-		imageInfo.imageLayout = layout;
+		imageInfo.imageLayout = imgView.getLayout();
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
