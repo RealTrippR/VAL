@@ -155,11 +155,18 @@ int main()
 
 
 
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	///// FIRST PIPELINE: RENDER IMAGE TO SWAPCHAIN///////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+	// configure graphics pipeline
+	val::graphicsPipelineCreateInfo pipeline1;\
+
 	// UBO which stores view information
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
 	// load and configure frag shader
-	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	val::sampler imgSampler(proc, val::combinedImage);
@@ -172,10 +179,6 @@ int main()
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
-
-
-	// configure graphics pipeline
-	val::graphicsPipelineCreateInfo pipeline1;
 	pipeline1.shaders = { &vertShader,&fragShaderImage };
 
 	setGraphicsPipelineInfo1(pipeline1);
@@ -187,7 +190,7 @@ int main()
 	pipeline1.renderPass = &renderPass1;
 
 	//////////////////////////////////////////////////////////////////////////////
-	///// SECOND PIPELINE: RENDER TO SWAPCHAIN ///////////////////////////////////
+	///// SECOND PIPELINE: RENDER COLOR //////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
 
 	val::graphicsPipelineCreateInfo pipeline2;
@@ -230,24 +233,10 @@ int main()
 		
 	*/
 
-	val::texture2d renderTargetImg(proc, 800, 800, imageFormat, VkImageUsageFlagBits(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT  | VK_IMAGE_USAGE_SAMPLED_BIT), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	/*VkImage renderTargetImg;
-	VkDeviceMemory renderTargImgMem;
-	VkExtent2D secondaryRenderTargetExtent = { 800,800 };
-	mainProc.createImage(secondaryRenderTargetExtent.width, secondaryRenderTargetExtent.height, imageFormat, VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, renderTargetImg, renderTargImgMem);*/
+	val::texture2d renderTargetImg(proc, 800, 800, imageFormat, 
+		VkImageUsageFlagBits(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT  | VK_IMAGE_USAGE_SAMPLED_BIT), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	val::imageView renderTargImgView(proc, renderTargetImg, VK_IMAGE_ASPECT_COLOR_BIT);
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -284,7 +273,7 @@ int main()
 
 	VkFramebufferCreateInfo framebufferInfo{};
 	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	framebufferInfo.renderPass = pipeline1.getVkRenderPass();
+	framebufferInfo.renderPass = pipeline2.getVkRenderPass();
 	framebufferInfo.attachmentCount = 1;
 	framebufferInfo.pAttachments = &renderTargImgView.getImageView();
 	framebufferInfo.width = secondaryRenderTargetExtent.width;
@@ -314,7 +303,7 @@ int main()
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
 
-	renderTargetImg.transitionLayout(NULL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//renderTargetImg.transitionLayout(NULL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 	while (!window.shouldClose()) {
 		auto& graphicsQueue = proc._graphicsQueue;
@@ -328,11 +317,16 @@ int main()
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
-		renderTarget.beginPass(proc, pipeline1.getVkRenderPass(), framebuffer);
+		renderTarget.begin(proc);
+
+		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+		/*PIPELINE 2: COLOR PIPELINE*/
+
+		renderTarget.beginPass(proc, pipeline2.getVkRenderPass(), renderTargetFramebuffer);
 
 		renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-
-		renderTarget.updatePipeline(proc, pipeline1);
+		renderTarget.updatePipeline(proc, pipeline2);
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
 		renderTarget.updateViewport(proc, viewport);
 
@@ -344,8 +338,11 @@ int main()
 
 
 
+		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		renderTarget.beginPass(proc, pipeline2.getVkRenderPass(), renderTargetFramebuffer);
+
+		/*PIPELINE 1: IMAGE PIPELINE*/
+		renderTarget.beginPass(proc, pipeline1.getVkRenderPass(), framebuffer);
 		renderTarget.setIndexBuffer(indices.getVkBuffer(), indices.size());
 		renderTarget.setVertexBuffer(vertices2, vertices2.size());
 		renderTarget.setClearValues({ { 0.0f, 0.2f, 0.5f, 1.0f } });
@@ -360,13 +357,6 @@ int main()
 
 		renderTarget.endPass(proc);
 
-	
-		renderTargetImg.transitionLayout(NULL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-		//proc.transitionImageLayout(renderTargetImg.getVkImage(), imageFormat,
-		//	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL/*this should match the colorAttachment.finalLayout of the 2nd render pass*/, 
-		//	VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-		//	cmdBuffer);
 
 		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, window.getPresentFence());
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });

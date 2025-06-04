@@ -97,6 +97,8 @@ namespace val {
 
 		void update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline, const std::vector<VkViewport>& viewports);
 
+		void begin(VAL_PROC& proc);
+
 		void beginPass(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer);
 
 		void endPass(VAL_PROC& proc); 

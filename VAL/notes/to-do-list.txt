@@ -16,6 +16,8 @@ The Vulkan Abstraction Library is missing the following key features:
 
 ----------------------------------------------------------------------------------------------------------------
 
+[!] Redesign Queue System
+
 [!] Optimize transition img layout
 
 [!] Rename "bufferSpace" to "memSpace"

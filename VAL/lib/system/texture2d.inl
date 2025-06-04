@@ -71,6 +71,7 @@ namespace val {
 	inline void texture2d::transitionLayout(VkCommandBuffer cmd_buff, VkImageLayout newLayout) 
 	{
 		_proc.transitionImageLayout(_img, _format, _layout, newLayout, cmd_buff, _mipLevels);
+		_layout = newLayout;
 	}
 }
 
