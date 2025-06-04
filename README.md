@@ -43,7 +43,7 @@ For example, if you're building for x64 and debug, the VAL .lib will be located 
 The Vulkan Abstraction Library is in a relatively early stage of development and help is greatly appreciated.
 To get started with development, refer to VAL/notes/to-do.txt and the issues page.
 
-The Vulkan Abstraction Library is missing the following key features:
+The Vulkan Abstraction Library is missing the following features:
 ```
 - Proper Queue Ownership Transfer
 - Proper optimization for Semaphore wait stages
