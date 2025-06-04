@@ -88,7 +88,7 @@ namespace val {
 		physicalDevicePriorities priorities{};
 		std::optional<uint32_t> deviceID;
 		std::optional<uint32_t> vendorID;
-		std::tiny_vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+		std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 	};
 }
 
