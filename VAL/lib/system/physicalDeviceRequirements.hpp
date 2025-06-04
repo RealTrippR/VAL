@@ -20,9 +20,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_DEVICE_REQUIREMENTS_HPP
 
 #include <stdint.h>
-#include <vector>
 #include <optional>
-
+#include <VAL/lib/ext/tiny_vector.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -89,7 +88,7 @@ namespace val {
 		physicalDevicePriorities priorities{};
 		std::optional<uint32_t> deviceID;
 		std::optional<uint32_t> vendorID;
-		std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+		tiny_vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 	};
 }
 
