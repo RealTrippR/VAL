@@ -28,6 +28,7 @@
     <ClCompile Include="experimental-features\renderGraph_WriteToAndReadImg.cpp">
       <Filter>experimental-features</Filter>
     </ClCompile>
+    <ClCompile Include="VolumetricsTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
