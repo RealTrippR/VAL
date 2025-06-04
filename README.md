@@ -51,5 +51,6 @@ The Vulkan Abstraction Library is missing the following key features:
 - Multi-threaded rendering
 - SSBO & UBO array binding
 - Externally Sourced Buffers
+- Pipeline disk caching
 - Dynamic Rendering
 ```
