@@ -188,7 +188,6 @@ int main()
 		// Update view information, stored in a UBO
 		updateUniformBuffer(proc, uboHdl);
 
-
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.begin(proc);
 
