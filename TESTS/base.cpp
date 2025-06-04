@@ -169,8 +169,8 @@ int main()
 	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
-	renderTarget.setIndexBuffer(indexBuffer, indices.size());
-	renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
+	renderTarget.setIndexBuffer(indices, indices.size());
+	renderTarget.setVertexBuffer(vertices, vertices.size());
 
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
