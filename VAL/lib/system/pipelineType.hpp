@@ -10,7 +10,6 @@ namespace val {
 	};
 
 	constexpr VkPipelineBindPoint PIPELINE_TYPE_To_VkPipelineBindPoint(const PIPELINE_TYPE& type) {
-		VkPipelineBindPoint point;
 		switch (type) {
 		case GRAPHICS:
 			return VK_PIPELINE_BIND_POINT_GRAPHICS;

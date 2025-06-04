@@ -80,9 +80,10 @@ namespace val {
 		//void pushDescriptor_MUTABLE_EXT(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const DESC_TYPE type, VkWriteDescriptorSet& write);
 
 	public:
-		inline VkRenderPass& getVkRenderPass() {
-			return renderPass->getVkRenderPass();
-		}
+		inline VkPipeline& getVkPipeline(VAL_PROC& proc);
+
+		inline VkRenderPass& getVkRenderPass();
+
 	protected:
 		friend VAL_PROC;
 	protected:

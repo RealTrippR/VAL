@@ -95,8 +95,13 @@ namespace val {
 		*/
 	}
 
-	const std::vector<char>& shader::getByteCode() noexcept {
+	tiny_vector<char>& shader::getByteCode() noexcept {
 		return _byteCode;
+	}
+
+
+	void shader::deleteByteCode() {
+		_byteCode.~tiny_vector();
 	}
 
 	const fs::path& shader::getFilepath() noexcept {
@@ -381,11 +386,11 @@ namespace val {
 		_pushDescriptors = pushDescriptors;
 	}
 
-	void shader::setTextures(const std::vector<descriptorBinding<val::imageView*>> textures) {
+	void shader::setTextures(const std::vector<descriptorBinding<val::imageView*>>& textures) {
 		_textures = textures;
 	}
 
-	const std::vector<descriptorBinding<val::imageView*>> shader::getTextures() noexcept {
+	const std::vector<descriptorBinding<val::imageView*>>& shader::getTextures() noexcept {
 		return _textures;
 	}
 

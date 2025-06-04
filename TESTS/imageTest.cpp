@@ -15,13 +15,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <iostream>
-#include <string>
-#include <chrono>
+#define FRAMES_IN_FLIGHT 2u
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
-
 #else
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
@@ -110,15 +107,11 @@ int main()
 	VAL_PROC proc;
 	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
-	/////////// consider moving this into the window class ///////////
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
-	//////////////////////////////////////////////////////////////////
 
-	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
-
-	window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	// Configure and create window
+	val::windowProperties windowConfig;
+	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
+	val::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -158,7 +151,7 @@ int main()
 	val::renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
-	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipeline });
+	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
@@ -217,17 +210,22 @@ int main()
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
-	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+	while (!window.shouldClose()) {
+		glfwPollEvents();
+
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
 
 		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
-		glfwPollEvents();
+		// Update view information, stored in a UBO
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		renderTarget.begin(proc);
+
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.updateBuffers(proc);
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
 		renderTarget.update(proc, pipeline, { viewport });
 		renderTarget.render(proc);
@@ -253,6 +251,8 @@ int main()
 			}
 		}
 	}
+
+	glfwTerminate();
 
 	return EXIT_SUCCESS;
 }

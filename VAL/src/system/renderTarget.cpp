@@ -249,7 +249,8 @@ namespace val {
 		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
 	}
 
-	void renderTarget::beginPass(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer) {
+	void renderTarget::begin(VAL_PROC& proc)
+	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
 		vkResetCommandBuffer(commandBuffer, 0);
@@ -261,6 +262,11 @@ namespace val {
 			throw std::runtime_error("failed to begin recording command buffer!");
 		}
 
+	}
+
+	void renderTarget::beginPass(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer) 
+	{
+		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
 		// this would make more sense to have in the update function
 		_renderPassBeginInfo.renderPass = renderPass;

@@ -29,7 +29,7 @@ namespace val {
 	}
 
 	VkBuffer UBO_Handle::getBuffer(VAL_PROC& proc) {
-		return _arrSubset->_vkBuff;
+		return _arrSubset ? _arrSubset->_vkBuff : VK_NULL_HANDLE;
 	}
 
 	void UBO_Handle::update(VAL_PROC& proc, void* data) {

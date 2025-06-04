@@ -15,18 +15,33 @@
     <ClCompile Include="instancingTest.cpp" />
     <ClCompile Include="SSBOtest.cpp" />
     <ClCompile Include="specializationConstantsTest.cpp" />
-    <ClCompile Include="advancedSamplerTest.cpp" />
+    <ClCompile Include="pushDescriptorAndPushConstantTest.cpp" />
     <ClCompile Include="immutableSamplerTest.cpp" />
     <ClCompile Include="UBO_SSBO_ArrayTest.cpp" />
     <ClCompile Include="Z-PrepassTest.cpp" />
     <ClCompile Include="forwardRendering.cpp" />
-    <ClCompile Include="pushDescriptorTest.cpp" />
     <ClCompile Include="texelBufferTest.cpp" />
     <ClCompile Include="inlineUBOtest.cpp" />
+    <ClCompile Include="experimental-features\renderGraphTest.cpp">
+      <Filter>experimental-features</Filter>
+    </ClCompile>
+    <ClCompile Include="experimental-features\renderGraph_WriteToAndReadImg.cpp">
+      <Filter>experimental-features</Filter>
+    </ClCompile>
+    <ClCompile Include="VolumetricsTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
     <ClInclude Include="polygonVertex.hpp" />
+    <ClInclude Include="experimental-features\renderGraph_Draft.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\renderGraph_Draft__processed.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="res">
@@ -40,6 +55,9 @@
     </Filter>
     <Filter Include="shaders-compiled">
       <UniqueIdentifier>{cc159bea-ab3f-4d77-9442-59a9a432d569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features">
+      <UniqueIdentifier>{5da3f189-593b-4200-9966-21486f953649}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

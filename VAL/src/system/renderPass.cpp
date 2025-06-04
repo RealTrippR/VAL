@@ -86,17 +86,19 @@ namespace val {
 			subDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT; // This is probably the right one, idk for sure.
 		}
 
-		// set destination access and stage masks
-		for (uint32_t i = 0; i < _VkSubpassDependencies.size()-1; ++i) {
-			VkSubpassDependency& subDependency = _VkSubpassDependencies[i];
-			VkSubpassDependency& nextSubDependency = _VkSubpassDependencies[i + 1];
+		if (_VkSubpassDependencies.size() > 0) { // prevent integer underflow
+			// set destination access and stage masks
+			for (uint32_t i = 0; i < _VkSubpassDependencies.size() - 1; ++i) {
+				VkSubpassDependency& subDependency = _VkSubpassDependencies[i];
+				VkSubpassDependency& nextSubDependency = _VkSubpassDependencies[i + 1];
 
-			subDependency.dstStageMask = nextSubDependency.srcStageMask;
-			subDependency.dstAccessMask = nextSubDependency.srcAccessMask;
+				subDependency.dstStageMask = nextSubDependency.srcStageMask;
+				subDependency.dstAccessMask = nextSubDependency.srcAccessMask;
 
-			subDependency.dstSubpass = i;
-			nextSubDependency.srcSubpass = i;
-			nextSubDependency.dstSubpass = i + 1;
+				subDependency.dstSubpass = i;
+				nextSubDependency.srcSubpass = i;
+				nextSubDependency.dstSubpass = i + 1;
+			}
 		}
 
 		return _VkSubpassDependencies;

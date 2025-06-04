@@ -1,3 +1,7 @@
+#ifndef TEST_VERTEX_HPP
+#define TEST_VERTEX_HPP
+
+
 #include <array>
 
 #define GLFW_INCLUDE_VULKAN
@@ -43,3 +47,5 @@ namespace res {
         }
     };
 }
+
+#endif // !TEST_VERTEX_HPP

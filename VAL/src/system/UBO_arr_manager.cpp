@@ -24,7 +24,7 @@ namespace val {
 	/* UBO ARRAY SUBSET */
 
 	void uboArraySubset::create(VAL_PROC& proc, VkBufferUsageFlags additionalUsages, bufferSpace space,
-		UBO_Handle* uboHandles, uint32_t uboCount)
+		UBO_Handle** uboHandles, uint32_t uboCount)
 	{
 		if (uboCount == 0u) {
 			return;
@@ -35,11 +35,11 @@ namespace val {
 		sizePerFrame = 0u;
 		// first calculate the size per frame and init UBOS
 		for (uint32_t i = 0; i < uboCount; ++i) {
-			UBO_Handle& ubo = uboHandles[i];
-			ubo._offset = sizePerFrame;
-			sizePerFrame += ubo._size;
+			UBO_Handle* ubo = uboHandles[i];
+			ubo->_offset = sizePerFrame;
+			sizePerFrame += ubo->_size;
 
-			ubo._arrSubset = this;
+			ubo->_arrSubset = this;
 		}
 
 		const uint8_t frameCount = proc._MAX_FRAMES_IN_FLIGHT;
@@ -69,7 +69,7 @@ namespace val {
 	/***************************************************/
 	/* UBO ARRAY */
 
-	void uboArray::create(VAL_PROC& proc, UBO_Handle* uboHandles, uint32_t uboCount) {
+	void uboArray::create(VAL_PROC& proc, UBO_Handle** uboHandles, uint32_t uboCount) {
 	
 		{ // create host local buffers (GPU Only)
 			VkBufferUsageFlags optionalFlags = 0x0;
@@ -80,7 +80,7 @@ namespace val {
 			std::vector<UBO_Handle*> validLocalDstAndSrcTransfer;
 			std::vector<UBO_Handle*> validLocalOther;
 			for (uint32_t i = 0; i < uboCount; ++i) {
-				UBO_Handle* Hdl = &uboHandles[i];
+				UBO_Handle* Hdl = uboHandles[i];
 				if (Hdl->_space != GPU_ONLY) {
 					continue; // device local space only
 				}
@@ -103,16 +103,16 @@ namespace val {
 				}
 			}
 			if (!validLocalReadOnly.empty()) {
-				localReadOnly.create(proc, 0x0, GPU_ONLY, *(validLocalReadOnly.data()), validLocalReadOnly.size());
+				localReadOnly.create(proc, 0x0, GPU_ONLY, (validLocalReadOnly.data()), validLocalReadOnly.size());
 			}
 			if (!validLocalDstTransferOnly.empty()) {
-				localDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, *(validLocalDstTransferOnly.data()), validLocalDstTransferOnly.size());
+				localDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, (validLocalDstTransferOnly.data()), validLocalDstTransferOnly.size());
 			}
 			if (!validLocalSrcTransferOnly.empty()) {
-				localSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, *(validLocalSrcTransferOnly.data()), validLocalSrcTransferOnly.size());
+				localSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, (validLocalSrcTransferOnly.data()), validLocalSrcTransferOnly.size());
 			}
 			if (!validLocalDstAndSrcTransfer.empty()) {
-				localDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, GPU_ONLY, *(validLocalDstAndSrcTransfer.data()), validLocalDstAndSrcTransfer.size());
+				localDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, GPU_ONLY, (validLocalDstAndSrcTransfer.data()), validLocalDstAndSrcTransfer.size());
 			}
 
 			// there is no reason to create the other array subset if it's not needed
@@ -121,7 +121,7 @@ namespace val {
 			}
 			else {
 				if (!validLocalOther.empty()) {
-					localOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, GPU_ONLY, *(validLocalOther.data()), validLocalOther.size());
+					localOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, GPU_ONLY, (validLocalOther.data()), validLocalOther.size());
 				}
 			}
 		}
@@ -135,7 +135,7 @@ namespace val {
 			std::vector<UBO_Handle*> validGlobalDstAndSrcTransfer;
 			std::vector<UBO_Handle*> validGlobalOther;
 			for (uint32_t i = 0; i < uboCount; ++i) {
-				UBO_Handle* Hdl = &uboHandles[i];
+				UBO_Handle* Hdl = uboHandles[i];
 				if (Hdl->_space != CPU_GPU) {
 					continue; // device local space only
 				}
@@ -158,16 +158,16 @@ namespace val {
 				}
 			}
 			if (!validGlobalReadOnly.empty()) {
-				globalReadOnly.create(proc, 0x0, CPU_GPU, *(validGlobalReadOnly.data()), validGlobalReadOnly.size());
+				globalReadOnly.create(proc, 0x0, CPU_GPU, (validGlobalReadOnly.data()), validGlobalReadOnly.size());
 			}
 			if (!validGlobalDstTransferOnly.empty()) {
-				globalDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, *(validGlobalDstTransferOnly.data()), validGlobalDstTransferOnly.size());
+				globalDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, (validGlobalDstTransferOnly.data()), validGlobalDstTransferOnly.size());
 			}
 			if (!validGlobalSrcTransferOnly.empty()) {
-				globalSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, *(validGlobalSrcTransferOnly.data()), validGlobalSrcTransferOnly.size());
+				globalSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, (validGlobalSrcTransferOnly.data()), validGlobalSrcTransferOnly.size());
 			}
 			if (!validGlobalOther.empty()) {
-				globalDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CPU_GPU, *(validGlobalDstAndSrcTransfer.data()), validGlobalDstAndSrcTransfer.size());
+				globalDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CPU_GPU, (validGlobalDstAndSrcTransfer.data()), validGlobalDstAndSrcTransfer.size());
 			}
 
 			// there is no reason to create the other array subset if it's not needed
@@ -175,7 +175,7 @@ namespace val {
 				|| optionalFlags == 0x0) {
 			}
 			else {
-				globalOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, CPU_GPU, *(validGlobalOther.data()), validGlobalOther.size());
+				globalOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, CPU_GPU, (validGlobalOther.data()), validGlobalOther.size());
 			}
 
 		}

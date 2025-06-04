@@ -15,6 +15,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <VAL/lib/system/VAL_PROC.hpp>
+
 #include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
 #include <VAL/lib/pipelineStateInfos/stateInfos.hpp>
 

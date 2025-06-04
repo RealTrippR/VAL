@@ -6,6 +6,7 @@
 
 #include <optional>
 #include <vector>
+#include <VAL/lib/ext/tiny_vector.hpp>
 
 namespace val
 {
@@ -23,16 +24,31 @@ namespace val
 
 		void destroy(VAL_PROC& proc);
 
+		inline void submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, queueManager& waitFor);
+
+		inline VkQueue getVkQueue();
+
+		inline VkQueueFlags getVkQueueFlags() const;
+
+		inline uint32_t getQueueFamily() const;
+
+		inline VkCommandBuffer& getCommandBuffer(const uint32_t& frameIdx);
+
+		inline VkSemaphore& getSemaphore(const uint32_t& frameIdx);
 	public:
 		VkQueue _queue;
 		VkQueueFlags _queueFlags;
 		uint32_t _queueFamily;
 
-		std::vector<VkCommandBuffer> _commandBuffers;
+		tiny_vector<VkCommandBuffer> _commandBuffers;
 
-		std::vector<VkSemaphore> _semaphores;
-		std::vector<VkFence> _fences;
+		tiny_vector<VkSemaphore> _semaphores;
+		tiny_vector<VkFence> _fences;
 
 	};
 }
 #endif // !VAL_QUEUE_HANDLER_HPP
+
+
+
+#include <VAL/lib/system/queueManager.inl>

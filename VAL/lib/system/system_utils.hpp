@@ -68,12 +68,17 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 #include <filesystem>
 #include <math.h>
 
+#include <VAL/lib/debugReporting/debugCallbacks.hpp>
+
+#include <VAL/lib/ext/tiny_vector.hpp>
+
 #include <VAL/lib/system/descriptorBinding.hpp>
 #include <VAL/lib/system/pipelineType.hpp>
 
 #include <VAL/lib/system/physicalDeviceRequirements.hpp>
 
 #include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
+
 
 namespace val {
 
@@ -91,9 +96,9 @@ namespace val {
 		TOPOLOGY = VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY
 	};
 
-	enum bufferSpace {
-		GPU_ONLY,
-		CPU_GPU
+	enum bufferSpace : uint8_t {
+		GPU_ONLY = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		CPU_GPU = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
 	};
 
 	class VAL_PROC; // forward declaration
@@ -174,9 +179,12 @@ namespace val {
 
 	VkImage createTextureImage(VAL_PROC* proc, fs::path imgFilepath, stbi_uc** pixelsOut, VkFormat format, VkDeviceMemory& textureImageMemory,
 		const VkImageUsageFlagBits& additionalUsageFlagBits = VkImageUsageFlagBits(0), const uint32_t& mipLevels = 1U,
-		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL);
+		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL, const bufferSpace& bufferSpace = GPU_ONLY);
+	
 	// returns false if the file cannot be read
 	bool readByteFile(const std::string& filename, std::vector<char>* dst);
+
+	bool readByteFile(const std::string& filename, tiny_vector<char>* dst);
 
 	uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 

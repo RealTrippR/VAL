@@ -1,4 +1,4 @@
-#include <VAL/lib/system/window.hpp>
+#include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
 	void window::setWindowHandleGLFW(GLFWwindow* window) {
@@ -31,8 +31,9 @@ namespace val {
 
 	void window::cleanup() {
 		if (_procVAL) {
-			glfwDestroyWindow(_window);
-			glfwTerminate();
+			if (_ownsGLFWwindow) {
+				glfwDestroyWindow(_window);
+			}
 			_presentQueue.destroy(*_procVAL);
 			cleanupSwapChain();
 			vkDestroySurfaceKHR(_procVAL->_instance, _surface, NULL);
@@ -59,7 +60,15 @@ namespace val {
 	}
 
 
-	void window::createSwapChain(const VkFormat swapchainFormat) {
+	void window::createSwapChain(const VkFormat swapchainFormat) 
+	{
+#ifndef NDEBUG
+		if (_swapChain != VK_NULL_HANDLE)
+		{
+			dbg::printWarning("createSwapChain was called on window %h that already has an initialized swapchain, calling this function more than once may lead to undefined behavior or program crashes.", this);
+		}
+#endif // !NDEBUG
+
 		swapChainSupportDetails swapChainSupport = querySwapChainSupport(_procVAL->_physicalDevice, _surface);
 
 		VkSurfaceFormatKHR surfaceFormat{};
@@ -250,9 +259,5 @@ namespace val {
 		vkResetFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame]);
 		VkFramebuffer& framebuffer = getSwapchainFramebuffer(imageFormat); // gets the swapchain framebuffer to be rendered to
 		return framebuffer;
-	}
-
-	VkFence window::getPresentFence() {
-		return _presentQueue._fences[_procVAL->_currentFrame];
 	}
 }

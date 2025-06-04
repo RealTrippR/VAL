@@ -145,6 +145,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -199,6 +200,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="lib\classEnumBitOps.hpp" />
+    <ClInclude Include="lib\C_compatibleBinding.h" />
+    <ClInclude Include="lib\debugReporting\debugCallbacks.hpp" />
+    <ClInclude Include="lib\debugReporting\VAL_DebugCallbacks.h" />
+    <ClInclude Include="lib\debugReporting\VAL_DebugIntercept.h" />
+    <ClInclude Include="lib\ext\gpu_vector.hpp" />
+    <ClInclude Include="lib\ext\hashmap.h" />
+    <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp" />
+    <ClInclude Include="lib\ext\streql.h" />
+    <ClInclude Include="lib\ext\tiny_vector.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp" />
     <ClInclude Include="lib\graphics\shader.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
@@ -217,12 +228,25 @@
     <ClInclude Include="lib\renderAttachments\inputAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\renderAttachment.hpp" />
     <ClInclude Include="lib\renderAttachments\resolveAttachment.hpp" />
+    <ClInclude Include="lib\renderGraph\argBlock.h" />
+    <ClInclude Include="lib\renderGraph\argHandleList.hpp" />
+    <ClInclude Include="lib\renderGraph\fixedBlock.h" />
+    <ClInclude Include="lib\renderGraph\graphEnums.hpp" />
+    <ClInclude Include="lib\renderGraph\pass.hpp" />
+    <ClInclude Include="lib\renderGraph\passContext.hpp" />
+    <ClInclude Include="lib\renderGraph\passFunctionDefinitions.hpp" />
+    <ClInclude Include="lib\renderGraph\passFunctions.hpp" />
+    <ClInclude Include="lib\renderGraph\passInfo.h" />
+    <ClInclude Include="lib\renderGraph\renderGraph.hpp" />
+    <ClInclude Include="lib\renderGraph\renderGraphBlock.h" />
+    <ClInclude Include="lib\renderGraph\renderPassBeginType.hpp" />
     <ClInclude Include="lib\system\buffer.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\descType.hpp" />
+    <ClInclude Include="lib\system\framebuffer.hpp" />
     <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\multisamplerManager.hpp" />
@@ -239,6 +263,7 @@
     <ClInclude Include="lib\system\specializationConstant.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\subpass.hpp" />
+    <ClInclude Include="lib\system\texture2d.hpp" />
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp" />
     <ClInclude Include="lib\system\UBO_arr_manager.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
@@ -246,7 +271,10 @@
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
-    <ClCompile Include="lib\system\physicalDeviceRequirements.cpp" />
+    <ClCompile Include="src\debugReporting\debugCallbacks.cpp" />
+    <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c" />
+    <ClCompile Include="src\ext\hashmap.c" />
+    <ClCompile Include="src\ext\streql.c" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp" />
@@ -256,12 +284,17 @@
     <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp" />
     <ClCompile Include="src\pipelineStateInfos\rasterizerState.cpp" />
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
+    <ClCompile Include="src\renderGraph\argBlock.c" />
+    <ClCompile Include="src\renderGraph\bakedCommandBuffer.c" />
+    <ClCompile Include="src\renderGraph\passInfo.c" />
+    <ClCompile Include="src\renderGraph\renderGraph.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
     <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\multisamplerManager.cpp" />
+    <ClCompile Include="src\system\physicalDeviceRequirements.cpp" />
     <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
@@ -273,8 +306,11 @@
     <ClCompile Include="src\system\SSBO_Handle.cpp" />
     <ClCompile Include="src\system\subpass.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />
+    <ClInclude Include="lib\system\windowProperties.hpp" />
+    <ClInclude Include="lib\VALreturnCode.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\system\texture2d.cpp" />
     <ClCompile Include="src\system\UBO_arr_manager.cpp" />
     <ClCompile Include="src\system\UBO_Handle.cpp" />
     <ClCompile Include="src\system\VAL_PROC.cpp" />
@@ -285,6 +321,31 @@
       <FileType>Text</FileType>
     </ClInclude>
     <Text Include="notes\to-do-list.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\queueManager.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\window.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\framebuffer.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\texture2d.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

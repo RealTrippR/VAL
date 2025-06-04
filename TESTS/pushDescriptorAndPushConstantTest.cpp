@@ -29,9 +29,10 @@ texture with different samplers (e.g., different filtering or addressing modes).
 #include <string>
 #include <chrono>
 
+#define FRAMES_IN_FLIGHT 2u
+
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
-
 #else
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
@@ -137,9 +138,12 @@ int main() {
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
 	//////////////////////////////////////////////////////////////////
 
-	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
 
-	window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	// Configure and create window
+	val::windowProperties windowConfig;
+	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
+	val::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+
 
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -192,9 +196,9 @@ int main() {
 	setRenderPass(renderPassManager, imageFormat);
 	pipeline.renderPass = &renderPassManager;
 
-	proc.create(windowHDL_GLFW, &window, 2U, imageFormat, { &pipeline });
+	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u,pipeline.getVkRenderPass(), proc._device);
+	window.createSwapChainFrameBuffers(window.getSize(), {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
 
 
@@ -246,7 +250,7 @@ int main() {
 
 	float tmp = .7;
 
-	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+	while (!window.shouldClose()) {
 		glfwPollEvents();
 
 		static uint16_t timer = 0;

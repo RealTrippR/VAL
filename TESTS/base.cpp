@@ -13,10 +13,7 @@ const bool enableValidationLayers = true;
 
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
-#include <VAL/lib/system/system_utils.hpp>
-#include <VAL/lib/system/UBO_Handle.hpp>
-#include <VAL/lib/graphics/shader.hpp>
-#include <VAL/lib/system/renderPass.hpp>
+#include <VAL/lib/ext/gpu_vector.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -65,6 +62,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
+	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
 	static colorBlendState blendState; 
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
@@ -94,16 +92,13 @@ int main()
 
 	v::VAL_PROC proc;
 	
-	val::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
+	v::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
 
-	/////////// consider moving this into the window class ///////////
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
-	//////////////////////////////////////////////////////////////////
 
-	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(800, 800, "Test", NULL, NULL);
-	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	// Configure and create window
+	v::windowProperties windowConfig;
+	windowConfig.setProperty(v::WN_BOOL_PROPERTY::RESIZABLE, true);
+	v::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 
 	// creates Vulkan logical and physical devices
@@ -138,25 +133,27 @@ int main()
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
 
-	proc.create(windowHDL_GLFW, &window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 	
+
+
+
+	// why is this still here? - for attachments?
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
-	const std::vector<res::vertex> vertices = {
+
+
+
+	val::gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
+		});
 
-	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
-
-	std::vector<uint32_t> indices = {
-		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), val::CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
+	val::gpu_vector<uint32_t> indices(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+		{ 0, 1, 2, 2, 3, 0 }
+	);
 
 
 	//////////////////////////////////////////////////////////////
@@ -179,29 +176,36 @@ int main()
 	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
 
 	
-	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+	while (!window.shouldClose()) {
+		glfwPollEvents();
+
+
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
 
 		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
-		glfwPollEvents();
+		// Update view information, stored in a UBO
 		updateUniformBuffer(proc, uboHdl);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		renderTarget.begin(proc);
+
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.updateBuffers(proc);
 		renderTarget.updatePipeline(proc, pipeline);
 		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize()});
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
-		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
+		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, window.getPresentFence());
 		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
 
 		proc.nextFrame();
 	}
 
+	glfwTerminate();
 #ifndef NDEBUG
 	_CrtDumpMemoryLeaks();
 #endif // !NDEBUG

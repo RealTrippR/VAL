@@ -16,6 +16,14 @@ The Vulkan Abstraction Library is missing the following key features:
 
 ----------------------------------------------------------------------------------------------------------------
 
+[!] Redesign Queue System
+
+[!] Optimize transition img layout
+
+[!] Rename "bufferSpace" to "memSpace"
+
+[!] Optimize the createGraphicsPipelines function of VAL_PROC, and allow customization of the VkPipelineViewportStateCreateInfo
+
 [!] Add shader updateUBO and updateSSBO functions to update their descriptor sets
 
 [✓] Allow customization of VkPhysicalDeviceFeatures (to enable things like samplerAnisotropy)
@@ -158,3 +166,5 @@ The Vulkan Abstraction Library is missing the following key features:
 [ ] Consider using: https://github.com/KhronosGroup/Vulkan-Hpp
 
 [ ] Consider purchasing https://www.oreilly.com/library/view/vulkantm-programming-guide/9780134464701/ch13.html
+
+[ ] Execution graphs? This is AMD specific and might not be very useful. (https://docs.vulkan.org/spec/latest/chapters/executiongraphs.html)

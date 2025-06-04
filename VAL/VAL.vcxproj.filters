@@ -48,6 +48,24 @@
     <Filter Include="src\pipelineStateInfos">
       <UniqueIdentifier>{f8534d2c-f76d-4da6-af58-3447f40e9edc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\renderGraph">
+      <UniqueIdentifier>{90ac42fd-b9ab-45c4-93b1-8222b2667aa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderGraph">
+      <UniqueIdentifier>{98ef4482-3d99-48ee-9ca6-c75ab3b75a0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\ext">
+      <UniqueIdentifier>{c35ec39f-fe36-42d0-881e-3cde798f6f39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ext">
+      <UniqueIdentifier>{8bc9da4d-b78b-48b2-8a8c-9ca91e460e31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\debugReporting">
+      <UniqueIdentifier>{2ed74d07-971f-4cd8-8255-76e37954298f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\debugReporting">
+      <UniqueIdentifier>{5b645efa-a567-4d92-99a7-e0e142b9edfc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\VAL_PROC.hpp">
@@ -194,6 +212,99 @@
     <ClInclude Include="lib\system\descType.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderGraph.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderGraphBlock.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\windowProperties.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\VALreturnCode.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\classEnumBitOps.hpp">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\graphEnums.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\pass.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passFunctions.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passFunctionDefinitions.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\tiny_vector.hpp">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passInfo.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\C_compatibleBinding.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\streql.h">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\argBlock.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\argHandleList.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\fixedBlock.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passContext.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\queueManager.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\window.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\gpu_vector.hpp">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\debugReporting\VAL_DebugCallbacks.h">
+      <Filter>lib\debugReporting</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\debugReporting\debugCallbacks.hpp">
+      <Filter>lib\debugReporting</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderPassBeginType.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\debugReporting\VAL_DebugIntercept.h">
+      <Filter>lib\debugReporting</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\hashmap.h">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\framebuffer.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\framebuffer.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\texture2d.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\texture2d.inl">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -280,13 +391,40 @@
     <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp">
       <Filter>src\pipelineStateInfos</Filter>
     </ClCompile>
-    <ClCompile Include="lib\system\physicalDeviceRequirements.cpp">
-      <Filter>src\system</Filter>
-    </ClCompile>
     <ClCompile Include="src\system\UBO_arr_manager.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\system\pushDescriptor.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\renderGraph.cpp">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\passInfo.c">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\streql.c">
+      <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\bakedCommandBuffer.c">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderGraph\argBlock.c">
+      <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c">
+      <Filter>src\debugReporting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debugReporting\debugCallbacks.cpp">
+      <Filter>src\debugReporting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\hashmap.c">
+      <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\physicalDeviceRequirements.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\texture2d.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>

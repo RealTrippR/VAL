@@ -12,13 +12,13 @@
 
 
 #include <VAL/lib/system/sampler.hpp>
-#include <VAL/lib/system/imageView.hpp>
 
 #include <vector>
 #include <algorithm>
 
 namespace val {
-	class shader;
+	class shader; // forward declaration
+	class imageView; // forward declaration
 
 	void pipelineCreateInfo_loadvkCmdPushDescriptorSetKHR(VkDevice device);
 
@@ -44,8 +44,8 @@ namespace val {
 
 		void pushDescriptor_COMBINED_SAMPLER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler);
 
-		void pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& image);
-		void pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& image);
+		void pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView);
+		void pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView);
 
 		void pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView);
 		void pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView);

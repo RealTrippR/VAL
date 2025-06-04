@@ -30,6 +30,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <stdlib.h>
 
 namespace val {
+	class imageView; // forward declaration
+
 	class image {
 	public:
 		image() = default;
@@ -102,6 +104,9 @@ namespace val {
 		void generateMipmaps(VAL_PROC& proc, const uint8_t mipLevels);
 
 	protected:
+
+		friend imageView;
+
 		stbi_uc* _pixels = NULL;
 		VkImage _image{};
 		VkImageLayout _imgLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;

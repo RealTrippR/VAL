@@ -1,9 +1,10 @@
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
 #include <VAL/lib/graphics/shader.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
+#include <VAL/lib/system/imageView.hpp>
 
 #ifndef NDEBUG 
-#define VAL_VALIDATE_PUSH_DESCRIPTOR_EXT if (vkCmdPushDescriptorSetKHR == VK_NULL_HANDLE) {printf("VAL: ERROR: Attempted to use push descriptors, but the push descriptor extension (VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME) was not enabled in the physicalDeviceRequirements!\n");}
+#define VAL_VALIDATE_PUSH_DESCRIPTOR_EXT if (vkCmdPushDescriptorSetKHR == VK_NULL_HANDLE) {val::dbg::printError("Attempted to use push descriptors, but the push descriptor extension (VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME) was not enabled in the physicalDeviceRequirements!\n");}
 #else
 #define VAL_VALIDATE_PUSH_DESCRIPTOR_EXT
 #endif
@@ -164,10 +165,11 @@ namespace val {
 	}
 
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView) {
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView) 
+	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
-		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(),imgView.getImage().getLayout() };
+		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(), imgView.getLayout()};
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -187,10 +189,11 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView) {
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView) 
+	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
-		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(),imgView.getImage().getLayout() };
+		VkDescriptorImageInfo imgInfo{ NULL, imgView.getImageView(), imgView.getLayout()};
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -211,13 +214,14 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView) {
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView)
+	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo;
 		imageInfo.sampler = VK_NULL_HANDLE;
 		imageInfo.imageView = imgView.getImageView();
-		imageInfo.imageLayout = imgView.getImage().getLayout();
+		imageInfo.imageLayout = imgView.getLayout();
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -237,13 +241,14 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView) {
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView)
+	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo;
 		imageInfo.sampler = VK_NULL_HANDLE;
 		imageInfo.imageView = imgView.getImageView();
-		imageInfo.imageLayout = imgView.getImage().getLayout();
+		imageInfo.imageLayout = imgView.getLayout();
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -331,7 +336,8 @@ namespace val {
 			&write
 		);
 	}
-	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, SSBO_Handle& ssbo) {
+	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, SSBO_Handle& ssbo)
+	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		const VkDescriptorBufferInfo bufferInfo{ ssbo.getBuffer(proc), 0, ssbo._size };

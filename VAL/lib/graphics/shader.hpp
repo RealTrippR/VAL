@@ -78,7 +78,9 @@ namespace val {
 
 		const fs::path& getFilepath() noexcept;
 
-		const std::vector<char>& getByteCode() noexcept;
+		tiny_vector<char>& getByteCode() noexcept;
+
+		void deleteByteCode();
 
 		void setStageFlags(const VkShaderStageFlags& stageFlags);
 
@@ -109,9 +111,9 @@ namespace val {
 
 		void setPushDescriptors(const std::vector<val::pushDescriptor*> pushDescriptors);
 
-		void setTextures(const std::vector<descriptorBinding<val::imageView*>> textures);
+		void setTextures(const std::vector<descriptorBinding<val::imageView*>>& textures);
 
-		const std::vector<descriptorBinding<val::imageView*>> getTextures() noexcept;
+		const std::vector<descriptorBinding<val::imageView*>>& getTextures() noexcept;
 
 		void setUBOs(const std::vector<descriptorBinding<UBO_Handle*>>& ubos);
 
@@ -142,7 +144,7 @@ namespace val {
 		VkShaderStageFlags _shaderStageFlags;
 
 		std::string _entryPoint = "main";
-		std::vector<char> _byteCode;
+		tiny_vector<char> _byteCode;
 		fs::path _filepath;
 
 		std::vector<descriptorBinding<specializationConstant*/*Constant*/>> _specializationConstants;

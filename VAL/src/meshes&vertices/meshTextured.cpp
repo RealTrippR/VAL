@@ -54,6 +54,6 @@ namespace val {
 		if (_textureImageView) {
 			vkDestroyImageView(proc._device, _textureImageView, NULL);
 		}
-		_textureImageView.recreate(*texture, VK_IMAGE_ASPECT_COLOR_BIT);
+		_textureImageView.create(*texture, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 }
