@@ -86,7 +86,7 @@ namespace val {
 		else if (*curCommentType == NONE && curStrPos[0] == '/' && curStrPos[1] == '*') {
 			*curCommentType = MULTI_LINE;
 		}
-		else if (*curCommentType == MULTI_LINE && curStrPos[0] == '*' && curStrPos[1] == '/') {
+		else if (*curCommentType == MULTI_LINE && curStrPos[-2] == '*' && curStrPos[-1] == '/') {
 			*curCommentType = NONE;
 		}
 	}
