@@ -107,19 +107,18 @@ int main()
 	VAL_PROC proc;
 	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
-
 	// Configure and create window
 	val::windowProperties windowConfig;
 	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
 	val::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
-	// VAL uses image format requirements to pick the best image format
-	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	imageFormatRequirements formatReqs;
-	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
-	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
-	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
+	//////////////////////////////////////////////////
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
@@ -143,22 +142,27 @@ int main()
 
 	setGraphicsPipelineInfo(pipeline);
 
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
 
+
+
+	// VAL uses image format requirements to pick the best image format
+	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
+	imageFormatRequirements formatReqs;
+	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
+	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
+	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
+
 
 
 	val::renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
-	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
-	//////////////////////////////////////////////////
 
 	val::image img1(proc, "testImage.jpg", imageFormat);
 	val::imageView imgView1(proc, img1, VK_IMAGE_ASPECT_COLOR_BIT);

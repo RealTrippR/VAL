@@ -165,7 +165,7 @@ int main()
 
 	pipeline.renderPass = &renderPassMngr;
 
-	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 

@@ -158,16 +158,13 @@ int main() {
 	val::meshTextured mesh(proc);
 	val::sampler imgSampler(proc, val::combinedImage);
 	imgSampler.bindImageView(mesh._textureImageView);
-	/////////// consider moving this into the window class ///////////
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
-	//////////////////////////////////////////////////////////////////
 
-	VkExtent2D windowSize{ 1000,800 }; // in pixels
-	GLFWwindow* windowHDL_GLFW = glfwCreateWindow(windowSize.width, windowSize.height, "Test", NULL, NULL);
+	
+	// Configure and create window
+	windowProperties windowConfig;
+	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
+	window window(windowConfig, 800, 800, "R_G_TEST", &proc);
 
-	val::window window(windowHDL_GLFW, &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
@@ -184,13 +181,10 @@ int main() {
 	renderImageFormatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, renderImageFormatReqs);
 
-	VkSampleCountFlagBits msaaSamples = proc.getMaxSampleCount();
-	VkPhysicalDeviceProperties deviceProperties;
-	vkGetPhysicalDeviceProperties(proc._physicalDevice, &deviceProperties);
 
 	// required for multisampling
-	multisamplerManager multisamplerMngr(proc, msaaSamples);
-	multisamplerMngr.create(imageFormat, windowSize.width, windowSize.height);
+	multisamplerManager multisamplerMngr(proc, proc.getMaxSampleCount());
+	multisamplerMngr.create(imageFormat, window.getWidth(), window.getHeight());
 
 	// load and configure shaders
 	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
@@ -205,7 +199,9 @@ int main() {
 	// config grahics pipeline
 	val::graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &vertShader,&fragShader };
-	setGraphicsPipelineInfo(pipeline, msaaSamples);
+	setGraphicsPipelineInfo(pipeline, multisamplerMngr.getSampleCount());
+
+
 
 	val::imageFormatRequirements depthFormatReqs;
 	depthFormatReqs.acceptedFormats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
@@ -216,17 +212,19 @@ int main() {
 
 
 	renderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat, depthFormat, msaaSamples);
+	setRenderPass(renderPassMngr, imageFormat, depthFormat, multisamplerMngr.getSampleCount());
 	pipeline.renderPass = &renderPassMngr;
 
-	proc.create(windowHDL_GLFW, &window, 2u, imageFormat, { &pipeline });
+	proc.create(window, 2u, imageFormat, { &pipeline });
 
 	// Create depth buffer
 	val::depthBuffer depthBuffer;
-	depthBuffer.create(proc, window._swapChainExtent, depthFormat, 1u, 1u, msaaSamples);
+	depthBuffer.create(proc, window.getSize(), depthFormat, 1u, 1u, multisamplerMngr.getSampleCount());
+
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front(), multisamplerMngr.getVkImageView() };
-	window.createSwapChainFrameBuffers(window._swapChainExtent, attachments.data(), attachments.size(), pipeline.getVkRenderPass(), proc._device);
+	window.createSwapChainFrameBuffers(window.getSize(), attachments.data(), attachments.size(), pipeline.getVkRenderPass(), proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER FML_PROC INIT //////////////////////////////////////////////////
@@ -252,7 +250,7 @@ int main() {
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
 
-	while (!glfwWindowShouldClose(windowHDL_GLFW)) {
+	while (!window.shouldClose()) {
 		glfwPollEvents();
 		// INSTEAD OF UPDATING HERE, ADD A METHOD TO UPDATE UBOS VIA THE SHADER
 		// ALSO, THERE IS EXCESS COPYING IN THIS FUNCTION
@@ -267,7 +265,10 @@ int main() {
 
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		renderTarget.begin(proc);
+
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.updateBuffers(proc);
 		renderTarget.update(proc, pipeline, { viewport });
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
 		renderTarget.render(proc);

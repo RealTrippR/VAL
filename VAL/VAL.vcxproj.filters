@@ -305,6 +305,12 @@
     <ClInclude Include="lib\system\texture2d.inl">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\meshPBR.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="src\meshes&amp;vertices\meshPBR.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">

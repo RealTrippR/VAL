@@ -24,17 +24,17 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace val {
 	class imageView; // forward declaration
 
-	class texture2d {
+	class Texture2D {
 	public:
-		texture2d(VAL_PROC& proc) : _proc(proc) {};
+		Texture2D(VAL_PROC& proc) : _proc(proc) {};
 
-		texture2d(VAL_PROC& proc, const uint16_t width, const uint16_t height, const VkFormat format,
+		Texture2D(VAL_PROC& proc, const uint16_t width, const uint16_t height, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(proc)
 		{
 			create(width, height, format, usages, layout, memspace, mipLevels);
 		}
 
-		texture2d(VAL_PROC& proc, std::filesystem::path srcpath, const VkFormat format,
+		Texture2D(VAL_PROC& proc, std::filesystem::path srcpath, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(proc)
 		{
 			create(srcpath, format, usages, layout, memspace, mipLevels);

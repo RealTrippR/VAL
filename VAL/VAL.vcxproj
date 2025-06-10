@@ -210,6 +210,7 @@
     <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp" />
     <ClInclude Include="lib\ext\streql.h" />
     <ClInclude Include="lib\ext\tiny_vector.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\meshPBR.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp" />
     <ClInclude Include="lib\graphics\shader.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
@@ -308,6 +309,7 @@
     <ClCompile Include="src\system\system_utils.cpp" />
     <ClInclude Include="lib\system\windowProperties.hpp" />
     <ClInclude Include="lib\VALreturnCode.h" />
+    <ClInclude Include="src\meshes&amp;vertices\meshPBR.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\texture2d.cpp" />

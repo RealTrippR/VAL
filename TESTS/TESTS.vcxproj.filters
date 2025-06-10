@@ -29,6 +29,10 @@
       <Filter>experimental-features</Filter>
     </ClCompile>
     <ClCompile Include="VolumetricsTest.cpp" />
+    <ClCompile Include="experimental-features\raytracingTest.cpp">
+      <Filter>experimental-features</Filter>
+    </ClCompile>
+    <ClCompile Include="deferredRendering.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />

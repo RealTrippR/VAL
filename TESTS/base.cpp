@@ -94,16 +94,16 @@ int main()
 	
 	v::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
 
-
 	// Configure and create window
 	v::windowProperties windowConfig;
 	windowConfig.setProperty(v::WN_BOOL_PROPERTY::RESIZABLE, true);
-	v::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	v::window window(windowConfig, 800, 800, "R_G_TEST", &proc);
 
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
 	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+
 
 	// VAL uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -113,6 +113,9 @@ int main()
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
+
+
+
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
@@ -125,6 +128,7 @@ int main()
 	val::shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	//////////////////////////////////////////////////////////////
 
+
 	val::graphicsPipelineCreateInfo pipeline;
 	pipeline.shaders = { &vertShader,&fragShader };
 	setGraphicsPipelineInfo(pipeline);
@@ -133,13 +137,13 @@ int main()
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
 
-	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 	
 
 
 
 	// why is this still here? - for attachments?
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
+	window.createSwapChainFrameBuffers(window.getSize(), {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
 
 

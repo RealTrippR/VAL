@@ -31,13 +31,13 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace val {
 	class VAL_PROC; // forward declaration
 
-	class window {
+	class Window {
 	public:
-		window() = default;
-		window(VAL_PROC& valProc) {
+		Window() = default;
+		Window(VAL_PROC& valProc) {
 			_procVAL = &valProc;
 		}
-		window(GLFWwindow* windowHDL, VAL_PROC* valProc, VkColorSpaceKHR colorSpace) {
+		Window(GLFWwindow* windowHDL, VAL_PROC* valProc, VkColorSpaceKHR colorSpace) {
 			if (!windowHDL) {
 				printf("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
 				throw std::runtime_error("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
@@ -48,7 +48,7 @@ namespace val {
 			_colorSpace = colorSpace;
 		}
 
-		window(windowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, VAL_PROC* valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL) {
+		Window(windowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, VAL_PROC* valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL) {
 			glfwInit(); // (it's safe to call init more than once. Refer to: https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init)
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
 			
@@ -59,9 +59,11 @@ namespace val {
 
 			_procVAL = valProc;
 			_colorSpace = colorSpace;
+			_swapChainExtent = { .width = width, .height = height };
+			_swapChainAttachmentCount = 0u;
 		}
 
-		~window() {
+		~Window() {
 			cleanup();
 		}
 	public:
@@ -134,8 +136,8 @@ namespace val {
 		tiny_vector<VkFramebuffer, uint8_t> _swapChainFrameBuffers;
 
 		// this data is used to recreate the swap chain when it's out of date.
-		VkImageView* _swapChainAttachments;
-		uint16_t _swapChainAttachmentCount;
+		VkImageView* _swapChainAttachments = NULL;
+		uint16_t _swapChainAttachmentCount = 0u;
 		VkRenderPass _swapChainRenderPass{};
 
 		// Because windows can be created from an existing GLFW handle,

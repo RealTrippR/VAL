@@ -132,18 +132,12 @@ int main() {
 	imageView imgView2(proc);
 
 	pushConstantHandle PC_ImgScissor(sizeof(float));
+
 	/////////// consider moving this into the window class ///////////
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // non resizable
-	//////////////////////////////////////////////////////////////////
-
-
 	// Configure and create window
-	val::windowProperties windowConfig;
-	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
-	val::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
-
+	windowProperties windowConfig;
+	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, false);
+	window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -196,7 +190,7 @@ int main() {
 	setRenderPass(renderPassManager, imageFormat);
 	pipeline.renderPass = &renderPassManager;
 
-	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	window.createSwapChainFrameBuffers(window.getSize(), {}, 0u, pipeline.getVkRenderPass(), proc._device);
 

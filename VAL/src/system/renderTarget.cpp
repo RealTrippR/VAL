@@ -309,6 +309,7 @@ namespace val {
 
 #ifndef NDEBUG
 		if (vkQueueSubmit(graphicsQueue._queue, 1, &submitInfo, fence) != VK_SUCCESS) {
+			dbg::printError("Failed to submit command buffer @ %p to graphics queue.", &graphicsQueue._commandBuffers[currentFrame]);
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
 #else
