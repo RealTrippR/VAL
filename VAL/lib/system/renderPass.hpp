@@ -26,8 +26,8 @@ namespace val {
 	class renderPassManager
 	{
 	public:
-		renderPassManager(VAL_PROC& proc) { _procVAL = &proc; };
-		renderPassManager(VAL_PROC& proc, VkSampleCountFlagBits MSAAsamples) { _procVAL = &proc; _MSAAsamples = MSAAsamples; };
+		renderPassManager(ValProc& proc) { _procVAL = &proc; };
+		renderPassManager(ValProc& proc, VkSampleCountFlagBits MSAAsamples) { _procVAL = &proc; _MSAAsamples = MSAAsamples; };
 
 		~renderPassManager() {
 			destroy();
@@ -57,9 +57,9 @@ namespace val {
 	protected:
 		friend renderAttachment;
 		friend subpass;
-		friend VAL_PROC;
+		friend ValProc;
 		/******************************************/
-		VAL_PROC* _procVAL = NULL;
+		ValProc* _procVAL = NULL;
 		/******************************************/
 
 		VkSampleCountFlagBits _MSAAsamples = VK_SAMPLE_COUNT_1_BIT;

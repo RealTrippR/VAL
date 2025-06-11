@@ -32,9 +32,9 @@ struct uniformBufferObject {
 
 const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
-void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
+void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl)
 {	using namespace val;
-	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
+	VkExtent2D& extent = proc._windowVAL->getSize();
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
@@ -48,7 +48,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 {	using namespace val;
 
 	// state infos
@@ -88,16 +88,16 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	namespace v = val;
+	using namespace val;
 
-	v::VAL_PROC proc;
+	ValProc proc;
 	
-	v::physicalDeviceRequirements deviceRequirements (v::DEVICE_TYPES::dedicated_GPU | v::DEVICE_TYPES::integrated_GPU);
+	PhysicalDeviceRequirements deviceRequirements (DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
-	v::windowProperties windowConfig;
-	windowConfig.setProperty(v::WN_BOOL_PROPERTY::RESIZABLE, true);
-	v::window window(windowConfig, 800, 800, "R_G_TEST", &proc);
+	WindowProperties windowConfig;
+	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
+	Window window(windowConfig, 800, 800, "Base Test", proc);
 
 
 	// creates Vulkan logical and physical devices
@@ -119,17 +119,17 @@ int main()
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
-	val::shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	//////////////////////////////////////////////////////////////
 
 
-	val::graphicsPipelineCreateInfo pipeline;
+	val::GraphicsPipeline pipeline;
 	pipeline.shaders = { &vertShader,&fragShader };
 	setGraphicsPipelineInfo(pipeline);
 

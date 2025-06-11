@@ -19,7 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void meshSimple::loadFromDiskObj(VAL_PROC& proc, fs::path objPath, bool deduplicateVertices) {
+	void meshSimple::loadFromDiskObj(ValProc& proc, fs::path objPath, bool deduplicateVertices) {
 
 		loadModelFromDiskAsUnifiedMesh(objPath, _vertices, _indices, &_meshAttribs, deduplicateVertices);
 
@@ -28,7 +28,7 @@ namespace val {
 		proc.createIndexBuffer(_indices.data(), _indices.size(), &_indexBuffer, &_indexBufferMem);
 	}
 
-	void meshSimple::cleanup(VAL_PROC& proc)
+	void meshSimple::destroy(ValProc& proc)
 	{
 		VkDevice& device = proc._device;
 

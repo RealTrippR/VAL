@@ -46,7 +46,7 @@ namespace val {
 		vkEndCommandBuffer(cmd);
 	}
 
-	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, graphicsPipelineCreateInfo& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType)
+	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType)
 	{
 
 		VkRenderPassBeginInfo renderPassBeginInfo{ 
@@ -65,7 +65,7 @@ namespace val {
 		vkCmdEndRenderPass(cmd);
 	}
 
-	inline void setPipeline(graphicsPipelineCreateInfo& pipeline, VAL_PROC& proc, VkCommandBuffer& commandBuffer) {
+	inline void SET_PIPELINE(GraphicsPipeline& pipeline, VAL_PROC& proc, VkCommandBuffer& commandBuffer) {
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		//VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		// bind pipeline and respective descriptor sets
@@ -74,45 +74,45 @@ namespace val {
 			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 	}
 
-	inline void setViewport(const VkViewport& viewport, VkCommandBuffer& commandBuffer) {
+	inline void SET_VIEWPORT(const VkViewport& viewport, VkCommandBuffer& commandBuffer) {
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	}
 
-	inline void setScissor(const VkRect2D& scissor, VkCommandBuffer& commandBuffer) {
+	inline void SET_SCISSOR(const VkRect2D& scissor, VkCommandBuffer& commandBuffer) {
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	inline void setScissor(const VkExtent2D& scissor, VkCommandBuffer& commandBuffer) {
+	inline void SET_SCISSOR(const VkExtent2D& scissor, VkCommandBuffer& commandBuffer) {
 		const VkRect2D _scissor = { 0, 0, scissor.width, scissor.height };
 		vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
 	}
 
-	inline void setVertexBuffer(VkBuffer& buffer, VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset) {
+	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset) {
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &buffer, &bufferOffset);
 	}
 
-	inline void setIndexBuffer(VkBuffer& buffer, VkCommandBuffer& commandBuffer) {
+	inline void SET_INDEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer) {
 		vkCmdBindIndexBuffer(commandBuffer, buffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 
-	inline void drawInstanced(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount, 
+	inline void DRAW_INSTANCED_INDEXED(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount,
 		VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex, const uint32_t& firstInstance)
 	{
 		vkCmdDrawIndexed(cmd, indexBuffer.size(), instanceCount, firstIndex, firstVertex, firstInstance);
 	}
 
-	inline void drawInstanced(val::buffer& vertexBuffer, const uint32_t& instanceCount,
+	inline void DRAW_INSTANCED(val::buffer& vertexBuffer, const uint32_t& instanceCount,
 		VkCommandBuffer& cmd, const uint32_t& firstInstance, const uint32_t& firstVertex)
 	{
 		vkCmdDraw(cmd, vertexBuffer.size(), instanceCount, firstVertex, firstInstance);
 	}
 
-	inline void drawIndexed(const uint32_t& indexCount, VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex)
+	inline void DRAW_INDEXED(const uint32_t& indexCount, VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex)
 	{
 		vkCmdDrawIndexed(cmd, indexCount, 1, firstIndex, firstVertex, 0);
 	}
 
-	inline void draw(const uint32_t& vertexCount,VkCommandBuffer& cmd, const uint32_t& firstVertex)
+	inline void DRAW(const uint32_t& vertexCount,VkCommandBuffer& cmd, const uint32_t& firstVertex)
 	{
 		vkCmdDraw(cmd, vertexCount, 1, 0, 0);
 	}

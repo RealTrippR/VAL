@@ -18,14 +18,14 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/image.hpp>
 
 namespace val {
-	void image::recreate(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels /*DEFAULT=1U*/) {
+	void Image::recreate(ValProc& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels /*DEFAULT=1U*/) {
 		vkDestroyImage(_device, _image, NULL);
 		vkFreeMemory(_device, _img_memory, NULL);
 
 		create(proc, path, format, mipLevels);
 	}
 
-	void image::create(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels, const VkSampleCountFlagBits& MSAA_samples) {
+	void Image::create(ValProc& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels, const VkSampleCountFlagBits& MSAA_samples) {
 #ifndef NDEBUG
 		if (_image) {
 			printf("VAL: The create function should not be called on an already initialized image, use the recreate function instead. The memory address of _image is: %p", &_image);
@@ -48,7 +48,7 @@ namespace val {
 		}
 	}
 
-	void image::generateMipmaps(VAL_PROC& proc, const uint8_t mipLevels) {
+	void Image::generateMipmaps(ValProc& proc, const uint8_t mipLevels) {
 		// Check if image format supports linear blitting
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties(proc._physicalDevice, _format, &formatProperties);
@@ -136,7 +136,7 @@ namespace val {
 	}
 
 
-	void image::transitionImgLayout(VAL_PROC& proc, VkCommandBuffer cmdbuff, VkImageLayout newLayout) {
+	void Image::transitionImgLayout(ValProc& proc, VkCommandBuffer cmdbuff, VkImageLayout newLayout) {
 		proc.transitionImageLayout(_image, _format, _imgLayout, newLayout, cmdbuff, _mipLevels);
 	}
 }

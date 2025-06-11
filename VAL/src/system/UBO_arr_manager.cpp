@@ -23,7 +23,7 @@ namespace val {
 	/***************************************************/
 	/* UBO ARRAY SUBSET */
 
-	void uboArraySubset::create(VAL_PROC& proc, VkBufferUsageFlags additionalUsages, bufferSpace space,
+	void uboArraySubset::create(ValProc& proc, VkBufferUsageFlags additionalUsages, bufferSpace space,
 		UBO_Handle** uboHandles, uint32_t uboCount)
 	{
 		if (uboCount == 0u) {
@@ -53,7 +53,7 @@ namespace val {
 
 	}
 
-	void uboArraySubset::destroy(VAL_PROC& proc) {
+	void uboArraySubset::destroy(ValProc& proc) {
 		if (_vkBuff) {
 			vkFreeMemory(proc._device, _vkMem, NULL);
 			vkDestroyBuffer(proc._device, _vkBuff, NULL);
@@ -69,7 +69,7 @@ namespace val {
 	/***************************************************/
 	/* UBO ARRAY */
 
-	void uboArray::create(VAL_PROC& proc, UBO_Handle** uboHandles, uint32_t uboCount) {
+	void uboArray::create(ValProc& proc, UBO_Handle** uboHandles, uint32_t uboCount) {
 	
 		{ // create host local buffers (GPU Only)
 			VkBufferUsageFlags optionalFlags = 0x0;
@@ -181,7 +181,7 @@ namespace val {
 		}
 	}
 
-	void uboArray::destroy(VAL_PROC& proc) {
+	void uboArray::destroy(ValProc& proc) {
 		localReadOnly.destroy(proc);
 		localDstTransferOnly.destroy(proc);
 		localSrcTransferOnly.destroy(proc);

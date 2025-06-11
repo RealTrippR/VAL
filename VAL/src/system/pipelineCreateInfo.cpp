@@ -22,7 +22,7 @@ namespace val {
 
 	std::vector<UBO_Handle*> pipelineCreateInfo::getUniqueUBOs() const {
 		std::vector<UBO_Handle*> UBO_Handles;
-		for (shader* shdr : shaders) {
+		for (Shader* shdr : shaders) {
 			for (auto& UBO_Write : shdr->_UBO_Handles) {
 				for (auto& UBO_Hdl : UBO_Write.values) {
 
@@ -41,7 +41,7 @@ namespace val {
 
 	std::vector<pushConstantHandle*> pipelineCreateInfo::getUniquePushConstants() const {
 		std::vector<pushConstantHandle*> PC_Handles;
-		for (shader* shdr : shaders) {
+		for (Shader* shdr : shaders) {
 			if (shdr->_pushConstant != NULL) {
 
 				pushConstantHandle* PC_Hdl = shdr->_pushConstant;
@@ -60,7 +60,7 @@ namespace val {
 
 	std::vector<SSBO_Handle*> pipelineCreateInfo::getUniqueSSBOs() const {
 		std::vector<SSBO_Handle*> SSBO_Handles;
-		for (shader* shdr : shaders) {
+		for (Shader* shdr : shaders) {
 			for (auto SSBO_Write : shdr->_SSBO_Handles) {
 				for (SSBO_Handle* SSBO_HDL : SSBO_Write.values) {
 
@@ -77,7 +77,7 @@ namespace val {
 		return SSBO_Handles;
 	}
 
-	std::vector<VkDescriptorSet> pipelineCreateInfo::getDescriptorSets(VAL_PROC& proc) const {
+	std::vector<VkDescriptorSet> pipelineCreateInfo::getDescriptorSets(ValProc& proc) const {
 		return proc._descriptorSets[descriptorsIdx];
 	}
 
@@ -118,7 +118,7 @@ namespace val {
 	}
 
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
+	void pipelineCreateInfo::pushDescriptor_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo = sampler.getVkDescriptorImageInfo();
@@ -141,7 +141,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_COMBINED_SAMPLER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
+	void pipelineCreateInfo::pushDescriptor_COMBINED_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo = sampler.getVkDescriptorImageInfo();
@@ -165,7 +165,7 @@ namespace val {
 	}
 
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView) 
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
@@ -189,7 +189,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView) 
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
@@ -214,7 +214,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView)
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
@@ -241,7 +241,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView)
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
@@ -268,7 +268,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_UNIFORM_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, UBO_Handle& ubo) {
+	void pipelineCreateInfo::pushDescriptor_UNIFORM_BUFFER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, UBO_Handle& ubo) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		const VkDescriptorBufferInfo bufferInfo{ ubo.getBuffer(proc), ubo._offset, ubo._size };
@@ -290,7 +290,7 @@ namespace val {
 			&write
 		);
 	}
-	void pipelineCreateInfo::pushDescriptor_UNIFORM_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, UBO_Handle& ubo) {
+	void pipelineCreateInfo::pushDescriptor_UNIFORM_BUFFER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, UBO_Handle& ubo) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		const VkDescriptorBufferInfo bufferInfo{ ubo.getBuffer(proc), ubo._offset, ubo._size };
@@ -313,7 +313,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, SSBO_Handle& ssbo) {
+	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, SSBO_Handle& ssbo) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		const VkDescriptorBufferInfo bufferInfo{ ssbo.getBuffer(proc), 0, ssbo._size };
@@ -336,7 +336,7 @@ namespace val {
 			&write
 		);
 	}
-	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, SSBO_Handle& ssbo)
+	void pipelineCreateInfo::pushDescriptor_STORAGE_BUFFER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, SSBO_Handle& ssbo)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 

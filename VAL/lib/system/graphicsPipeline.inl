@@ -17,14 +17,14 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
 #define VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
 
-#include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
+#include <VAL/lib/system/graphicsPipeline.hpp>
 
 namespace val {
-	inline VkPipeline& graphicsPipelineCreateInfo::getVkPipeline(VAL_PROC& proc) {
+	inline VkPipeline& GraphicsPipeline::getVkPipeline(ValProc& proc) {
 		return proc._graphicsPipelines[pipelineIdx];
 	}
 
-	inline VkRenderPass& graphicsPipelineCreateInfo::getVkRenderPass() {
+	inline VkRenderPass& GraphicsPipeline::getVkRenderPass() {
 		return renderPass->getVkRenderPass();
 	}
 }

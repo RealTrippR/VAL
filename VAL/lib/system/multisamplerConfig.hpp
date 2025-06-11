@@ -4,11 +4,11 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	class multisamplerManager
+	class MultisamplerConfig
 	{
 	public:
-		multisamplerManager(VAL_PROC& proc) { _procVAL = &proc; }
-		multisamplerManager(VAL_PROC& proc, const VkSampleCountFlagBits& sampleCount) { _procVAL = &proc; _sampleCount = sampleCount; }
+		MultisamplerConfig(ValProc& proc) { _procVAL = &proc; }
+		MultisamplerConfig(ValProc& proc, const VkSampleCountFlagBits& sampleCount) { _procVAL = &proc; _sampleCount = sampleCount; }
 
 	public:
 		
@@ -27,11 +27,11 @@ namespace val {
 
 		const VkSampleCountFlagBits& getSampleCount();
 
-		void setVAL_PROC(VAL_PROC& proc);
+		void setValProc(ValProc& proc);
 
-		VAL_PROC& getVAL_PROC();
+		ValProc& getValProc();
 	protected:
-		VAL_PROC* _procVAL;
+		ValProc* _procVAL;
 		/********************************/
 		VkImage _colorImage = VK_NULL_HANDLE;
 		VkDeviceMemory _colorImageMemory = VK_NULL_HANDLE;

@@ -10,14 +10,18 @@ namespace val {
 
 	class meshTextured {
 	public:
-		meshTextured(VAL_PROC& proc) : _proc(proc), _textureImageView(proc) {};
+		meshTextured(ValProc& proc) : _proc(proc), _textureImageView(proc) {};
+
+		~meshTextured() {
+			cleanup();
+		}
 	public:
-		void loadFromDiskObj(VAL_PROC& proc, fs::path objPath, bool deduplicateVertices);
+		void loadFromDiskObj(fs::path objPath, bool deduplicateVertices);
 		//void loadTexture(VAL_PROC& proc, const fs::path texturePath, const VkFormat imageFormat,
 		//	const uint32_t mipLevels = 1u, const VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT);
 
-		void setTexture(VAL_PROC& proc, val::image* texture);
-		void cleanup(VAL_PROC& proc);
+		void setTexture(val::Image& texture);
+		void cleanup();
 
 		std::vector<vertex3D> _vertices;
 		std::vector<uint32_t> _indices;
@@ -29,9 +33,9 @@ namespace val {
 		VkBuffer _indexBuffer = NULL;
 		VkDeviceMemory _indexBufferMem = NULL;
 
-		val::image* _texture = NULL;
+		val::Image* _texture = NULL;
 		val::imageView _textureImageView;
-		val::VAL_PROC& _proc;
+		val::ValProc& _proc;
 		//mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(val::vertex3D), &vertexBuffer, &vertexBufferMem);
 	};
 }

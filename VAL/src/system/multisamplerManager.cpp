@@ -1,15 +1,15 @@
-#include <VAL/lib/system/multisamplerManager.hpp>
+#include <VAL/lib/system/multisamplerConfig.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val
 {
-	void multisamplerManager::create(const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits, const bufferSpace& space, const uint8_t& mipMapLevel) {
+	void MultisamplerConfig::create(const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits, const bufferSpace& space, const uint8_t& mipMapLevel) {
 		_procVAL->createImage(width, height, imgFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 			bufferSpaceToVkMemoryProperty(space), _colorImage, _colorImageMemory, mipMapLevel, _sampleCount);
 		_procVAL->createImageView(_colorImage, imgFormat, VK_IMAGE_ASPECT_COLOR_BIT, &_colorImageView, mipMapLevel);
 	}
 
-	void multisamplerManager::create(const VkSampleCountFlagBits MSAA_samples, const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits, const bufferSpace& space, const uint8_t& mipMapLevel) {
+	void MultisamplerConfig::create(const VkSampleCountFlagBits MSAA_samples, const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits, const bufferSpace& space, const uint8_t& mipMapLevel) {
 		
 		setSampleCount(MSAA_samples);
 
@@ -19,7 +19,7 @@ namespace val
 	}
 
 
-	void multisamplerManager::destroy() {
+	void MultisamplerConfig::destroy() {
 		const auto& device = _procVAL->_device;
 		if (_colorImage) {
 			vkDestroyImage(device, _colorImage, VK_NULL_HANDLE);
@@ -32,31 +32,31 @@ namespace val
 		}
 	}
 
-	const VkImage& multisamplerManager::getVkImage() {
+	const VkImage& MultisamplerConfig::getVkImage() {
 		return _colorImage;
 	}
 
-	const VkDeviceMemory& multisamplerManager::getImageMemory() {
+	const VkDeviceMemory& MultisamplerConfig::getImageMemory() {
 		return _colorImageMemory;
 	}
 
-	const VkImageView& multisamplerManager::getVkImageView() {
+	const VkImageView& MultisamplerConfig::getVkImageView() {
 		return _colorImageView;
 	}
 
-	void multisamplerManager::setSampleCount(const VkSampleCountFlagBits& samples) {
+	void MultisamplerConfig::setSampleCount(const VkSampleCountFlagBits& samples) {
 		_sampleCount = samples;
 	}
 
-	const VkSampleCountFlagBits& multisamplerManager::getSampleCount() {
+	const VkSampleCountFlagBits& MultisamplerConfig::getSampleCount() {
 		return _sampleCount;
 	}
 
-	void multisamplerManager::setVAL_PROC(VAL_PROC& proc) {
+	void MultisamplerConfig::setValProc(ValProc& proc) {
 		_procVAL = &proc;
 	}
 
-	VAL_PROC& multisamplerManager::getVAL_PROC() {
+	ValProc& MultisamplerConfig::getValProc() {
 		return *_procVAL;
 	}
 }

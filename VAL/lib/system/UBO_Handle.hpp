@@ -31,17 +31,17 @@ namespace val {
 		UBO_Handle(uint16_t sizeOfUBO, bufferSpace space, VkBufferUsageFlags additionalUsageFlags) : _size(sizeOfUBO), _space(space), _additionalUsageFlags(additionalUsageFlags){};
 
 	public:
-		void* getData(VAL_PROC& proc);
+		void* getData(ValProc& proc);
 
-		void* getData(VAL_PROC& proc, const uint8_t frameIdx);
+		void* getData(ValProc& proc, const uint8_t frameIdx);
 
-		VkBuffer getBuffer(VAL_PROC& proc);
+		VkBuffer getBuffer(ValProc& proc);
 
-		void update(VAL_PROC& proc, void* data);
+		void update(ValProc& proc, void* data);
 
-		void update(VAL_PROC& proc, void* data, const uint8_t frameIdx);
+		void update(ValProc& proc, void* data, const uint8_t frameIdx);
 
-		uboArraySubset* getUBOarraySubset(VAL_PROC& proc);
+		uboArraySubset* getUBOarraySubset(ValProc& proc);
 
 
 		//void* getMappedData(VAL_PROC& pro);

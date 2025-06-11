@@ -21,7 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
 
 namespace val {
-	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, const shader& shdr, VkCommandBuffer& cmdBuffer) {
+	void pushConstantHandle::update(ValProc& proc, void* data, const pipelineCreateInfo& pipeline, const Shader& shdr, VkCommandBuffer& cmdBuffer) {
 #ifndef NDEBUG
 		if (_size % 4 != 0) {
 			printf("VAL: WARNING: Push constant at memory address %h has a size that is not a multiple of 4! It's size is: %d", this, _size);
@@ -39,7 +39,7 @@ namespace val {
 		);
 	}
 
-	void pushConstantHandle::update(VAL_PROC& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer& cmdBuffer) {
+	void pushConstantHandle::update(ValProc& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer& cmdBuffer) {
 		vkCmdPushConstants(
 			cmdBuffer,
 			proc._pipelineLayouts[pipeline.pipelineIdx],

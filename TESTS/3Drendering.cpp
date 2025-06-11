@@ -67,7 +67,7 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
+void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -85,7 +85,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline, const VkSampleCountFlagBits& MSAAsamples)
+void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline, const VkSampleCountFlagBits& MSAAsamples)
 {
 	using namespace val;
 	// state infos (MUST BE STATIC IN MEMORY!)
@@ -150,20 +150,20 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, V
 
 int main() {
 	using namespace val;
-	val::VAL_PROC proc;
+	ValProc proc;
 
-	val::physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	val::PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-	val::meshTextured mesh(proc);
-	val::sampler imgSampler(proc, val::combinedImage);
+	meshTextured mesh(proc);
+	sampler imgSampler(proc, val::combinedImage);
 	imgSampler.bindImageView(mesh._textureImageView);
 
 	
 	// Configure and create window
-	windowProperties windowConfig;
+	WindowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
-	window window(windowConfig, 800, 800, "R_G_TEST", &proc);
+	Window window(windowConfig, 800, 800, "3D Rendering Test", proc);
 
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
@@ -174,7 +174,7 @@ int main() {
 
 	// FML uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements renderImageFormatReqs;
+	val::ImageFormatRequirements renderImageFormatReqs;
 	renderImageFormatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	renderImageFormatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	renderImageFormatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
@@ -183,27 +183,27 @@ int main() {
 
 
 	// required for multisampling
-	multisamplerManager multisamplerMngr(proc, proc.getMaxSampleCount());
-	multisamplerMngr.create(imageFormat, window.getWidth(), window.getHeight());
+	MultisamplerConfig multisampler(proc, proc.getMaxSampleCount());
+	multisampler.create(imageFormat, window.getWidth(), window.getHeight());
 
 	// load and configure shaders
-	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ val::vertex3D::getBindingDescription() });
 	vertShader._UBO_Handles = { { &uboHdl, 0 } };
 
 	// load and configure frag shader
-	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 	
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipeline;
+	val::GraphicsPipeline pipeline;
 	pipeline.shaders = { &vertShader,&fragShader };
-	setGraphicsPipelineInfo(pipeline, multisamplerMngr.getSampleCount());
+	setGraphicsPipelineInfo(pipeline, multisampler.getSampleCount());
 
 
 
-	val::imageFormatRequirements depthFormatReqs;
+	val::ImageFormatRequirements depthFormatReqs;
 	depthFormatReqs.acceptedFormats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
 	depthFormatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	depthFormatReqs.features = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -212,27 +212,27 @@ int main() {
 
 
 	renderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat, depthFormat, multisamplerMngr.getSampleCount());
+	setRenderPass(renderPassMngr, imageFormat, depthFormat, multisampler.getSampleCount());
 	pipeline.renderPass = &renderPassMngr;
 
 	proc.create(window, 2u, imageFormat, { &pipeline });
 
 	// Create depth buffer
-	val::depthBuffer depthBuffer;
-	depthBuffer.create(proc, window.getSize(), depthFormat, 1u, 1u, multisamplerMngr.getSampleCount());
+	val::DepthBuffer depthBuffer;
+	depthBuffer.create(proc, window.getSize(), depthFormat, 1u, 1u, multisampler.getSampleCount());
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
-	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front(), multisamplerMngr.getVkImageView() };
+	std::vector<VkImageView> attachments = { depthBuffer.imgViews.front(), multisampler.getVkImageView() };
 	window.createSwapChainFrameBuffers(window.getSize(), attachments.data(), attachments.size(), pipeline.getVkRenderPass(), proc._device);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER FML_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 	// Create mesh and texture, load object and apply texture to the image
-	val::image textureImg(proc, TEXTURE_PATH, imageFormat);
-	mesh.loadFromDiskObj(proc, MODEL_PATH, true);
-	mesh.setTexture(proc, &textureImg);
+	val::Image textureImg(proc, TEXTURE_PATH, imageFormat);
+	mesh.loadFromDiskObj(MODEL_PATH, true);
+	mesh.setTexture(textureImg);
 
 	//////////////////////////////////////////////////////////////////
 	proc.createDescriptorSets(&pipeline);

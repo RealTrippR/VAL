@@ -159,12 +159,12 @@ int main() {
 
 	// The shader class is poorly optimized and fucking retarded at the moment
 	// load and configure vert shader
-	val::shader polygonVertShader("shaders/polygonvert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader polygonVertShader("shaders/polygonvert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	polygonVertShader.setVertexAttributes(res::polygonVertex::getAttributeDescriptions().data(),
 		res::polygonVertex::getAttributeDescriptions().size());
 	polygonVertShader.setBindingDescription(res::polygonVertex::getBindingDescription());
 
-	val::shader polygonFragShader("shaders/polygonfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader polygonFragShader("shaders/polygonfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	val::pipelineCreateInfo pipelineInfo;
 

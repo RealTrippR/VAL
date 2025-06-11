@@ -122,14 +122,14 @@ int main() {
 
 
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 
 	// load and configure frag shader
-	val::shader fragShader("shaders-compiled/specializationConstantsfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/specializationConstantsfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	float redOffset = .5;
 	val::specializationConstant spc;
 	spc._data = &redOffset; spc._dataSize = sizeof(redOffset);

@@ -101,7 +101,7 @@
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp">
+    <ClInclude Include="lib\system\graphicsPipeline.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp">
@@ -170,7 +170,7 @@
     <ClInclude Include="lib\system\subpass.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\multisamplerManager.hpp">
+    <ClInclude Include="lib\system\multisamplerConfig.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp">
@@ -260,7 +260,7 @@
     <ClInclude Include="lib\renderGraph\fixedBlock.h">
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.inl">
+    <ClInclude Include="lib\system\graphicsPipeline.inl">
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\renderGraph\passContext.hpp">

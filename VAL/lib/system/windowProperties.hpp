@@ -43,7 +43,7 @@ namespace val {
 		DEF_ENUM_BITWISE_OPERATORS(WN_BOOL_PROPERTY);
 	#endif
 
-	class windowProperties {
+	class WindowProperties {
 	protected:
 		WN_BOOL_PROPERTY _boolSetMask{}; // the values to be set
 		WN_BOOL_PROPERTY _boolValueMask{};

@@ -101,11 +101,11 @@ namespace val {
 		CPU_GPU = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
 	};
 
-	class VAL_PROC; // forward declaration
+	class ValProc; // forward declaration
 
 	namespace fs = std::filesystem;
 
-	struct imageFormatRequirements
+	struct ImageFormatRequirements
 	{
 		std::vector<VkFormat> acceptedFormats;
 		std::vector<VkColorSpaceKHR> acceptedColorSpaces;
@@ -113,7 +113,7 @@ namespace val {
 		VkFormatFeatureFlags features;
 	};
 
-	struct queueFamilyIndices
+	struct QueueFamilyIndices
 	{
 		std::optional<unsigned int> graphicsFamily;
 		std::optional<unsigned int> presentFamily;
@@ -149,7 +149,7 @@ namespace val {
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	queueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
 
 	std::vector<const char*> getRequiredExtensions(const bool& enableValidationLayers);
 
@@ -163,13 +163,13 @@ namespace val {
 
 	//VkSurfaceFormatKHR findSurfaceImageFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 
-	VkFormat findSupportedImageFormat(VAL_PROC& proc, imageFormatRequirements& requirements);
+	VkFormat findSupportedImageFormat(ValProc& proc, ImageFormatRequirements& requirements);
 
-	VkFormat findSupportedImageFormat(VkPhysicalDevice physicalDevice, imageFormatRequirements& requirements);
+	VkFormat findSupportedImageFormat(VkPhysicalDevice physicalDevice, ImageFormatRequirements& requirements);
 
-	VkPhysicalDevice findOptimalPhysicalDevice(VAL_PROC& proc, physicalDeviceRequirements& requirements, VkSurfaceKHR surface);
+	VkPhysicalDevice findOptimalPhysicalDevice(ValProc& proc, PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface);
 
-	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance vkInstance, physicalDeviceRequirements& requirements, VkSurfaceKHR surface);
+	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance vkInstance, PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface);
 
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 
@@ -177,7 +177,7 @@ namespace val {
 
 	VkImageView createImageView(VkDevice device, VkImage image, const VkFormat& format, const uint32_t& mipLevels = 1U);
 
-	VkImage createTextureImage(VAL_PROC* proc, fs::path imgFilepath, stbi_uc** pixelsOut, VkFormat format, VkDeviceMemory& textureImageMemory,
+	VkImage createTextureImage(ValProc* proc, fs::path imgFilepath, stbi_uc** pixelsOut, VkFormat format, VkDeviceMemory& textureImageMemory,
 		const VkImageUsageFlagBits& additionalUsageFlagBits = VkImageUsageFlagBits(0), const uint32_t& mipLevels = 1U,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL, const bufferSpace& bufferSpace = GPU_ONLY);
 	

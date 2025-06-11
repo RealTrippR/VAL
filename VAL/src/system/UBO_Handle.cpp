@@ -20,28 +20,28 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	void* UBO_Handle::getData(VAL_PROC& proc) {
+	void* UBO_Handle::getData(ValProc& proc) {
 		return (char*)_arrSubset->getMappedDataOfFrame(proc._currentFrame) + _offset;
 	}
 
-	void* UBO_Handle::getData(VAL_PROC& proc, const uint8_t frameIdx) {
+	void* UBO_Handle::getData(ValProc& proc, const uint8_t frameIdx) {
 		return (char*)_arrSubset->getMappedDataOfFrame(frameIdx) + _offset;
 	}
 
-	VkBuffer UBO_Handle::getBuffer(VAL_PROC& proc) {
+	VkBuffer UBO_Handle::getBuffer(ValProc& proc) {
 		return _arrSubset ? _arrSubset->_vkBuff : VK_NULL_HANDLE;
 	}
 
-	void UBO_Handle::update(VAL_PROC& proc, void* data) {
+	void UBO_Handle::update(ValProc& proc, void* data) {
 		uint8_t* tmp = (uint8_t*)_arrSubset->getMappedDataOfFrame(proc._currentFrame);
 		memcpy((uint8_t*)_arrSubset->getMappedDataOfFrame(proc._currentFrame) + _offset, data, _size);
 	}
 
-	void UBO_Handle::update(VAL_PROC& proc, void* data, const uint8_t frameIdx) {
+	void UBO_Handle::update(ValProc& proc, void* data, const uint8_t frameIdx) {
 		memcpy((char*)_arrSubset->getMappedDataOfFrame(frameIdx) + _offset, data, _size);
 	}
 
-	uboArraySubset* UBO_Handle::getUBOarraySubset(VAL_PROC& proc) {
+	uboArraySubset* UBO_Handle::getUBOarraySubset(ValProc& proc) {
 		return _arrSubset;
 	}
 

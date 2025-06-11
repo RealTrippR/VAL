@@ -54,7 +54,7 @@ namespace val {
 
 	protected:
 		friend subpass;
-		friend VAL_PROC;
+		friend ValProc;
 		VkFormat _imgFormat = VK_FORMAT_UNDEFINED;
 		RENDER_ATTACHMENT_OPERATION_TYPE _loadOp = CLEAR;
 		RENDER_ATTACHMENT_OPERATION_TYPE _storeOp = STORE;

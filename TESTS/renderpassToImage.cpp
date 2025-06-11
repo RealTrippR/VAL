@@ -167,14 +167,14 @@ int main()
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
 	// load and configure frag shader
-	val::shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	val::sampler imgSampler(proc, val::combinedImage);
 	imgSampler.setMaxAnisotropy(8.f);
 	fragShaderImage.setImageSamplers({ { &imgSampler, 1 } });
 
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
@@ -197,13 +197,13 @@ int main()
 
 	val::UBO_Handle uboHdl2(sizeof(uniformBufferObject));
 
-	val::shader vertShader2("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader2("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader2.setBindingDescriptions({ res::vertex::getBindingDescription() });
 
 	vertShader2._UBO_Handles = {{ &uboHdl2,0 }};
 
-	val::shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	pipeline2.shaders = { &vertShader2,&fragShaderColor };
 
 	setGraphicsPipelineInfo2(pipeline2);

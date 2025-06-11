@@ -2,7 +2,7 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void imageView::create(val::image& img, const VkImageAspectFlags& aspectFlags)
+	void imageView::create(val::Image& img, const VkImageAspectFlags& aspectFlags)
 	{
 		_layout = &img._imgLayout;
 		if (_imgView != VK_NULL_HANDLE) {
@@ -13,7 +13,7 @@ namespace val {
 	}
 
 
-	void imageView::create(val::texture2d& texture, const VkImageAspectFlags& aspectFlags) 
+	void imageView::create(val::Texture2D& texture, const VkImageAspectFlags& aspectFlags)
 	{
 		_layout = &(texture._layout);
 
@@ -41,7 +41,7 @@ namespace val {
 		}
 	}
 
-	VAL_PROC& imageView::getProc() 
+	ValProc& imageView::getProc() 
 	{
 		return _proc;
 	}

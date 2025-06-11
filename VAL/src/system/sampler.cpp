@@ -17,7 +17,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/system/sampler.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
-#include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
+#include <VAL/lib/system/graphicsPipeline.hpp>
 
 namespace val {
 

@@ -33,7 +33,7 @@ namespace val
 		//void removeAttachment(renderAttachment* attachment);
 
 	protected:
-		friend VAL_PROC;
+		friend ValProc;
 		friend subpass;
 		friend renderAttachment;
 		friend renderPassManager;

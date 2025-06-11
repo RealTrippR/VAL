@@ -16,4 +16,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 */
 
 #include <VAL/lib/system/VAL_PROC.hpp>
- 
+
+
+int main() {
+
+}

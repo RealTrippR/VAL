@@ -6,18 +6,18 @@
 #ifndef VAL_IMAGE_VIEW_HPP
 #define VAL_IMAGE_VIEW_HPP
 namespace val {
-	class image; // forward declaration
-	class texture2d; // forward declaration
+	class Image; // forward declaration
+	class Texture2D; // forward declaration
 	class imageView {
 	public:
-		imageView(VAL_PROC& proc) : _proc(proc) {};
-		imageView(VAL_PROC& proc, VkImageLayout* layout) : _proc(proc) { _layout = layout; };
-		imageView(VAL_PROC& proc, val::image& img, const VkImageAspectFlags& aspectFlags) : _proc(proc)
+		imageView(ValProc& proc) : _proc(proc) {};
+		imageView(ValProc& proc, VkImageLayout* layout) : _proc(proc) { _layout = layout; };
+		imageView(ValProc& proc, val::Image& img, const VkImageAspectFlags& aspectFlags) : _proc(proc)
 		{
 			create(img, aspectFlags);
 		}
 
-		imageView(VAL_PROC& proc, val::texture2d& texture, const VkImageAspectFlags& aspectFlags) : _proc(proc) 
+		imageView(ValProc& proc, val::Texture2D& texture, const VkImageAspectFlags& aspectFlags) : _proc(proc)
 		{
 			create(texture, aspectFlags);
 		}
@@ -36,15 +36,15 @@ namespace val {
 
 
 	public:
-		void create(val::image& img, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
+		void create(val::Image& img, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
 
-		void create(val::texture2d& texture, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
+		void create(val::Texture2D& texture, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
 
 		void create(VkImage img, VkFormat format, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
 
 		void destroy();
 	public:
-		VAL_PROC& getProc();
+		ValProc& getProc();
 
 		inline VkImageLayout getLayout() {
 			return _layout ? *_layout : VK_IMAGE_LAYOUT_UNDEFINED;
@@ -54,7 +54,7 @@ namespace val {
 
 		const VkImageAspectFlags& getAspectFlags();
 	protected:
-		VAL_PROC& _proc;  // Store a reference
+		ValProc& _proc;  // Store a reference
 		VkImageLayout* _layout = NULL;
 		VkImageView _imgView = VK_NULL_HANDLE;
 		VkImageAspectFlags _aspectFlags{};

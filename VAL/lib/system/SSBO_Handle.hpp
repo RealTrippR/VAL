@@ -18,17 +18,17 @@ namespace val {
 			_usage = usage;
 		}
 	public:
-		void update(VAL_PROC& proc, void* data);
+		void update(ValProc& proc, void* data);
 
-		void updateFromTempStagingBuffer(VAL_PROC& proc, void* data);
+		void updateFromTempStagingBuffer(ValProc& proc, void* data);
 
 		//void resize(VAL_PROC& proc, size_t size);
 
 		//void* getMappedData(VAL_PROC& pro);
 
-		VkBuffer getBuffer(VAL_PROC& proc);
+		VkBuffer getBuffer(ValProc& proc);
 
-		std::vector<VkBuffer> getBuffers(VAL_PROC& proc);
+		std::vector<VkBuffer> getBuffers(ValProc& proc);
 
 		VkMemoryPropertyFlags getMemoryPropertyFlags();
 

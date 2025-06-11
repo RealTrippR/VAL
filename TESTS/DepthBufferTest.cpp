@@ -217,7 +217,7 @@ int main()
 	//////////////////////////////////////////////////
 
 	// CREATE IMAGE & IMAGE VIEW //
-	val::image img(proc, "testImage.jpg", imageFormat);
+	val::Image img(proc, "testImage.jpg", imageFormat);
 	imgView.create(img, VK_IMAGE_ASPECT_COLOR_BIT);
 	imgSampler.bindImageView(imgView);
 

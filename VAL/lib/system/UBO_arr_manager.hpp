@@ -29,8 +29,8 @@ namespace val {
 	class UBO_Handle; // forward declaration
 
 	struct uboArraySubset {
-		void create(VAL_PROC& proc, VkBufferUsageFlags additionalUsages, bufferSpace space, UBO_Handle** uboHandles, uint32_t uboCount);
-		void destroy(VAL_PROC& proc);
+		void create(ValProc& proc, VkBufferUsageFlags additionalUsages, bufferSpace space, UBO_Handle** uboHandles, uint32_t uboCount);
+		void destroy(ValProc& proc);
 		void* getMappedDataOfFrame(const uint8_t& frameIdx);
 
 		size_t _sizePerFrame = 0; // in bytes
@@ -42,8 +42,8 @@ namespace val {
 	};
 
 	struct uboArray {
-		void create(VAL_PROC& proc, UBO_Handle** uboHandles, uint32_t uboCount);
-		void destroy(VAL_PROC& proc);
+		void create(ValProc& proc, UBO_Handle** uboHandles, uint32_t uboCount);
+		void destroy(ValProc& proc);
 		/*************************************/
 		/* GPU-only memory                   */
 		uboArraySubset localReadOnly;

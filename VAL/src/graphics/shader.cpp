@@ -19,7 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	bool shader::loadFromFile(fs::path filepath) {
+	bool Shader::loadFromFile(fs::path filepath) {
 		_filepath = fs::absolute(filepath);
 #ifndef NDEBUG
 
@@ -40,16 +40,16 @@ namespace val {
 #endif // ! NDEBUG
 	}
 
-	void shader::setEntryPoint(const std::string& entryPoint) {
+	void Shader::setEntryPoint(const std::string& entryPoint) {
 		_entryPoint = entryPoint;
 	}
 
-	const std::string& shader::getEntryPoint() {
+	const std::string& Shader::getEntryPoint() {
 		return _entryPoint;
 	}
 
 
-	void shader::setImageSamplers(std::vector<descriptorBinding<val::sampler*>> samplerInfo) {
+	void Shader::setImageSamplers(std::vector<descriptorBinding<val::sampler*>> samplerInfo) {
 		_imageSamplers = samplerInfo;
 		#ifndef NDEBUG
 		// validate the samplerInfo. Samplers cannot be binded as arrays.
@@ -63,7 +63,7 @@ namespace val {
 
 	}
 
-	void shader::createImageSamplers(VAL_PROC* proc) {
+	void Shader::createImageSamplers(ValProc* proc) {
 		for (int i = 0; i < _imageSamplers.size(); ++i) {
 #ifndef NDEBUG
 			if (_imageSamplers[i].values.size() > 1) {
@@ -95,28 +95,28 @@ namespace val {
 		*/
 	}
 
-	tiny_vector<char>& shader::getByteCode() noexcept {
+	tiny_vector<char>& Shader::getByteCode() noexcept {
 		return _byteCode;
 	}
 
 
-	void shader::deleteByteCode() {
+	void Shader::deleteByteCode() {
 		_byteCode.~tiny_vector();
 	}
 
-	const fs::path& shader::getFilepath() noexcept {
+	const fs::path& Shader::getFilepath() noexcept {
 		return _filepath;
 	}
 
-	VkShaderStageFlags shader::getStageFlags() noexcept {
+	VkShaderStageFlags Shader::getStageFlags() noexcept {
 		return _shaderStageFlags;
 	}
 
-	void shader::setStageFlags(const VkShaderStageFlags& stageFlags) {
+	void Shader::setStageFlags(const VkShaderStageFlags& stageFlags) {
 		_shaderStageFlags  = stageFlags;
 	}
 
-	std::vector<VkDescriptorSetLayoutBinding>* shader::getLayoutBindings() noexcept {
+	std::vector<VkDescriptorSetLayoutBinding>* Shader::getLayoutBindings() noexcept {
 		_layoutBindings.clear();
 
 		uint32_t currentBindingIdx = 0;
@@ -196,7 +196,7 @@ namespace val {
 		return &_layoutBindings;
 	}
 	
-	std::vector<VkDescriptorSetLayoutBinding>* shader::getPushDescriptorLayoutBindings() noexcept {
+	std::vector<VkDescriptorSetLayoutBinding>* Shader::getPushDescriptorLayoutBindings() noexcept {
 		auto& pdlb_v = _pushDescriptorLayoutBindings;
 		pdlb_v.resize(_pushDescriptors.size()); /*resize pd layouts to match the number of push descriptor*/
 
@@ -214,7 +214,7 @@ namespace val {
 
 
 	// THE DESCRIPTOR WRITE IS INCOMPLETE, MUST BE FURTHER CONFIGURED IN VAL_PROC
-	std::vector<VkWriteDescriptorSet>* shader::getDescriptorWrites() {
+	std::vector<VkWriteDescriptorSet>* Shader::getDescriptorWrites() {
 		_descriptorWrites.clear();
 
 		uint32_t idx = 0;
@@ -316,7 +316,7 @@ namespace val {
 		return &_descriptorWrites;
 	}
 
-	std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>>* shader::getDescriptorBufferInfos(VAL_PROC& proc) {
+	std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>>* Shader::getDescriptorBufferInfos(ValProc& proc) {
 		auto& bufferWrites = _descriptorWriteBufferInfos;
 		bufferWrites.clear();
 		bufferWrites.resize(proc._MAX_FRAMES_IN_FLIGHT);
@@ -353,64 +353,64 @@ namespace val {
 		return &_descriptorWriteBufferInfos;
 	}
 
-	void shader::setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes) {
+	void Shader::setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes) {
 		_attributes = attributes;
 	}
 
-	const std::vector<VkVertexInputAttributeDescription>& shader::getVertexAttributes() noexcept {
+	const std::vector<VkVertexInputAttributeDescription>& Shader::getVertexAttributes() noexcept {
 		return _attributes;
 	}
 
-	void shader::setBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions) {
+	void Shader::setBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions) {
 		_bindings = bindingDescriptions;
 	}
 
-	const std::vector<VkVertexInputBindingDescription>& shader::getBindingDescriptions() noexcept {
+	const std::vector<VkVertexInputBindingDescription>& Shader::getBindingDescriptions() noexcept {
 		return _bindings;
 	}
 
-	void shader::setPushConstant(pushConstantHandle* pushConstant) {
+	void Shader::setPushConstant(pushConstantHandle* pushConstant) {
 		_pushConstant = pushConstant;
 		_pushConstant->_stageFlags |= _shaderStageFlags;
 	}
 
-	pushConstantHandle* shader::getPushConstant() noexcept {
+	pushConstantHandle* Shader::getPushConstant() noexcept {
 		return _pushConstant;
 	}
 
-	void shader::addPushDescriptor(val::pushDescriptor& pushDesc) {
+	void Shader::addPushDescriptor(val::pushDescriptor& pushDesc) {
 		_pushDescriptors.push_back(&pushDesc);
 	}
 
-	void shader::setPushDescriptors(const std::vector<val::pushDescriptor*> pushDescriptors) {
+	void Shader::setPushDescriptors(const std::vector<val::pushDescriptor*> pushDescriptors) {
 		_pushDescriptors = pushDescriptors;
 	}
 
-	void shader::setTextures(const std::vector<descriptorBinding<val::imageView*>>& textures) {
+	void Shader::setTextures(const std::vector<descriptorBinding<val::imageView*>>& textures) {
 		_textures = textures;
 	}
 
-	const std::vector<descriptorBinding<val::imageView*>>& shader::getTextures() noexcept {
+	const std::vector<descriptorBinding<val::imageView*>>& Shader::getTextures() noexcept {
 		return _textures;
 	}
 
-	void shader::setUBOs(const std::vector<descriptorBinding<UBO_Handle*>>& ubos) {
+	void Shader::setUBOs(const std::vector<descriptorBinding<UBO_Handle*>>& ubos) {
 		_UBO_Handles = ubos;
 	}
 
-	const std::vector<descriptorBinding<val::UBO_Handle*>> shader::getUBOS() noexcept {
+	const std::vector<descriptorBinding<val::UBO_Handle*>> Shader::getUBOS() noexcept {
 		return _UBO_Handles;
 	}
 
-	void shader::setSSBOs(const std::vector<descriptorBinding<SSBO_Handle*>>& SSBOs) {
+	void Shader::setSSBOs(const std::vector<descriptorBinding<SSBO_Handle*>>& SSBOs) {
 		_SSBO_Handles = SSBOs;
 	}
 
-	const std::vector<descriptorBinding<val::SSBO_Handle*>> shader::getSSBOs() noexcept {
+	const std::vector<descriptorBinding<val::SSBO_Handle*>> Shader::getSSBOs() noexcept {
 		return _SSBO_Handles;
 	}
 
-	void shader::updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler) {
+	void Shader::updateImageSampler(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler) {
 		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
 			VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][i];
 
@@ -428,7 +428,7 @@ namespace val {
 		}
 	}
 	;
-	void shader::updateImageSamplerAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight)
+	void Shader::updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight)
 	{
 		VkWriteDescriptorSet descriptorWrite;
 		descriptorWrite.pNext = NULL;
@@ -442,7 +442,7 @@ namespace val {
 		vkUpdateDescriptorSets(proc._device, 1u, &descriptorWrite, 0, NULL);
 	}
 
-	void shader::updateTexture(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx)
+	void Shader::updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx)
 	{
 
 		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
@@ -463,7 +463,7 @@ namespace val {
 		}
 	}
 
-	void shader::updateTextureAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx)
+	void Shader::updateTextureAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx)
 	{
 			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameInFlight];
 
@@ -482,7 +482,7 @@ namespace val {
 	}
 
 
-	void shader::updateUBO(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx)
+	void Shader::updateUBO(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx)
 	{
 		for (int_fast8_t frameIdx = 0; frameIdx < proc._MAX_FRAMES_IN_FLIGHT; ++frameIdx) {
 			VkDescriptorBufferInfo buffInfo;
@@ -504,7 +504,7 @@ namespace val {
 		}
 	}
 
-	void shader::updateUBOatFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint8_t frameInFlight, const uint16_t arrIdx)
+	void Shader::updateUBOatFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint8_t frameInFlight, const uint16_t arrIdx)
 	{
 		VkDescriptorBufferInfo buffInfo;
 		buffInfo.buffer = UBO.first.getBuffer(proc);
@@ -524,7 +524,7 @@ namespace val {
 		vkUpdateDescriptorSets(proc._device, 1, &descriptorWrite, 0, nullptr);
 	}
 
-	void shader::updateSSBO(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint16_t arrIdx)
+	void Shader::updateSSBO(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint16_t arrIdx)
 	{
 		for (int_fast8_t frameIdx = 0; frameIdx < proc._MAX_FRAMES_IN_FLIGHT; ++frameIdx) {
 			VkDescriptorBufferInfo buffInfo;
@@ -546,7 +546,7 @@ namespace val {
 		}
 	}
 
-	void shader::updateSSBOatFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint8_t frameInFlight, const uint16_t arrIdx)
+	void Shader::updateSSBOatFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint8_t frameInFlight, const uint16_t arrIdx)
 	{
 		VkDescriptorBufferInfo buffInfo;
 		buffInfo.buffer = SSBO.first.getBuffers(proc)[frameInFlight];

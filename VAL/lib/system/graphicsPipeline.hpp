@@ -29,12 +29,12 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/imageView.hpp>
 
 namespace val {
-	class shader; // forward declaration
+	class Shader; // forward declaration
 	class sampler; // forward declaration
 
-	class graphicsPipelineCreateInfo : public pipelineCreateInfo {
+	class GraphicsPipeline : public pipelineCreateInfo {
 	public:		
-		graphicsPipelineCreateInfo() { _bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; }
+		GraphicsPipeline() { _bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; }
 	public:
 		inline VkPipelineBindPoint getBindPoint() {return _bindPoint;};
 
@@ -80,12 +80,12 @@ namespace val {
 		//void pushDescriptor_MUTABLE_EXT(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const DESC_TYPE type, VkWriteDescriptorSet& write);
 
 	public:
-		inline VkPipeline& getVkPipeline(VAL_PROC& proc);
+		inline VkPipeline& getVkPipeline(ValProc& proc);
 
 		inline VkRenderPass& getVkRenderPass();
 
 	protected:
-		friend VAL_PROC;
+		friend ValProc;
 	protected:
 		VkPrimitiveTopology _topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 

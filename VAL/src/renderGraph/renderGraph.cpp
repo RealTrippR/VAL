@@ -1273,7 +1273,7 @@ namespace val {
 		}
 
 		processedSrc.insert(0, srcBeforeFirstPass);
-		processedSrc.insert(0, "#include <VAL/lib/system/VAL_PROC.hpp>\n");
+		processedSrc.insert(0, "#include <VAL/lib/system/ValProc.hpp>\n");
 
 		/* 
 		* Deduplicate arguments, and append the them in this order:
@@ -1305,7 +1305,7 @@ namespace val {
 
 				//////////////////////////////////////////////////////////////////////
 				// add V_PROC
-				processedSrc.append("val::VAL_PROC& V_PROC,");
+				processedSrc.append("val::ValProc& V_PROC,");
 
 				//////////////////////////////////////////////////////////////////////
 				// add read args
@@ -1359,7 +1359,7 @@ namespace val {
 
 					//////////////////////////////////////////////////////////////////////
 					// add V_PROC
-					processedSrc.append("val::VAL_PROC& V_PROC,");
+					processedSrc.append("val::ValProc& V_PROC,");
 
 					// add read args
 					processedSrc.append(argBlockToString(passInfo.readBlock));

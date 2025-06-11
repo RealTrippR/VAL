@@ -1,15 +1,15 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void window::setWindowHandleGLFW(GLFWwindow* window) {
+	void Window::setWindowHandleGLFW(GLFWwindow* window) {
 		_window = window;
 	}
 
-	GLFWwindow* window::getWindowHandleGLFW() {
+	GLFWwindow* Window::getWindowHandleGLFW() {
 		return _window;
 	}
 
-	void window::createWindowSurface(VkInstance instance) {
+	void Window::createWindowSurface(VkInstance instance) {
 		if (_surface) {
 			return;
 		}
@@ -18,18 +18,18 @@ namespace val {
 		}
 	}
 
-	void window::configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace) {
+	void Window::configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace) {
 		_window = windowHDL;
 		_colorSpace = colorSpace;
 	}
 
-	void window::display(const VkFormat& imageFormat, std::vector<VkSemaphore> waitOn) {
+	void Window::display(const VkFormat& imageFormat, std::vector<VkSemaphore> waitOn) {
 		vkWaitForFences(_procVAL->_device, 1, &(_presentQueue._fences[_procVAL->_currentFrame]), VK_TRUE, UINT64_MAX);
 		updateSwapChain(imageFormat, waitOn);
 		//vkResetFences(_procVAL->_device, 1, &(_presentQueue._fences[_procVAL->_currentFrame]));
 	}
 
-	void window::cleanup() {
+	void Window::cleanup() {
 		if (_procVAL) {
 			if (_ownsGLFWwindow) {
 				glfwDestroyWindow(_window);
@@ -46,7 +46,7 @@ namespace val {
 	}
 
 
-	void window::cleanupSwapChain() {
+	void Window::cleanupSwapChain() {
 		for (auto framebuffer : _swapChainFrameBuffers) {
 			vkDestroyFramebuffer(_procVAL->_device, framebuffer, nullptr);
 		}
@@ -60,7 +60,7 @@ namespace val {
 	}
 
 
-	void window::createSwapChain(const VkFormat swapchainFormat) 
+	void Window::createSwapChain(const VkFormat swapchainFormat)
 	{
 #ifndef NDEBUG
 		if (_swapChain != VK_NULL_HANDLE)
@@ -95,7 +95,7 @@ namespace val {
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-		queueFamilyIndices indices = findQueueFamilies(_procVAL->_physicalDevice, _surface);
+		QueueFamilyIndices indices = findQueueFamilies(_procVAL->_physicalDevice, _surface);
 		uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 		if (indices.graphicsFamily != indices.presentFamily) {
@@ -123,7 +123,7 @@ namespace val {
 		_swapChainExtent = extent;
 	}
 
-	void window::recreateSwapChain(const VkFormat swapchainFormat) {
+	void Window::recreateSwapChain(const VkFormat swapchainFormat) {
 		int width = 0, height = 0;
 		glfwGetFramebufferSize(_window, &width, &height);
 		while (width == 0 || height == 0) {
@@ -142,7 +142,7 @@ namespace val {
 		//createSyncObjects();
 	}
 
-	void window::createSwapChainImageViews(const VkFormat swapchainFormat) {
+	void Window::createSwapChainImageViews(const VkFormat swapchainFormat) {
 		_swapChainImageViews.resize(_swapChainImages.size());
 
 		for (size_t i = 0; i < _swapChainImages.size(); i++) {
@@ -165,7 +165,7 @@ namespace val {
 		}
 	}
 
-	void window::createSwapChainFrameBuffers(const VkExtent2D& extent, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice)
+	void Window::createSwapChainFrameBuffers(const VkExtent2D& extent, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice)
 	{
 		_swapChainAttachments = Attachments;
 		_swapChainAttachmentCount = attachmentCount;
@@ -202,7 +202,7 @@ namespace val {
 	{
 	}*/
 
-	void window::updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn) {
+	void Window::updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn) {
 
 		const auto& currentFrame = _procVAL->_currentFrame;
 
@@ -231,11 +231,11 @@ namespace val {
 		}
 	}
 
-	void window::waitForFences() {
+	void Window::waitForFences() {
 		vkWaitForFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame], VK_TRUE, UINT64_MAX);
 	}
 
-	VkFramebuffer& window::getSwapchainFramebuffer(const VkFormat& imageFormat) {
+	VkFramebuffer& Window::getSwapchainFramebuffer(const VkFormat& imageFormat) {
 		//vkWaitForFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame], VK_TRUE, UINT64_MAX);
 
 		//uint32_t imageIndex;
@@ -255,7 +255,7 @@ namespace val {
 	}
 
 	// returns a swapchain frame buffer to use
-	VkFramebuffer& window::beginDraw(const VkFormat& imageFormat) {
+	VkFramebuffer& Window::beginDraw(const VkFormat& imageFormat) {
 		vkResetFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame]);
 		VkFramebuffer& framebuffer = getSwapchainFramebuffer(imageFormat); // gets the swapchain framebuffer to be rendered to
 		return framebuffer;

@@ -21,7 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	void renderTarget::render(VAL_PROC& proc, const uint32_t& instanceCount /*DEFAULT = 1U*/)
+	void renderTarget::render(ValProc& proc, const uint32_t& instanceCount /*DEFAULT = 1U*/)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
@@ -33,7 +33,7 @@ namespace val {
 		}
 	}
 
-	void renderTarget::rebindDescriptorSet(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline) {
+	void renderTarget::rebindDescriptorSet(ValProc& proc, const GraphicsPipeline& pipeline) {
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		// bind pipeline and respective descriptor sets
@@ -42,7 +42,7 @@ namespace val {
 			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 	}
 
-	void renderTarget::updatePipeline(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline)
+	void renderTarget::updatePipeline(ValProc& proc, const GraphicsPipeline& pipeline)
 	{
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
@@ -52,76 +52,76 @@ namespace val {
 			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 	}
 
-	void renderTarget::updateViewport(VAL_PROC& proc, const VkViewport& viewport)
+	void renderTarget::updateViewport(ValProc& proc, const VkViewport& viewport)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	}
 
-	void renderTarget::updateViewport(VAL_PROC& proc, const VkViewport& viewport, const uint16_t index)
+	void renderTarget::updateViewport(ValProc& proc, const VkViewport& viewport, const uint16_t index)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	}
 
-	void renderTarget::updateViewports(VAL_PROC& proc, const std::vector<VkViewport>&viewports)
+	void renderTarget::updateViewports(ValProc& proc, const std::vector<VkViewport>&viewports)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
 	}
 
-	void renderTarget::updateViewports(VAL_PROC& proc, const std::vector<VkViewport>& viewports, const uint16_t startIndex) {
+	void renderTarget::updateViewports(ValProc& proc, const std::vector<VkViewport>& viewports, const uint16_t startIndex) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetViewport(commandBuffer, startIndex, viewports.size(), viewports.data());
 	}
 
-	void renderTarget::updateScissor(VAL_PROC& proc, const VkRect2D& scissor) {
+	void renderTarget::updateScissor(ValProc& proc, const VkRect2D& scissor) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void renderTarget::updateScissor(VAL_PROC& proc, const VkRect2D& scissor, const uint16_t index) {
+	void renderTarget::updateScissor(ValProc& proc, const VkRect2D& scissor, const uint16_t index) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetScissor(commandBuffer, index, 1, &scissor);
 	}
 
-	void renderTarget::updateScissors(VAL_PROC& proc, const std::vector<VkRect2D>& scissors) {
+	void renderTarget::updateScissors(ValProc& proc, const std::vector<VkRect2D>& scissors) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetScissor(commandBuffer, 0, scissors.size(), scissors.data());
 	}
 
-	void renderTarget::updateScissors(VAL_PROC& proc, const std::vector<VkRect2D>& scissors, const uint16_t startIndex) {
+	void renderTarget::updateScissors(ValProc& proc, const std::vector<VkRect2D>& scissors, const uint16_t startIndex) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetScissor(commandBuffer, startIndex, scissors.size(), scissors.data());
 	}
 
 
-	void renderTarget::updateLinewidth(VAL_PROC& proc, const float lineWidth) {
+	void renderTarget::updateLinewidth(ValProc& proc, const float lineWidth) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetLineWidth(commandBuffer, lineWidth);
 	}
 
-	void renderTarget::updateBlendConstants(VAL_PROC& proc, const std::array<float, 4>& depthConstants) {
+	void renderTarget::updateBlendConstants(ValProc& proc, const std::array<float, 4>& depthConstants) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetBlendConstants(commandBuffer, depthConstants.data());
 	}
 
-	void renderTarget::updateTopologyMode(VAL_PROC& proc, const TOPOLOGY_MODE topologyMode) {
+	void renderTarget::updateTopologyMode(ValProc& proc, const TOPOLOGY_MODE topologyMode) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetPrimitiveTopology(commandBuffer,(VkPrimitiveTopology)topologyMode);
 	}
 
-	void renderTarget::updateCullMode(VAL_PROC& proc, const CULL_MODE cullMode) {
+	void renderTarget::updateCullMode(ValProc& proc, const CULL_MODE cullMode) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetCullMode(commandBuffer, VkCullModeFlags(cullMode));
 	}
 
-	void renderTarget::updateDepthBias(VAL_PROC& proc, const float depthBiasConstant, const float depthBiasClamp, const float depthBiasSlopeFactor) {
+	void renderTarget::updateDepthBias(ValProc& proc, const float depthBiasConstant, const float depthBiasClamp, const float depthBiasSlopeFactor) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdSetDepthBias(commandBuffer, depthBiasConstant, depthBiasClamp, depthBiasSlopeFactor);
 	}
 
-	void renderTarget::updateBuffers(VAL_PROC& proc)
+	void renderTarget::updateBuffers(ValProc& proc)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		// bind buffers
@@ -131,14 +131,14 @@ namespace val {
 		}
 	}
 
-	void renderTarget::updateIndexBuffer(VAL_PROC& proc) {
+	void renderTarget::updateIndexBuffer(ValProc& proc) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		if (_indexCount > 0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
 	}
 
-	void renderTarget::updateVertexBuffers(VAL_PROC& proc) {
+	void renderTarget::updateVertexBuffers(ValProc& proc) {
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
@@ -146,7 +146,7 @@ namespace val {
 	/*****************************************************************************************************************************/
 	/* BUFFER MANIPULATION*/
 
-	void renderTarget::updateAndSetIndexBuffer(VAL_PROC& proc, val::buffer& buffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetIndexBuffer(ValProc& proc, val::buffer& buffer, const uint32_t& indexCount) {
 		setIndexBuffer(buffer, indexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		if (_indexCount > 0) {
@@ -154,7 +154,7 @@ namespace val {
 		};
 	}
 
-	void renderTarget::updateAndSetIndexBuffer(VAL_PROC& proc, const VkBuffer& buffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetIndexBuffer(ValProc& proc, const VkBuffer& buffer, const uint32_t& indexCount) {
 		setIndexBuffer(buffer, indexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		if (_indexCount > 0) {
@@ -163,31 +163,31 @@ namespace val {
 	}
 
 
-	void renderTarget::updateAndSetVertexBuffer(VAL_PROC& proc, const VkBuffer& buffer, const uint32_t& vertexCount) {
+	void renderTarget::updateAndSetVertexBuffer(ValProc& proc, const VkBuffer& buffer, const uint32_t& vertexCount) {
 		setVertexBuffer(buffer, vertexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
-	void renderTarget::updateAndSetVertexBuffer(VAL_PROC& proc, val::buffer& buffer, const uint32_t& vertexCount) {
+	void renderTarget::updateAndSetVertexBuffer(ValProc& proc, val::buffer& buffer, const uint32_t& vertexCount) {
 		setVertexBuffer(buffer, vertexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
-	void renderTarget::updateAndSetVertexBuffers(VAL_PROC& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount) {
+	void renderTarget::updateAndSetVertexBuffers(ValProc& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
-	void renderTarget::updateAndSetVertexBuffers(VAL_PROC& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount) {
+	void renderTarget::updateAndSetVertexBuffers(ValProc& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
-	void renderTarget::updateAndSetVertexBufferAndIndexBuffer(VAL_PROC& proc, val::buffer& vertexBuffer, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, val::buffer& vertexBuffer, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount) {
 		setVertexBuffer(vertexBuffer, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
@@ -197,7 +197,7 @@ namespace val {
 		}
 	}
 
-	void renderTarget::updateAndSetVertexBufferAndIndexBuffer(VAL_PROC& proc, const VkBuffer& vertexBuffer, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, const VkBuffer& vertexBuffer, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount) {
 		setVertexBuffer(vertexBuffer, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
@@ -207,7 +207,7 @@ namespace val {
 		}
 	}
 
-	void renderTarget::updateAndSetVertexBuffersAndIndexBuffer(VAL_PROC& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 
@@ -218,7 +218,7 @@ namespace val {
 		}
 	}
 
-	void renderTarget::updateAndSetVertexBuffersAndIndexBuffer(VAL_PROC& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 
@@ -230,7 +230,7 @@ namespace val {
 	}
 	/*****************************************************************************************************************************/
 
-	void renderTarget::update(VAL_PROC& proc, const graphicsPipelineCreateInfo& pipeline, const std::vector<VkViewport>& viewports)
+	void renderTarget::update(ValProc& proc, const GraphicsPipeline& pipeline, const std::vector<VkViewport>& viewports)
 	{
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
@@ -249,7 +249,7 @@ namespace val {
 		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
 	}
 
-	void renderTarget::begin(VAL_PROC& proc)
+	void renderTarget::begin(ValProc& proc)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
@@ -264,7 +264,7 @@ namespace val {
 
 	}
 
-	void renderTarget::beginPass(VAL_PROC& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer) 
+	void renderTarget::beginPass(ValProc& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer)
 	{
 		VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 
@@ -275,12 +275,12 @@ namespace val {
 		vkCmdBeginRenderPass(commandBuffer, &_renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
-	void renderTarget::endPass(VAL_PROC& proc) {
+	void renderTarget::endPass(ValProc& proc) {
 		vkCmdEndRenderPass(proc._graphicsQueue._commandBuffers[proc._currentFrame]);
 	}
 
 	
-	void renderTarget::submit(VAL_PROC& proc,
+	void renderTarget::submit(ValProc& proc,
 		std::vector<VkSemaphore> waitSemaphores, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/)
 	{
 		auto& graphicsQueue = proc._graphicsQueue;

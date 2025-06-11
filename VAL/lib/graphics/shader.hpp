@@ -53,11 +53,11 @@ namespace val {
 	class VAL_PROC; // forward declaration
 	namespace fs = std::filesystem;
 
-	class shader {
+	class Shader {
 	public:
-		shader() = default;
+		Shader() = default;
 
-		shader(fs::path filepath, VkShaderStageFlags shaderStageFlags, std::string entryPoint = "main") {
+		Shader(fs::path filepath, VkShaderStageFlags shaderStageFlags, std::string entryPoint = "main") {
 			loadFromFile(filepath);
 			_entryPoint = entryPoint;
 			_shaderStageFlags = shaderStageFlags;
@@ -74,7 +74,7 @@ namespace val {
 		// change to allow for multiple image samplers (only one allowed per image view)
 		void setImageSamplers(std::vector<descriptorBinding<val::sampler*>> samplerInfo);
 
-		void createImageSamplers(VAL_PROC* proc);
+		void createImageSamplers(ValProc* proc);
 
 		const fs::path& getFilepath() noexcept;
 
@@ -93,7 +93,7 @@ namespace val {
 		virtual std::vector<VkWriteDescriptorSet>* getDescriptorWrites();
 
 		// outer vector is for each frame in flight, second is for the buffer info for that frame
-		virtual std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>>* getDescriptorBufferInfos(VAL_PROC& proc);
+		virtual std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>>* getDescriptorBufferInfos(ValProc& proc);
 
 		void setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes);
 
@@ -124,21 +124,21 @@ namespace val {
 		const std::vector<descriptorBinding<val::SSBO_Handle*>> getSSBOs() noexcept;
 
 	public:
-		void updateImageSampler(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler);
+		void updateImageSampler(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler);
 
-		void updateImageSamplerAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight);
+		void updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight);
 		
-		void updateTexture(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx = 0);
+		void updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx = 0);
 
-		void updateTextureAtFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
+		void updateTextureAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
 
-		void updateUBO(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx = 0);
+		void updateUBO(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx = 0);
 
-		void updateUBOatFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
+		void updateUBOatFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
 
-		void updateSSBO(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint16_t arrIdx = 0);
+		void updateSSBO(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint16_t arrIdx = 0);
 
-		void updateSSBOatFrame(VAL_PROC& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
+		void updateSSBOatFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
 
 	public:
 		VkShaderStageFlags _shaderStageFlags;

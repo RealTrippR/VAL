@@ -4,17 +4,17 @@
 #include <VAL/lib/system/system_utils.hpp>
 
 namespace val {
-	class depthBuffer
+	class DepthBuffer
 	{
 	public:
-		depthBuffer() = default;
-		depthBuffer(VAL_PROC& proc, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT) {
+		DepthBuffer() = default;
+		DepthBuffer(ValProc& proc, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT) {
 			create(proc, extent, depthFormat, imgViewCount, mipLevels, msaaSamples);
 		}
 	public:
-		void create(VAL_PROC& proc, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT);
+		void create(ValProc& proc, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT);
 
-		void destroy(VAL_PROC& proc);
+		void destroy(ValProc& proc);
 	public:
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;

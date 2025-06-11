@@ -30,17 +30,17 @@ namespace val {
 
 	inline void END_COMMAND_BUFFER(VkCommandBuffer& cmd);
 
-	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, graphicsPipelineCreateInfo& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType);
+	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType);
 
 	inline void END_RENDER_PASS(VkCommandBuffer& cmd);
 
-	inline void setPipeline(graphicsPipelineCreateInfo& pipeline, VAL_PROC& proc, VkCommandBuffer& commandBuffer);
+	inline void SET_PIPELINE(GraphicsPipeline& pipeline, VAL_PROC& proc, VkCommandBuffer& commandBuffer);
 
-	inline void setViewport(const VkViewport& viewport, VkCommandBuffer& commandBuffer);
+	inline void SET_VIEWPORT(const VkViewport& viewport, VkCommandBuffer& commandBuffer);
 
-	inline void setScissor(const VkRect2D& scissor, VkCommandBuffer& commandBuffer);
+	inline void SET_SCISSOR(const VkRect2D& scissor, VkCommandBuffer& commandBuffer);
 
-	inline void setScissor(const VkExtent2D& scissor, VkCommandBuffer& commandBuffer);
+	inline void SET_SCISSOR(const VkExtent2D& scissor, VkCommandBuffer& commandBuffer);
 
 	//inline void setLineWidth();
 
@@ -52,26 +52,26 @@ namespace val {
 
 	//inline void setDepthBias();
 
-	//inline void copyImage(val::image& dst, val::image& src);
+	//inline void copyImage(val::Image& dst, val::image& src);
 
 	//inline void copyImage(val::image& dst, val::image& src, val::imageCopyInfo& copyInfo);
 
 	//inline void copyBuffer(val::image& dst, val::image& src);
 
-	inline void setVertexBuffer(VkBuffer& buffer, VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset = 0u);
+	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset = 0u);
 
 	//inline void setVertexBuffers();
 
-	inline void setIndexBuffer(VkBuffer& buffer, VkCommandBuffer& commandBuffer);
+	inline void SET_INDEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer);
 
-	inline void drawInstanced(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd,
+	inline void DRAW_INSTANCED_INDEXED(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd,
 		const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
 
-	inline void drawInstanced(val::buffer& vertexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
+	inline void DRAW_INSTANCED(val::buffer& vertexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
 
-	inline void drawIndexed(const uint32_t& indexCount, VkCommandBuffer& cmd, const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u);
+	inline void DRAW_INDEXED(const uint32_t& indexCount, VkCommandBuffer& cmd, const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u);
 
-	inline void draw(const uint32_t& vertexCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u);
+	inline void DRAW(const uint32_t& vertexCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u);
 	//inline void setIndexAndVertexBuffers();
 }
 

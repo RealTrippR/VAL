@@ -60,7 +60,7 @@ namespace val
 
 		VkPipelineDepthStencilStateCreateInfo& getVkPipelineDepthStencilStateCreateInfo();
 	protected:
-		friend VAL_PROC;
+		friend ValProc;
 		VkPipelineDepthStencilStateCreateInfo _VKdepthState{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
 			.pNext = NULL,

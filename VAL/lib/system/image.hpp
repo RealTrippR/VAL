@@ -32,21 +32,21 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace val {
 	class imageView; // forward declaration
 
-	class image {
+	class Image {
 	public:
-		image() = default;
-		image(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : image() {
+		Image() = default;
+		Image(ValProc& proc, const std::filesystem::path path, const VkFormat& format, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : Image() {
 			create(proc, path, format, mipLevels, MSAA_samples);
 		}
-		image(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, VkImageLayout imgLayout, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : image() {
+		Image(ValProc& proc, const std::filesystem::path path, const VkFormat& format, VkImageLayout imgLayout, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : Image() {
 			_imgLayout = imgLayout;
 			create(proc, path, format, mipLevels, MSAA_samples);
 		}
-		~image() {
+		~Image() {
 			destroy();
 		}
 
-		void recreate(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U);
+		void recreate(ValProc& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U);
 
 		inline const stbi_uc* pixels() {
 			return _pixels;
@@ -92,16 +92,16 @@ namespace val {
 			}
 		}
 
-		void transitionImgLayout(VAL_PROC& proc, VkCommandBuffer cmdbuff, VkImageLayout newLayout);
+		void transitionImgLayout(ValProc& proc, VkCommandBuffer cmdbuff, VkImageLayout newLayout);
 
 		inline const VkImageLayout getLayout() {
 			return _imgLayout;
 		}
 	public:
 
-		void create(VAL_PROC& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U, const VkSampleCountFlagBits& MSAA_samples = VK_SAMPLE_COUNT_1_BIT);
+		void create(ValProc& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U, const VkSampleCountFlagBits& MSAA_samples = VK_SAMPLE_COUNT_1_BIT);
 
-		void generateMipmaps(VAL_PROC& proc, const uint8_t mipLevels);
+		void generateMipmaps(ValProc& proc, const uint8_t mipLevels);
 
 	protected:
 

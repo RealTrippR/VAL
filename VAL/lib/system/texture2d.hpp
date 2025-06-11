@@ -26,15 +26,15 @@ namespace val {
 
 	class Texture2D {
 	public:
-		Texture2D(VAL_PROC& proc) : _proc(proc) {};
+		Texture2D(ValProc& proc) : _proc(proc) {};
 
-		Texture2D(VAL_PROC& proc, const uint16_t width, const uint16_t height, const VkFormat format,
+		Texture2D(ValProc& proc, const uint16_t width, const uint16_t height, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(proc)
 		{
 			create(width, height, format, usages, layout, memspace, mipLevels);
 		}
 
-		Texture2D(VAL_PROC& proc, std::filesystem::path srcpath, const VkFormat format,
+		Texture2D(ValProc& proc, std::filesystem::path srcpath, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(proc)
 		{
 			create(srcpath, format, usages, layout, memspace, mipLevels);
@@ -80,7 +80,7 @@ namespace val {
 		stbi_uc* _pixels = NULL;
 		VkImage _img = VK_NULL_HANDLE;
 		VkDeviceMemory _imgMemory = VK_NULL_HANDLE;
-		VAL_PROC& _proc;
+		ValProc& _proc;
 
 		VkImageLayout _layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		VkFormat _format = VK_FORMAT_UNDEFINED;

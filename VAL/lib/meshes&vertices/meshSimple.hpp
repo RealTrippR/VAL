@@ -18,9 +18,9 @@ namespace val {
 	public:
 		meshSimple(VAL_PROC& proc) : _proc(proc) {};
 	public:
-		void loadFromDiskObj(VAL_PROC& proc, fs::path objPath, bool deduplicateVertices);
+		void loadFromDiskObj(ValProc& proc, fs::path objPath, bool deduplicateVertices);
 
-		void cleanup(VAL_PROC& proc);
+		void destroy(ValProc& proc);
 
 		std::vector<vertex3Dsimple> _vertices;
 		std::vector<uint32_t> _indices;

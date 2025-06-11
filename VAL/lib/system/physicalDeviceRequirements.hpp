@@ -71,11 +71,11 @@ namespace val {
 		float shaderInputCapability = 1.f;
 	};
 
-	struct physicalDeviceRequirements
+	struct PhysicalDeviceRequirements
 	{
-		physicalDeviceRequirements() = default;
-		physicalDeviceRequirements(DEVICE_TYPES deviceTypes_) : deviceTypes(deviceTypes_) {};
-		physicalDeviceRequirements(DEVICE_TYPES deviceTypes_, DEVICE_FEATURES deviceFeatures_) : 
+		PhysicalDeviceRequirements() = default;
+		PhysicalDeviceRequirements(DEVICE_TYPES deviceTypes_) : deviceTypes(deviceTypes_) {};
+		PhysicalDeviceRequirements(DEVICE_TYPES deviceTypes_, DEVICE_FEATURES deviceFeatures_) :
 			deviceTypes(deviceTypes_), deviceFeatures(deviceFeatures_) {};
 			//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
 		inline void addExtension(const char* ext) { deviceExtensions.push_back(ext); }

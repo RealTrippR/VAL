@@ -21,17 +21,17 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	void meshTextured::loadFromDiskObj(VAL_PROC& proc, fs::path objPath, bool deduplicateVertices) {
+	void meshTextured::loadFromDiskObj(fs::path objPath, bool deduplicateVertices) {
 
 		loadModelFromDiskAsUnifiedMesh(objPath, _vertices, _indices, &_meshAttribs, deduplicateVertices);
 
-		proc.createVertexBuffer(_vertices.data(), _vertices.size(), sizeof(val::vertex3D), &_vertexBuffer, &_vertexBufferMem);
+		_proc.createVertexBuffer(_vertices.data(), _vertices.size(), sizeof(val::vertex3D), &_vertexBuffer, &_vertexBufferMem);
 
-		proc.createIndexBuffer(_indices.data(), _indices.size(), &_indexBuffer, &_indexBufferMem);
+		_proc.createIndexBuffer(_indices.data(), _indices.size(), &_indexBuffer, &_indexBufferMem);
 	}
 
-	void meshTextured::cleanup(VAL_PROC& proc) {
-		VkDevice& device = proc._device;
+	void meshTextured::cleanup() {
+		VkDevice& device = _proc._device;
 
 #ifndef NDEBUG
 		if (!(bool(_indexBuffer) xor bool(_vertexBuffer))) {
@@ -49,11 +49,11 @@ namespace val {
 		}
 	}
 
-	void meshTextured::setTexture(VAL_PROC& proc, val::image* texture) {
-		_texture = texture;
+	void meshTextured::setTexture(val::Image& texture) {
+		_texture = &texture;
 		if (_textureImageView) {
-			vkDestroyImageView(proc._device, _textureImageView, NULL);
+			vkDestroyImageView(_proc._device, _textureImageView, NULL);
 		}
-		_textureImageView.create(*texture, VK_IMAGE_ASPECT_COLOR_BIT);
+		_textureImageView.create(texture, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 }

@@ -2,7 +2,7 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void computeTarget::compute(VAL_PROC& proc, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ)
+	void computeTarget::compute(ValProc& proc, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ)
 	{
 		const auto& currentFrame = proc._currentFrame;
 		VkCommandBuffer& cmdBuffer = proc._computeQueue._commandBuffers[currentFrame];
@@ -10,7 +10,7 @@ namespace val {
 		vkCmdDispatch(proc._computeQueue._commandBuffers[currentFrame], groupCountX, groupCountY, groupCountZ);
 	}
 
-	void computeTarget::update(VAL_PROC& proc, computePipelineCreateInfo& computePipeline)
+	void computeTarget::update(ValProc& proc, computePipelineCreateInfo& computePipeline)
 	{
 		auto& queue = proc._computeQueue;
 		const auto& currentFrame = proc._currentFrame;
@@ -22,7 +22,7 @@ namespace val {
 			0, 1, &proc._descriptorSets[computePipeline.descriptorsIdx][currentFrame], 0, nullptr);
 	}
 
-	void computeTarget::begin(VAL_PROC& proc)
+	void computeTarget::begin(ValProc& proc)
 	{
 		auto& queue = proc._computeQueue;
 		const auto& currentFrame = proc._currentFrame;
@@ -40,7 +40,7 @@ namespace val {
 		}
 	}
 
-	void computeTarget::submit(VAL_PROC& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/)
+	void computeTarget::submit(ValProc& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/)
 	{
 		if (vkEndCommandBuffer(proc._computeQueue._commandBuffers[proc._currentFrame]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to record compute command buffer!");

@@ -29,26 +29,26 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 
 namespace val {
-	class VAL_PROC; // forward declaration
+	class ValProc; // forward declaration
 
 	class Window {
 	public:
 		Window() = default;
-		Window(VAL_PROC& valProc) {
+		Window(ValProc& valProc) {
 			_procVAL = &valProc;
 		}
-		Window(GLFWwindow* windowHDL, VAL_PROC* valProc, VkColorSpaceKHR colorSpace) {
+		Window(GLFWwindow* windowHDL, ValProc& valProc, VkColorSpaceKHR colorSpace) {
 			if (!windowHDL) {
 				printf("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
 				throw std::runtime_error("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
 			}
 			_ownsGLFWwindow = false;
 			_window = windowHDL;
-			_procVAL = valProc;
+			_procVAL = &valProc;
 			_colorSpace = colorSpace;
 		}
 
-		Window(windowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, VAL_PROC* valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL) {
+		Window(WindowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, ValProc& valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL) {
 			glfwInit(); // (it's safe to call init more than once. Refer to: https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init)
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
 			
@@ -57,7 +57,7 @@ namespace val {
 			_window = glfwCreateWindow(width, height, name.c_str(), monitor, NULL);
 			if (!_window) { printf("VAL: ERROR: Failed to initialize GLFW window, window is: %p \n", _window); }
 
-			_procVAL = valProc;
+			_procVAL = &valProc;
 			_colorSpace = colorSpace;
 			_swapChainExtent = { .width = width, .height = height };
 			_swapChainAttachmentCount = 0u;
@@ -117,7 +117,7 @@ namespace val {
 
 		uint32_t _currentSwapChainImageIndex = 0;
 
-		VAL_PROC* _procVAL = NULL;
+		ValProc* _procVAL = NULL;
 
 		GLFWwindow* _window = NULL;
 

@@ -181,7 +181,7 @@ int main() {
 
 	// The shader class is poorly optimized and fucking retarded at the moment
 	// load and configure vert shader
-	val::shader vertShader("shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions().data(),
 		res::vertex::getAttributeDescriptions().size());
 	vertShader.setBindingDescription(res::vertex::getBindingDescription());
@@ -190,7 +190,7 @@ int main() {
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::shader fragShader("shaders/imagefrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders/imagefrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	VkSamplerCreateInfo samplerInfo{};
 	setImageSamplerInfo(&samplerInfo, mipLevels);
@@ -229,7 +229,7 @@ int main() {
 	stbi_uc* imgPixels = NULL;
 	VkDeviceMemory imgMem = NULL;
 
-	val::image img(mainProc, "testImage.jpg", imageFormat, mipLevels);
+	val::Image img(mainProc, "testImage.jpg", imageFormat, mipLevels);
 	mainProc.createImageView(img.getImage(), imageFormat, VK_IMAGE_ASPECT_COLOR_BIT, &imgView1, mipLevels);
 
 	const std::vector<res::vertex> vertices = {

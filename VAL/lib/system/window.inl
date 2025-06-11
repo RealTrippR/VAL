@@ -22,31 +22,31 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/window.hpp>
 
 namespace val {
-	inline VkFence& window::getPresentFence() {
+	inline VkFence& Window::getPresentFence() {
 		return _presentQueue._fences[_procVAL->_currentFrame];
 	}
 
-	inline queueManager& window::getPresentQueue() {
+	inline queueManager& Window::getPresentQueue() {
 		return _presentQueue;
 	}
 
-	inline uint32_t window::getHeight() {
+	inline uint32_t Window::getHeight() {
 		return _swapChainExtent.height;
 	}
 	
-	inline uint32_t window::getWidth() {
+	inline uint32_t Window::getWidth() {
 		return _swapChainExtent.width;
 	}
 
-	inline VkExtent2D window::getSize() {
+	inline VkExtent2D Window::getSize() {
 		return { _swapChainExtent.width, _swapChainExtent.height };
 	}
 
-	inline VkRect2D window::getSizeAsRect2D() {
+	inline VkRect2D Window::getSizeAsRect2D() {
 		return { 0,0, _swapChainExtent.width, _swapChainExtent.height };
 	}
 
-	inline bool window::shouldClose() {
+	inline bool Window::shouldClose() {
 		return glfwWindowShouldClose(_window);
 	}
 }

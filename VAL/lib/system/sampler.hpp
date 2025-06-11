@@ -13,9 +13,9 @@ namespace val {
 
 	class sampler {
 	public:
-		sampler(VAL_PROC& proc) : _proc(proc) { initDefaultValues(); };
-		sampler(VAL_PROC& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
-		sampler(VAL_PROC& proc, val::imageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
+		sampler(ValProc& proc) : _proc(proc) { initDefaultValues(); };
+		sampler(ValProc& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
+		sampler(ValProc& proc, val::imageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
 
 		~sampler() {
 			destroy();
@@ -104,8 +104,8 @@ namespace val {
 		}
 
 	protected:
-		friend VAL_PROC;
-		VAL_PROC& _proc;
+		friend ValProc;
+		ValProc& _proc;
 		samplerType _samplerType = combinedImage;
 		VkSampler _sampler = VK_NULL_HANDLE;
 		VkSamplerCreateInfo _samplerCreateInfo{};

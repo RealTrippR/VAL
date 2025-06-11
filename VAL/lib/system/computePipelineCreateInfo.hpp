@@ -5,7 +5,7 @@
 
 #include <VAL/lib/system/pipelineCreateInfo.hpp>
 namespace val {
-	class shader;
+	class Shader;
 
 	class computePipelineCreateInfo : public pipelineCreateInfo {
 	public:

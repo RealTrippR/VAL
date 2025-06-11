@@ -177,13 +177,13 @@ int main() {
 	val::UBO_Handle uboHDL(sizeof(UniformBufferObject));
 
 	// load and configure shaders
-	val::shader vertShader("shaders-compiled/particleShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/particleShadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setBindingDescriptions({ Particle::getBindingDescription() });
 	vertShader.setVertexAttributes(Particle::getAttributeDescriptions());
 
-	val::shader fragShader("shaders-compiled/particleShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/particleShaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::shader computeShader("shaders-compiled/particleShadercomp.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
+	val::Shader computeShader("shaders-compiled/particleShadercomp.spv", VK_SHADER_STAGE_COMPUTE_BIT, "main");
 	computeShader._UBO_Handles = { {&uboHDL,0} };
 	computeShader._SSBO_Handles = { {&ssboHdl,1}, {&ssboHdl,2}, {&debugHdl,3} };
 

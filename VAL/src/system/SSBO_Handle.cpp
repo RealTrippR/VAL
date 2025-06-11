@@ -2,7 +2,7 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void SSBO_Handle::update(VAL_PROC& proc, void* data) {
+	void SSBO_Handle::update(ValProc& proc, void* data) {
 #ifndef NDEBUG
 		if (_usage != CPU_GPU) {
 			printf("VAL: A BUFFER WITH A USAGE BIT OF CPU_GPU CANNOT BE WRITTEN TO OR READ BY THE CPU!\n");
@@ -12,12 +12,12 @@ namespace val {
 		memcpy(proc._SSBO_DataMapped[proc._currentFrame][_index],data,_size);
 	}
 
-	VkBuffer SSBO_Handle::getBuffer(VAL_PROC& proc) {
+	VkBuffer SSBO_Handle::getBuffer(ValProc& proc) {
 		return proc._SSBO_Buffers[proc._currentFrame][_index];
 
 	}
 
-	std::vector<VkBuffer> SSBO_Handle::getBuffers(VAL_PROC& proc) {
+	std::vector<VkBuffer> SSBO_Handle::getBuffers(ValProc& proc) {
 		std::vector<VkBuffer> buffers;
 		for (uint_fast8_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
 			buffers.push_back(proc._SSBO_Buffers[i][_index]);
@@ -25,7 +25,7 @@ namespace val {
 		return buffers;
 	}
 
-	void SSBO_Handle::updateFromTempStagingBuffer(VAL_PROC& proc, void* data) {
+	void SSBO_Handle::updateFromTempStagingBuffer(ValProc& proc, void* data) {
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 		proc.createBuffer(_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,

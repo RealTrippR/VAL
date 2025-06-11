@@ -248,9 +248,9 @@
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\descType.hpp" />
     <ClInclude Include="lib\system\framebuffer.hpp" />
-    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.hpp" />
+    <ClInclude Include="lib\system\graphicsPipeline.hpp" />
     <ClInclude Include="lib\system\image.hpp" />
-    <ClInclude Include="lib\system\multisamplerManager.hpp" />
+    <ClInclude Include="lib\system\multisamplerConfig.hpp" />
     <ClInclude Include="lib\system\physicalDeviceRequirements.hpp" />
     <ClInclude Include="lib\system\pipelineType.hpp" />
     <ClInclude Include="lib\system\pushDescriptor.hpp" />
@@ -325,7 +325,7 @@
     <Text Include="notes\to-do-list.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\system\graphicsPipelineCreateInfo.inl">
+    <ClInclude Include="lib\system\graphicsPipeline.inl">
       <FileType>Document</FileType>
     </ClInclude>
   </ItemGroup>

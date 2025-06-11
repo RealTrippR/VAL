@@ -21,7 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
-	void buffer::create(VAL_PROC& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage, uint16_t frameCount) {
+	void buffer::create(ValProc& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage, uint16_t frameCount) {
 		_proc = proc;
 		_size = size;
 		_space = space;
@@ -188,7 +188,7 @@ namespace val
 		return _usage;
 	}
 
-	VAL_PROC* buffer::getVAL_Proc() const {
+	ValProc* buffer::getVAL_Proc() const {
 		return  &_proc;
 	}
 

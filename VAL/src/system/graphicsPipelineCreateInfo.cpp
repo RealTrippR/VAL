@@ -17,7 +17,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/system/VAL_PROC.hpp>
 
-#include <VAL/lib/system/graphicsPipelineCreateInfo.hpp>
+#include <VAL/lib/system/graphicsPipeline.hpp>
 #include <VAL/lib/pipelineStateInfos/stateInfos.hpp>
 
 #include <stdio.h>
@@ -26,51 +26,51 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace val
 {
 
-	void graphicsPipelineCreateInfo::setRasterizer(val::rasterizerState* rasterizer)
+	void GraphicsPipeline::setRasterizer(val::rasterizerState* rasterizer)
 	{
 		_rasterizerState = rasterizer;
 	}
 
-	rasterizerState* graphicsPipelineCreateInfo::getRasterizer()
+	rasterizerState* GraphicsPipeline::getRasterizer()
 	{
 		return _rasterizerState;
 	}
 
-	void graphicsPipelineCreateInfo::setColorBlendState(val::colorBlendState* colorState) {
+	void GraphicsPipeline::setColorBlendState(val::colorBlendState* colorState) {
 		_colorBlendState = colorState;
 	}
 
-	colorBlendState* graphicsPipelineCreateInfo::getColorBlendState() {
+	colorBlendState* GraphicsPipeline::getColorBlendState() {
 		return _colorBlendState;
 	}
 
-	void graphicsPipelineCreateInfo::setDepthStencilState(val::depthStencilState* blendState) {
+	void GraphicsPipeline::setDepthStencilState(val::depthStencilState* blendState) {
 		_depthStencilState = blendState;
 	}
 
-	depthStencilState* graphicsPipelineCreateInfo::getDepthStencilState() {
+	depthStencilState* GraphicsPipeline::getDepthStencilState() {
 		return _depthStencilState;
 	}
 
-	void graphicsPipelineCreateInfo::setSampleCount(const VkSampleCountFlags& samples)
+	void GraphicsPipeline::setSampleCount(const VkSampleCountFlags& samples)
 	{
 		_sampleCountMSAA = samples;
 	}
 
-	const VkSampleCountFlags& graphicsPipelineCreateInfo::getSampleCount()
+	const VkSampleCountFlags& GraphicsPipeline::getSampleCount()
 	{
 		return _sampleCountMSAA;
 	}
 
-	void graphicsPipelineCreateInfo::setSampleShadingEnabled(const bool& enabled) {
+	void GraphicsPipeline::setSampleShadingEnabled(const bool& enabled) {
 		_sampleShadingEnabled = enabled;
 	}
 
-	const bool& graphicsPipelineCreateInfo::getSampleShadingEnabled() {
+	const bool& GraphicsPipeline::getSampleShadingEnabled() {
 		return _sampleShadingEnabled;
 	}
 
-	VkPipelineMultisampleStateCreateInfo graphicsPipelineCreateInfo::getVkPipelineMultisampleStateCreateInfo() {
+	VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getVkPipelineMultisampleStateCreateInfo() {
 		VkPipelineMultisampleStateCreateInfo info{};
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		info.rasterizationSamples = (VkSampleCountFlagBits)_sampleCountMSAA;
@@ -78,19 +78,19 @@ namespace val
 		return info;
 	}
 
-	void graphicsPipelineCreateInfo::setTopology(const VkPrimitiveTopology& topolgy) {
+	void GraphicsPipeline::setTopology(const VkPrimitiveTopology& topolgy) {
 		_topology = topolgy;
 	}
 
-	VkPrimitiveTopology graphicsPipelineCreateInfo::getTopology() {
+	VkPrimitiveTopology GraphicsPipeline::getTopology() {
 		return _topology;
 	}
 
-	void graphicsPipelineCreateInfo::setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates) {
+	void GraphicsPipeline::setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates) {
 		_dynamicStates = dynamicStates;
 	}
 
-	const std::vector<DYNAMIC_STATE>& graphicsPipelineCreateInfo::getDynamicStates() {
+	const std::vector<DYNAMIC_STATE>& GraphicsPipeline::getDynamicStates() {
 		return _dynamicStates;
 	}
 }

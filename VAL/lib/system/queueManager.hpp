@@ -11,18 +11,18 @@
 namespace val
 {
 
-	class VAL_PROC; // forward declaration
+	class ValProc; // forward declaration
 
 	class queueManager {
 	public:
 		uint32_t findQueueFamilyFromQueueFlags(VkPhysicalDevice physicalDevice,
 			bool isPresentQueue=false, VkSurfaceKHR surface=VK_NULL_HANDLE);
 
-		void create(VAL_PROC& proc, bool semaphoresNeeded, bool fencesNeeded);
+		void create(ValProc& proc, bool semaphoresNeeded, bool fencesNeeded);
 
 		VkDeviceQueueCreateInfo getQueueCreateInfo();
 
-		void destroy(VAL_PROC& proc);
+		void destroy(ValProc& proc);
 
 		inline void submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, queueManager& waitFor);
 

@@ -186,7 +186,7 @@ int main() {
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
 
 	// CREATE IMAGE & IMAGE VIEW //
-	val::image img(proc, "testImage.jpg", imageFormat);
+	val::Image img(proc, "testImage.jpg", imageFormat);
 	imgView.create(img, VK_IMAGE_ASPECT_COLOR_BIT);
 
 	imgSampler.bindImageView(imgView); // it is imperative that this is called AFTER the image view is created

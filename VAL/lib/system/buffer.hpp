@@ -9,10 +9,10 @@ namespace val
 	{
 	public:
 
-		buffer(VAL_PROC& proc) : _proc(proc) {}
+		buffer(ValProc& proc) : _proc(proc) {}
 
 		// creates the buffer from the input values.
-		buffer(VAL_PROC& proc, const uint32_t& size, const bufferSpace& space, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u)
+		buffer(ValProc& proc, const uint32_t& size, const bufferSpace& space, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u)
 			: _proc(proc) {
 			create(proc, size, space, bufferUsage, frameCount);
 		}
@@ -28,7 +28,7 @@ namespace val
 		}
 
 	public:
-		void create(VAL_PROC& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u);
+		void create(ValProc& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u);
 
 		void overwriteFromStagingBuffer(void* data, uint64_t dataSize, uint16_t frameIdx, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
@@ -64,13 +64,13 @@ namespace val
 
 		const VkBufferUsageFlags& getUsageFlags() const;
 
-		VAL_PROC* getVAL_Proc() const;
+		ValProc* getVAL_Proc() const;
 
 	protected:
 		void copy(const buffer& other);
 
 	protected:
-		VAL_PROC& _proc;  // Store a reference
+		ValProc& _proc;  // Store a reference
 		uint32_t _size = 0u;
 		bufferSpace _space{};
 		VkBufferUsageFlags _usage = 0;

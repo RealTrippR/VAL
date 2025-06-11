@@ -62,7 +62,7 @@ namespace val
 		VkPipelineColorBlendAttachmentState& getVkColorBlendAttachmentState();
 
 	protected:
-		friend VAL_PROC;
+		friend ValProc;
 		VkPipelineColorBlendAttachmentState _VKblendAttachment{};
 	};
 }

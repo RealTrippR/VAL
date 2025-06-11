@@ -36,7 +36,7 @@ namespace val
 
 
 
-	void queueManager::create(VAL_PROC& proc, bool semaphoresNeeded, bool fencesNeeded) {
+	void queueManager::create(ValProc& proc, bool semaphoresNeeded, bool fencesNeeded) {
 		_commandBuffers.resize(proc._MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
@@ -100,7 +100,7 @@ namespace val
 		return queueCreateInfo;
 	}
 
-	void queueManager::destroy(VAL_PROC& proc) {
+	void queueManager::destroy(ValProc& proc) {
 		if (_queue == NULL) {
 			return;
 		}

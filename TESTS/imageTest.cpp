@@ -51,7 +51,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 
-void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
+void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -67,7 +67,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 
 	hdl.update(proc, &ubo);
 }
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 {	using namespace val;
 
 	// state infos
@@ -104,13 +104,13 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 int main()
 {	using namespace val;
 
-	VAL_PROC proc;
-	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	ValProc proc;
+	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
-	val::windowProperties windowConfig;
+	WindowProperties windowConfig;
 	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
-	val::window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	Window window(windowConfig, 800, 800, "Image Test", proc);
 
 
 	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
@@ -122,7 +122,7 @@ int main()
 
 	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0 } };
@@ -130,14 +130,14 @@ int main()
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
 	val::sampler imgSampler(proc, val::combinedImage);
 	imgSampler.setMaxAnisotropy(8.f);
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
-	val::graphicsPipelineCreateInfo pipeline;
+	GraphicsPipeline pipeline;
 	pipeline.shaders = { &fragShader, &vertShader };
 
 	setGraphicsPipelineInfo(pipeline);
@@ -147,7 +147,7 @@ int main()
 
 	// VAL uses image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	imageFormatRequirements formatReqs;
+	ImageFormatRequirements formatReqs;
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
@@ -159,15 +159,16 @@ int main()
 	val::renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
+
 	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
 
-	val::image img1(proc, "testImage.jpg", imageFormat);
+	val::Image img1(proc, "testImage.jpg", imageFormat);
 	val::imageView imgView1(proc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
 
-	val::image img2(proc, "testImage2.png", imageFormat);
+	val::Image img2(proc, "testImage2.png", imageFormat);
 	val::imageView imgView2(proc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
 
 

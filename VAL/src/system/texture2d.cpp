@@ -19,7 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void texture2d::destroy()
+	void Texture2D::destroy()
 	{
 		if (_imgMemory) {
 			_imgMemory = VK_NULL_HANDLE;
@@ -35,7 +35,7 @@ namespace val {
 		}
 	}
 
-	void texture2d::create(std::filesystem::path srcpath, const VkFormat format, const VkImageUsageFlagBits usages,
+	void Texture2D::create(std::filesystem::path srcpath, const VkFormat format, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
 	{
 
@@ -62,7 +62,7 @@ namespace val {
 		}
 	}
 
-	void texture2d::create(const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages, 
+	void Texture2D::create(const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
 	{
 		destroy();
@@ -84,7 +84,7 @@ namespace val {
 
 	/* PRIVATE: */
 
-	void texture2d::generateMipmaps(const uint8_t mipLevels)
+	void Texture2D::generateMipmaps(const uint8_t mipLevels)
 	{
 #ifndef NDEBUG
 		// Check if image format supports linear blitting
@@ -93,7 +93,7 @@ namespace val {
 
 		if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
 			dbg::printError("Texture image format does not support linear blitting!");
-			throw std::runtime_error("Texture image format does not support linear blitting!");
+			throw std::runtime_error("Texture Image format does not support linear blitting!");
 		}
 #endif // !NDEBUG
 
