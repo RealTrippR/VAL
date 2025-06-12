@@ -107,7 +107,7 @@ namespace val
 	}
 	*/
 
-	void subpass::update() {
+	void Subpass::update() {
 
 		// Color attachments
 		_subpassDesc.pColorAttachments = _colorAttachments.data();
@@ -126,7 +126,7 @@ namespace val
 		_subpassDesc.inputAttachmentCount = _inputAttachments.size();
 	}
 
-	void subpass::bindAttachment(renderAttachment* attachment) {
+	void Subpass::bindAttachment(renderAttachment* attachment) {
 		// will not be added if it's already in the list
 		uint32_t idx = _rpMngr->addAttachment(attachment);
 		
@@ -182,7 +182,7 @@ namespace val
 	}
 	*/
 
-	void subpass::attachToRenderPassManager() {
+	void Subpass::attachToRenderPassManager() {
 		_rpMngr->_subpasses.push_back(this);
 	}
 

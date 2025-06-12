@@ -74,7 +74,7 @@ namespace val {
 
 		const VkSamplerAddressMode& getAddressModeW();
 
-		const bool& normalizedCoordinates();
+		const bool& unnormalizedCoordinates();
 
 		const VkCompareOp& getCompareMode();
 

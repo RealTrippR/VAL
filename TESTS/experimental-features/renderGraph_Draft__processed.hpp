@@ -14,7 +14,7 @@ using namespace val;
 
 /* A basic example rendergraph */
 VkCommandBuffer __DRAW_RECT_fixed_cmd_buffer_0[2];
-void pass_mainDRAW_RECT(val::VAL_PROC& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, graphicsPipelineCreateInfo& pipeline, window& wind, VkCommandBuffer& cmd) {
+void pass_mainDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd) {
 
 	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 	FIXED_BEGIN(
@@ -24,7 +24,7 @@ void pass_mainDRAW_RECT(val::VAL_PROC& V_PROC,gpu_vector<res::vertex>& vertices,
 		vkCmdExecuteCommands(cmd,1, &(__DRAW_RECT_fixed_cmd_buffer_0[V_PROC.getCurrentFrame()]));
 FIXED_END
 }
-void pass_bakeDRAW_RECT(val::VAL_PROC& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, graphicsPipelineCreateInfo& pipeline, window& wind, VkCommandBuffer& cmd, VkRenderPass pass,uint32_t subpassIndex) {
+void pass_bakeDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd, VkRenderPass pass,uint32_t subpassIndex) {
 
 	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 	{	
@@ -37,7 +37,7 @@ allocInfo.commandPool = V_PROC._commandPool;
 allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 allocInfo.commandBufferCount = 2;
 if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo,__DRAW_RECT_fixed_cmd_buffer_0) != VK_SUCCESS) {
-throw std::runtime_error("Failed to allocate command buffers!");
+val::dbg::printError("Failed to allocate command buffers for baking render graph.");throw std::runtime_error("Failed to allocate command buffers!");
 }
 
 }
@@ -60,18 +60,18 @@ vkBeginCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__], &b
 	
 	{
 		static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
-		setPipeline(pipeline,V_PROC,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+		SET_PIPELINE(pipeline, V_PROC, cmd);
 
-		setVertexBuffer(vertices,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
-		setIndexBuffer(indices,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+		SET_VERTEX_BUFFER(vertices, cmd);
+		SET_INDEX_BUFFER(indices, cmd);
 
 
-		setViewport(viewport,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
-		setScissor(wind.getSize(),__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+		SET_VIEWPORT(viewport, cmd);
+		SET_SCISSOR(wind.getSize(), cmd);
 
 	
 
-		drawIndexed(indices.size(),__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+		DRAW_INDEXED(indices.size(), cmd);
 {
 /* END RECORDING */
 vkEndCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);

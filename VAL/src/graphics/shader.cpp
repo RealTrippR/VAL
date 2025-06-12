@@ -283,7 +283,7 @@ namespace val {
 					_descriptorWrites[idx].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 				}
 				else {
-					printf("VAL: ERROR: Samper at %h has an invalid sampler type of %d!\n", &_imageSamplers[i].values[0], _imageSamplers[i].values[0]->getSamplerType());
+					printf("VAL: ERROR: Samper at %p has an invalid sampler type of %d!\n", _imageSamplers[i].values[0], int(_imageSamplers[i].values[0]->getSamplerType()));
 					throw std::runtime_error("INVALID SAMPLER TYPE");
 				}
 				_descriptorWrites[idx].descriptorCount = imageInfos.size();  // One image sampler descriptor

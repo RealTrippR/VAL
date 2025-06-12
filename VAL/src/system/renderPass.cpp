@@ -9,7 +9,7 @@ namespace val {
 		}
 	}
 
-	void renderPassManager::bindSubpass(subpass* sp) {
+	void renderPassManager::bindSubpass(Subpass* sp) {
 		_subpasses.push_back(sp);
 	}
 
@@ -21,7 +21,7 @@ namespace val {
 		_VkSubpasses.clear();
 
 		// create std::vector<VkSubpassDescription> _VkSubpasses;
-		for (subpass* sp : _subpasses) {
+		for (Subpass* sp : _subpasses) {
 			sp->update();
 			_VkSubpasses.push_back(sp->_subpassDesc);
 		}
@@ -61,7 +61,7 @@ namespace val {
 		for (uint32_t i = 0; i < _subpasses.size(); ++i) {
 
 			VkSubpassDependency& subDependency = _VkSubpassDependencies[i];
-			val::subpass& subpass = *_subpasses[i];
+			val::Subpass& subpass = *_subpasses[i];
 
 			if (i < _subpasses.size() - 1) {
 				VkSubpassDependency* nextDepenency = &(_VkSubpassDependencies[i + 1]);

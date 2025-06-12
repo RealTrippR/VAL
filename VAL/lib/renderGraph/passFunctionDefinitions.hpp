@@ -65,7 +65,7 @@ namespace val {
 		vkCmdEndRenderPass(cmd);
 	}
 
-	inline void SET_PIPELINE(GraphicsPipeline& pipeline, VAL_PROC& proc, VkCommandBuffer& commandBuffer) {
+	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, VkCommandBuffer& commandBuffer) {
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		//VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		// bind pipeline and respective descriptor sets

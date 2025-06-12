@@ -36,7 +36,7 @@ namespace val {
 
 		void destroy();
 
-		void bindSubpass(subpass* sp);
+		void bindSubpass(Subpass* sp);
 
 		VkRenderPass& getVkRenderPass();
 
@@ -56,7 +56,7 @@ namespace val {
 
 	protected:
 		friend renderAttachment;
-		friend subpass;
+		friend Subpass;
 		friend ValProc;
 		/******************************************/
 		ValProc* _procVAL = NULL;
@@ -65,7 +65,7 @@ namespace val {
 		VkSampleCountFlagBits _MSAAsamples = VK_SAMPLE_COUNT_1_BIT;
 
 		// these must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
-		std::vector<subpass*> _subpasses;
+		std::vector<Subpass*> _subpasses;
 
 		std::vector<VkSubpassDescription> _VkSubpasses;
 

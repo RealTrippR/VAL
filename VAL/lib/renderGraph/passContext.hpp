@@ -22,7 +22,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 	struct PASS_CONTEXT {
-		VAL_PROC& proc;
+		ValProc& proc;
 		VkRect2D renderArea;
 		tiny_vector<VkClearValue> clearValues = {};
 	};

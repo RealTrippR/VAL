@@ -107,8 +107,8 @@ namespace val {
 
 	struct ImageFormatRequirements
 	{
-		std::vector<VkFormat> acceptedFormats;
-		std::vector<VkColorSpaceKHR> acceptedColorSpaces;
+		tiny_vector<VkFormat> acceptedFormats;
+		tiny_vector<VkColorSpaceKHR> acceptedColorSpaces;
 		VkImageTiling tiling;
 		VkFormatFeatureFlags features;
 	};

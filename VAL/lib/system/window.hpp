@@ -113,6 +113,9 @@ namespace val {
 		inline VkRect2D getSizeAsRect2D();
 
 		inline bool shouldClose();
+
+		inline const VkColorSpaceKHR getColorSpace();
+
 	public:
 
 		uint32_t _currentSwapChainImageIndex = 0;
@@ -121,7 +124,7 @@ namespace val {
 
 		GLFWwindow* _window = NULL;
 
-		VkColorSpaceKHR _colorSpace;
+		VkColorSpaceKHR _colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 
 		queueManager _presentQueue;
 

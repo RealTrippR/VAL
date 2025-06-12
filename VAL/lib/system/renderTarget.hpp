@@ -211,7 +211,7 @@ namespace val {
 			for (uint32_t i = 0; i < clearValueCount; ++i) {
 				_clearValues.push_back(clearValues[i]);
 			}
-			_renderPassBeginInfo.clearValueCount = _clearValues.size();
+			_renderPassBeginInfo.clearValueCount = uint32_t(_clearValues.size());
 			_renderPassBeginInfo.pClearValues = _clearValues.data();
 		}
 

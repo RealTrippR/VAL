@@ -41,7 +41,7 @@ struct uniformBufferObject {
 };
 
 const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
+void updateViewMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
 {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
@@ -58,7 +58,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 {
 	using namespace val;
 
@@ -81,53 +81,35 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 }
 
 
-val::subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
-	namespace v = val;
-	static v::colorAttachment colorAttach;
+val::Subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	using namespace val;
+	static colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(v::CLEAR);
-	colorAttach.setStoreOperation(v::STORE);
+	colorAttach.setLoadOperation(CLEAR);
+	colorAttach.setStoreOperation(STORE);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	static v::subpass subpass(renderPassMngr, v::GRAPHICS);
+	static Subpass subpass(renderPassMngr, GRAPHICS);
 	subpass.bindAttachment(&colorAttach);
 	return subpass;
 }
 
-void intercept(const char* msg, bool* block) {
-	printf("bar, bar: ");
-	printf(msg);
-	printf("\n");
-	*block = false;
-}
-
-
-void interceptNo2(const char* msg, bool* block) {
-	printf("foo, foo");
-	printf(msg);
-	printf("\n");
-
-	*block = false;
-}
 int main()
 {
 #ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	
-	val::dbg::addNoteIntercept(intercept);
-	val::dbg::addNoteIntercept(interceptNo2);
-
 	using namespace val;
 
-	VAL_PROC proc;
+	ValProc proc;
 
-	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
-	windowProperties windowConfig;
+	WindowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
-	window window(windowConfig, 800,800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	Window window(windowConfig, 800,800, "Render Graph Test", proc);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
@@ -135,32 +117,32 @@ int main()
 
 	// VAL uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements formatReqs;
+	val::ImageFormatRequirements formatReqs;
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+	formatReqs.acceptedColorSpaces = { window.getColorSpace() };
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	val::UBO_Handle viewMatrixUBO(sizeof(uniformBufferObject));
 	// load and configure vert shader
 	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
-	vertShader._UBO_Handles = { {&uboHdl,0} };
+	vertShader._UBO_Handles = { {&viewMatrixUBO,0} };
 
 	// load and configure frag shader
 	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	//////////////////////////////////////////////////////////////
 
-	val::graphicsPipelineCreateInfo pipeline;
+	val::GraphicsPipeline pipeline;
 	pipeline.shaders = { &vertShader,&fragShader };
 	setGraphicsPipelineInfo(pipeline);
 
 	/* * * * * * * * * * * * * * * * * * * */
 	// configure render pass and subpass
-	val::renderPassManager renderPassMngr(proc);
-	val::subpass subpass = setRenderPass(renderPassMngr, imageFormat);
+	renderPassManager renderPassMngr(proc);
+	Subpass subpass = setRenderPass(renderPassMngr, imageFormat);
 	/* * * * * * * * * * * * * * * * * * * */
 
 	pipeline.renderPass = &renderPassMngr;
@@ -229,7 +211,7 @@ int main()
 
 
 		// Update view information, stored in a UBO
-		updateUniformBuffer(proc, uboHdl);
+		updateViewMatrix(proc, viewMatrixUBO);
 
 		/* * * * * * * * * * * * * * * * * */
 

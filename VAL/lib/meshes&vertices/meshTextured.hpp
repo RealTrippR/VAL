@@ -8,13 +8,23 @@
 namespace val {
 	namespace fs = std::filesystem;
 
-	class meshTextured {
+	class MeshTextured {
 	public:
-		meshTextured(ValProc& proc) : _proc(proc), _textureImageView(proc) {};
+		MeshTextured(ValProc& proc) : _proc(proc), _textureImageView(proc) {};
 
-		~meshTextured() {
+		~MeshTextured() {
 			cleanup();
 		}
+
+
+		inline val::Image& getTexture() {
+			return *_texture;
+		}
+
+		inline val::imageView& getTextureImageView() {
+			return _textureImageView;
+		}
+
 	public:
 		void loadFromDiskObj(fs::path objPath, bool deduplicateVertices);
 		//void loadTexture(VAL_PROC& proc, const fs::path texturePath, const VkFormat imageFormat,

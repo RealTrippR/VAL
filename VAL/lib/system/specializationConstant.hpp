@@ -26,7 +26,7 @@ namespace val {
 			specializationConstant ret;
 			ret._id = other.constantID;
 			ret._dataOffset = other.offset;
-			ret._dataSize = other.size;
+			ret._dataSize = uint16_t(other.size);
 
 			return ret;
 		}

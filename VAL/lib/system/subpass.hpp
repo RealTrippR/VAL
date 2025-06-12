@@ -12,15 +12,13 @@ namespace val
 {
 	class renderPassManager; // forward declaration
 
-	class subpass {
+	class Subpass {
 	public:
-		subpass(renderPassManager& rpManager) : _rpMngr(&rpManager) {
-			//_rpMngr->_subpasses.push_back(this);
+		Subpass(renderPassManager& rpManager) : _rpMngr(&rpManager) {
 			attachToRenderPassManager();
 		};
-		subpass(renderPassManager& rpManager, PIPELINE_TYPE pipelineBindPoint) : _rpMngr(&rpManager) {
+		Subpass(renderPassManager& rpManager, PIPELINE_TYPE pipelineBindPoint) : _rpMngr(&rpManager) {
 			_subpassDesc.pipelineBindPoint = PIPELINE_TYPE_To_VkPipelineBindPoint(pipelineBindPoint);
-			//_rpMngr->_subpasses.push_back(this);
 			attachToRenderPassManager();
 		}
 	public:
@@ -34,7 +32,7 @@ namespace val
 
 	protected:
 		friend ValProc;
-		friend subpass;
+		friend Subpass;
 		friend renderAttachment;
 		friend renderPassManager;
 		/******************************************/

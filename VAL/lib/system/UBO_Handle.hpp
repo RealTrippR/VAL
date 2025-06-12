@@ -26,7 +26,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <GLFW/glfw3.h>
 
 namespace val {
-	struct UBO_Handle {
+	class UBO_Handle {
+	public:
 		UBO_Handle(uint16_t sizeOfUBO, bufferSpace space = CPU_GPU) : _size(sizeOfUBO), _space(space) {};
 		UBO_Handle(uint16_t sizeOfUBO, bufferSpace space, VkBufferUsageFlags additionalUsageFlags) : _size(sizeOfUBO), _space(space), _additionalUsageFlags(additionalUsageFlags){};
 

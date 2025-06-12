@@ -29,9 +29,6 @@ const bool enableValidationLayers = true;
 
 
 #include <VAL/lib/system/VAL_PROC.hpp>
-#include <VAL/lib/system/window.hpp>
-#include <VAL/lib/system/system_utils.hpp>
-#include <VAL/lib/graphics/shader.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -56,7 +53,7 @@ const bool enableValidationLayers = true;
 const std::string MODEL_PATH = "res/viking_room.obj";
 const std::string TEXTURE_PATH = "res/viking_room.png";
 
-struct uniformBufferObject {
+struct ViewMatrix {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
@@ -76,7 +73,7 @@ void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	const float CAM_DIST = 3.0f;
-	static uniformBufferObject ubo{};
+	static ViewMatrix ubo{};
 	ubo.model = glm::rotate(glm::mat4(1.0f), .5f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(CAM_DIST, CAM_DIST, CAM_DIST), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
@@ -155,9 +152,9 @@ int main() {
 	val::PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-	meshTextured mesh(proc);
+	MeshTextured mesh(proc);
 	sampler imgSampler(proc, val::combinedImage);
-	imgSampler.bindImageView(mesh._textureImageView);
+	imgSampler.bindImageView(mesh.getTextureImageView());
 
 	
 	// Configure and create window
@@ -166,7 +163,7 @@ int main() {
 	Window window(windowConfig, 800, 800, "3D Rendering Test", proc);
 
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	val::UBO_Handle uboHdl(sizeof(ViewMatrix));
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created

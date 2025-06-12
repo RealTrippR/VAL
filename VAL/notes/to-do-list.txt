@@ -16,17 +16,16 @@ The Vulkan Abstraction Library is missing the following key features:
 
 ----------------------------------------------------------------------------------------------------------------
 
-[!] This is critical: create a standard naming case convention:
+[*] VAL standard naming case convention:
 		
-		- Pascal case for structures, classes, and Enums
+		- PascalCase for structure and class types
 
-		- Camel case for functions & variables
+		- camelCase for functions & variables
 
-
-
-
+		- UPPER_SNAKE_CASE for enum types, camel case for enum values.
 
 
+[!] Completely redesign meshes, the current implementation is dogwater
 
 
 [!] Redesign Queue System

@@ -16,7 +16,7 @@ PASS_BEGIN(DRAW_RECT)
 READ(gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices)
 //WRITE(NULL)
 //READ_WRITE(NULL)
-INPUT(graphicsPipelineCreateInfo& pipeline, window& wind, VkCommandBuffer& cmd)
+INPUT(GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd)
 ){
 	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 	FIXED_BEGIN(
@@ -25,18 +25,18 @@ INPUT(graphicsPipelineCreateInfo& pipeline, window& wind, VkCommandBuffer& cmd)
 	)		
 	{
 		static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
-		setPipeline(pipeline, V_PROC, cmd);
+		SET_PIPELINE(pipeline, V_PROC, cmd);
 
-		setVertexBuffer(vertices, cmd);
-		setIndexBuffer(indices, cmd);
+		SET_VERTEX_BUFFER(vertices, cmd);
+		SET_INDEX_BUFFER(indices, cmd);
 
 
-		setViewport(viewport, cmd);
-		setScissor(wind.getSize(), cmd);
+		SET_VIEWPORT(viewport, cmd);
+		SET_SCISSOR(wind.getSize(), cmd);
 
 	
 
-		drawIndexed(indices.size(), cmd);
+		DRAW_INDEXED(indices.size(), cmd);
 	}
 	FIXED_END
 }

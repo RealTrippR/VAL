@@ -1018,6 +1018,7 @@ namespace val {
 		);
 		processedSrc.append(
 			string("if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo,") + cmdBuffName + string(") != VK_SUCCESS) {\n"
+					"val::dbg::printError(\"Failed to allocate command buffers for baking render graph.\");"
 					"throw std::runtime_error(\"Failed to allocate command buffers!\");\n"
 			"}\n")
 		);
@@ -1273,7 +1274,7 @@ namespace val {
 		}
 
 		processedSrc.insert(0, srcBeforeFirstPass);
-		processedSrc.insert(0, "#include <VAL/lib/system/ValProc.hpp>\n");
+		processedSrc.insert(0, "#include <VAL/lib/system/VAL_PROC.hpp>\n");
 
 		/* 
 		* Deduplicate arguments, and append the them in this order:

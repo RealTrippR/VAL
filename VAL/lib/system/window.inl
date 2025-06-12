@@ -49,6 +49,10 @@ namespace val {
 	inline bool Window::shouldClose() {
 		return glfwWindowShouldClose(_window);
 	}
+
+	inline const VkColorSpaceKHR Window::getColorSpace() {
+		return _colorSpace;
+	}
 }
 
 #endif

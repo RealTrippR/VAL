@@ -111,11 +111,11 @@ namespace val
 			vkFreeCommandBuffers(proc._device, proc._commandPool, _commandBuffers.size(), _commandBuffers.data());
 		}
 
-		for (int i = 0; i < _semaphores.size(); ++i) {
+		for (uint32_t i = 0; i < _semaphores.size(); ++i) {
 			vkDestroySemaphore(proc._device, _semaphores[i], VK_NULL_HANDLE);
 		}
 
-		for (int i = 0; i < _fences.size(); ++i) {
+		for (uint32_t i = 0; i < _fences.size(); ++i) {
 			vkDestroyFence(proc._device, _fences[i], VK_NULL_HANDLE);
 		}
 

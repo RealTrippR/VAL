@@ -143,8 +143,8 @@ namespace val {
 	const VkSamplerAddressMode& sampler::getAddressModeW() {
 		return _samplerCreateInfo.addressModeW;
 	}
-	const bool& sampler::normalizedCoordinates() {
-		return !_samplerCreateInfo.unnormalizedCoordinates;
+	const bool& sampler::unnormalizedCoordinates() {
+		return _samplerCreateInfo.unnormalizedCoordinates;
 	}
 	const VkCompareOp& sampler::getCompareMode() {
 		return _samplerCreateInfo.compareOp;

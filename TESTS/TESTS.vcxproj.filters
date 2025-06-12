@@ -33,6 +33,7 @@
       <Filter>experimental-features</Filter>
     </ClCompile>
     <ClCompile Include="deferredRendering.cpp" />
+    <ClCompile Include="shadingTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
@@ -114,6 +115,15 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="README.MD" />
+    <None Include="shaders\Deffered1.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\Deferred1.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\DefferedLightingPass.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\viking_room.png">

@@ -21,7 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	void meshTextured::loadFromDiskObj(fs::path objPath, bool deduplicateVertices) {
+	void MeshTextured::loadFromDiskObj(fs::path objPath, bool deduplicateVertices) {
 
 		loadModelFromDiskAsUnifiedMesh(objPath, _vertices, _indices, &_meshAttribs, deduplicateVertices);
 
@@ -30,7 +30,7 @@ namespace val {
 		_proc.createIndexBuffer(_indices.data(), _indices.size(), &_indexBuffer, &_indexBufferMem);
 	}
 
-	void meshTextured::cleanup() {
+	void MeshTextured::cleanup() {
 		VkDevice& device = _proc._device;
 
 #ifndef NDEBUG
@@ -49,7 +49,7 @@ namespace val {
 		}
 	}
 
-	void meshTextured::setTexture(val::Image& texture) {
+	void MeshTextured::setTexture(val::Image& texture) {
 		_texture = &texture;
 		if (_textureImageView) {
 			vkDestroyImageView(_proc._device, _textureImageView, NULL);

@@ -34,7 +34,7 @@ namespace val {
 
 	inline void END_RENDER_PASS(VkCommandBuffer& cmd);
 
-	inline void SET_PIPELINE(GraphicsPipeline& pipeline, VAL_PROC& proc, VkCommandBuffer& commandBuffer);
+	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, VkCommandBuffer& commandBuffer);
 
 	inline void SET_VIEWPORT(const VkViewport& viewport, VkCommandBuffer& commandBuffer);
 

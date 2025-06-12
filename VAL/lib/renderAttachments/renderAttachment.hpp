@@ -5,7 +5,7 @@
 #include <VAL/lib/renderAttachments/attachmentEnums.hpp>
 
 namespace val {
-	class subpass; // forward declaration
+	class Subpass; // forward declaration
 
 	enum RENDER_ATTACHMENT_USAGE {
 		USED,
@@ -53,7 +53,7 @@ namespace val {
 		}
 
 	protected:
-		friend subpass;
+		friend Subpass;
 		friend ValProc;
 		VkFormat _imgFormat = VK_FORMAT_UNDEFINED;
 		RENDER_ATTACHMENT_OPERATION_TYPE _loadOp = CLEAR;

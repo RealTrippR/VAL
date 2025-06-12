@@ -27,12 +27,12 @@ namespace val {
 	template<typename T, typename size_t = uint32_t>
 	class gpu_vector {
 	public:
-		gpu_vector(VAL_PROC& proc, const VkBufferUsageFlags& usage) {
+		gpu_vector(ValProc& proc, const VkBufferUsageFlags& usage) {
 			init(proc, 0);
 		}
 
 
-		gpu_vector(VAL_PROC& proc, const VkBufferUsageFlags& usage, size_t size, const T& val) {
+		gpu_vector(ValProc& proc, const VkBufferUsageFlags& usage, size_t size, const T& val) {
 			_usage = usage;
 			init(proc, size);
 
@@ -41,7 +41,7 @@ namespace val {
 			}
 		}
 
-		gpu_vector(VAL_PROC& proc, const VkBufferUsageFlags& usage, std::initializer_list<T> list) {
+		gpu_vector(ValProc& proc, const VkBufferUsageFlags& usage, std::initializer_list<T> list) {
 			_usage = usage;
 			init(proc, list.size());
 
@@ -82,7 +82,7 @@ namespace val {
 			return _buffer;
 		}
 
-		inline void init(VAL_PROC& proc, size_t size) {
+		inline void init(ValProc& proc, size_t size) {
 			_size = size;
 
 			_capacity = roundToNextPowerOfTwo(_size + 1);
@@ -94,7 +94,7 @@ namespace val {
 			vkMapMemory(proc._device, _memory, 0, _size, 0, (void**)&_mappedMemory);
 		}
 
-		inline void resize(VAL_PROC& proc, const size_t& newSize) {
+		inline void resize(ValProc& proc, const size_t& newSize) {
 			if (_size == newSize) { return; }
 
 			VkBuffer newBuffer;
@@ -128,7 +128,7 @@ namespace val {
 			}
 		}
 
-		inline void resize(VAL_PROC& proc, const size_t& newSize, VkCommandBuffer& commandBuff) {
+		inline void resize(ValProc& proc, const size_t& newSize, VkCommandBuffer& commandBuff) {
 			if (_size == newSize) { return; }
 
 			VkBuffer newBuffer;
@@ -162,7 +162,7 @@ namespace val {
 			}
 		}
 
-		inline void copy(VAL_PROC& proc, VkBuffer& other, uint32_t otherSize, VkCommandBuffer& cmdBuff) {
+		inline void copy(ValProc& proc, VkBuffer& other, uint32_t otherSize, VkCommandBuffer& cmdBuff) {
 
 			VkBufferCopy copyRegion;
 			copyRegion.srcOffset = 0u; 
@@ -193,7 +193,7 @@ namespace val {
 			vkCmdCopyBuffer(cmdBuff, _buffer, other._buffer, 1, &copyRegion);
 		}
 
-		inline void destroy(VAL_PROC& proc) {
+		inline void destroy(ValProc& proc) {
 			if (_memory) {
 				vkDestroyBuffer(proc._device, _buffer, VK_NULL_HANDLE);
 				vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
