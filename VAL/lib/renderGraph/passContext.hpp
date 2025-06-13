@@ -19,12 +19,22 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_PASS_CONTEXT_HPP
 
 #include <VAL/lib/system/system_utils.hpp>
+#include <VAL/lib/system/graphicsPipeline.hpp>
 
 namespace val {
-	struct PASS_CONTEXT {
+	class PASS_CONTEXT {
+	public:
+		PASS_CONTEXT(ValProc& proc__, const VkRect2D& renderArea__, const tiny_vector<VkClearValue>& clearValues__)
+		: proc(proc__), renderArea(renderArea__), clearValues(clearValues__) {}
+	public:
 		ValProc& proc;
 		VkRect2D renderArea;
 		tiny_vector<VkClearValue> clearValues = {};
+
+	private:
+		tiny_vector<VkPipelineStageFlagBits> waitStages = {};
+
+		void createWaitStages(ValProc& proc, tiny_vector<GraphicsPipeline>& graphicsPipelines/*tiny_vector<ComputePipeline>& computePipelines*/);
 	};
 }
 

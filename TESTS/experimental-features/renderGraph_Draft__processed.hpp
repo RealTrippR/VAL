@@ -37,7 +37,8 @@ allocInfo.commandPool = V_PROC._commandPool;
 allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 allocInfo.commandBufferCount = 2;
 if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo,__DRAW_RECT_fixed_cmd_buffer_0) != VK_SUCCESS) {
-val::dbg::printError("Failed to allocate command buffers for baking render graph.");throw std::runtime_error("Failed to allocate command buffers!");
+val::dbg::printError("Failed to allocate command buffers for baking render graph.");
+throw std::runtime_error("Failed to allocate command buffers!");
 }
 
 }
@@ -60,18 +61,18 @@ vkBeginCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__], &b
 	
 	{
 		static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
-		SET_PIPELINE(pipeline, V_PROC, cmd);
+		SET_PIPELINE(pipeline,V_PROC,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 
-		SET_VERTEX_BUFFER(vertices, cmd);
-		SET_INDEX_BUFFER(indices, cmd);
+		SET_VERTEX_BUFFER(vertices,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+		SET_INDEX_BUFFER(indices,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 
 
-		SET_VIEWPORT(viewport, cmd);
-		SET_SCISSOR(wind.getSize(), cmd);
+		SET_VIEWPORT(viewport,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+		SET_SCISSOR(wind.getSize(),__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 
 	
 
-		DRAW_INDEXED(indices.size(), cmd);
+		DRAW_INDEXED(indices.size(),__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 {
 /* END RECORDING */
 vkEndCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);

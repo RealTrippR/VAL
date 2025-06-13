@@ -79,6 +79,9 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 
 #include <VAL/lib/pipelineStateInfos/stateInfoEnums.hpp>
 
+#include <VAL/lib/system/bufferUsageEnum.hpp>
+
+#include <VAL/lib/system/shaderStageEnum.hpp>
 
 namespace val {
 

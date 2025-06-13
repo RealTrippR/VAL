@@ -62,6 +62,9 @@ namespace val {
 			_entryPoint = entryPoint;
 			_shaderStageFlags = shaderStageFlags;
 		}
+
+		Shader(fs::path filepath, SHADER_STAGE shaderStageFlags, std::string entryPoint = "main")
+			: Shader(filepath, static_cast<VkShaderStageFlags>(shaderStageFlags), entryPoint) {}
 		
 	public:
 		// returns true if the shader was succesfully loaded

@@ -242,6 +242,7 @@
     <ClInclude Include="lib\renderGraph\renderGraphBlock.h" />
     <ClInclude Include="lib\renderGraph\renderPassBeginType.hpp" />
     <ClInclude Include="lib\system\buffer.hpp" />
+    <ClInclude Include="lib\system\bufferUsageEnum.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />
     <ClInclude Include="lib\system\depthBuffer.hpp" />
@@ -261,6 +262,7 @@
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\renderTarget.hpp" />
+    <ClInclude Include="lib\system\shaderStageEnum.hpp" />
     <ClInclude Include="lib\system\specializationConstant.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\subpass.hpp" />
@@ -287,6 +289,7 @@
     <ClCompile Include="src\renderAttachments\renderAttachment.cpp" />
     <ClCompile Include="src\renderGraph\argBlock.c" />
     <ClCompile Include="src\renderGraph\bakedCommandBuffer.c" />
+    <ClCompile Include="src\renderGraph\passContext.cpp" />
     <ClCompile Include="src\renderGraph\passInfo.c" />
     <ClCompile Include="src\renderGraph\renderGraph.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />
@@ -346,6 +349,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\texture2d.inl">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\system\VAL_PROC.inl">
       <FileType>Document</FileType>
     </ClInclude>
   </ItemGroup>

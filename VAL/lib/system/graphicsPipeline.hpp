@@ -38,39 +38,35 @@ namespace val {
 	public:
 		inline VkPipelineBindPoint getBindPoint() {return _bindPoint;};
 
-		uint32_t subpassIndex = 0u;
-
-		renderPassManager* renderPass;
-
 		void setRasterizer(val::rasterizerState* rasterizer);
 
-		rasterizerState* getRasterizer();
+		rasterizerState* getRasterizer() const;
 
 		void setColorBlendState(val::colorBlendState* colorState);
 
-		colorBlendState* getColorBlendState();
+		colorBlendState* getColorBlendState() const;
 
 		void setDepthStencilState(val::depthStencilState* blendState);
 
-		depthStencilState* getDepthStencilState();
+		depthStencilState* getDepthStencilState() const;
 
 		void setSampleCount(const VkSampleCountFlags& samples);
 
-		const VkSampleCountFlags& getSampleCount();
+		const VkSampleCountFlags& getSampleCount() const;
 
 		void setSampleShadingEnabled(const bool& enabled);
 
-		const bool& getSampleShadingEnabled();
+		const bool& getSampleShadingEnabled() const;
 
 		VkPipelineMultisampleStateCreateInfo getVkPipelineMultisampleStateCreateInfo();
 
 		void setTopology(const VkPrimitiveTopology& topolgy);
 
-		VkPrimitiveTopology getTopology();
+		VkPrimitiveTopology getTopology() const;
 
 		void setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates);
 
-		const std::vector<DYNAMIC_STATE>& getDynamicStates();
+		const std::vector<DYNAMIC_STATE>& getDynamicStates() const;
 
 	public: 
 
@@ -87,6 +83,10 @@ namespace val {
 	protected:
 		friend ValProc;
 	protected:
+		uint32_t subpassIndex = 0u;
+
+		renderPassManager* renderPass = NULL;
+
 		VkPrimitiveTopology _topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
 		rasterizerState* _rasterizerState = NULL;

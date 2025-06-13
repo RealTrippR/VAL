@@ -93,11 +93,11 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
 	static colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(CLEAR);
-	colorAttach.setStoreOperation(STORE);
+	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	static Subpass subpass(renderPassMngr, GRAPHICS);
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 	subpass.bindAttachment(&colorAttach);
 }
 

@@ -1,0 +1,56 @@
+/*
+Copyright © 2025 Tripp Robins
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the “Software”), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#include <VAL/lib/classEnumBitOps.hpp>
+#include <ExternalLibraries/Vulkan/Include/vulkan/vulkan_core.h>
+
+namespace val {
+
+	enum BUFFER_USAGE : uint32_t
+	{
+		TransferSRC = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		TransferDST = VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		UniformTexel = VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT,
+		StorageTexel = VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT,
+		Uniform = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		Storage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+		Index = VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+		Vertex = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		Indirect = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT,
+		ShaderDeviceAddress = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+		VideoDecodeSRC = VK_BUFFER_USAGE_VIDEO_DECODE_SRC_BIT_KHR,
+		VideoDecodeDST = VK_BUFFER_USAGE_VIDEO_DECODE_DST_BIT_KHR,
+		TransformFeedback = VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_BUFFER_BIT_EXT,
+		TransformFeedbackCounter = VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_COUNTER_BUFFER_BIT_EXT,
+		ConditionalRendering = VK_BUFFER_USAGE_CONDITIONAL_RENDERING_BIT_EXT,
+		AccelerationStructureBuildInput = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
+		AccelerationStructureStorage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+		BindingTable = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR,
+		VideoEncodeSRC = VK_BUFFER_USAGE_VIDEO_ENCODE_SRC_BIT_KHR,
+		VideoEncodeDST = VK_BUFFER_USAGE_VIDEO_ENCODE_DST_BIT_KHR,
+		SamplerDescriptorBuffer = VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT,
+		ResourceDescriptorBuffer = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT,
+		PushDescriptorBuffer = VK_BUFFER_USAGE_PUSH_DESCRIPTORS_DESCRIPTOR_BUFFER_BIT_EXT,
+		MicromapBuildInput = VK_BUFFER_USAGE_MICROMAP_BUILD_INPUT_READ_ONLY_BIT_EXT,
+		MicromapStorage = VK_BUFFER_USAGE_MICROMAP_STORAGE_BIT_EXT,
+	};
+
+#ifndef BUFFER_USAGE_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS
+#define BUFFER_USAGE_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(BUFFER_USAGE);
+#endif
+}

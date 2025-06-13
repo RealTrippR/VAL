@@ -42,12 +42,18 @@ public:
         resize(size);
     }
 
-
     tiny_vector(size_type size, std::initializer_list<t> list) {
         resize(size);
         size_type i = 0;
         for (const t& value : list) {
             _data[i++] = value;
+        }
+    }
+
+    tiny_vector(const tiny_vector<t>& other ) {
+        resize(other.size());
+        for (size_t i = 0; i < other.size(); ++i) {
+            _data[i] = other._data[i];
         }
     }
 

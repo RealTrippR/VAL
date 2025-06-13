@@ -31,7 +31,7 @@ namespace val
 		_rasterizerState = rasterizer;
 	}
 
-	rasterizerState* GraphicsPipeline::getRasterizer()
+	rasterizerState* GraphicsPipeline::getRasterizer() const
 	{
 		return _rasterizerState;
 	}
@@ -40,7 +40,7 @@ namespace val
 		_colorBlendState = colorState;
 	}
 
-	colorBlendState* GraphicsPipeline::getColorBlendState() {
+	colorBlendState* GraphicsPipeline::getColorBlendState() const {
 		return _colorBlendState;
 	}
 
@@ -48,7 +48,7 @@ namespace val
 		_depthStencilState = blendState;
 	}
 
-	depthStencilState* GraphicsPipeline::getDepthStencilState() {
+	depthStencilState* GraphicsPipeline::getDepthStencilState() const {
 		return _depthStencilState;
 	}
 
@@ -57,20 +57,23 @@ namespace val
 		_sampleCountMSAA = samples;
 	}
 
-	const VkSampleCountFlags& GraphicsPipeline::getSampleCount()
+	const VkSampleCountFlags& GraphicsPipeline::getSampleCount() const
 	{
 		return _sampleCountMSAA;
 	}
 
-	void GraphicsPipeline::setSampleShadingEnabled(const bool& enabled) {
+	void GraphicsPipeline::setSampleShadingEnabled(const bool& enabled) 
+	{
 		_sampleShadingEnabled = enabled;
 	}
 
-	const bool& GraphicsPipeline::getSampleShadingEnabled() {
+	const bool& GraphicsPipeline::getSampleShadingEnabled() const 
+	{
 		return _sampleShadingEnabled;
 	}
 
-	VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getVkPipelineMultisampleStateCreateInfo() {
+	VkPipelineMultisampleStateCreateInfo GraphicsPipeline::getVkPipelineMultisampleStateCreateInfo()
+	{
 		VkPipelineMultisampleStateCreateInfo info{};
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		info.rasterizationSamples = (VkSampleCountFlagBits)_sampleCountMSAA;
@@ -78,19 +81,22 @@ namespace val
 		return info;
 	}
 
-	void GraphicsPipeline::setTopology(const VkPrimitiveTopology& topolgy) {
+	void GraphicsPipeline::setTopology(const VkPrimitiveTopology& topolgy) 
+	{
 		_topology = topolgy;
 	}
 
-	VkPrimitiveTopology GraphicsPipeline::getTopology() {
+	VkPrimitiveTopology GraphicsPipeline::getTopology() const {
 		return _topology;
 	}
 
-	void GraphicsPipeline::setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates) {
+	void GraphicsPipeline::setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates) 
+	{
 		_dynamicStates = dynamicStates;
 	}
 
-	const std::vector<DYNAMIC_STATE>& GraphicsPipeline::getDynamicStates() {
+	const std::vector<DYNAMIC_STATE>& GraphicsPipeline::getDynamicStates() const 
+	{
 		return _dynamicStates;
 	}
 }

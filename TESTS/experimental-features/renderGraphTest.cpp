@@ -70,7 +70,8 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	// the color blend state affects how the output of the fragmennt shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	static colorBlendStateAttachment colorBlendAttachment;
+	colorBlendAttachment.setBlendEnabled(false);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	static colorBlendState blendState;
@@ -80,16 +81,16 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 
-
-val::Subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+val::Subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) 
+{
 	using namespace val;
 	static colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(CLEAR);
-	colorAttach.setStoreOperation(STORE);
+	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	static Subpass subpass(renderPassMngr, GRAPHICS);
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 	subpass.bindAttachment(&colorAttach);
 	return subpass;
 }
@@ -122,17 +123,17 @@ int main()
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
 	formatReqs.acceptedColorSpaces = { window.getColorSpace() };
-	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
+	VkFormat imageFormat = val::findSupportedImageFormat(proc.getVkPhysicalDevice(), formatReqs);
 
 	val::UBO_Handle viewMatrixUBO(sizeof(uniformBufferObject));
 	// load and configure vert shader
-	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/shadervert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&viewMatrixUBO,0} };
 
 	// load and configure frag shader
-	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", SHADER_STAGE::Fragment, "main");
 	//////////////////////////////////////////////////////////////
 
 	val::GraphicsPipeline pipeline;
@@ -151,14 +152,14 @@ int main()
 
 	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
 
-	gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
+	gpu_vector<res::vertex> vertices(proc, BUFFER_USAGE::Vertex, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	});
 
-	gpu_vector<uint32_t> indices(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 
+	gpu_vector<uint32_t> indices(proc, BUFFER_USAGE::Index, 
 		{0, 1, 2, 2, 3, 0 }
 	);
 
@@ -175,7 +176,7 @@ int main()
 	RENDER_GRAPH renderGraph;
 	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
 
-	renderGraph.compile(proc._MAX_FRAMES_IN_FLIGHT,filepath("experimental-features"));
+	renderGraph.compile(proc.getFramesInFlight(), filepath("experimental-features"));
 
 
 	PASS_CONTEXT passContext = {
@@ -206,7 +207,6 @@ int main()
 		VkCommandBuffer& cmd = graphicsQueue._commandBuffers[currentFrame];
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-
 
 
 

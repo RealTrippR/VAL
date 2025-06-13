@@ -15,18 +15,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
-#define VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
 
-#include <VAL/lib/system/graphicsPipeline.hpp>
+#ifndef VAL_PROC_INLINE
+#define VAL_PROC_INLINE
 
 namespace val {
-	inline VkPipeline& GraphicsPipeline::getVkPipeline(ValProc& proc) {
-		return proc._graphicsPipelines[pipelineIdx];
+	inline const uint8_t& ValProc::getFramesInFlight() {
+		return _MAX_FRAMES_IN_FLIGHT;
 	}
 
-	inline VkRenderPass& GraphicsPipeline::getVkRenderPass() {
-		return renderPass->getVkRenderPass();
-	}
 }
-#endif // !VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
+#endif // !VAL_PROC_INLINE

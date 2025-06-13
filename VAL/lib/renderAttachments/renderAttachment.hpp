@@ -30,13 +30,13 @@ namespace val {
 	public:
 		VkAttachmentDescription toVkAttachmentDescription();
 
-		void setLoadOperation(const RENDER_ATTACHMENT_OPERATION_TYPE& opType);
+		void setLoadOperation(const RENDER_ATTACHMENT_OPERATION& opType);
 		
-		const RENDER_ATTACHMENT_OPERATION_TYPE& getLoadOperation();
+		const RENDER_ATTACHMENT_OPERATION& getLoadOperation();
 
-		void setStoreOperation(const RENDER_ATTACHMENT_OPERATION_TYPE& opType);
+		void setStoreOperation(const RENDER_ATTACHMENT_OPERATION& opType);
 
-		const RENDER_ATTACHMENT_OPERATION_TYPE& getStoreOperation();
+		const RENDER_ATTACHMENT_OPERATION& getStoreOperation();
 
 		void setImgFormat(const VkFormat& format);
 
@@ -56,10 +56,10 @@ namespace val {
 		friend Subpass;
 		friend ValProc;
 		VkFormat _imgFormat = VK_FORMAT_UNDEFINED;
-		RENDER_ATTACHMENT_OPERATION_TYPE _loadOp = CLEAR;
-		RENDER_ATTACHMENT_OPERATION_TYPE _storeOp = STORE;
-		RENDER_ATTACHMENT_OPERATION_TYPE _stencilLoadOp = DISCARD;
-		RENDER_ATTACHMENT_OPERATION_TYPE _stencilStoreOp = DISCARD;
+		RENDER_ATTACHMENT_OPERATION _loadOp = RENDER_ATTACHMENT_OPERATION::Clear;
+		RENDER_ATTACHMENT_OPERATION _storeOp = RENDER_ATTACHMENT_OPERATION::Store;
+		RENDER_ATTACHMENT_OPERATION _stencilLoadOp = RENDER_ATTACHMENT_OPERATION::Discard;
+		RENDER_ATTACHMENT_OPERATION _stencilStoreOp = RENDER_ATTACHMENT_OPERATION::Discard;
 		VkImageLayout _initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkImageLayout _finalLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		bool _unused = false;

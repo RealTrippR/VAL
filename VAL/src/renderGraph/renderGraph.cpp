@@ -612,7 +612,7 @@ namespace val {
 		string processed_src;
 		const VAL_RETURN_CODE preprocess_res = preprocess(&processed_src, &errorMsg, framesInFlight);
 		if (preprocess_res == VAL_FAILURE) {
-			printf("Failed to compile render pass: %s\n", errorMsg);
+			dbg::printError("Failed to compile render pass : % s\n", errorMsg);
 			cleanup();
 			return VAL_FAILURE;
 		}
@@ -651,7 +651,7 @@ namespace val {
 				if (processedSrcFptr) {
 					fclose(processedSrcFptr);
 				}
-				printf("Nothing to compile, the processed src length is 0!\n");
+				dbg::printWarning("Render graph is blank, there is nothing to compile.\n");
 				return VAL_FAILURE;
 			}
 			fclose(processedSrcFptr);
@@ -951,10 +951,6 @@ namespace val {
 				*error = (char*)"Out of system memory, could not allocate memory for passInfo.execSrc";
 				return VAL_FAILURE;
 			}
-
-			printf("-- %.*s --\n", passInfo.execSrcLen, passInfo.execSrc);
-
-			//extractPassData(&passInfo, &EXEC_SRC);
 		}
 
 
@@ -1018,7 +1014,7 @@ namespace val {
 		);
 		processedSrc.append(
 			string("if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo,") + cmdBuffName + string(") != VK_SUCCESS) {\n"
-					"val::dbg::printError(\"Failed to allocate command buffers for baking render graph.\");"
+					"val::dbg::printError(\"Failed to allocate command buffers for baking render graph.\");\n"
 					"throw std::runtime_error(\"Failed to allocate command buffers!\");\n"
 			"}\n")
 		);
@@ -1057,24 +1053,24 @@ namespace val {
 		);
 		// find render graph functions and replace any instances of command buffers with the fixed command buffer
 		const char* f_table[] = {
-			("setPipeline(*,*,c)"), /*the extra parenthesis are to reduce the risk of joined string errors*/
-			("setPipeline("),		/*(C will automatically join strings together if they're not seperated by a comma)*/
-			("setViewport(*,c)"),
-			("setViewport("),
-			("setScissor(*,c)"),
-			("setScissor("),
-			("setIndexBuffer(*,c)"),
-			("setIndexBuffer("),
-			("setVertexBuffer(*,c)"),
-			("setVertexBuffer("),
-			("drawInstanced(*,*,*,c)"),
-			("drawInstanced("),
-			("drawInstanced(*,*,c)"),
-			("drawInstanced("),
-			("drawIndexed(*,c)"),
-			("drawIndexed("),
-			("draw(*,c)"),
-			("draw(")
+			("SET_PIPELINE(*,*,c)"), /*the extra parenthesis are to reduce the risk of joined string errors*/
+			("SET_PIPELINE("),		/*(C will automatically join strings together if they're not seperated by a comma)*/
+			("SET_VIEWPORT(*,c)"),
+			("SET_VIEWPORT("),
+			("SET_SCISSOR(*,c)"),
+			("SET_SCISSOR("),
+			("SET_INDEX_BUFFER(*,c)"),
+			("SET_INDEX_BUFFER("),
+			("SET_VERTEX_BUFFER(*,c)"),
+			("SET_VERTEX_BUFFER("),
+			("DRAW_INSTANCED_INDEXED(*,*,*,c)"),
+			("DRAW_INSTANCED_INDEXED("),
+			("DRAW_INSTANCED(*,*,c)"),
+			("DRAW_INSTANCED("),
+			("DRAW_INDEXED(*,c)"),
+			("DRAW_INDEXED("),
+			("DRAW(*,c)"),
+			("DRAW(")
 		};
 
 	#ifndef NDEBUG
