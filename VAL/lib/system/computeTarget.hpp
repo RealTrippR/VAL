@@ -5,7 +5,7 @@
 #include <VAL/lib/system/computePipelineCreateInfo.hpp>
 
 namespace val {
-	class queueManager; // forward declaration
+	class QueueManager; // forward declaration
 	class computeTarget {
 	public:
 		void compute(ValProc& proc, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ);

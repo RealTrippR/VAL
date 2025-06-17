@@ -105,7 +105,7 @@ namespace val {
 
 	protected:
 
-		friend imageView;
+		friend ImageView;
 
 		stbi_uc* _pixels = NULL;
 		VkImage _image{};

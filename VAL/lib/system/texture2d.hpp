@@ -22,7 +22,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_TEXTURE_2D_HPP
 
 namespace val {
-	class imageView; // forward declaration
+	class ImageView; // forward declaration
 
 	class Texture2D {
 	public:
@@ -75,7 +75,7 @@ namespace val {
 
 	protected:
 
-		friend imageView;
+		friend ImageView;
 
 		stbi_uc* _pixels = NULL;
 		VkImage _img = VK_NULL_HANDLE;

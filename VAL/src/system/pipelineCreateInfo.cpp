@@ -165,7 +165,7 @@ namespace val {
 	}
 
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView)
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, ImageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
@@ -189,7 +189,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView)
+	void pipelineCreateInfo::pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, ImageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
@@ -214,7 +214,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView)
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, ImageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
@@ -241,7 +241,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView)
+	void pipelineCreateInfo::pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, ImageView& imgView)
 	{
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 

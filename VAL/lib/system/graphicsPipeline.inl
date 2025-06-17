@@ -19,10 +19,16 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_GRAPHICS_PIPELINE_CREATE_INFO_INLINE
 
 #include <VAL/lib/system/graphicsPipeline.hpp>
+#include <VAL/lib/system/renderPass.hpp>
 
 namespace val {
 	inline VkPipeline& GraphicsPipeline::getVkPipeline(ValProc& proc) {
 		return proc._graphicsPipelines[pipelineIdx];
+	}
+
+
+	inline void GraphicsPipeline::setRenderPassManager(renderPassManager* passMngr) {
+		renderPass = passMngr;
 	}
 
 	inline VkRenderPass& GraphicsPipeline::getVkRenderPass() {

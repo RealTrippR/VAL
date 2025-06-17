@@ -21,7 +21,7 @@ namespace val {
 			return *_texture;
 		}
 
-		inline val::imageView& getTextureImageView() {
+		inline val::ImageView& getTextureImageView() {
 			return _textureImageView;
 		}
 
@@ -44,7 +44,7 @@ namespace val {
 		VkDeviceMemory _indexBufferMem = NULL;
 
 		val::Image* _texture = NULL;
-		val::imageView _textureImageView;
+		val::ImageView _textureImageView;
 		val::ValProc& _proc;
 		//mainProc.createVertexBuffer(vertices.data(), vertices.size(), sizeof(val::vertex3D), &vertexBuffer, &vertexBufferMem);
 	};

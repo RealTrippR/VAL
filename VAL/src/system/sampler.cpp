@@ -39,13 +39,13 @@ namespace val {
 		}
 	}
 
-	void sampler::bindImageView(imageView& imageView) {
+	void sampler::bindImageView(ImageView& imageView) {
 		_imgView = &imageView;
 		_VKdescriptorInfo.imageView = _imgView->getImageView();
 		_VKdescriptorInfo.sampler = _sampler;
 	}
 
-	imageView* sampler::getImageView() {
+	ImageView* sampler::getImageView() {
 		return _imgView;
 	}
 	

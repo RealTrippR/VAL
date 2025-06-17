@@ -46,6 +46,37 @@ namespace val {
 		vkEndCommandBuffer(cmd);
 	}
 
+	inline void SUBMIT_COMMAND_BUFFER(VkCommandBuffer& cmd, PASS_CONTEXT& passContext, QueueManager& queue, VkFence& waitFence, QueueManager& waitOnQueue)
+	{
+		auto& proc = passContext.proc;
+		const auto& currentFrame = proc._currentFrame;
+
+		VkPipelineStageFlags waitStages = passContext.getWaitStages();
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		submitInfo.waitSemaphoreCount = 1u;
+		submitInfo.pWaitSemaphores = &(waitOnQueue._semaphores[proc._currentFrame]);
+		submitInfo.pWaitDstStageMask = &waitStages; // 1 wait stage for every semaphor.
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &queue._commandBuffers[currentFrame];
+
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = &queue._semaphores[currentFrame];
+
+#ifndef NDEBUG
+		if (vkQueueSubmit(queue._queue, 1, &submitInfo, waitFence) != VK_SUCCESS) {
+			dbg::printError("Failed to submit command buffer @ %p to graphics queue.", &queue._commandBuffers[currentFrame]);
+			throw std::runtime_error("failed to submit draw command buffer!");
+		}
+#else
+		vkQueueSubmit(queue._queue, 1, &submitInfo, waitFence);
+#endif // !NDEBUG
+	}
+
+
 	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType)
 	{
 

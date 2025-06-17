@@ -1,4 +1,4 @@
-#define VAL_ENABLE_EXPIREMENTAL // for render graphs and gpu_vector
+#define FRAMES_IN_FLIGHT 2u
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -7,10 +7,10 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
 
-#define FRAMES_IN_FLIGHT 2u
-
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
+#include <VAL/lib/system/system_utils.hpp>
+#include <VAL/lib/system/framebuffer.hpp>;
 #include <VAL/lib/ext/gpu_vector.hpp>
 
 #define GLFW_INCLUDE_VULKAN
@@ -18,20 +18,9 @@ const bool enableValidationLayers = true;
 
 #include "../vertex.hpp"
 
-
-#include "../vertex.hpp"
-
 // it is important that this comes last
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
-
-//#define VAL_RENDER_PASS_COMPILE_MODE
-#include <VAL/lib/renderGraph/renderGraph.hpp>
-#include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
-
-/************************************************/
-#include GRAPH_FILE(renderGraph_Draft);
-/************************************************/
 
 struct uniformBufferObject {
 	alignas(16) glm::mat4 model;
@@ -39,12 +28,15 @@ struct uniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
-{
+const std::vector<const char*> validationLayers = {
+	"VK_LAYER_KHRONOS_validation"
+};
+
+void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
+
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
@@ -57,7 +49,8 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl)
 	hdl.update(proc, &ubo);
 }
 
-void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
+
+void setGraphicsPipelineInfo1(val::GraphicsPipeline& pipeline)
 {
 	using namespace val;
 
@@ -72,6 +65,7 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
+	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
 	static colorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
@@ -80,191 +74,265 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 }
 
 
-val::subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
-	namespace v = val;
-	static v::colorAttachment colorAttach;
-	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(v::CLEAR);
-	colorAttach.setStoreOperation(v::STORE);
-	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-
-	static v::subpass subpass(renderPassMngr, v::GRAPHICS);
-	subpass.bindAttachment(&colorAttach);
-	return subpass;
-}
-
-void intercept(const char* msg, bool* block) {
-	printf("bar, bar: ");
-	printf(msg);
-	printf("\n");
-	*block = false;
-}
-
-
-void interceptNo2(const char* msg, bool* block) {
-	printf("foo, foo");
-	printf(msg);
-	printf("\n");
-
-	*block = false;
-}
-int main()
+void setGraphicsPipelineInfo2(val::GraphicsPipeline& pipeline)
 {
-#ifndef NDEBUG
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
-	val::dbg::addNoteIntercept(intercept);
-	val::dbg::addNoteIntercept(interceptNo2);
-
 	using namespace val;
 
-	VAL_PROC proc;
+	// state infos
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE::BACK);
+	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
+	pipeline.setRasterizer(&rasterizer);
 
-	physicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	// the color blend state affects how the output of the fragmennt shader is 
+	// blended into the existing content of the the framebuffer.
+	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+
+	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
+	static colorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
+
+	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+}
+
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	using namespace val;
+	static colorAttachment colorAttach;
+	colorAttach.setImgFormat(imgFormat);
+	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
+	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
+	subpass.bindAttachment(&colorAttach);
+}
+
+
+void setRenderPass2(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+	using namespace val;
+	static colorAttachment colorAttach;
+	colorAttach.setImgFormat(imgFormat);
+	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
+	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
+	subpass.bindAttachment(&colorAttach);
+}
+
+int main()
+{
+	using namespace val;
+	ValProc proc;
+	PhysicalDeviceRequirements deviceRequirements(val::DEVICE_TYPES::dedicated_GPU | val::DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
-	windowProperties windowConfig;
-	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
-	window window(windowConfig, 800, 800, "R_G_TEST", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	WindowProperties windowConfig;
+	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
+	Window window(windowConfig, 800, 800, "Render Pass To Image", proc);
 
-	// creates Vulkan logical and physical devices
-	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-	// VAL uses the image format requirements to pick the best image format
+	// FML uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements formatReqs;
+	ImageFormatRequirements formatReqs;
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
+	formatReqs.acceptedColorSpaces = { window.getColorSpace() };
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+
+	//////////////////////////////////////////////////////////////////////////////
+	///// CREATE PHYSICAL DEVICES              ///////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	///// FIRST PIPELINE: RENDER IMAGE TO SWAPCHAIN///////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+
+	GraphicsPipeline imgPipeline;
+
+	// create UBO which stores view information
+	UBO_Handle uboHdl(sizeof(uniformBufferObject));
+
+	// load and configure frag shader
+	Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+
+	sampler imgSampler(proc, val::combinedImage);
+	imgSampler.setMaxAnisotropy(8.f);
+	fragShaderImage.setImageSamplers({ { &imgSampler, 1 } });
+
 	// load and configure vert shader
-	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
-	// load and configure frag shader
-	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
-	//////////////////////////////////////////////////////////////
+	imgPipeline.shaders = { &vertShader,&fragShaderImage };
 
-	val::graphicsPipelineCreateInfo pipeline;
-	pipeline.shaders = { &vertShader,&fragShader };
-	setGraphicsPipelineInfo(pipeline);
+	setGraphicsPipelineInfo1(imgPipeline);
 
-	/* * * * * * * * * * * * * * * * * * * */
-	// configure render pass and subpass
-	val::renderPassManager renderPassMngr(proc);
-	val::subpass subpass = setRenderPass(renderPassMngr, imageFormat);
-	/* * * * * * * * * * * * * * * * * * * */
+	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	pipeline.renderPass = &renderPassMngr;
+	val::renderPassManager renderPass1(proc);
+	setRenderPass(renderPass1, imageFormat);
+	imgPipeline.setRenderPassManager(&renderPass1);
 
-	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+	//////////////////////////////////////////////////////////////////////////////
+	///// SECOND PIPELINE: RENDER COLOR //////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
 
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
+	GraphicsPipeline colorPipeline;
 
-	gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
+	UBO_Handle uboHdl2(sizeof(uniformBufferObject));
+
+	val::Shader vertShader2("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions());
+	vertShader2.setBindingDescriptions({ res::vertex::getBindingDescription() });
+
+	vertShader2._UBO_Handles = { { &uboHdl2,0 } };
+
+	Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	colorPipeline.shaders = { &vertShader2,&fragShaderColor };
+
+	setGraphicsPipelineInfo2(colorPipeline);
+
+
+	//////////////////////////////////////////////////////////////////
+	///// SECONDARY RENDER PASS //////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
+
+
+	val::renderPassManager renderPass2(proc);
+	setRenderPass2(renderPass2, imageFormat);
+	colorPipeline.setRenderPassManager(&renderPass2);
+
+
+	//////////////////////////////////////////////////////////////////
+	// CREATE MAIN_PROC, PIPELINES, & THEIR RESOURCES /////////////////
+	//////////////////////////////////////////////////////////////////
+	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &imgPipeline, &colorPipeline });
+	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, imgPipeline.getVkRenderPass(), proc._device);
+
+	val::Texture2D renderTargetImg(proc, 800, 800, imageFormat,
+		VkImageUsageFlagBits(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	val::ImageView renderTargImgView(proc, renderTargetImg, VK_IMAGE_ASPECT_COLOR_BIT);
+
+
+
+
+	val::gpu_vector<res::vertex> vertices1(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 		});
 
-	gpu_vector<uint32_t> indices(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+	val::gpu_vector<uint32_t> indices(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 		{ 0, 1, 2, 2, 3, 0 }
 	);
 
-	//////////////////////////////////////////////////////////////
-	proc.createDescriptorSets(&pipeline);
-	//////////////////////////////////////////////////////////////
-
-	//// Note that simply setting the index and vertex buffers does not automatically update
-	//// them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
-	//// every frame that the command buffer is reset
-	//renderTarget.setIndexBuffer(indexBuffer, indices.size());
-	//renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
-
-	RENDER_GRAPH renderGraph;
-	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
-
-	renderGraph.compile(proc._MAX_FRAMES_IN_FLIGHT, filepath("experimental-features"));
+	//////////////////////////////////////////////////////////////////
+	// create secondary vertex buffer
+	val::gpu_vector<res::vertex> vertices2(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		{
+			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+		});
 
 
-	PASS_CONTEXT passContext = {
-		proc,
-		window.getSizeAsRect2D(),
-		{ { 0.0f, 0.04f, 0.2f, 1.0f } } /*clear values*/
-	};
 
-	auto& graphicsQueue = proc._graphicsQueue;
+	val::Framebuffer renderTargetFramebuffer(proc, 800, 800, colorPipeline.getVkRenderPass(), renderTargImgView);
 
+	////////////////////////////////////////////////////////////
+	imgSampler.bindImageView(renderTargImgView);
 
-	VkCommandBuffer cmd;
-	BAKE_RENDER_PASS(DRAW_RECT, proc,
-		READ(vertices, indices)
-		INPUT(pipeline, window, cmd),
-		pipeline.getVkRenderPass(),
-		0
-	);
+	////////////////// CREATE DESCRIPTOR SETS //////////////////
+	proc.createDescriptorSets(&imgPipeline);
+	proc.createDescriptorSets(&colorPipeline);
+	////////////////////////////////////////////////////////////
 
+	// configure the render target, setting vertex buffers, scissors, area, etc
+	val::renderTarget renderTarget;
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setRenderArea(window._swapChainExtent);
+	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	renderTarget.setIndexBuffer(indices, indices.size());
+	renderTarget.setVertexBuffer(vertices1, vertices1.size());
 
-	while (!window.shouldClose()) {
+	// config viewport, covers the entire size of the window
+	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+
+	while (!window.shouldClose()) 
+	{
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
 
+		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
-
-		VkCommandBuffer& cmd = graphicsQueue._commandBuffers[currentFrame];
+		updateUniformBuffer(proc, uboHdl);
+		updateUniformBuffer(proc, uboHdl2);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
+		renderTarget.begin(proc);
+
+		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+		/*PIPELINE 2: COLOR PIPELINE*/
+
+		renderTarget.beginPass(proc, colorPipeline.getVkRenderPass(), renderTargetFramebuffer);
+
+		renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+		renderTarget.updatePipeline(proc, colorPipeline);
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
+		renderTarget.updateViewport(proc, viewport);
+
+		renderTarget.updateBuffers(proc);
+
+		renderTarget.render(proc);
+
+		renderTarget.endPass(proc);
 
 
 
-		// Update view information, stored in a UBO
-		updateUniformBuffer(proc, uboHdl);
-
-		/* * * * * * * * * * * * * * * * * */
-
-		RESET_COMMAND_BUFFER(cmd);
-		BEGIN_COMMAND_BUFFER(cmd);
-
-		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd, FIXED);
-
-		CALL_RENDER_PASS(WRITE_TO_IMG, proc,
-			READ(vertices, indices)
-			INPUT(pipeline, window, cmd)
-		);
+		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 
-		CALL_PIPELINE_BARRIER(WRITE_TO_IMG, RENDER_IMG);
+		/*PIPELINE 1: IMAGE PIPELINE*/
+		renderTarget.beginPass(proc, imgPipeline.getVkRenderPass(), framebuffer);
+		renderTarget.setIndexBuffer(indices.getVkBuffer(), indices.size());
+		renderTarget.setVertexBuffer(vertices2, vertices2.size());
+		renderTarget.setClearValues({ { 0.0f, 0.2f, 0.5f, 1.0f } });
 
-		CALL_RENDER_PASS(RENDER_IMG, proc,
-			READ(vertices, indices),
-			INPUT(pipeline, window, cmd)
-		);
-		END_RENDER_PASS(cmd);
+		renderTarget.updatePipeline(proc, imgPipeline);
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
+		renderTarget.updateViewport(proc, viewport);
 
-		END_COMMAND_BUFFER(cmd);
+		renderTarget.updateBuffers(proc);
 
-		/* * * * * * * * * * * * * * * * * */
+		renderTarget.render(proc);
 
-		graphicsQueue.submit(currentFrame, cmd, window.getPresentFence(), window.getPresentQueue());
+		renderTarget.endPass(proc);
 
-		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame) });
+
+		renderTarget.submit(proc, { window.getSemaphore(currentFrame)}, window.getPresentFence());
+		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame)});
 
 		proc.nextFrame();
 	}
 
-#ifndef NDEBUG
-	_CrtDumpMemoryLeaks();
-#endif // !NDEBUG
+	glfwTerminate();
 
 	return EXIT_SUCCESS;
 }

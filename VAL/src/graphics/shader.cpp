@@ -386,11 +386,11 @@ namespace val {
 		_pushDescriptors = pushDescriptors;
 	}
 
-	void Shader::setTextures(const std::vector<descriptorBinding<val::imageView*>>& textures) {
+	void Shader::setTextures(const std::vector<descriptorBinding<val::ImageView*>>& textures) {
 		_textures = textures;
 	}
 
-	const std::vector<descriptorBinding<val::imageView*>>& Shader::getTextures() noexcept {
+	const std::vector<descriptorBinding<val::ImageView*>>& Shader::getTextures() noexcept {
 		return _textures;
 	}
 
@@ -442,7 +442,7 @@ namespace val {
 		vkUpdateDescriptorSets(proc._device, 1u, &descriptorWrite, 0, NULL);
 	}
 
-	void Shader::updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx)
+	void Shader::updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<ImageView&, uint32_t> texture, const uint16_t arrIdx)
 	{
 
 		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
@@ -463,7 +463,7 @@ namespace val {
 		}
 	}
 
-	void Shader::updateTextureAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx)
+	void Shader::updateTextureAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<ImageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx)
 	{
 			const VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][frameInFlight];
 

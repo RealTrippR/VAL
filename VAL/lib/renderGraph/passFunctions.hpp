@@ -30,6 +30,8 @@ namespace val {
 
 	inline void END_COMMAND_BUFFER(VkCommandBuffer& cmd);
 
+	inline void SUBMIT_COMMAND_BUFFER(VkCommandBuffer& cmd, PASS_CONTEXT& passContext, QueueManager& graphicsQueue, VkFence& waitFence, QueueManager& queueWait);
+
 	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType);
 
 	inline void END_RENDER_PASS(VkCommandBuffer& cmd);

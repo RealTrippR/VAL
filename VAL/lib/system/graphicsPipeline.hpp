@@ -36,7 +36,7 @@ namespace val {
 	public:		
 		GraphicsPipeline() { _bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; }
 	public:
-		inline VkPipelineBindPoint getBindPoint() {return _bindPoint;};
+		inline VkPipelineBindPoint getBindPoint() const {return _bindPoint;}
 
 		void setRasterizer(val::rasterizerState* rasterizer);
 
@@ -75,8 +75,9 @@ namespace val {
 		//void pushDescriptor_INPUT_ATTACHMENT(VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const );
 		//void pushDescriptor_MUTABLE_EXT(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const DESC_TYPE type, VkWriteDescriptorSet& write);
 
-	public:
 		inline VkPipeline& getVkPipeline(ValProc& proc);
+
+		inline void setRenderPassManager(renderPassManager* passMngr);
 
 		inline VkRenderPass& getVkRenderPass();
 

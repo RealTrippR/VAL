@@ -291,7 +291,7 @@
   <ItemGroup>
     <ClInclude Include="experimental-features\renderGraph_Draft.hpp" />
     <ClInclude Include="experimental-features\renderGraph_Draft__processed.hpp" />
-    <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.hpp" />
+    <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.rg.hpp" />
     <ClInclude Include="polygonVertex.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>

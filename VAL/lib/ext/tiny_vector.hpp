@@ -131,10 +131,10 @@ public:
         pointer operator->() const { return _ptr; }
 
         // Increment/Decrement
-        iterator& operator++() { ++_ptr; return *this; }
-        iterator operator++(int) { iterator tmp = *this; ++_ptr; return tmp; }
-        iterator& operator--() { --_ptr; return *this; }
-        iterator operator--(int) { iterator tmp = *this; --_ptr; return tmp; }
+        iterator& operator++() { ++_ptr; return *this; } //++itr
+        iterator operator++(int) { iterator tmp = *this; ++_ptr; return tmp; } //itr++
+        iterator& operator--() { --_ptr; return *this; } //--itr
+        iterator operator--(int) { iterator tmp = *this; --_ptr; return tmp; } //itr--
 
 
         // Comparison operators
@@ -156,10 +156,50 @@ public:
         difference_type operator-(const iterator& other) const { return _ptr - other._ptr; }
 
         reference operator[](difference_type n) { return *(_ptr + n); }
-
     private:
         t* _ptr;
     };
+
+    class const_iterator {
+    public:
+        using value_type = t;
+        using pointer = t*;
+        using reference = t&;
+        using difference_type = ptrdiff_t;
+        using iterator_category = std::random_access_iterator_tag;
+
+        const_iterator(t* ptr) : _ptr(ptr) {}
+
+        // Dereference operators
+        reference operator*() const { return *_ptr; }
+        pointer operator->() const { return _ptr; }
+
+        // Comparison operators
+        bool operator==(const const_iterator& other) const { return _ptr == other._ptr; }
+        bool operator!=(const const_iterator& other) const { return _ptr != other._ptr; }
+        bool operator<(const const_iterator& other) const { return _ptr < other._ptr; }
+        bool operator>(const const_iterator& other) const { return _ptr > other._ptr; }
+        bool operator<=(const const_iterator& other) const { return _ptr <= other._ptr; }
+        bool operator>=(const const_iterator& other) const { return _ptr >= other._ptr; }
+
+        // Increment/Decrement
+        const_iterator& operator++() { ++_ptr; return *this; } // ++itr
+        const_iterator operator++(int) { const_iterator tmp = *this; ++_ptr; return tmp; } //itr++
+        const_iterator& operator--() { --_ptr; return *this; } //--itr
+        const_iterator operator--(int) { const_iterator tmp = *this; --_ptr; return tmp; } //itr--
+
+        // Random access
+        const_iterator& operator+=(difference_type n) { _ptr += n; return *this; }
+        const_iterator& operator-=(difference_type n) { _ptr -= n; return *this; }
+        const_iterator operator+(difference_type n) const { return const_iterator(_ptr + n); }
+        const_iterator operator-(difference_type n) const { return const_iterator(_ptr - n); }
+        difference_type operator-(const const_iterator& other) const { return _ptr - other._ptr; }
+
+        reference operator[](difference_type n) { return *(_ptr + n); }
+    private:
+        t* _ptr;
+    };
+
 
 
 
@@ -174,6 +214,15 @@ public:
         return iterator(_data + _size);
     }
 
+    // Begin function returning a const iterator to the start
+    const_iterator begin() const {
+        return const_iterator(_data);
+    }
+
+    // End function returning a const iterator to the end - note that according to the C++ standard, the end is just beyond the last valid element
+    const_iterator end() const {
+        return const_iterator(_data + _size);
+    }
 
 public:
     inline void clear() {

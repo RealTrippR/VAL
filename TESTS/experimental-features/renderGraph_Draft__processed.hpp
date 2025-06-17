@@ -1,11 +1,8 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
+/********************************/
 /* Copyright Tripp Robins, 2025 */
+/********************************/
 #include <VAL/lib/renderGraph/pass.hpp>
-/*************************************/
-
-
-#include <stdio.h>
-#include <utility>
 
 #include "../vertex.hpp"
 #include <VAL/lib/ext/gpu_vector.hpp>
@@ -14,7 +11,7 @@ using namespace val;
 
 /* A basic example rendergraph */
 VkCommandBuffer __DRAW_RECT_fixed_cmd_buffer_0[2];
-void pass_mainDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd) {
+void pass_mainDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, VkFramebuffer& framebuffer, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd) {
 
 	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 	FIXED_BEGIN(
@@ -24,7 +21,7 @@ void pass_mainDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, 
 		vkCmdExecuteCommands(cmd,1, &(__DRAW_RECT_fixed_cmd_buffer_0[V_PROC.getCurrentFrame()]));
 FIXED_END
 }
-void pass_bakeDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd, VkRenderPass pass,uint32_t subpassIndex) {
+void pass_bakeDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, VkFramebuffer& framebuffer, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd, VkRenderPass pass,uint32_t subpassIndex) {
 
 	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 	{	
@@ -60,8 +57,10 @@ vkBeginCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__], &b
 }
 	
 	{
+		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd, FIXED);
+
 		static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
-		SET_PIPELINE(pipeline,V_PROC,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+		SET_PIPELINE(pipeline,valProc,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 
 		SET_VERTEX_BUFFER(vertices,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 		SET_INDEX_BUFFER(indices,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
@@ -70,9 +69,10 @@ vkBeginCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__], &b
 		SET_VIEWPORT(viewport,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 		SET_SCISSOR(wind.getSize(),__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 
-	
 
 		DRAW_INDEXED(indices.size(),__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
+
+		END_RENDER_PASS(cmd);
 {
 /* END RECORDING */
 vkEndCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);

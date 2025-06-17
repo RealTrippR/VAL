@@ -44,7 +44,7 @@
     <ClInclude Include="experimental-features\renderGraph_Draft__processed.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
-    <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.hpp">
+    <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.rg.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
   </ItemGroup>

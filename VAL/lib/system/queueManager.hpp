@@ -13,7 +13,7 @@ namespace val
 
 	class ValProc; // forward declaration
 
-	class queueManager {
+	class QueueManager {
 	public:
 		uint32_t findQueueFamilyFromQueueFlags(VkPhysicalDevice physicalDevice,
 			bool isPresentQueue=false, VkSurfaceKHR surface=VK_NULL_HANDLE);
@@ -24,7 +24,7 @@ namespace val
 
 		void destroy(ValProc& proc);
 
-		inline void submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, queueManager& waitFor);
+		inline void submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, QueueManager& waitFor);
 
 		inline VkQueue getVkQueue();
 

@@ -19,7 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/renderGraph/passContext.hpp>
 
 namespace val {
-	void PASS_CONTEXT::createWaitStages(ValProc& proc, tiny_vector<GraphicsPipeline>& graphicsPipelines/*tiny_vector<ComputePipeline>& computePipelines*/)
+	void PASS_CONTEXT::createWaitStages(ValProc& proc, const tiny_vector<GraphicsPipeline>& graphicsPipelines/*tiny_vector<ComputePipeline>& computePipelines*/)
 	{
 		bool hasVertexShaders = false;
 		bool hasFragmentShaders = false;
@@ -31,11 +31,10 @@ namespace val {
 		bool hasColorBlendOutput = false;
 		bool hasDepthBuffer = false;
 
+		for (size_t i = 0; i < graphicsPipelines.size(); ++i) 
+		{
+			const GraphicsPipeline& pipeline = graphicsPipelines[i];
 
-		tiny_vector<VkShaderStageFlags> waitStagesFlags(graphicsPipelines.size());
-
-
-		for (const GraphicsPipeline& pipeline : graphicsPipelines) {
 			if (pipeline.getDepthStencilState() != NULL) {
 				hasDepthBuffer = true;
 			}
@@ -76,10 +75,10 @@ namespace val {
 		}
 
 
-		// create wait stages
-		for (uint32_t i = 0; i < waitStagesFlags.size(); ++i) 
-		{
-			VkPipelineStageFlags& stageFlags = waitStagesFlags[i];
+		//// create wait stages
+		//for (uint32_t i = 0; i < waitStagesFlags.size(); ++i) 
+		//{
+			VkPipelineStageFlags& stageFlags = waitStages;
 			stageFlags = 0x0;
 			if (hasVertexShaders)  // VERTEX
 			{
@@ -116,6 +115,6 @@ namespace val {
 			{
 				stageFlags |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
 			}
-		}
+		//}
 	}
 }

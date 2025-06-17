@@ -102,7 +102,7 @@ namespace val {
 
 		inline VkFence& getPresentFence();
 
-		inline queueManager& getPresentQueue();
+		inline QueueManager& getPresentQueue();
 
 		inline uint32_t getHeight();
 
@@ -116,6 +116,13 @@ namespace val {
 
 		inline const VkColorSpaceKHR getColorSpace();
 
+		inline VkSemaphore getCurrentSemaphore();
+
+		inline VkSemaphore getSemaphore(const uint8_t frameidx);
+
+		inline static void pollEvents() {
+			glfwPollEvents();
+		}
 	public:
 
 		uint32_t _currentSwapChainImageIndex = 0;
@@ -126,7 +133,7 @@ namespace val {
 
 		VkColorSpaceKHR _colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 
-		queueManager _presentQueue;
+		QueueManager _presentQueue;
 
 		VkSurfaceKHR _surface{};
 		////////////////// SWAPCHAIN //////////////////

@@ -26,7 +26,7 @@ namespace val {
 		return _presentQueue._fences[_procVAL->_currentFrame];
 	}
 
-	inline queueManager& Window::getPresentQueue() {
+	inline QueueManager& Window::getPresentQueue() {
 		return _presentQueue;
 	}
 
@@ -48,6 +48,14 @@ namespace val {
 
 	inline bool Window::shouldClose() {
 		return glfwWindowShouldClose(_window);
+	}
+
+	inline VkSemaphore Window::getCurrentSemaphore() {
+		return _presentQueue.getSemaphore(_procVAL->getCurrentFrame());
+	}
+
+	inline VkSemaphore Window::getSemaphore(const uint8_t frameidx) {
+		return _presentQueue.getSemaphore(frameidx);
 	}
 
 	inline const VkColorSpaceKHR Window::getColorSpace() {

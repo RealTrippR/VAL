@@ -2,7 +2,7 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void imageView::create(val::Image& img, const VkImageAspectFlags& aspectFlags)
+	void ImageView::create(val::Image& img, const VkImageAspectFlags& aspectFlags)
 	{
 		_layout = &img._imgLayout;
 		if (_imgView != VK_NULL_HANDLE) {
@@ -13,7 +13,7 @@ namespace val {
 	}
 
 
-	void imageView::create(val::Texture2D& texture, const VkImageAspectFlags& aspectFlags)
+	void ImageView::create(val::Texture2D& texture, const VkImageAspectFlags& aspectFlags)
 	{
 		_layout = &(texture._layout);
 
@@ -24,7 +24,7 @@ namespace val {
 		_proc.createImageView(texture.getVkImage(), texture.getVkFormat(), aspectFlags, &_imgView);
 	}
 
-	void imageView::create(VkImage img, VkFormat format, const VkImageAspectFlags& aspectFlags)
+	void ImageView::create(VkImage img, VkFormat format, const VkImageAspectFlags& aspectFlags)
 	{
 		if (_imgView != VK_NULL_HANDLE) {
 			destroy();
@@ -33,7 +33,7 @@ namespace val {
 		_proc.createImageView(img, format, aspectFlags, &_imgView);
 	}
 
-	void imageView::destroy() 
+	void ImageView::destroy()
 	{
 		if (_imgView) {
 			vkDestroyImageView(_proc._device, _imgView, VK_NULL_HANDLE);
@@ -41,17 +41,17 @@ namespace val {
 		}
 	}
 
-	ValProc& imageView::getProc() 
+	ValProc& ImageView::getProc()
 	{
 		return _proc;
 	}
 
-	VkImageView& imageView::getImageView() 
+	VkImageView& ImageView::getImageView()
 	{
 		return _imgView;
 	}
 
-	const VkImageAspectFlags& imageView::getAspectFlags() 
+	const VkImageAspectFlags& ImageView::getAspectFlags()
 	{
 		return _aspectFlags;
 	}

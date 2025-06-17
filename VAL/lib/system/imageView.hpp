@@ -8,21 +8,22 @@
 namespace val {
 	class Image; // forward declaration
 	class Texture2D; // forward declaration
-	class imageView {
+	class ImageView 
+	{
 	public:
-		imageView(ValProc& proc) : _proc(proc) {};
-		imageView(ValProc& proc, VkImageLayout* layout) : _proc(proc) { _layout = layout; };
-		imageView(ValProc& proc, val::Image& img, const VkImageAspectFlags& aspectFlags) : _proc(proc)
+		ImageView(ValProc& proc) : _proc(proc) {};
+		ImageView(ValProc& proc, VkImageLayout* layout) : _proc(proc) { _layout = layout; };
+		ImageView(ValProc& proc, val::Image& img, const VkImageAspectFlags& aspectFlags) : _proc(proc)
 		{
 			create(img, aspectFlags);
 		}
 
-		imageView(ValProc& proc, val::Texture2D& texture, const VkImageAspectFlags& aspectFlags) : _proc(proc)
+		ImageView(ValProc& proc, val::Texture2D& texture, const VkImageAspectFlags& aspectFlags) : _proc(proc)
 		{
 			create(texture, aspectFlags);
 		}
 
-		~imageView() {
+		~ImageView() {
 			destroy();
 		}
 		// conversion operator to VkImageView

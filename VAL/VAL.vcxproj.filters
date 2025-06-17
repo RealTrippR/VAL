@@ -418,9 +418,6 @@
     <ClCompile Include="src\renderGraph\passInfo.c">
       <Filter>src\renderGraph</Filter>
     </ClCompile>
-    <ClCompile Include="src\ext\streql.c">
-      <Filter>src\ext</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderGraph\bakedCommandBuffer.c">
       <Filter>src\renderGraph</Filter>
     </ClCompile>
@@ -444,6 +441,9 @@
     </ClCompile>
     <ClCompile Include="src\renderGraph\passContext.cpp">
       <Filter>src\renderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\frameBuffer.cpp">
+      <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

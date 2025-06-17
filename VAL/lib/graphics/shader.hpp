@@ -114,9 +114,9 @@ namespace val {
 
 		void setPushDescriptors(const std::vector<val::pushDescriptor*> pushDescriptors);
 
-		void setTextures(const std::vector<descriptorBinding<val::imageView*>>& textures);
+		void setTextures(const std::vector<descriptorBinding<val::ImageView*>>& textures);
 
-		const std::vector<descriptorBinding<val::imageView*>>& getTextures() noexcept;
+		const std::vector<descriptorBinding<val::ImageView*>>& getTextures() noexcept;
 
 		void setUBOs(const std::vector<descriptorBinding<UBO_Handle*>>& ubos);
 
@@ -131,9 +131,9 @@ namespace val {
 
 		void updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight);
 		
-		void updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint16_t arrIdx = 0);
+		void updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<ImageView&, uint32_t> texture, const uint16_t arrIdx = 0);
 
-		void updateTextureAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<imageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
+		void updateTextureAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<ImageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
 
 		void updateUBO(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx = 0);
 
@@ -157,7 +157,7 @@ namespace val {
 		std::vector<descriptorBinding<UBO_Handle*>> _UBO_Handles;
 		std::vector<descriptorBinding<SSBO_Handle*>> _SSBO_Handles;
 		std::vector<descriptorBinding<val::sampler*>> _imageSamplers;
-		std::vector<descriptorBinding<val::imageView*>> _textures;
+		std::vector<descriptorBinding<val::ImageView*>> _textures;
 		//std::vector<VkImageView*> _imageViews;
 
 		std::vector<VkDescriptorSetLayoutBinding> _layoutBindings;

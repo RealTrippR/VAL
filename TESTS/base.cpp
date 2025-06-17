@@ -135,8 +135,7 @@ int main()
 
 	val::renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
-	pipeline.renderPass = &renderPassMngr;
-
+	pipeline.setRenderPassManager(&renderPassMngr);
 	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 	
 
@@ -203,8 +202,8 @@ int main()
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
-		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, window.getPresentFence());
-		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+		renderTarget.submit(proc, { presentQueue.getSemaphore(currentFrame)}, window.getPresentFence());
+		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame) });
 
 		proc.nextFrame();
 	}

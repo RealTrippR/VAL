@@ -66,6 +66,8 @@ namespace val {
 	private:
 		void cleanup();
 
+		VAL_RETURN_CODE findPassDependencies(struct PASS_INFO* curPass, struct PASS_INFO* passesToSearch, const uint32_t passToSearchCount, std::vector<PASS_INFO*>& dependentUpon);
+
 		VAL_RETURN_CODE readPass(struct PASS_INFO* __passInfo__, char* passBegin, uint32_t* passStrLen, char** error);
 
 		VAL_RETURN_CODE preprocess(string* processed_src_out, char** errorMsg, const uint8_t framesInFlight);

@@ -672,6 +672,38 @@ namespace val {
 			preprocessFileName = NULL;
 		}
 	}
+	VAL_RETURN_CODE RENDER_GRAPH::findPassDependencies(struct PASS_INFO* curPass, struct PASS_INFO* passesToSearch, const uint32_t passToSearchCount, std::vector<PASS_INFO*>& dependentUpon) 
+	{
+		dependentUpon = {};
+
+
+		// this desperately needs to be optimized. what in the O^3 bruh
+		for (uint32_t i = 0; i < passToSearchCount; ++i) 
+		{
+			// check to see if the pass reads from something that another writes to
+			for (uint32_t j = 0; j < curPass->readBlock.argCount; ++j)
+			{
+				const char* arg_curread = GET_ARG_FROM_ARG_BLOCK(&curPass->readBlock, j);
+
+				// check other passes and see if they write to an arg that we are reading from
+				for (uint32_t k = 0; k < passesToSearch[i].writeBlock.argCount; ++k)
+				{;
+					const char* arg_otherwrite = GET_ARG_FROM_ARG_BLOCK(&curPass->writeBlock, k);
+
+					if (streql(arg_curread, arg_otherwrite)) 
+					{
+						dependentUpon.push_back(&passesToSearch[i]);
+					}
+				}
+			}
+		}
+
+
+		//printf(TODO);
+
+		return VAL_SUCCESS;
+	}
+
 
 	VAL_RETURN_CODE RENDER_GRAPH::readPass(struct PASS_INFO* __passInfo__,
 		char* passBegin, uint32_t* passStrLen, char** error)
@@ -1416,7 +1448,8 @@ namespace val {
 					// this allows to preprocessor to seperate exec src from fixed subroutines. 
 					char* last_exec = passInfo.execSrc;
 					// handle fixed subroutines
-					for (auto j = 0; j < passInfo.fixedBlockCount; ++j) {
+					for (auto j = 0; j < passInfo.fixedBlockCount; ++j) 
+					{
 
 						FIXED_BLOCK& fixedBlock = passInfo.fixedBlocks[j];
 
@@ -1451,8 +1484,10 @@ namespace val {
 
 		
 	bail:
-		if (passInfos) {
-			for (uint16_t i = 0u; i < passInfoCount; ++i) {
+		if (passInfos) 
+		{
+			for (uint16_t i = 0u; i < passInfoCount; ++i) 
+			{
 				PASS_INFO_CLEANUP(&(passInfos[i]));
 			}
 			free(passInfos);

@@ -24,7 +24,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <stdlib.h>
 
 
-struct PASS_INFO {
+struct PASS_INFO 
+{
 	
 	struct ARG_BLOCK readBlock;
 	struct ARG_BLOCK writeBlock;

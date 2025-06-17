@@ -45,32 +45,32 @@ namespace val {
 	};
 
 	inline bool operator==(const VkShaderStageFlags& a, const SHADER_STAGE& b) {
-		return bool(a == b); 
+		return bool(VkShaderStageFlags(a) == VkShaderStageFlags(b));
 	}
 	inline bool operator==(const VkShaderStageFlagBits& a, const SHADER_STAGE& b) {
-		return bool(a == b);
+		return bool(VkShaderStageFlags(a) == VkShaderStageFlags(b));
 	}
 
 	inline bool operator&(const VkShaderStageFlags& a, const SHADER_STAGE& b) {
-		return bool(a & b);
+		return bool(VkShaderStageFlags(a) & VkShaderStageFlags(b));
 	}
 	inline bool operator&(const VkShaderStageFlagBits& a, const SHADER_STAGE& b) {
-		return bool(a & b);
+		return bool(VkShaderStageFlags(a) & VkShaderStageFlags(b));
 	}
 	
 
 	inline bool operator|(const VkShaderStageFlags& a, const SHADER_STAGE& b) {
-		return bool(a | b);
+		return bool(VkShaderStageFlags(a) | VkShaderStageFlags(b));
 	}
 	inline bool operator|(const VkShaderStageFlagBits& a, const SHADER_STAGE& b) {
-		return bool(a | b);
+		return bool(VkShaderStageFlags(a) | VkShaderStageFlags(b));
 	}
 	
 	inline bool operator^(const VkShaderStageFlags& a, const SHADER_STAGE& b) {
-		return bool(a ^ b);
+		return bool(VkShaderStageFlags(a) ^ VkShaderStageFlags(b));
 	}
 	inline bool operator^(const VkShaderStageFlagBits& a, const SHADER_STAGE& b) {
-		return bool(a ^ b);
+		return bool(VkShaderStageFlags(a) ^ VkShaderStageFlags(b));
 	}
 
 #ifndef SHADER_STAGE_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS

@@ -3,7 +3,7 @@
 
 namespace val
 {
-	uint32_t queueManager::findQueueFamilyFromQueueFlags(VkPhysicalDevice physicalDevice, bool isPresentQueue, VkSurfaceKHR surface) {
+	uint32_t QueueManager::findQueueFamilyFromQueueFlags(VkPhysicalDevice physicalDevice, bool isPresentQueue, VkSurfaceKHR surface) {
 
 		uint32_t queueFamilyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
@@ -36,7 +36,7 @@ namespace val
 
 
 
-	void queueManager::create(ValProc& proc, bool semaphoresNeeded, bool fencesNeeded) {
+	void QueueManager::create(ValProc& proc, bool semaphoresNeeded, bool fencesNeeded) {
 		_commandBuffers.resize(proc._MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
@@ -92,7 +92,7 @@ namespace val
 		}
 	}
 
-	VkDeviceQueueCreateInfo queueManager::getQueueCreateInfo() {
+	VkDeviceQueueCreateInfo QueueManager::getQueueCreateInfo() {
 		VkDeviceQueueCreateInfo queueCreateInfo{};
 		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		queueCreateInfo.queueFamilyIndex = _queueFamily;
@@ -100,7 +100,7 @@ namespace val
 		return queueCreateInfo;
 	}
 
-	void queueManager::destroy(ValProc& proc) {
+	void QueueManager::destroy(ValProc& proc) {
 		if (_queue == NULL) {
 			return;
 		}

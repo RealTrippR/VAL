@@ -277,7 +277,6 @@
     <ClCompile Include="src\debugReporting\debugCallbacks.cpp" />
     <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c" />
     <ClCompile Include="src\ext\hashmap.c" />
-    <ClCompile Include="src\ext\streql.c" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp" />
@@ -295,6 +294,7 @@
     <ClCompile Include="src\system\buffer.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
+    <ClCompile Include="src\system\frameBuffer.cpp" />
     <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp" />
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\multisamplerManager.cpp" />

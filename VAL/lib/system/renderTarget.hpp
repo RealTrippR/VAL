@@ -23,7 +23,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/buffer.hpp>
 
 namespace val {
-	class queueManager; // forward declaration
+	class QueueManager; // forward declaration
 	class GraphicsPipeline; // forward declaration
 	class renderTarget {
 	public:

@@ -15,7 +15,7 @@ namespace val {
 	public:
 		sampler(ValProc& proc) : _proc(proc) { initDefaultValues(); };
 		sampler(ValProc& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
-		sampler(ValProc& proc, val::imageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
+		sampler(ValProc& proc, val::ImageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
 
 		~sampler() {
 			destroy();
@@ -26,9 +26,9 @@ namespace val {
 		void destroy();
 		//void recreate();
 	public:
-		void bindImageView(imageView& imageView);
+		void bindImageView(ImageView& imageView);
 
-		imageView* getImageView();
+		ImageView* getImageView();
 	public:
 		void setSamplerType(const samplerType& type);
 
@@ -109,7 +109,7 @@ namespace val {
 		samplerType _samplerType = combinedImage;
 		VkSampler _sampler = VK_NULL_HANDLE;
 		VkSamplerCreateInfo _samplerCreateInfo{};
-		imageView* _imgView;
+		ImageView* _imgView;
 		VkDescriptorImageInfo _VKdescriptorInfo{.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
 	};
 }

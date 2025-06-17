@@ -24,17 +24,25 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace val {
 	class PASS_CONTEXT {
 	public:
-		PASS_CONTEXT(ValProc& proc__, const VkRect2D& renderArea__, const tiny_vector<VkClearValue>& clearValues__)
-		: proc(proc__), renderArea(renderArea__), clearValues(clearValues__) {}
+		PASS_CONTEXT(ValProc& proc__, const VkRect2D& renderArea__, const tiny_vector<VkClearValue>& clearValues__, const tiny_vector<GraphicsPipeline>& pipelines)
+		: proc(proc__), renderArea(renderArea__), clearValues(clearValues__) 
+		{
+			createWaitStages(proc, pipelines);
+		}
 	public:
 		ValProc& proc;
 		VkRect2D renderArea;
 		tiny_vector<VkClearValue> clearValues = {};
 
-	private:
-		tiny_vector<VkPipelineStageFlagBits> waitStages = {};
+		inline VkPipelineStageFlags getWaitStages() {
+			return waitStages;
+		}
 
-		void createWaitStages(ValProc& proc, tiny_vector<GraphicsPipeline>& graphicsPipelines/*tiny_vector<ComputePipeline>& computePipelines*/);
+	private:
+		// currently only supports 1 queue at a time, once multiple queue support is added this should be changed to an array of stage flags, 1 for each semaphor
+		VkPipelineStageFlags waitStages = 0x0;
+
+		void createWaitStages(ValProc& proc, const tiny_vector<GraphicsPipeline>& graphicsPipelines/*tiny_vector<ComputePipeline>& computePipelines*/);
 	};
 }
 

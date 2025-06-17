@@ -44,11 +44,11 @@ namespace val {
 
 		void pushDescriptor_COMBINED_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler);
 
-		void pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView);
-		void pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, imageView& imgView);
+		void pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, ImageView& imgView);
+		void pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, ImageView& imgView);
 
-		void pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, imageView& imgView);
-		void pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, imageView& imgView);
+		void pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, ImageView& imgView);
+		void pushDescriptor_STORAGE_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIndex, ImageView& imgView);
 
 		//void pushDescriptor_UNIFORM_TEXEL_BUFFER(VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const TexelUBO_Hndle& ubo);
 		//void pushDescriptor_STORAGE_TEXEL_BUFFER(VkCommandBuffer cmdBuffer, const uint16_t bindingIdx);

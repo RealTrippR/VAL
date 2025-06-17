@@ -10,8 +10,8 @@ const bool enableValidationLayers = true;
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
 #include <VAL/lib/system/system_utils.hpp>
+#include <VAL/lib/system/framebuffer.hpp>;
 #include <VAL/lib/ext/gpu_vector.hpp>
-
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -32,7 +32,7 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
+void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
 	using namespace val;
 	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
 	static auto startTime = std::chrono::high_resolution_clock::now();
@@ -50,7 +50,7 @@ void updateUniformBuffer(val::VAL_PROC& proc, val::UBO_Handle& hdl) {
 }
 
 
-void setGraphicsPipelineInfo1(val::graphicsPipelineCreateInfo& pipeline)
+void setGraphicsPipelineInfo1(val::GraphicsPipeline& pipeline)
 {
 	using namespace val;
 
@@ -74,7 +74,7 @@ void setGraphicsPipelineInfo1(val::graphicsPipelineCreateInfo& pipeline)
 }
 
 
-void setGraphicsPipelineInfo2(val::graphicsPipelineCreateInfo& pipeline)
+void setGraphicsPipelineInfo2(val::GraphicsPipeline& pipeline)
 {
 	using namespace val;
 
@@ -101,11 +101,11 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
 	static colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(CLEAR);
-	colorAttach.setStoreOperation(STORE);
+	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	static subpass subpass(renderPassMngr, GRAPHICS);
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 	subpass.bindAttachment(&colorAttach);
 }
 
@@ -114,34 +114,34 @@ void setRenderPass2(val::renderPassManager& renderPassMngr, VkFormat imgFormat) 
 	using namespace val;
 	static colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(CLEAR);
-	colorAttach.setStoreOperation(STORE);
+	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-	static subpass subpass(renderPassMngr, GRAPHICS);
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 	subpass.bindAttachment(&colorAttach);
 }
 
 int main()
 {
-
-	val::VAL_PROC proc;
-	val::physicalDeviceRequirements deviceRequirements(val::DEVICE_TYPES::dedicated_GPU | val::DEVICE_TYPES::integrated_GPU);
+	using namespace val;
+	ValProc proc;
+	PhysicalDeviceRequirements deviceRequirements(val::DEVICE_TYPES::dedicated_GPU | val::DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
-	val::windowProperties windowConfig;
+	WindowProperties windowConfig;
 	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
-	val::window window(windowConfig, 800, 800, "Render pass to image", &proc, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+	Window window(windowConfig, 800, 800, "Render pass to image", proc);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	// FML uses the image format requirements to pick the best image format
 	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::imageFormatRequirements formatReqs;
+	ImageFormatRequirements formatReqs;
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+	formatReqs.acceptedColorSpaces = { window.getColorSpace() };
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -161,20 +161,20 @@ int main()
 	///// FIRST PIPELINE: RENDER IMAGE TO SWAPCHAIN///////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
 	// configure graphics pipeline
-	val::graphicsPipelineCreateInfo pipeline1;\
+	GraphicsPipeline pipeline1;
 
 	// UBO which stores view information
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl(sizeof(uniformBufferObject));
 
 	// load and configure frag shader
-	val::Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::sampler imgSampler(proc, val::combinedImage);
+	sampler imgSampler(proc, val::combinedImage);
 	imgSampler.setMaxAnisotropy(8.f);
 	fragShaderImage.setImageSamplers({ { &imgSampler, 1 } });
 
 	// load and configure vert shader
-	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 	vertShader._UBO_Handles = { {&uboHdl,0} };
@@ -187,15 +187,15 @@ int main()
 
 	val::renderPassManager renderPass1(proc);
 	setRenderPass(renderPass1, imageFormat);
-	pipeline1.renderPass = &renderPass1;
+	pipeline1.setRenderPassManager(&renderPass1);
 
 	//////////////////////////////////////////////////////////////////////////////
 	///// SECOND PIPELINE: RENDER COLOR //////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
 
-	val::graphicsPipelineCreateInfo pipeline2;
+	GraphicsPipeline pipeline2;
 
-	val::UBO_Handle uboHdl2(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl2(sizeof(uniformBufferObject));
 
 	val::Shader vertShader2("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions());
@@ -203,7 +203,7 @@ int main()
 
 	vertShader2._UBO_Handles = {{ &uboHdl2,0 }};
 
-	val::Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 	pipeline2.shaders = { &vertShader2,&fragShaderColor };
 
 	setGraphicsPipelineInfo2(pipeline2);
@@ -216,13 +216,13 @@ int main()
 
 	val::renderPassManager renderPass2(proc);
 	setRenderPass2(renderPass2, imageFormat);
-	pipeline2.renderPass = &renderPass2;
+	pipeline2.setRenderPassManager(&renderPass2);
 
 
 	//////////////////////////////////////////////////////////////////
 	// CREATE MAIN_PROC, PIPELINES, & THEIR RESOURCES /////////////////
 	//////////////////////////////////////////////////////////////////
-	proc.create(&window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline1, &pipeline2 });
+	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline1, &pipeline2 });
 
 	/*
 	texture2d(VAL_PROC& proc, const uint16_t width, const uint16_t height, const VkFormat format,
@@ -233,10 +233,10 @@ int main()
 		
 	*/
 
-	val::texture2d renderTargetImg(proc, 800, 800, imageFormat, 
+	val::Texture2D renderTargetImg(proc, 800, 800, imageFormat, 
 		VkImageUsageFlagBits(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT  | VK_IMAGE_USAGE_SAMPLED_BIT), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-	val::imageView renderTargImgView(proc, renderTargetImg, VK_IMAGE_ASPECT_COLOR_BIT);
+	val::ImageView renderTargImgView(proc, renderTargetImg, VK_IMAGE_ASPECT_COLOR_BIT);
 
 
 
@@ -255,34 +255,19 @@ int main()
 	);
 
 	//////////////////////////////////////////////////////////////////
-	// create secondary vertex and index buffers
-	// buffer wrapper for vertex Buffer
-	val::gpu_vector<res::vertex> vertices2(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
+	// create secondary vertex buffer
+	val::gpu_vector<res::vertex> vertices2(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
+	{
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-		});
+	});
 
 
 
-
-
-	VkExtent2D secondaryRenderTargetExtent = { 800,800 };
-
-
-	VkFramebufferCreateInfo framebufferInfo{};
-	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	framebufferInfo.renderPass = pipeline2.getVkRenderPass();
-	framebufferInfo.attachmentCount = 1;
-	framebufferInfo.pAttachments = &renderTargImgView.getImageView();
-	framebufferInfo.width = secondaryRenderTargetExtent.width;
-	framebufferInfo.height = secondaryRenderTargetExtent.height;
-	framebufferInfo.layers = 1;
-
-	VkFramebuffer renderTargetFramebuffer;
-	vkCreateFramebuffer(proc._device, &framebufferInfo, nullptr, &renderTargetFramebuffer);
-
+	val::Framebuffer renderTargetFramebuffer(proc, 800, 800, pipeline2.getVkRenderPass(), renderTargImgView);
+	
 	////////////////////////////////////////////////////////////
 	imgSampler.bindImageView(renderTargImgView);
 
@@ -305,7 +290,8 @@ int main()
 
 	//renderTargetImg.transitionLayout(NULL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-	while (!window.shouldClose()) {
+	while (!window.shouldClose()) 
+	{
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
@@ -358,8 +344,8 @@ int main()
 		renderTarget.endPass(proc);
 
 
-		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, window.getPresentFence());
-		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+		renderTarget.submit(proc, { presentQueue.getSemaphore(currentFrame) }, window.getPresentFence());
+		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame) });
 
 		proc.nextFrame();
 	}

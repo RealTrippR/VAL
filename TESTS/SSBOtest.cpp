@@ -105,7 +105,8 @@ void setGraphicsPipelineInfo(val::graphicsPipelineCreateInfo& pipeline)
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) 
+{
 	using namespace val;
 	static colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
@@ -117,7 +118,8 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	subpass.bindAttachment(&colorAttach);
 }
 
-void initParticles(std::vector<Particle>& particles, VkExtent2D displayExtent) {
+void initParticles(std::vector<Particle>& particles, VkExtent2D displayExtent) 
+{
 	// Initialize particles
 	std::default_random_engine rndEngine((unsigned)time(nullptr));
 	std::uniform_real_distribution<float> rndDist(0.0f, 1.0f);
@@ -270,7 +272,7 @@ int main() {
 		glfwPollEvents();
 		lastTime = glfwGetTime();
 
-		val::queueManager& computeQueue = proc._computeQueue;
+		val::QueueManager& computeQueue = proc._computeQueue;
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;

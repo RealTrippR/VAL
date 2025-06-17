@@ -6,7 +6,7 @@
 #include <VAL/lib/system/queueManager.hpp>
 
 namespace val {
-	inline void queueManager::submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, queueManager& waitFor) {
+	inline void QueueManager::submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, QueueManager& waitFor) {
 
 
 		// this needs to be changed to something optimal 
@@ -35,23 +35,23 @@ namespace val {
 #endif // !NDEBUG
 	}
 
-	inline VkQueue queueManager::getVkQueue() {
+	inline VkQueue QueueManager::getVkQueue() {
 		return _queue;
 	}
 
-	inline VkQueueFlags queueManager::getVkQueueFlags() const {
+	inline VkQueueFlags QueueManager::getVkQueueFlags() const {
 		return _queueFlags;
 	}
 
-	inline uint32_t queueManager::getQueueFamily() const {
+	inline uint32_t QueueManager::getQueueFamily() const {
 		return _queueFamily;
 	}
 
-	inline VkCommandBuffer& queueManager::getCommandBuffer(const uint32_t& frameIdx) {
+	inline VkCommandBuffer& QueueManager::getCommandBuffer(const uint32_t& frameIdx) {
 		return _commandBuffers[frameIdx];
 	}
 
-	inline VkSemaphore& queueManager::getSemaphore(const uint32_t& frameIdx) {
+	inline VkSemaphore& QueueManager::getSemaphore(const uint32_t& frameIdx) {
 		return _semaphores[frameIdx];
 	}
 }

@@ -26,7 +26,7 @@ const bool enableValidationLayers = true;
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
 
-//#define VAL_RENDER_PASS_COMPILE_MODE
+#define VAL_RENDER_PASS_COMPILE_MODE
 #include <VAL/lib/renderGraph/renderGraph.hpp>
 #include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
 
@@ -105,6 +105,11 @@ int main()
 
 	ValProc proc;
 
+
+
+
+
+
 	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
@@ -146,7 +151,7 @@ int main()
 	Subpass subpass = setRenderPass(renderPassMngr, imageFormat);
 	/* * * * * * * * * * * * * * * * * * * */
 
-	pipeline.renderPass = &renderPassMngr;
+	pipeline.setRenderPassManager(&renderPassMngr);
 
 	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
@@ -182,7 +187,8 @@ int main()
 	PASS_CONTEXT passContext = {
 		proc,
 		window.getSizeAsRect2D(),
-		{ { 0.0f, 0.04f, 0.2f, 1.0f } } /*clear values*/
+		{ { 0.0f, 0.04f, 0.2f, 1.0f } }, /*clear values*/
+		{ pipeline }
 	};
 
 	auto& graphicsQueue = proc._graphicsQueue;
@@ -197,12 +203,13 @@ int main()
 	);
 
 
-	while (!window.shouldClose()) {
+	while (!window.shouldClose()) 
+	{
+		window.pollEvents();
+
 		auto& graphicsQueue = proc._graphicsQueue;
 		auto& presentQueue = window._presentQueue;
 		auto& currentFrame = proc._currentFrame;
-
-		glfwPollEvents();
 
 		VkCommandBuffer& cmd = graphicsQueue._commandBuffers[currentFrame];
 
@@ -217,21 +224,20 @@ int main()
 
 		RESET_COMMAND_BUFFER(cmd);
 		BEGIN_COMMAND_BUFFER(cmd);
+		// 
+		// BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd, FIXED);
 
-		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd, FIXED);
-
-		CALL_RENDER_PASS(DRAW_RECT, proc,
+		CALL_RENDER_PASS(DRAW_RECT, passContext, proc,
 			READ(vertices, indices)
 			INPUT(pipeline, window, cmd)
 		);
 
-		END_RENDER_PASS(cmd);
-
+		//END_RENDER_PASS(cmd);
+		// 
 		END_COMMAND_BUFFER(cmd);
 
 		/* * * * * * * * * * * * * * * * * */
-
-		graphicsQueue.submit(currentFrame, cmd, window.getPresentFence(), window.getPresentQueue());
+		SUBMIT_COMMAND_BUFFER(cmd, passContext, graphicsQueue, window.getPresentFence(), window.getPresentQueue());
 
 		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame)});
 
