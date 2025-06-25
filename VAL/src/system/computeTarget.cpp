@@ -2,19 +2,16 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void computeTarget::compute(ValProc& proc, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ)
+	void computeTarget::compute(Queue& computeQueue, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ)
 	{
-		const auto& currentFrame = proc._currentFrame;
-		VkCommandBuffer& cmdBuffer = proc._computeQueue._commandBuffers[currentFrame];
-
-		vkCmdDispatch(proc._computeQueue._commandBuffers[currentFrame], groupCountX, groupCountY, groupCountZ);
+		vkCmdDispatch(computeQueue.getCommandBuffer(), groupCountX, groupCountY, groupCountZ);
 	}
 
-	void computeTarget::update(ValProc& proc, computePipelineCreateInfo& computePipeline)
+	void computeTarget::update(Queue& computeQueue, computePipelineCreateInfo& computePipeline)
 	{
-		auto& queue = proc._computeQueue;
-		const auto& currentFrame = proc._currentFrame;
-		VkCommandBuffer& cmdBuffer = queue._commandBuffers[currentFrame];
+		ValProc& proc = *computeQueue.getValProc();
+		const auto& currentFrame = proc.getCurrentFrame();
+		VkCommandBuffer& cmdBuffer = computeQueue.getCommandBuffer();
 
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, proc._computePipelines[computePipeline.pipelineIdx]);
@@ -22,32 +19,31 @@ namespace val {
 			0, 1, &proc._descriptorSets[computePipeline.descriptorsIdx][currentFrame], 0, nullptr);
 	}
 
-	void computeTarget::begin(ValProc& proc)
+	void computeTarget::begin(Queue& queue)
 	{
-		auto& queue = proc._computeQueue;
-		const auto& currentFrame = proc._currentFrame;
+		const auto& currentFrame = queue.getValProc()->getCurrentFrame();
 
 		// wait for the previosly submitted compute command buffer to finish
-		vkWaitForFences(proc._device, 1, &queue._fences[proc._currentFrame], VK_TRUE, UINT64_MAX);
-		vkResetFences(proc._device, 1, &queue._fences[proc._currentFrame]);
-		vkResetCommandBuffer(queue._commandBuffers[proc._currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
+		//vkWaitForFences(queue.getValProc()->getVkLogicalDevice(), 1, &queue._fences[proc._currentFrame], VK_TRUE, UINT64_MAX);
+		//vkResetFences(queue.getValProc()->getVkLogicalDevice(), 1, &queue._fences[proc._currentFrame]);
+		//vkResetCommandBuffer(queue._commandBuffers[proc._currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
 
-
-		VkCommandBufferBeginInfo beginInfo{};
+		/*VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		if (vkBeginCommandBuffer(queue._commandBuffers[proc._currentFrame], &beginInfo) != VK_SUCCESS) {
 			throw std::runtime_error("failed to begin recording command buffer!");
-		}
+		}*/
+
+		//queue
 	}
 
-	void computeTarget::submit(ValProc& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/)
+	void computeTarget::submit(Queue& computeQueue, std::vector<VkSemaphore> waitSemaphores, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/)
 	{
-		if (vkEndCommandBuffer(proc._computeQueue._commandBuffers[proc._currentFrame]) != VK_SUCCESS) {
+		if (vkEndCommandBuffer(computeQueue.getCommandBuffer()) != VK_SUCCESS) {
 			throw std::runtime_error("failed to record compute command buffer!");
 		}
 
-		auto& currentFrame = proc._currentFrame;
-		auto& queue = proc._computeQueue;
+		ValProc& proc = *computeQueue.getValProc();
 		
 		// SUBMIT
 		VkPipelineStageFlags* waitStages = (VkPipelineStageFlags*)calloc(waitSemaphores.size(), sizeof(VkPipelineStageFlags));
@@ -61,11 +57,11 @@ namespace val {
 		submitInfo.pWaitSemaphores = waitSemaphores.data();
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &queue._commandBuffers[currentFrame];
+		submitInfo.pCommandBuffers = &computeQueue.getCommandBuffer();
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &queue._semaphores[currentFrame];
+		submitInfo.pSignalSemaphores = &computeQueue.getSemaphore();
 
-		if (vkQueueSubmit(queue._queue, 1, &submitInfo, fence) != VK_SUCCESS) {
+		if (vkQueueSubmit(computeQueue, 1, &submitInfo, fence) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit compute command buffer!");
 		};
 	}

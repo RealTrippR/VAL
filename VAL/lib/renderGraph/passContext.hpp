@@ -38,6 +38,7 @@ namespace val {
 			return waitStages;
 		}
 
+		std::string passName;
 	private:
 		// currently only supports 1 queue at a time, once multiple queue support is added this should be changed to an array of stage flags, 1 for each semaphor
 		VkPipelineStageFlags waitStages = 0x0;

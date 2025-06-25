@@ -61,7 +61,7 @@ namespace val {
 
 		VAL_RETURN_CODE loadFromFile(const std::filesystem::path& srcPath);
 
-		VAL_RETURN_CODE compile(const uint8_t framesInFlight, const filepath& compileToDir = "");
+		VAL_RETURN_CODE compile(const uint8_t framesInFlight, const filepath& compileToDir = "", const fs::path& HTMLdiagramFilepath = "");
 
 	private:
 		void cleanup();
@@ -70,14 +70,17 @@ namespace val {
 
 		VAL_RETURN_CODE readPass(struct PASS_INFO* __passInfo__, char* passBegin, uint32_t* passStrLen, char** error);
 
-		VAL_RETURN_CODE preprocess(string* processed_src_out, char** errorMsg, const uint8_t framesInFlight);
+		VAL_RETURN_CODE preprocess(string* processed_src_out, char** errorMsg, const uint8_t framesInFlight, const fs::path& HTMLdiagramFilepath);
+
+		VAL_RETURN_CODE createHTMLdiagram(fs::path filepath, PASS_INFO* passInfos, uint16_t passInfoCount);
 
 	private:
+		PASS_INFO* passInfos;
 		char* preprocessFileName = NULL;
 		char* srcFileContents = NULL;
-		uint32_t srcContentLen = 0u;
+		uint32_t srcFileContentsLen = 0u;
+		uint16_t passInfoCount;
 		std::string srcFileName;
-		uint64_t srcFileContentsLen = 0u;
 	};
 }
 

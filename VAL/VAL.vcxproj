@@ -205,19 +205,28 @@
     <ClInclude Include="lib\debugReporting\debugCallbacks.hpp" />
     <ClInclude Include="lib\debugReporting\VAL_DebugCallbacks.h" />
     <ClInclude Include="lib\debugReporting\VAL_DebugIntercept.h" />
+    <ClInclude Include="lib\debugUtils\dbgUtils.hpp" />
     <ClInclude Include="lib\ext\gpu_vector.hpp" />
     <ClInclude Include="lib\ext\hashmap.h" />
     <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp" />
     <ClInclude Include="lib\ext\streql.h" />
     <ClInclude Include="lib\ext\tiny_vector.hpp" />
+    <ClInclude Include="lib\ext\ubfx.h" />
+    <ClInclude Include="lib\ext\VkPipelineStagesToString.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\mesh.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshPBR.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp" />
     <ClInclude Include="lib\graphics\shader.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp" />
-    <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp" />
-    <ClInclude Include="lib\meshes&amp;vertices\vertex3Dsimple.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertex.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertexAttributeType.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertexBase.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertexClr.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertexInputAttribute.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertexInputAttributeList.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertexTxtr.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\colorBlendStateAttachment.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\depthStencilState.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\rasterizerState.hpp" />
@@ -232,6 +241,7 @@
     <ClInclude Include="lib\renderGraph\argBlock.h" />
     <ClInclude Include="lib\renderGraph\argHandleList.hpp" />
     <ClInclude Include="lib\renderGraph\fixedBlock.h" />
+    <ClInclude Include="lib\renderGraph\graphBranch.h" />
     <ClInclude Include="lib\renderGraph\graphEnums.hpp" />
     <ClInclude Include="lib\renderGraph\pass.hpp" />
     <ClInclude Include="lib\renderGraph\passContext.hpp" />
@@ -240,6 +250,7 @@
     <ClInclude Include="lib\renderGraph\passInfo.h" />
     <ClInclude Include="lib\renderGraph\renderGraph.hpp" />
     <ClInclude Include="lib\renderGraph\renderGraphBlock.h" />
+    <ClInclude Include="lib\renderGraph\renderGraphError.h" />
     <ClInclude Include="lib\renderGraph\renderPassBeginType.hpp" />
     <ClInclude Include="lib\system\buffer.hpp" />
     <ClInclude Include="lib\system\bufferUsageEnum.hpp" />
@@ -253,8 +264,12 @@
     <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\multisamplerConfig.hpp" />
     <ClInclude Include="lib\system\physicalDeviceRequirements.hpp" />
+    <ClInclude Include="lib\system\pipelineStages.hpp" />
     <ClInclude Include="lib\system\pipelineType.hpp" />
     <ClInclude Include="lib\system\pushDescriptor.hpp" />
+    <ClInclude Include="lib\system\queue.hpp" />
+    <ClInclude Include="lib\system\queueFlags.hpp" />
+    <ClInclude Include="lib\system\queueGroup.hpp" />
     <ClInclude Include="lib\system\renderPass.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
     <ClInclude Include="lib\system\imageView.hpp" />
@@ -267,6 +282,7 @@
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
     <ClInclude Include="lib\system\subpass.hpp" />
     <ClInclude Include="lib\system\texture2d.hpp" />
+    <ClInclude Include="lib\system\texture2d16bit.hpp" />
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp" />
     <ClInclude Include="lib\system\UBO_arr_manager.hpp" />
     <ClInclude Include="lib\system\UBO_Dynamic_Handle.hpp" />
@@ -276,11 +292,23 @@
     <ClInclude Include="lib\system\window.hpp" />
     <ClCompile Include="src\debugReporting\debugCallbacks.cpp" />
     <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c" />
+    <ClCompile Include="src\debugUtils\dbgUtils.cpp" />
     <ClCompile Include="src\ext\hashmap.c" />
+    <ClCompile Include="src\ext\tiny_obj.cpp" />
+    <ClCompile Include="src\ext\ufbx.c" />
     <ClCompile Include="src\graphics\shader.cpp" />
-    <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp" />
-    <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp" />
-    <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp" />
+    <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\vertexAttributeType.cpp" />
+    <ClCompile Include="src\meshes&amp;vertices\vertexInputAttribute.cpp" />
+    <ClCompile Include="src\meshes&amp;vertices\vertexInputAttributeList.cpp" />
     <ClCompile Include="src\pipelineStateInfos\colorBlendState.cpp" />
     <ClCompile Include="src\pipelineStateInfos\colorBlendStateAttachment.cpp" />
     <ClCompile Include="src\pipelineStateInfos\depthStencilState.cpp" />
@@ -303,6 +331,7 @@
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\pushDescriptor.cpp" />
+    <ClCompile Include="src\system\queue.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
     <ClCompile Include="src\system\renderPass.cpp" />
     <ClCompile Include="src\system\renderTarget.cpp" />
@@ -312,7 +341,9 @@
     <ClCompile Include="src\system\system_utils.cpp" />
     <ClInclude Include="lib\system\windowProperties.hpp" />
     <ClInclude Include="lib\VALreturnCode.h" />
-    <ClInclude Include="src\meshes&amp;vertices\meshPBR.cpp" />
+    <ClInclude Include="src\meshes&amp;vertices\meshPBR.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\texture2d.cpp" />
@@ -356,6 +387,9 @@
     <ClInclude Include="lib\system\VAL_PROC.inl">
       <FileType>Document</FileType>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lib\system\queue.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

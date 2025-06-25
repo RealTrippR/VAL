@@ -18,7 +18,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/renderGraph/passInfo.h>
 
 #include <stdio.h>
-char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t argIndex) {
+char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t argIndex) 
+{
 	uint32_t i = 0u;
 	uint32_t j = 0u;
 	while (i < argblock->argCount) {
@@ -34,7 +35,8 @@ char* GET_ARG_FROM_ARG_BLOCK(const struct ARG_BLOCK* argblock, const uint16_t ar
 	return NULL;
 }
 
-void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
+void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) 
+{
 	printf("-- ARG BLOCK @ %p: --\n", argblock);
 	printf("Args:\n");
 	uint32_t i = 0u;
@@ -50,7 +52,8 @@ void PRINT_ARG_BLOCK(struct ARG_BLOCK* argblock) {
 	printf("-------------------\n");
 }
 
-void PASS_INFO_CLEANUP(struct PASS_INFO* pass) {
+void PASS_INFO_CLEANUP(struct PASS_INFO* pass) 
+{
 	ARG_BLOCK_DESTROY(&pass->readBlock);
 	ARG_BLOCK_DESTROY(&pass->writeBlock);
 	ARG_BLOCK_DESTROY(&pass->readWriteBlock);
@@ -69,5 +72,10 @@ void PASS_INFO_CLEANUP(struct PASS_INFO* pass) {
 	if (pass->execSrc) {
 		free(pass->execSrc);
 		pass->execSrc = NULL;
+	}
+	if (pass->dependentPasses) {
+		free(pass->dependentPasses);
+		pass->dependentPasses = NULL;
+		pass->dependentPassesCount = 0u;
 	}
 }

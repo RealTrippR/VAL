@@ -21,7 +21,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	void sampler::create() {
+	void sampler::create() 
+	{
 		const VkPhysicalDeviceProperties& properties = _proc._physicalDeviceProperties;
 		
 		float& ans = _samplerCreateInfo.maxAnisotropy;

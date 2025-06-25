@@ -9,20 +9,20 @@
 #include <glm/gtx/hash.hpp>
 
 #include <VAL/lib/system/system_utils.hpp>
-#include <VAL/lib/meshes&vertices/vertex3DSimple.hpp>
+//#include <VAL/lib/meshes&vertices/vertex3DSimple.hpp>
 
 namespace val {
 	namespace fs = std::filesystem;
 
 	class meshSimple {
 	public:
-		meshSimple(VAL_PROC& proc) : _proc(proc) {};
+		//meshSimple(VAL_PROC& proc) : _proc(proc) {};
 	public:
-		void loadFromDiskObj(ValProc& proc, fs::path objPath, bool deduplicateVertices);
+		//void loadFromDiskObj(ValProc& proc, fs::path objPath, bool deduplicateVertices);
 
-		void destroy(ValProc& proc);
+		//void destroy(ValProc& proc);
 
-		std::vector<vertex3Dsimple> _vertices;
+	/*	std::vector<vertex3Dsimple> _vertices;
 		std::vector<uint32_t> _indices;
 		tinyobj::attrib_t _meshAttribs;
 
@@ -32,7 +32,7 @@ namespace val {
 		VkBuffer _indexBuffer = NULL;
 		VkDeviceMemory _indexBufferMem = NULL;
 
-		val::VAL_PROC& _proc;
+		val::VAL_PROC& _proc;*/
 	};
 }
 

@@ -3,7 +3,6 @@
 
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/system/image.hpp>
-#include <VAL/lib/meshes&vertices/vertex3Dtextured.hpp>
 
 namespace val {
 	namespace fs = std::filesystem;
@@ -33,9 +32,9 @@ namespace val {
 		void setTexture(val::Image& texture);
 		void cleanup();
 
-		std::vector<vertex3D> _vertices;
+		//std::vector<vertex3D> _vertices;
 		std::vector<uint32_t> _indices;
-		tinyobj::attrib_t _meshAttribs;
+		//tinyobj::attrib_t _meshAttribs;
 
 		VkBuffer _vertexBuffer = NULL;
 		VkDeviceMemory _vertexBufferMem = NULL;

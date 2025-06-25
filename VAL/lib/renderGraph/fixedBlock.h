@@ -24,7 +24,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 struct FIXED_BLOCK {
 	uint32_t srcOffset;
 	uint32_t srcLength;
-
 	char renderPassArgName[256];
 	char subpassArgName[256];
 };

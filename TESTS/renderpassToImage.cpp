@@ -34,7 +34,7 @@ const std::vector<const char*> validationLayers = {
 
 void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
 	using namespace val;
-	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
+	VkExtent2D extent = proc._windowVAL->getSize();
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -130,7 +130,7 @@ int main()
 
 	// Configure and create window
 	WindowProperties windowConfig;
-	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
+	windowConfig.setProperty(val::WN_BOOL_PROPERTY::Resizable, true);
 	Window window(windowConfig, 800, 800, "Render pass to image", proc);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
@@ -151,7 +151,7 @@ int main()
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
 
 
 
@@ -240,7 +240,7 @@ int main()
 
 
 
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline1.getVkRenderPass(), proc._device);
+	window.createSwapChainFrameBuffers({}, 0u, pipeline1.getVkRenderPass(), proc._device);
 
 
 	val::gpu_vector<res::vertex> vertices1(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
@@ -276,27 +276,25 @@ int main()
 	proc.createDescriptorSets(&pipeline2);
 	////////////////////////////////////////////////////////////
 
+	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Compute);
+
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget;
+	renderTarget.setQueue(graphicsQueue);
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window._swapChainExtent);
+	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	renderTarget.setIndexBuffer(indices, indices.size());
 	renderTarget.setVertexBuffer(vertices1, vertices1.size());
 
 	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+	VkViewport viewport{ 0,0, window.getWidth(), window.getHeight(), 0.f, 1.f};
 
 
-	//renderTargetImg.transitionLayout(NULL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 	while (!window.shouldClose()) 
 	{
-		auto& graphicsQueue = proc._graphicsQueue;
-		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = proc._currentFrame;
 
-		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		glfwPollEvents();
 		updateUniformBuffer(proc, uboHdl);
 		updateUniformBuffer(proc, uboHdl2);
@@ -305,7 +303,7 @@ int main()
 
 		renderTarget.begin(proc);
 
-		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		renderTargetImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 		/*PIPELINE 2: COLOR PIPELINE*/
 
@@ -324,7 +322,7 @@ int main()
 
 
 
-		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		renderTargetImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 
 		/*PIPELINE 1: IMAGE PIPELINE*/
@@ -344,8 +342,8 @@ int main()
 		renderTarget.endPass(proc);
 
 
-		renderTarget.submit(proc, { presentQueue.getSemaphore(currentFrame) }, window.getPresentFence());
-		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame) });
+		renderTarget.submit(proc, { window.getPresentSemaphore()}, window.getPresentFence());
+		window.display(imageFormat, { graphicsQueue.getSemaphore() });
 
 		proc.nextFrame();
 	}

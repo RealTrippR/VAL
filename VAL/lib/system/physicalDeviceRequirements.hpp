@@ -58,7 +58,7 @@ namespace val {
 	};
 
 #ifndef DEVICE_FEATURE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
-	#define DEVICE_FEATURE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+#define DEVICE_FEATURE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
 	DEF_ENUM_BITWISE_OPERATORS(DEVICE_FEATURES);
 #endif
 
@@ -80,7 +80,7 @@ namespace val {
 			//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
 		inline void addExtension(const char* ext) { deviceExtensions.push_back(ext); }
 		inline void addFeature(DEVICE_FEATURES feature) { deviceFeatures |= feature; }
-		inline void removeFeature(DEVICE_FEATURES feature) { deviceFeatures &= (~feature);}
+		inline void removeFeature(DEVICE_FEATURES feature) { deviceFeatures &= (DEVICE_FEATURES)(~feature);}
 
 	public:
 		DEVICE_TYPES deviceTypes = (DEVICE_TYPES::integrated_GPU | DEVICE_TYPES::dedicated_GPU);

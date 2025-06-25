@@ -100,7 +100,11 @@ namespace val {
 
 		void setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes);
 
+		void setVertexAttributes(const tiny_vector<VkVertexInputAttributeDescription>& attributes);
+
 		const std::vector<VkVertexInputAttributeDescription>& getVertexAttributes() noexcept;
+
+		void setBindingDescriptions(const VkVertexInputBindingDescription& bindingDescription);
 
 		void setBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
 

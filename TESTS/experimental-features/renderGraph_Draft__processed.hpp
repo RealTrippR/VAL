@@ -11,29 +11,36 @@ using namespace val;
 
 /* A basic example rendergraph */
 VkCommandBuffer __DRAW_RECT_fixed_cmd_buffer_0[2];
-void pass_mainDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, VkFramebuffer& framebuffer, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd) {
+void pass_mainDRAW_RECT(val::ValProc& valProc, val::PASS_CONTEXT& passContext, gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, VkFramebuffer framebuffer, GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue) {
+
+	BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, graphicsQueue, FIXED); // the INLINE/FIXED flag should be automatically set, this is bad code.
 
 	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 	FIXED_BEGIN(
 		VkRenderPass pass;
 		uint32_t subpassIndex;
 	)	
-		vkCmdExecuteCommands(cmd,1, &(__DRAW_RECT_fixed_cmd_buffer_0[V_PROC.getCurrentFrame()]));
+		vkCmdExecuteCommands(graphicsQueue,1, &(__DRAW_RECT_fixed_cmd_buffer_0[valProc.getCurrentFrame()]));
 FIXED_END
+
+	END_RENDER_PASS(graphicsQueue);
 }
-void pass_bakeDRAW_RECT(val::ValProc& V_PROC,gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, VkFramebuffer& framebuffer, GraphicsPipeline& pipeline, Window& wind, VkCommandBuffer& cmd, VkRenderPass pass,uint32_t subpassIndex) {
+void pass_bakeDRAW_RECT(val::ValProc&valProc, val::PASS_CONTEXT& passContext, gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, VkFramebuffer framebuffer, GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue, VkRenderPass pass,uint32_t subpassIndex) {
+
+	; // the INLINE/FIXED flag should be automatically set, this is bad code.
 
 	// a fixed subroutine  https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
-	{	
+	{
+/*FIXED_BEGIN*/	
 {
 
 VkCommandBufferAllocateInfo allocInfo;
 allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 allocInfo.pNext = VK_NULL_HANDLE;
-allocInfo.commandPool = V_PROC._commandPool;
+allocInfo.commandPool = valProc._commandPool; 
 allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 allocInfo.commandBufferCount = 2;
-if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo,__DRAW_RECT_fixed_cmd_buffer_0) != VK_SUCCESS) {
+if (vkAllocateCommandBuffers(valProc._device, &allocInfo,__DRAW_RECT_fixed_cmd_buffer_0) != VK_SUCCESS) {
 val::dbg::printError("Failed to allocate command buffers for baking render graph.");
 throw std::runtime_error("Failed to allocate command buffers!");
 }
@@ -57,7 +64,6 @@ vkBeginCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__], &b
 }
 	
 	{
-		BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, cmd, FIXED);
 
 		static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
 		SET_PIPELINE(pipeline,valProc,__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
@@ -71,14 +77,16 @@ vkBeginCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__], &b
 
 
 		DRAW_INDEXED(indices.size(),__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
-
-		END_RENDER_PASS(cmd);
 {
 /* END RECORDING */
 vkEndCommandBuffer(__DRAW_RECT_fixed_cmd_buffer_0[__current_frame_index__]);
 }
 }
 
+
 	}
-	}
+	
+}/*FIXED_END*/
+
+	;
 }

@@ -39,7 +39,7 @@ namespace val {
 			throw std::runtime_error("Failed to create vkFramebuffer.");
 		}
 #else
-		vkCreateFramebuffer(_proc.getVkLogicalDevice(), &framebufferInfo, nullptr, &renderTargetFramebuffer);
+		vkCreateFramebuffer(_proc.getVkLogicalDevice(), &framebufferInfo, nullptr, &_vkframebuffer);
 #endif // !NDEBUG
 	}
 

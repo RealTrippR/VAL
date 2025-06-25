@@ -25,14 +25,19 @@ The Vulkan Abstraction Library is missing the following key features:
 		- UPPER_SNAKE_CASE for enum types, camel case for enum values.
 
 
+----------------------------------------------------------------------------------------------------------------
+
+[!] Add warnings when a outdated render pass is ran
+
+[!] Add resize method to window class 
+
 [!] Completely redesign meshes, the current implementation is dogwater
 
-
-[!] Redesign Queue System
+[~] Redesign Queue System
 
 [!] Optimize transition img layout
 
-[!] Rename "bufferSpace" to "memSpace"
+[!] Rename "bufferSpace" to "memorySpace"
 
 [!] Optimize the createGraphicsPipelines function of VAL_PROC, and allow customization of the VkPipelineViewportStateCreateInfo
 
@@ -72,8 +77,6 @@ The Vulkan Abstraction Library is missing the following key features:
 
 [ ] Complete the Raytracing test
 
-[ ] Check if inputAttachments work as expected
-
 [ ] Optimize pipelineCreateInfo functions (cache and pass by reference instead of value)
 
 [!] Change the updateSwapChain function to use the optimal VK_PIPELINE_STAGE_FLAGS
@@ -91,19 +94,19 @@ The Vulkan Abstraction Library is missing the following key features:
 
 [✓] Ensure that shaders can use shaders can use multiple image samplers and multiple image views. Also, allow for layout bindings of samplers.
 
-[!] pack uniform buffer vectors into a single vector for optimization
+[✓] pack uniform buffer vectors into a single vector for optimization
 
-[!] reform storage and uniform buffers in the VAL_PROC from [currentFrame][bufferIdx] to [bufferIdx][currentFrame]
+[✓] reform storage and uniform buffers in the VAL_PROC from [currentFrame][bufferIdx] to [bufferIdx][currentFrame]
 	because it allows for simpler and faster access and writing of data.
 
-[!] Give developers more control of the render passes created/submitted to the pipeline creation process.
+[✓] Give developers more control of the render passes created/submitted to the pipeline creation process.
     Currently their extent cannot be specified.
 
 [!] To implement multi-threading, consider creating renderThread class for this purpose. (a typedef?)
 	This might have to be passed into functions as an argument,
 	or move functions to be mulithreaded into this class
 
-[!] Optimize buffers - for better performance they should be close together in memory
+[✓] Optimize buffers - for better performance they should be close together in memory
 	This can be done with UBOs as it has already been done with push constants.
 
 [ ] Consider loading pixels from a seperate function rather than as a part of createTextureImage funciton, 
@@ -142,11 +145,9 @@ The Vulkan Abstraction Library is missing the following key features:
 
 [ ] Optimize the createDescriptorSet function in VAL_PROC - currently there is excess copying of data (i.e. vector to C struct)
 
-[ ] Consider making a VAL_FAIL and VAL_SUCCESS for failures and successes of functions
+[✓] Consider making a VAL_FAIL and VAL_SUCCESS for failures and successes of functions
 
 [✓] Add the ability to set the MAX_FRAMES_IN_FLIGHT upon initialization of VAL_PROC
-
-[!] mainProc.drawFrameExperimental(vertexBuffer, indexBuffer, indices); - This only allows for the binding of 3 different buffers - not suitable for practical use.
 
 [!] update the createImageView function to take aspect flags as an input to allow for depth buffering support (https://vulkan-tutorial.com/Depth_buffering)
 	It's more complicated than just updating createImageView - check the transitionImageLayout and renderPass and frameBuffer creation functions as well as the recordCommandBuffer function.

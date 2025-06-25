@@ -23,12 +23,12 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	inline void RESET_COMMAND_BUFFER(VkCommandBuffer& cmd) 
+	inline void RESET_COMMAND_BUFFER(const VkCommandBuffer& cmd)
 	{
 		vkResetCommandBuffer(cmd, 0);
 	}
 
-	inline void BEGIN_COMMAND_BUFFER(VkCommandBuffer& cmd) 
+	inline void BEGIN_COMMAND_BUFFER(const VkCommandBuffer& cmd)
 	{
 		thread_local static VkCommandBufferBeginInfo beginInfo;
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -41,12 +41,12 @@ namespace val {
 		}
 	}
 
-	inline void END_COMMAND_BUFFER(VkCommandBuffer& cmd) 
+	inline void END_COMMAND_BUFFER(const VkCommandBuffer& cmd)
 	{
 		vkEndCommandBuffer(cmd);
 	}
 
-	inline void SUBMIT_COMMAND_BUFFER(VkCommandBuffer& cmd, PASS_CONTEXT& passContext, QueueManager& queue, VkFence& waitFence, QueueManager& waitOnQueue)
+	inline void SUBMIT_COMMAND_BUFFER(VkCommandBuffer& cmd, PASS_CONTEXT& passContext, Queue& queue, const VkFence& waitFence, const Queue& waitOnQueue)
 	{
 		auto& proc = passContext.proc;
 		const auto& currentFrame = proc._currentFrame;
@@ -57,18 +57,18 @@ namespace val {
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 		submitInfo.waitSemaphoreCount = 1u;
-		submitInfo.pWaitSemaphores = &(waitOnQueue._semaphores[proc._currentFrame]);
+		submitInfo.pWaitSemaphores = &(waitOnQueue.getSemaphore());
 		submitInfo.pWaitDstStageMask = &waitStages; // 1 wait stage for every semaphor.
 
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &queue._commandBuffers[currentFrame];
+		submitInfo.pCommandBuffers = &queue.getCommandBuffer();
 
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &queue._semaphores[currentFrame];
+		submitInfo.pSignalSemaphores = &queue.getSemaphore();
 
 #ifndef NDEBUG
-		if (vkQueueSubmit(queue._queue, 1, &submitInfo, waitFence) != VK_SUCCESS) {
-			dbg::printError("Failed to submit command buffer @ %p to graphics queue.", &queue._commandBuffers[currentFrame]);
+		if (vkQueueSubmit(queue.getVkQueue(), 1, &submitInfo, waitFence) != VK_SUCCESS) {
+			dbg::printError("Failed to submit command buffer @ %p to graphics queue.", &queue.getCommandBuffer());
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
 #else
@@ -77,7 +77,7 @@ namespace val {
 	}
 
 
-	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType)
+	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, const VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType)
 	{
 
 		VkRenderPassBeginInfo renderPassBeginInfo{ 
@@ -92,11 +92,11 @@ namespace val {
 		vkCmdBeginRenderPass(cmd, &renderPassBeginInfo, VkSubpassContents(beginType));
 	}
 
-	inline void END_RENDER_PASS(VkCommandBuffer& cmd) {
+	inline void END_RENDER_PASS(const VkCommandBuffer& cmd) {
 		vkCmdEndRenderPass(cmd);
 	}
 
-	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, VkCommandBuffer& commandBuffer) {
+	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer) {
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		//VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		// bind pipeline and respective descriptor sets
@@ -105,45 +105,45 @@ namespace val {
 			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 	}
 
-	inline void SET_VIEWPORT(const VkViewport& viewport, VkCommandBuffer& commandBuffer) {
+	inline void SET_VIEWPORT(const VkViewport& viewport, const VkCommandBuffer& commandBuffer) {
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	}
 
-	inline void SET_SCISSOR(const VkRect2D& scissor, VkCommandBuffer& commandBuffer) {
+	inline void SET_SCISSOR(const VkRect2D& scissor, const VkCommandBuffer& commandBuffer) {
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	inline void SET_SCISSOR(const VkExtent2D& scissor, VkCommandBuffer& commandBuffer) {
+	inline void SET_SCISSOR(const VkExtent2D& scissor, const VkCommandBuffer& commandBuffer) {
 		const VkRect2D _scissor = { 0, 0, scissor.width, scissor.height };
 		vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
 	}
 
-	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset) {
+	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, const VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset) {
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &buffer, &bufferOffset);
 	}
 
-	inline void SET_INDEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer) {
+	inline void SET_INDEX_BUFFER(VkBuffer& buffer, const VkCommandBuffer& commandBuffer) {
 		vkCmdBindIndexBuffer(commandBuffer, buffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 
 	inline void DRAW_INSTANCED_INDEXED(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount,
-		VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex, const uint32_t& firstInstance)
+		const VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex, const uint32_t& firstInstance)
 	{
 		vkCmdDrawIndexed(cmd, indexBuffer.size(), instanceCount, firstIndex, firstVertex, firstInstance);
 	}
 
 	inline void DRAW_INSTANCED(val::buffer& vertexBuffer, const uint32_t& instanceCount,
-		VkCommandBuffer& cmd, const uint32_t& firstInstance, const uint32_t& firstVertex)
+		const VkCommandBuffer& cmd, const uint32_t& firstInstance, const uint32_t& firstVertex)
 	{
 		vkCmdDraw(cmd, vertexBuffer.size(), instanceCount, firstVertex, firstInstance);
 	}
 
-	inline void DRAW_INDEXED(const uint32_t& indexCount, VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex)
+	inline void DRAW_INDEXED(const uint32_t& indexCount, const VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex)
 	{
 		vkCmdDrawIndexed(cmd, indexCount, 1, firstIndex, firstVertex, 0);
 	}
 
-	inline void DRAW(const uint32_t& vertexCount,VkCommandBuffer& cmd, const uint32_t& firstVertex)
+	inline void DRAW(const uint32_t& vertexCount, const VkCommandBuffer& cmd, const uint32_t& firstVertex)
 	{
 		vkCmdDraw(cmd, vertexCount, 1, 0, 0);
 	}

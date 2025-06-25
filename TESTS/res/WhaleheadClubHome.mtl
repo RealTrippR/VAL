@@ -1,0 +1,182 @@
+# Blender 4.4.3 MTL File: 'WhaleheadClubHome.blend'
+# www.blender.org
+
+newmtl ChimneyCover
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Ns E:/Blender/Poliigon/MetalAluminumCastDirty001/MetalAluminumCastDirty001_ROUGHNESS_2K_METALNESS.jpg
+map_refl E:/Blender/Poliigon/MetalAluminumCastDirty001/MetalAluminumCastDirty001_METALNESS_2K_METALNESS.jpg
+map_Bump -bm 1.000000 E:/Blender/Poliigon/MetalAluminumCastDirty001/MetalAluminumCastDirty001_NRM_2K_METALNESS.jpg
+
+newmtl MetalAluminumCast001_2K
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Ns E:/Blender/Poliigon/MetalAluminumCast001/MetalAluminumCast001_ROUGHNESS_2K_METALNESS.jpg
+map_refl E:/Blender/Poliigon/MetalAluminumCast001/MetalAluminumCast001_METALNESS_2K_METALNESS.jpg
+map_Bump -bm 1.000000 E:/Blender/Poliigon/MetalAluminumCast001/MetalAluminumCast001_NRM_2K_METALNESS.jpg
+
+newmtl MetalAluminumCastDirty001_2K
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Ns E:/Blender/Poliigon/MetalAluminumCastDirty001/MetalAluminumCastDirty001_ROUGHNESS_2K_METALNESS.jpg
+map_refl E:/Blender/Poliigon/MetalAluminumCastDirty001/MetalAluminumCastDirty001_METALNESS_2K_METALNESS.jpg
+map_Bump -bm 1.000000 E:/Blender/Poliigon/MetalAluminumCastDirty001/MetalAluminumCastDirty001_NRM_2K_METALNESS.jpg
+
+newmtl MetalAluminumScratched003_2K
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd E:/Blender/Poliigon/MetalAluminumScratched003/MetalAluminumScratched003_COL_2K_METALNESS.jpg
+map_Ns E:/Blender/Poliigon/MetalAluminumScratched003/MetalAluminumScratched003_ROUGHNESS_2K_METALNESS.jpg
+map_refl E:/Blender/Poliigon/MetalAluminumScratched003/MetalAluminumScratched003_METALNESS_2K_METALNESS.jpg
+map_Bump -bm 1.000000 E:/Blender/Poliigon/MetalAluminumScratched003/MetalAluminumScratched003_NRM16_2K_METALNESS.tif
+
+newmtl MetalBronzeCast001_2K
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Ns E:/Blender/Poliigon/MetalBronzeCast001/MetalBronzeCast001_ROUGHNESS_2K_METALNESS.png
+map_refl E:/Blender/Poliigon/MetalBronzeCast001/MetalBronzeCast001_METALNESS_2K_METALNESS.png
+map_Bump -bm 1.000000 E:/Blender/Poliigon/MetalBronzeCast001/MetalBronzeCast001_NRM_2K_METALNESS.png
+
+newmtl PaintedExterior
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.799098 0.737911 0.337164
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl PaintedExterior.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.799098 0.737911 0.337164
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl PaintedVerticalSiding.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_refl -s 0.05 0.05 0.05 E:/Blender/Poliigon/WoodFlooringPineNatural001/WoodFlooringPineNatural001_REFL_2K.jpg
+map_Bump -s 0.05 0.05 0.05 E:/Blender/Poliigon/WoodFlooringPineNatural001/WoodFlooringPineNatural001_NRM_2K.png
+
+newmtl Poliigon_BrickReclaimedRunning_7787_4K
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Ns E:/Blender/Poliigon/Poliigon_BrickReclaimedRunning_7787/4K/Poliigon_BrickReclaimedRunning_7787_Roughness.jpg
+map_refl E:/Blender/Poliigon/Poliigon_BrickReclaimedRunning_7787/4K/Poliigon_BrickReclaimedRunning_7787_Metallic.jpg
+map_Bump -bm 1.000000 E:/Blender/Poliigon/Poliigon_BrickReclaimedRunning_7787/4K/Poliigon_BrickReclaimedRunning_7787_Normal.jpg
+
+newmtl Poliigon_BrickWallCommon_8542_2K
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Ns E:/Blender/Poliigon/Poliigon_BrickWallCommon_8542/2K/Poliigon_BrickWallCommon_8542_Roughness.jpg
+map_refl E:/Blender/Poliigon/Poliigon_BrickWallCommon_8542/2K/Poliigon_BrickWallCommon_8542_Metallic.jpg
+map_Bump -bm 1.000000 E:/Blender/Poliigon/Poliigon_BrickWallCommon_8542/2K/Poliigon_BrickWallCommon_8542_Normal.jpg
+
+newmtl RoofShinglesOld001_6K
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_refl E:/Blender/Poliigon/RoofShinglesOld001/RoofShinglesOld001_REFL_6K.jpg
+map_Bump -bm 9.000000 E:/Blender/Poliigon/RoofShinglesOld001/RoofShinglesOld001_NRM_6K.jpg
+
+newmtl RoofShinglesOld001_6K.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_refl E:/Blender/Poliigon/RoofShinglesOld001/RoofShinglesOld001_REFL_6K.jpg
+map_Bump -bm 9.000000 E:/Blender/Poliigon/RoofShinglesOld001/RoofShinglesOld001_NRM_6K.jpg
+
+newmtl VOID.001
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+
+newmtl WINDOW.001
+Ns 1000.000000
+Ka 0.596330 0.596330 0.596330
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+newmtl WindowBorderRed.001
+Ns 39.999996
+Ka 1.000000 1.000000 1.000000
+Kd 0.121019 0.034321 0.021118
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl WindowWhite.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.988656 0.958168
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

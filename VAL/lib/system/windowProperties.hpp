@@ -23,23 +23,23 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <stdint.h>
 #include <stdio.h>
 #include <VAL/lib/classEnumBitOps.hpp>
-
+#include <type_traits>
 
 namespace val {
 	
 	// see :: https://www.glfw.org/docs/latest/window_guide.html
-	enum class WN_BOOL_PROPERTY : uint32_t {
-		RESIZABLE =				1,
-		VISIBLE =				2,
-		MAXIMIZED =				4,
-		CENTER_CURSOR =			8,
-		SCALE_TO_MONITOR =		16,
-		SCALE_FRAMEBUFFER =		32,
-		MOUSE_PASSTHROUGH =		64
+	enum WN_BOOL_PROPERTY : uint32_t {
+		Resizable =				1,
+		Visible =				2,
+		Maximized =				4,
+		CenterCursor =			8,
+		ScaleToMonitor =		16,
+		ScaleFramebuffer =		32,
+		MousePassthrough =		64
 	};
 
 	#ifndef WINDOW_BOOL_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS
-		#define WINDOW_BOOL_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS
+	#define WINDOW_BOOL_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS
 		DEF_ENUM_BITWISE_OPERATORS(WN_BOOL_PROPERTY);
 	#endif
 
@@ -51,11 +51,15 @@ namespace val {
 
 		inline void setProperty(WN_BOOL_PROPERTY property, bool value) {
 			_boolSetMask |= property;
+
 			if (value) {
-				_boolValueMask |= WN_BOOL_PROPERTY(1 << uint32_t(property)); //set val
+				WN_BOOL_PROPERTY flag = static_cast<WN_BOOL_PROPERTY>(1 << uint32_t(property));
+				_boolValueMask |= flag; //set val
 			}
 			else {
-				_boolValueMask &= ~WN_BOOL_PROPERTY(1 << uint32_t(property)); //clear val
+				WN_BOOL_PROPERTY flag = static_cast<WN_BOOL_PROPERTY>(1 << uint32_t(property));
+				flag = ~flag;
+				_boolValueMask &= flag;
 			}
 		}
 
@@ -85,33 +89,33 @@ namespace val {
 		}
 
 		inline void applyToGLFW() {
-			if (bool(_boolSetMask & WN_BOOL_PROPERTY::RESIZABLE)) {
+			if (bool(_boolSetMask & WN_BOOL_PROPERTY::Resizable)) {
 				glfwWindowHint(GLFW_RESIZABLE,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::RESIZABLE));
+					bool(_boolValueMask & WN_BOOL_PROPERTY::Resizable));
 			}
-			if (bool(_boolSetMask & WN_BOOL_PROPERTY::VISIBLE)) {
+			if (bool(_boolSetMask & WN_BOOL_PROPERTY::Visible)) {
 				glfwWindowHint(GLFW_VISIBLE,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::VISIBLE));
+					bool(_boolValueMask & WN_BOOL_PROPERTY::Visible));
 			}
-			if (bool(_boolSetMask & WN_BOOL_PROPERTY::MAXIMIZED)) {
+			if (bool(_boolSetMask & WN_BOOL_PROPERTY::Maximized)) {
 				glfwWindowHint(GLFW_MAXIMIZED,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::MAXIMIZED));
+					bool(_boolValueMask & WN_BOOL_PROPERTY::Maximized));
 			}
-			if (bool(_boolSetMask & WN_BOOL_PROPERTY::CENTER_CURSOR)) {
+			if (bool(_boolSetMask & WN_BOOL_PROPERTY::CenterCursor)) {
 				glfwWindowHint(GLFW_CENTER_CURSOR,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::CENTER_CURSOR));
+					bool(_boolValueMask & WN_BOOL_PROPERTY::CenterCursor));
 			}
-			if (bool(_boolSetMask & WN_BOOL_PROPERTY::SCALE_TO_MONITOR)) {
+			if (bool(_boolSetMask & WN_BOOL_PROPERTY::ScaleToMonitor)) {
 				glfwWindowHint(GLFW_SCALE_TO_MONITOR,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::SCALE_TO_MONITOR));
+					bool(_boolValueMask & WN_BOOL_PROPERTY::ScaleToMonitor));
 			}
-			if (bool(_boolSetMask & WN_BOOL_PROPERTY::SCALE_FRAMEBUFFER)) {
+			if (bool(_boolSetMask & WN_BOOL_PROPERTY::ScaleFramebuffer)) {
 				glfwWindowHint(GLFW_SCALE_FRAMEBUFFER,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::SCALE_FRAMEBUFFER));
+					bool(_boolValueMask & WN_BOOL_PROPERTY::ScaleFramebuffer));
 			}
-			if (bool(_boolSetMask & WN_BOOL_PROPERTY::MOUSE_PASSTHROUGH)) {
+			if (bool(_boolSetMask & WN_BOOL_PROPERTY::MousePassthrough)) {
 				glfwWindowHint(GLFW_MOUSE_PASSTHROUGH,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::MOUSE_PASSTHROUGH));
+					bool(_boolValueMask & WN_BOOL_PROPERTY::MousePassthrough));
 			}
 		}
 	};

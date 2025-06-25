@@ -23,11 +23,11 @@ namespace val {
 	{
 		if (_imgMemory) {
 			_imgMemory = VK_NULL_HANDLE;
-			vkFreeMemory(_proc._device, _imgMemory, VK_NULL_HANDLE);
+			vkFreeMemory(_proc->_device, _imgMemory, VK_NULL_HANDLE);
 		}
 		if (_img) {
 			_img = VK_NULL_HANDLE;
-			vkDestroyImage(_proc._device, _img, VK_NULL_HANDLE);
+			vkDestroyImage(_proc->_device, _img, VK_NULL_HANDLE);
 		}
 		if (_pixels) {
 			stbi_image_free(_pixels);
@@ -35,27 +35,60 @@ namespace val {
 		}
 	}
 
-	void Texture2D::create(std::filesystem::path srcpath, const VkFormat format, const VkImageUsageFlagBits usages,
-		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
+	void Texture2D::createFromMemory(void* memory, size_t memorySize, const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
+		const VkImageLayout layout, const bufferSpace memspac, const uint8_t mipLevels)
 	{
-
 #ifndef NDEBUG
 		if (mipLevels == 0u) {
-			dbg::printError("Mip levels of texture2d img must not be 0.");
+			dbg::printError("Mip levels of Texture2D img must not be 0. The minimum is 1.");
+			throw std::runtime_error("Invalid mip levels. The minimum is 1.");
 		}
 #endif // !NDEBUG
-		destroy();
+
 
 		_format = format;
 		_mipLevels = mipLevels;
 
 		int widthtmp;
 		int heightmp;
-		_img = createTextureImage(&_proc, srcpath, &_pixels, _format, _imgMemory,
-			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);
+		/*_img = createTextureImageFromMemory(_proc, memory, memorySize, &_pixels, _format, _imgMemory,
+			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);*/
+		throw std::runtime_error("INCOMPLETE");
+	}
+
+	void Texture2D::createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
+		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels, const uint16_t maxWidth, const uint16_t maxHeight)
+	{
+#ifndef NDEBUG
+		if (mipLevels == 0u) {
+			dbg::printError("Mip levels of Texture2D img must not be 0. The minimum is 1.");
+			throw std::runtime_error("Invalid mip levels. The minimum is 1.");
+		}
+#endif // !NDEBUG
+		destroy();
+		_mipLevels = mipLevels;
+
+		int widthtmp;
+		int heightmp;
+
+		_img = createTextureImage8BitFromDisk(_proc, srcpath.string().c_str(), &_pixels, &_imgMemory, usages, mipLevels,
+			&widthtmp, &heightmp, &_channels, memspace, &_format);
+		
+		/*_img = createTextureImage(_proc, srcpath, &_pixels, _format, _imgMemory,
+			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);*/
 		_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-		_width = widthtmp;
-		_height = heightmp;
+		if (maxWidth == USE_SOURCE_DIMENSION) {
+			_width = widthtmp;
+		}
+		else {
+			_width = std::min((int)maxWidth, widthtmp);
+		}
+		if (maxHeight == USE_SOURCE_DIMENSION) {
+			_height = heightmp;
+		}
+		else {
+			_height = std::min((int)maxHeight, heightmp);
+		}
 
 		if (mipLevels > 0) {
 			generateMipmaps(mipLevels);
@@ -65,12 +98,21 @@ namespace val {
 	void Texture2D::create(const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
 	{
+#ifndef NDEBUG
+		if (format == TEXTURE_FORMAT_AUTO) {
+			dbg::printError("Texture2D::create: TEXTURE_FORMAT_AUTO is not allowed here - format cannot be automatically deduced without external information, such as that loaded from a file.");
+			throw std::runtime_error("Texture2D::create: TEXTURE_FORMAT_AUTO is not allowed here - format cannot be automatically deduced without external information, such as that loaded from a file.");
+		}
+#endif // !NDEBUG
+
+	
 		destroy();
 
 
 #ifndef NDEBUG
 		if (mipLevels == 0u) {
-			dbg::printError("Mip levels of texture2d img must not be 0.");
+			dbg::printError("Mip levels of Texture2D img must not be 0. The minimum is 1.");
+			throw std::runtime_error("Invalid mip levels. The minimum is 1.");
 		}
 #endif // !NDEBUG
 
@@ -79,7 +121,7 @@ namespace val {
 		_height = height;
 		_format = format;
 		_mipLevels = mipLevels;
-		_proc.createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
+		_proc->createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
 	}
 
 	/* PRIVATE: */
@@ -89,7 +131,7 @@ namespace val {
 #ifndef NDEBUG
 		// Check if image format supports linear blitting
 		VkFormatProperties formatProperties;
-		vkGetPhysicalDeviceFormatProperties(_proc._physicalDevice, _format, &formatProperties);
+		vkGetPhysicalDeviceFormatProperties(_proc->_physicalDevice, _format, &formatProperties);
 
 		if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
 			dbg::printError("Texture image format does not support linear blitting!");
@@ -99,7 +141,7 @@ namespace val {
 
 
 
-		VkCommandBuffer commandBuffer = _proc.beginSingleTimeCommands();
+		VkCommandBuffer commandBuffer = _proc->beginSingleTimeCommands();
 
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -174,6 +216,6 @@ namespace val {
 			0, nullptr,
 			1, &barrier);
 
-		_proc.endSingleTimeCommands(commandBuffer);
+		_proc->endSingleTimeCommands(commandBuffer);
 	}
 }

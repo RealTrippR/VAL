@@ -1,0 +1,98 @@
+/*
+Copyright © 2025 Tripp Robins
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the “Software”), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#include <VAL/lib/meshes&vertices/vertexBase.hpp>
+#include <VAL/lib/meshes&vertices/vertexInputAttributeList.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
+
+#include <string.h>
+
+namespace val
+{
+	class VertexTxtr : public VertexBase
+	{
+	public:
+
+		VertexTxtr& operator=(const VertexTxtr&) = default;
+
+		bool operator==(const VertexTxtr&) const = default;
+
+	public:
+
+		glm::vec3 pos;
+		glm::vec3 color;
+		glm::vec2 texCoord;
+		glm::vec3 normal;
+	public:
+		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs) override
+		{
+			this->pos = pos;
+			this->color = color;
+			if (!UVs.empty()) 
+			{
+				this->texCoord = UVs[0];
+			}
+			this->normal = normal;
+		}
+
+		static const tiny_vector<VkVertexInputAttributeDescription>& getInputAttributeDescriptions()
+		{
+			static const VertexInputAttributeList vertexAttributes = {
+				   VertexInputAttribute(0, vec3, offsetof(VertexTxtr, pos)),
+				   VertexInputAttribute(1, vec3, offsetof(VertexTxtr, color)),
+				   VertexInputAttribute(2, vec2, offsetof(VertexTxtr, texCoord)),
+				   VertexInputAttribute(3, vec3, offsetof(VertexTxtr, normal))
+			};
+			static const tiny_vector<VkVertexInputAttributeDescription> r = vertexAttributes.toVkVertexInputAttributeDescription();
+			return r;
+		}
+
+		static VkVertexInputBindingDescription getBindingDescription()
+		{
+			static const VkVertexInputBindingDescription bindingDescription
+			{
+				.binding = 0,
+				.stride = sizeof(VertexTxtr),
+				.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+			};
+			return bindingDescription;
+		}
+	};
+}
+
+
+
+namespace std {
+	template<> struct hash<val::VertexTxtr> {
+		size_t operator()(val::VertexTxtr const& vertex) const {
+			return (hash<glm::vec3>()(vertex.pos));
+		}
+
+	/*	bool operator==(const val::VertexTxtr& other) const {
+			return pos == other.pos &&
+			color == other.color &&
+			texCoord == other.texCoord &&
+			normal == other.normal;
+		}*/
+		/*bool operator==(const hash<val::VertexTxtr>& other) const {
+			return (memcmp(this, &other, sizeof(this)) == 0);
+		}*/
+	};
+}

@@ -18,6 +18,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef VAL_PASS_INFO_H
 #define VAL_PASS_INFO_H
 
+#include <ExternalLibraries/Vulkan/Include/vulkan/vulkan_core.h>
 #include <VAL/lib/C_compatibleBinding.h>
 #include <VAL/lib/renderGraph/argBlock.h>
 #include <VAL/lib/renderGraph/fixedBlock.h>
@@ -26,7 +27,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 struct PASS_INFO 
 {
-	
+	struct PASS_INFO** dependentPasses;
+
 	struct ARG_BLOCK readBlock;
 	struct ARG_BLOCK writeBlock;
 	struct ARG_BLOCK readWriteBlock;
@@ -38,7 +40,11 @@ struct PASS_INFO
 
 	uint16_t fixedBlockCount;
 
+	uint16_t dependentPassesCount;
+
 	struct FIXED_BLOCK* fixedBlocks;
+
+	enum VkShaderStageFlags shaderStages;
 };
 
 // returns a reference to an argument at the given index.

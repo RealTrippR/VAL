@@ -24,7 +24,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/queueManager.hpp>
 #include <VAL/lib/system/windowProperties.hpp>
-#include <vector>
+#include <vector> 
 #include <VAL/lib/ext/tiny_vector.hpp>
 
 
@@ -33,11 +33,15 @@ namespace val {
 
 	class Window {
 	public:
-		Window() = default;
-		Window(ValProc& valProc) {
+		Window(ValProc& valProc) 
+			: _presentQueue(NULL) 
+		{
 			_procVAL = &valProc;
 		}
-		Window(GLFWwindow* windowHDL, ValProc& valProc, VkColorSpaceKHR colorSpace) {
+
+		Window(GLFWwindow* windowHDL, ValProc& valProc, VkColorSpaceKHR colorSpace) 
+			: _presentQueue(_procVAL)
+		{
 			if (!windowHDL) {
 				printf("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
 				throw std::runtime_error("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
@@ -48,7 +52,9 @@ namespace val {
 			_colorSpace = colorSpace;
 		}
 
-		Window(WindowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, ValProc& valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL) {
+		Window(WindowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, ValProc& valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL)
+			: _presentQueue(_procVAL)
+		{
 			glfwInit(); // (it's safe to call init more than once. Refer to: https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init)
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
 			
@@ -68,6 +74,7 @@ namespace val {
 		}
 	public:
 		void setWindowHandleGLFW(GLFWwindow* windowHDL);
+
 		GLFWwindow* getWindowHandleGLFW();
 
 	public:
@@ -76,19 +83,17 @@ namespace val {
 
 		void display(const VkFormat& imgFormat, std::vector<VkSemaphore> waitOn);
 
-		void createWindowSurface(VkInstance instance);
+		void destroy(); // same as cleanup()
 
 		void cleanup();
 
+		/// cleanupSwapChain() - Destroys the swapchain and it's associated images and framebuffers.
+		/// @brief 
 		void cleanupSwapChain();
 
 		void createSwapChain(const VkFormat swapchainFormat);
 
 		void recreateSwapChain(const VkFormat swapchainFormat);
-
-		void createSwapChainImageViews(const VkFormat swapchainFormat);
-
-		void createSwapChainFrameBuffers(const VkExtent2D& extent, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
 		void updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn);
 
@@ -96,63 +101,91 @@ namespace val {
 
 		VkFramebuffer& getSwapchainFramebuffer(const VkFormat& imageFormat); // gets the swapchain framebuffer for rendering
 
-		//void createPresentQueue();
-
 		VkFramebuffer& beginDraw(const VkFormat& imageFormat);
 
-		inline VkFence& getPresentFence();
+		inline uint32_t getHeight() const;
 
-		inline QueueManager& getPresentQueue();
-
-		inline uint32_t getHeight();
-
-		inline uint32_t getWidth();
+		inline uint32_t getWidth() const;
 		
-		inline VkExtent2D getSize();
+		inline VkExtent2D getSize() const;
 
-		inline VkRect2D getSizeAsRect2D();
+		inline VkRect2D getSizeAsRect2D() const;
 
-		inline bool shouldClose();
+		inline bool shouldClose() const;
 
-		inline const VkColorSpaceKHR getColorSpace();
+		inline const VkColorSpaceKHR getColorSpace() const;
 
-		inline VkSemaphore getCurrentSemaphore();
+		inline VkSemaphore getPresentSemaphore() const;
 
-		inline VkSemaphore getSemaphore(const uint8_t frameidx);
+		inline VkSemaphore getPresentSemaphore(const uint8_t frameidx) const;
+
+		inline const VkFence& getPresentFence() const;
+
+		inline const Queue& getPresentQueue() const;
+
+		inline Queue& getPresentQueue();
+
+		inline ValProc* getValProc() const;
+
+		inline VkSurfaceKHR getVkSurface() const;
 
 		inline static void pollEvents() {
 			glfwPollEvents();
 		}
-	public:
+	
+		void createSwapChainFrameBuffers(VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
-		uint32_t _currentSwapChainImageIndex = 0;
+	protected:
+
+		void createPresentQueue();
+
+		void createPresentFence(VkDevice device);
+
+		void createWindowSurface(VkInstance instance);
+
+		void createSwapChainImageViews(const VkFormat swapchainFormat);
+
+	protected:
+		friend ValProc;
 
 		ValProc* _procVAL = NULL;
 
 		GLFWwindow* _window = NULL;
 
-		VkColorSpaceKHR _colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+		Queue _presentQueue;
 
-		QueueManager _presentQueue;
+		VkColorSpaceKHR _colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 
 		VkSurfaceKHR _surface{};
 		////////////////// SWAPCHAIN //////////////////
 
 		VkSwapchainKHR _swapChain{};
-		tiny_vector<VkImage, uint8_t> _swapChainImages;
-		//VkFormat _swapChainImageFormat;
 		VkExtent2D _swapChainExtent{};
-		tiny_vector<VkImageView, uint8_t> _swapChainImageViews;
-		tiny_vector<VkFramebuffer, uint8_t> _swapChainFrameBuffers;
 
-		// this data is used to recreate the swap chain when it's out of date.
-		VkImageView* _swapChainAttachments = NULL;
+		VkImage* _swapChainImages = VK_NULL_HANDLE;
+		VkImageView* _swapChainImageViews = VK_NULL_HANDLE;
+		VkFramebuffer* _swapChainFramebuffers = VK_NULL_HANDLE;
+
+		VkFence _presentFence = VK_NULL_HANDLE;
+
+		uint8_t _swapChainImageCount = 0u;
+
 		uint16_t _swapChainAttachmentCount = 0u;
-		VkRenderPass _swapChainRenderPass{};
 
+		uint32_t _currentSwapChainImageIndex = 0;
 		// Because windows can be created from an existing GLFW handle,
 		// this is used to avoid the destruction of a window that it doesn't own.
 		bool _ownsGLFWwindow = true;
+		// this can be consolidated
+		/*
+		tiny_vector<VkImage, uint8_t> _swapChainImages;
+		tiny_vector<VkImageView, uint8_t> _swapChainImageViews;
+		tiny_vector<VkFramebuffer, uint8_t> _swapChainFrameBuffers;
+		*/
+
+		// this data is used to recreate the swap chain when it's out of date.
+		VkImageView* _swapChainAttachments = NULL;
+		VkRenderPass _swapChainRenderPass{};
 	};
 }
 

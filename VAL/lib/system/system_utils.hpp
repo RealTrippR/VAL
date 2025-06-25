@@ -26,9 +26,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define DEF_ENUM_BITWISE_XOR(TYPE) inline TYPE operator^(TYPE a, TYPE b) { return static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
 #define DEF_ENUM_BITWISE_NOT(TYPE) inline TYPE operator~(TYPE a) { return static_cast<TYPE>(~static_cast<std::underlying_type_t<TYPE>>(a));}
 
-#define DEF_ENUM_BITWISE_OR_ASSIGN(TYPE) inline TYPE operator|=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) | static_cast<std::underlying_type_t<TYPE>>(b));}
-#define DEF_ENUM_BITWISE_AND_ASSIGN(TYPE) inline TYPE operator&=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) & static_cast<std::underlying_type_t<TYPE>>(b));}
-#define DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE) inline TYPE operator^=(TYPE& a, TYPE& b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_OR_ASSIGN(TYPE) inline TYPE operator|=(TYPE a, TYPE b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) | static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_AND_ASSIGN(TYPE) inline TYPE operator&=(TYPE a, TYPE b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) & static_cast<std::underlying_type_t<TYPE>>(b));}
+#define DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE) inline TYPE operator^=(TYPE a, TYPE b) { return a = static_cast<TYPE>(static_cast<std::underlying_type_t<TYPE>>(a) ^ static_cast<std::underlying_type_t<TYPE>>(b));}
 
 #define DEF_ENUM_BITWISE_OPERATORS(TYPE)\
 DEF_ENUM_BITWISE_OR(TYPE)\
@@ -53,7 +53,7 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 
 #include <stdlib.h>
 
-#include <ExternalLibraries/stb_image.h>;
+#include <ExternalLibraries/stb_image.h>
 #include <optional>
 #include <array>
 #include <set>
@@ -83,7 +83,16 @@ DEF_ENUM_BITWISE_XOR_ASSIGN(TYPE)
 
 #include <VAL/lib/system/shaderStageEnum.hpp>
 
+#include <VAL/lib/debugUtils/dbgUtils.hpp>
+
 namespace val {
+
+	constexpr uint16_t USE_SOURCE_DIMENSION = 0;
+	constexpr VkFormat TEXTURE_FORMAT_AUTO = VK_FORMAT_MAX_ENUM;
+
+	class Queue; // forward declaration
+	class Window; // forward declaration
+	class ValProc; // forward declaration
 
 	// VAL::DYNAMIC_STATE maps directly to VkDynamicState
 	enum class DYNAMIC_STATE
@@ -103,8 +112,6 @@ namespace val {
 		GPU_ONLY = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		CPU_GPU = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
 	};
-
-	class ValProc; // forward declaration
 
 	namespace fs = std::filesystem;
 
@@ -136,7 +143,6 @@ namespace val {
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef NDEBUG
 	void __VAL_DEBUG_ValidateBufferCopy(uint64_t dstBufferSize, uint64_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -148,7 +154,6 @@ namespace val {
 
 	void destroyDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerEXT messenger, const VkAllocationCallbacks* pAllocator);
 
-#endif // !NDEBUG
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -180,10 +185,19 @@ namespace val {
 
 	VkImageView createImageView(VkDevice device, VkImage image, const VkFormat& format, const uint32_t& mipLevels = 1U);
 
-	VkImage createTextureImage(ValProc* proc, fs::path imgFilepath, stbi_uc** pixelsOut, VkFormat format, VkDeviceMemory& textureImageMemory,
-		const VkImageUsageFlagBits& additionalUsageFlagBits = VkImageUsageFlagBits(0), const uint32_t& mipLevels = 1U,
-		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL, const bufferSpace& bufferSpace = GPU_ONLY);
+
+	VkImage createTextureImage16BitFromDisk(ValProc* proc, fs::path imgFilepath, VkFormat* autoFormatOut, stbi_us** pixelsOut,
+		VkDeviceMemory* textureImageMemory, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
+		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
+		const bufferSpace& buffSpace = GPU_ONLY);
+
+	VkImage createTextureImage8BitFromDisk(ValProc* proc, fs::path imgFilepath, stbi_uc** pixelsOut,
+		VkDeviceMemory* textureImageMemory, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
+		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
+		const bufferSpace& buffSpace = GPU_ONLY, VkFormat* autoFormatOut = NULL);
 	
+
+
 	// returns false if the file cannot be read
 	bool readByteFile(const std::string& filename, std::vector<char>* dst);
 

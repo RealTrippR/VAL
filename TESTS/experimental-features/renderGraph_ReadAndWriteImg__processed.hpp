@@ -1,0 +1,53 @@
+#include <VAL/lib/system/VAL_PROC.hpp>
+/********************************/
+/* Copyright Tripp Robins, 2025 */
+/********************************/
+#include <VAL/lib/renderGraph/pass.hpp>
+
+#include "../vertex.hpp"
+#include <VAL/lib/ext/gpu_vector.hpp>
+
+using namespace val;
+
+void pass_mainCOLOR(val::ValProc& valProc, val::PASS_CONTEXT& passContext, gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, VkFramebuffer frameBuffer, Texture2D& renderTargImg, GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue) {
+
+	renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
+
+	// it's important to note that BEGIN_RENDER_PASS and END_RENDER_PASS cannot be called inside fixed functions, 
+	// the RG error handling must be improved to change this, also add error lines and reasons for failure
+	BEGIN_RENDER_PASS(passContext, pipeline, frameBuffer, graphicsQueue, INLINE);
+
+	SET_PIPELINE(pipeline, valProc, graphicsQueue);
+
+	SET_VERTEX_BUFFER(vertices, graphicsQueue);
+	SET_INDEX_BUFFER(indices, graphicsQueue);
+
+	SET_VIEWPORT(viewport, graphicsQueue);
+
+	SET_SCISSOR(wind.getSize(), graphicsQueue);
+	DRAW_INDEXED(indices.size(), graphicsQueue);
+
+	END_RENDER_PASS(graphicsQueue);
+}
+void pass_mainIMAGE(val::ValProc& valProc, val::PASS_CONTEXT& passContext, gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, Texture2D& renderTargImg, VkFramebuffer frameBuffer, GraphicsPipeline pipeline, Window& wind, Queue& graphicsQueue) {
+
+	renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	BEGIN_RENDER_PASS(passContext, pipeline, frameBuffer, graphicsQueue, INLINE);
+
+	static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
+
+	SET_PIPELINE(pipeline, valProc, graphicsQueue);
+
+	SET_VERTEX_BUFFER(vertices, graphicsQueue);
+	SET_INDEX_BUFFER(indices, graphicsQueue);
+
+	SET_VIEWPORT(viewport, graphicsQueue);
+	SET_SCISSOR(wind.getSize(), graphicsQueue);
+
+	DRAW_INDEXED(indices.size(), graphicsQueue);
+
+	END_RENDER_PASS(graphicsQueue);
+}

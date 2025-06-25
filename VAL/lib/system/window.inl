@@ -22,45 +22,60 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/window.hpp>
 
 namespace val {
-	inline VkFence& Window::getPresentFence() {
-		return _presentQueue._fences[_procVAL->_currentFrame];
-	}
 
-	inline QueueManager& Window::getPresentQueue() {
-		return _presentQueue;
-	}
-
-	inline uint32_t Window::getHeight() {
+	inline uint32_t Window::getHeight() const {
 		return _swapChainExtent.height;
 	}
 	
-	inline uint32_t Window::getWidth() {
+	inline uint32_t Window::getWidth() const {
 		return _swapChainExtent.width;
 	}
 
-	inline VkExtent2D Window::getSize() {
+	inline VkExtent2D Window::getSize() const {
 		return { _swapChainExtent.width, _swapChainExtent.height };
 	}
 
-	inline VkRect2D Window::getSizeAsRect2D() {
+	inline VkRect2D Window::getSizeAsRect2D() const {
 		return { 0,0, _swapChainExtent.width, _swapChainExtent.height };
 	}
 
-	inline bool Window::shouldClose() {
+	inline bool Window::shouldClose() const {
 		return glfwWindowShouldClose(_window);
 	}
 
-	inline VkSemaphore Window::getCurrentSemaphore() {
+	inline VkSemaphore Window::getPresentSemaphore() const {
 		return _presentQueue.getSemaphore(_procVAL->getCurrentFrame());
 	}
 
-	inline VkSemaphore Window::getSemaphore(const uint8_t frameidx) {
+	inline VkSemaphore Window::getPresentSemaphore(const uint8_t frameidx) const {
 		return _presentQueue.getSemaphore(frameidx);
 	}
 
-	inline const VkColorSpaceKHR Window::getColorSpace() {
+	inline const VkColorSpaceKHR Window::getColorSpace() const {
 		return _colorSpace;
 	}
+
+	inline const VkFence& Window::getPresentFence() const {
+		return _presentFence;
+	}
+
+	inline const Queue& Window::getPresentQueue() const {
+		return _presentQueue;
+	}
+
+
+	inline Queue& Window::getPresentQueue() {
+		return _presentQueue;
+	}
+
+	inline ValProc* Window::getValProc() const {
+		return _procVAL;
+	}
+
+	inline VkSurfaceKHR Window::getVkSurface() const {
+		return _surface;
+	}
+
 }
 
 #endif

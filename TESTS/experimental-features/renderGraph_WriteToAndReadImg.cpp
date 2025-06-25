@@ -2,16 +2,19 @@
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
-
 #else
+#define _CRTDBG_MAP_ALLOC
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
+
+#define VAL_ENABLE_EXPIREMENTAL // for render graphs and gpu_vector
 
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/system/framebuffer.hpp>;
 #include <VAL/lib/ext/gpu_vector.hpp>
+#include <VAL/lib/ext/VkPipelineStagesToString.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -22,7 +25,16 @@ const bool enableValidationLayers = true;
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
 
-struct uniformBufferObject {
+//#define VAL_RENDER_PASS_COMPILE_MODE
+#include <VAL/lib/renderGraph/renderGraph.hpp>
+#include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
+
+/************************************************/
+#include GRAPH_FILE(renderGraph_ReadAndWriteImg);
+/************************************************/
+
+
+struct ViewMatrix {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
@@ -32,15 +44,16 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
+void updateViewMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
+{
 	using namespace val;
-	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
+	const VkExtent2D extent = proc._windowVAL->getSize();
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-	static uniformBufferObject ubo{};
+	static ViewMatrix ubo{};
 	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
@@ -124,13 +137,17 @@ void setRenderPass2(val::renderPassManager& renderPassMngr, VkFormat imgFormat) 
 
 int main()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+
 	using namespace val;
 	ValProc proc;
 	PhysicalDeviceRequirements deviceRequirements(val::DEVICE_TYPES::dedicated_GPU | val::DEVICE_TYPES::integrated_GPU);
+	
 
 	// Configure and create window
 	WindowProperties windowConfig;
-	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
+	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
 	Window window(windowConfig, 800, 800, "Render Pass To Image", proc);
 
 	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
@@ -148,7 +165,7 @@ int main()
 	///// CREATE PHYSICAL DEVICES              ///////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
 
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
 
 
 
@@ -159,20 +176,20 @@ int main()
 	GraphicsPipeline imgPipeline;
 
 	// create UBO which stores view information
-	UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl1(sizeof(ViewMatrix));
 
 	// load and configure frag shader
-	Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", SHADER_STAGE::Fragment, "main");
 
 	sampler imgSampler(proc, val::combinedImage);
 	imgSampler.setMaxAnisotropy(8.f);
 	fragShaderImage.setImageSamplers({ { &imgSampler, 1 } });
 
 	// load and configure vert shader
-	Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	Shader vertShader("shaders-compiled/shadervert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
-	vertShader._UBO_Handles = { {&uboHdl,0} };
+	vertShader._UBO_Handles = { {&uboHdl1,0} };
 
 	imgPipeline.shaders = { &vertShader,&fragShaderImage };
 
@@ -190,15 +207,15 @@ int main()
 
 	GraphicsPipeline colorPipeline;
 
-	UBO_Handle uboHdl2(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl2(sizeof(ViewMatrix));
 
-	val::Shader vertShader2("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader2("shaders-compiled/shadervert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader2.setBindingDescriptions({ res::vertex::getBindingDescription() });
 
 	vertShader2._UBO_Handles = { { &uboHdl2,0 } };
 
-	Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", SHADER_STAGE::Fragment, "main");
 	colorPipeline.shaders = { &vertShader2,&fragShaderColor };
 
 	setGraphicsPipelineInfo2(colorPipeline);
@@ -218,7 +235,7 @@ int main()
 	// CREATE MAIN_PROC, PIPELINES, & THEIR RESOURCES /////////////////
 	//////////////////////////////////////////////////////////////////
 	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &imgPipeline, &colorPipeline });
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, imgPipeline.getVkRenderPass(), proc._device);
+	window.createSwapChainFrameBuffers({}, 0u, imgPipeline.getVkRenderPass(), proc._device);
 
 	val::Texture2D renderTargetImg(proc, 800, 800, imageFormat,
 		VkImageUsageFlagBits(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -242,12 +259,12 @@ int main()
 	//////////////////////////////////////////////////////////////////
 	// create secondary vertex buffer
 	val::gpu_vector<res::vertex> vertices2(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-		{
-			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-		});
+	{
+		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+	});
 
 
 
@@ -259,80 +276,94 @@ int main()
 	////////////////// CREATE DESCRIPTOR SETS //////////////////
 	proc.createDescriptorSets(&imgPipeline);
 	proc.createDescriptorSets(&colorPipeline);
-	////////////////////////////////////////////////////////////
 
-	// configure the render target, setting vertex buffers, scissors, area, etc
-	val::renderTarget renderTarget;
-	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window._swapChainExtent);
-	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	renderTarget.setIndexBuffer(indices, indices.size());
-	renderTarget.setVertexBuffer(vertices1, vertices1.size());
+	///////////////////  CREATE RENDER GRAPH ///////////////////
+	RENDER_GRAPH renderGraph;
 
-	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+	renderGraph.loadFromFile("experimental-features/renderGraph_ReadAndWriteImg.rg.hpp");
+
+
+	PASS_CONTEXT colorPassContext = {
+		//"COLOR_PIPELINE",
+		proc,
+		window.getSizeAsRect2D(),
+		{ { 0.0f, 0.04f, 0.2f, 1.0f } }, /*clear values*/
+		{ colorPipeline }
+	};
+
+
+	PASS_CONTEXT imagePassContext = {
+		//"IMAGE_PIPELINE",
+		proc,
+		window.getSizeAsRect2D(),
+		{ { 0.0f, 0.0f, 0.0f, 1.0f } }, /*clear values*/
+		{ imgPipeline }
+	};
+
+	renderGraph.compile(proc.getFramesInFlight(), filepath("experimental-features"),
+		//{ colorPassContext, imagePassContext }
+		"experimental-features/renderGraphDiagrams"
+	);
+
+	//////////////////  CREATE GRAPHICS QUEUE //////////////////
+	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Compute);
+
+
+	std::cout << "Color pass wait stages: " << val::to_string(colorPassContext.getWaitStages()) << "\n\n";
+	std::cout << "Image pass wait stages: " << val::to_string(imagePassContext.getWaitStages()) << "\n\n";
 
 	while (!window.shouldClose()) 
 	{
-		auto& graphicsQueue = proc._graphicsQueue;
-		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = proc._currentFrame;
-
-		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
-		glfwPollEvents();
-		updateUniformBuffer(proc, uboHdl);
-		updateUniformBuffer(proc, uboHdl2);
+		window.pollEvents();
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		
+		// Update view information, stored in a UBO
+		updateViewMatrix(proc, uboHdl1);
+		updateViewMatrix(proc, uboHdl2);
 
-		renderTarget.begin(proc);
+		/* * * * * * * * * * * * * * * * * */
 
-		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-		/*PIPELINE 2: COLOR PIPELINE*/
-
-		renderTarget.beginPass(proc, colorPipeline.getVkRenderPass(), renderTargetFramebuffer);
-
-		renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-		renderTarget.updatePipeline(proc, colorPipeline);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
-		renderTarget.updateViewport(proc, viewport);
-
-		renderTarget.updateBuffers(proc);
-
-		renderTarget.render(proc);
-
-		renderTarget.endPass(proc);
+		graphicsQueue.reset();
+		graphicsQueue.begin();
 
 
+		CALL_RENDER_PASS(COLOR, proc, colorPassContext, 
+			vertices1, indices, 
+			renderTargetFramebuffer, renderTargetImg, 
+			colorPipeline, window, graphicsQueue);
 
-		renderTargetImg.transitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-
-		/*PIPELINE 1: IMAGE PIPELINE*/
-		renderTarget.beginPass(proc, imgPipeline.getVkRenderPass(), framebuffer);
-		renderTarget.setIndexBuffer(indices.getVkBuffer(), indices.size());
-		renderTarget.setVertexBuffer(vertices2, vertices2.size());
-		renderTarget.setClearValues({ { 0.0f, 0.2f, 0.5f, 1.0f } });
-
-		renderTarget.updatePipeline(proc, imgPipeline);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
-		renderTarget.updateViewport(proc, viewport);
-
-		renderTarget.updateBuffers(proc);
-
-		renderTarget.render(proc);
-
-		renderTarget.endPass(proc);
+		CALL_RENDER_PASS(IMAGE, proc, imagePassContext,
+			vertices2, indices, renderTargetImg, 
+			framebuffer, 
+			imgPipeline, window, graphicsQueue);
 
 
-		renderTarget.submit(proc, { window.getSemaphore(currentFrame)}, window.getPresentFence());
-		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame)});
+
+
+		graphicsQueue.end();
+
+		/* * * * * * * * * * * * * * * * * */
+
+		graphicsQueue.submit(window.getPresentQueue(),
+			colorPassContext.getWaitStages() | imagePassContext.getWaitStages(), window.getPresentFence());
+
+		window.display(imageFormat, { graphicsQueue.getSemaphore() });
 
 		proc.nextFrame();
 	}
 
+	vertices1.destroy(proc);
+	vertices2.destroy(proc);
+	indices.destroy(proc);
+	renderTargetImg.destroy();
+	renderTargImgView.destroy();
+	window.destroy();
+	
 	glfwTerminate();
+
+
+	_CrtDumpMemoryLeaks();
 
 	return EXIT_SUCCESS;
 }

@@ -24,25 +24,25 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	inline void RESET_COMMAND_BUFFER(VkCommandBuffer& cmd);
+	inline void RESET_COMMAND_BUFFER(const VkCommandBuffer& cmd);
 
-	inline void BEGIN_COMMAND_BUFFER(VkCommandBuffer& cmd);
+	inline void BEGIN_COMMAND_BUFFER(const VkCommandBuffer& cmd);
 
-	inline void END_COMMAND_BUFFER(VkCommandBuffer& cmd);
+	inline void END_COMMAND_BUFFER(const VkCommandBuffer& cmd);
 
-	inline void SUBMIT_COMMAND_BUFFER(VkCommandBuffer& cmd, PASS_CONTEXT& passContext, QueueManager& graphicsQueue, VkFence& waitFence, QueueManager& queueWait);
+	inline void SUBMIT_COMMAND_BUFFER(VkCommandBuffer& cmd, PASS_CONTEXT& passContext, Queue& graphicsQueue, const VkFence& waitFence, const Queue& waitOnQueue);
 
-	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType);
+	inline void BEGIN_RENDER_PASS(PASS_CONTEXT& passContext, GraphicsPipeline& pipeline, VkFramebuffer& framebuffer, const VkCommandBuffer& cmd, const val::RENDER_PASS_BEGIN_TYPE& beginType);
 
-	inline void END_RENDER_PASS(VkCommandBuffer& cmd);
+	inline void END_RENDER_PASS(const VkCommandBuffer& cmd);
 
-	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, VkCommandBuffer& commandBuffer);
+	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer);
 
-	inline void SET_VIEWPORT(const VkViewport& viewport, VkCommandBuffer& commandBuffer);
+	inline void SET_VIEWPORT(const VkViewport& viewport, const VkCommandBuffer& commandBuffer);
 
-	inline void SET_SCISSOR(const VkRect2D& scissor, VkCommandBuffer& commandBuffer);
+	inline void SET_SCISSOR(const VkRect2D& scissor, const VkCommandBuffer& commandBuffer);
 
-	inline void SET_SCISSOR(const VkExtent2D& scissor, VkCommandBuffer& commandBuffer);
+	inline void SET_SCISSOR(const VkExtent2D& scissor, const VkCommandBuffer& commandBuffer);
 
 	//inline void setLineWidth();
 
@@ -60,20 +60,20 @@ namespace val {
 
 	//inline void copyBuffer(val::image& dst, val::image& src);
 
-	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset = 0u);
+	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, const VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset = 0u);
 
 	//inline void setVertexBuffers();
 
-	inline void SET_INDEX_BUFFER(VkBuffer& buffer, VkCommandBuffer& commandBuffer);
+	inline void SET_INDEX_BUFFER(VkBuffer& buffer, const VkCommandBuffer& commandBuffer);
 
-	inline void DRAW_INSTANCED_INDEXED(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd,
+	inline void DRAW_INSTANCED_INDEXED(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount, const VkCommandBuffer& cmd,
 		const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
 
-	inline void DRAW_INSTANCED(val::buffer& vertexBuffer, const uint32_t& instanceCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
+	inline void DRAW_INSTANCED(val::buffer& vertexBuffer, const uint32_t& instanceCount, const VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
 
-	inline void DRAW_INDEXED(const uint32_t& indexCount, VkCommandBuffer& cmd, const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u);
+	inline void DRAW_INDEXED(const uint32_t& indexCount, const VkCommandBuffer& cmd, const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u);
 
-	inline void DRAW(const uint32_t& vertexCount, VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u);
+	inline void DRAW(const uint32_t& vertexCount, const VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u);
 	//inline void setIndexAndVertexBuffers();
 }
 

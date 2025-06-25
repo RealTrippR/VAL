@@ -14,15 +14,17 @@ THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRI
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
 #include <VAL/lib/meshes&vertices/loadModels.hpp>
 
 namespace val {
 
-    namespace fs = std::filesystem;
+ namespace fs = std::filesystem;
 
     void loadModelFromDiskAsUnifiedMesh(fs::path modelPath, std::vector<val::vertex3D>& verticesOut, std::vector<uint32_t>& indicesOut,
         tinyobj::attrib_t* meshAttribsOut, bool deduplicateVertices /*Default: True*/)
     {
+        
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -88,11 +90,13 @@ namespace val {
         if (meshAttribsOut) {
             *meshAttribsOut = attrib;
         }
+        
     }
 
     void loadModelFromDisk(fs::path modelPath, std::vector<std::vector<val::vertex3D>>& verticesOut, std::vector<std::vector<uint32_t>>& indicesOut,
         tinyobj::attrib_t* meshAttribsOut, bool deduplicateVertices /*DEfault: true*/)
     {
+        
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -131,8 +135,8 @@ namespace val {
         }
         else {
             for (size_t shapeIdx = 0; shapeIdx < shapes.size(); ++shapeIdx) {
-                \
-                    std::unordered_map<vertex3D, uint32_t> uniqueVertices{};
+                
+                std::unordered_map<vertex3D, uint32_t> uniqueVertices{};
 
                 const auto shape = shapes[shapeIdx];
                 for (const auto& index : shape.mesh.indices) {
@@ -162,11 +166,13 @@ namespace val {
         if (meshAttribsOut) {
             *meshAttribsOut = attrib;
         }
+        
     }
 
     void loadModelFromDiskAsUnifiedMesh(fs::path modelPath, std::vector<val::vertex3Dsimple>& verticesOut, std::vector<uint32_t>& indicesOut,
         tinyobj::attrib_t* meshAttribsOut, bool deduplicateVertices /*Default: True*/)
     {
+        
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -222,11 +228,13 @@ namespace val {
         if (meshAttribsOut) {
             *meshAttribsOut = attrib;
         }
+        
     }
 
     void loadModelFromDisk(fs::path modelPath, std::vector<std::vector<val::vertex3Dsimple>>& verticesOut, std::vector<std::vector<uint32_t>>& indicesOut,
         tinyobj::attrib_t* meshAttribsOut, bool deduplicateVertices /*DEfault: true*/)
     {
+        
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -285,5 +293,6 @@ namespace val {
         if (meshAttribsOut) {
             *meshAttribsOut = attrib;
         }
+        
     }
 }

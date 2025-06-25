@@ -66,6 +66,12 @@
     <Filter Include="src\debugReporting">
       <UniqueIdentifier>{5b645efa-a567-4d92-99a7-e0e142b9edfc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\debugUtils">
+      <UniqueIdentifier>{15a0fc4e-e898-4650-973d-f852ae75b0f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\debugUtils">
+      <UniqueIdentifier>{c903a468-41a5-4e2e-91db-db9af32cfa7d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\VAL_PROC.hpp">
@@ -79,9 +85,6 @@
     </ClInclude>
     <ClInclude Include="lib\graphics\shader.hpp">
       <Filter>lib\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\meshes&amp;vertices\vertex3Dtextured.hpp">
-      <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp">
       <Filter>lib\meshes&amp;vertices</Filter>
@@ -177,9 +180,6 @@
       <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
     <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp">
-      <Filter>lib\meshes&amp;vertices</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\meshes&amp;vertices\vertex3Dsimple.hpp">
       <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\physicalDeviceRequirements.hpp">
@@ -305,9 +305,6 @@
     <ClInclude Include="lib\system\texture2d.inl">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\meshes&amp;vertices\meshPBR.hpp">
-      <Filter>lib\meshes&amp;vertices</Filter>
-    </ClInclude>
     <ClInclude Include="src\meshes&amp;vertices\meshPBR.cpp">
       <Filter>src\meshes&amp;vertices</Filter>
     </ClInclude>
@@ -318,6 +315,63 @@
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\shaderStageEnum.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\queue.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\queueFlags.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\queueGroup.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\pipelineStages.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderGraphError.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\VkPipelineStagesToString.hpp">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\graphBranch.h">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\debugUtils\dbgUtils.hpp">
+      <Filter>lib\debugUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertexInputAttribute.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertexAttributeType.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertexInputAttributeList.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertexBase.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertex.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertexClr.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertexTxtr.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\mesh.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\meshPBR.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\ubfx.h">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\texture2d16bit.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
   </ItemGroup>
@@ -445,10 +499,36 @@
     <ClCompile Include="src\system\frameBuffer.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
+    <ClCompile Include="src\system\queue.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debugUtils\dbgUtils.cpp">
+      <Filter>src\debugUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\vertexAttributeType.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\vertexInputAttributeList.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\vertexInputAttribute.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\ufbx.c">
+      <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\tiny_obj.cpp">
+      <Filter>src\ext</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="notes\to-do-list.txt">
       <Filter>notes</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lib\system\queue.inl">
+      <Filter>lib\system</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -6,9 +6,8 @@
 #include <VAL/lib/system/queueManager.hpp>
 
 namespace val {
-	inline void QueueManager::submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, QueueManager& waitFor) {
-
-
+	inline void QueueManager::submit(const uint32_t frameidx, const VkCommandBuffer& cmdBuff, VkFence& fence, QueueManager& waitFor) 
+	{
 		// this needs to be changed to something optimal 
 		// https://docs.vulkan.org/samples/latest/samples/performance/wait_idle/README.html
 		// https://docs.vulkan.org/spec/latest/chapters/synchronization.html
@@ -23,7 +22,6 @@ namespace val {
 		submitInfo.pCommandBuffers = &cmdBuff;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &(_semaphores[frameidx]);
-
 
 
 #ifndef NDEBUG

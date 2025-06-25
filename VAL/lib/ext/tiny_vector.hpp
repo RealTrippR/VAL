@@ -36,10 +36,21 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 template <typename t, typename size_type = uint32_t>
 class tiny_vector {
 public:
-    tiny_vector() = default;
+    tiny_vector() 
+    {
+        _size = 0u;
+        _data = NULL;
+    }
 
     tiny_vector(size_type size) {
         resize(size);
+    }
+
+    tiny_vector(size_type size, const t& value) {
+        resize(size);
+        for (size_type i = 0; i < _size; ++i) {
+            _data[i] = value;
+        }
     }
 
     tiny_vector(size_type size, std::initializer_list<t> list) {
@@ -77,7 +88,7 @@ public:
     }
 
     // assignment
-    t& operator[](size_t index) {
+    t& operator[](size_type index) {
 #ifndef NDEBUG
         if (_size == 0u || index > _size - 1) {
             throw std::out_of_range("BAD ACCESS: index exceeds vector size");
@@ -88,12 +99,12 @@ public:
     }
 
     // getter
-    const t& operator[](size_t index) const {
+    const t& operator[](size_type index) const {
         return get(index);
     }
 
     tiny_vector<t>& operator=(std::initializer_list<t> list) {
-        resize(list.size());
+        resize(size_type(list.size()));
         std::copy(list.begin(), list.end(), _data);
         return *this;
     }
@@ -221,6 +232,16 @@ public:
 
     // End function returning a const iterator to the end - note that according to the C++ standard, the end is just beyond the last valid element
     const_iterator end() const {
+        return const_iterator(_data + _size);
+    }
+
+    // Begin function returning a const iterator to the start
+    const_iterator cbegin() const {
+        return const_iterator(_data);
+    }
+
+    // End function returning a const iterator to the end - note that according to the C++ standard, the end is just beyond the last valid element
+    const_iterator cend() const {
         return const_iterator(_data + _size);
     }
 
@@ -355,6 +376,12 @@ public:
     t& back() const {
         return *(_data + (_size - 1));
     }
+
+    inline t& emplaceBack() {
+        resize(_size + 1);
+        return back();
+    }
+
 private:
     const t& get(const size_type idx) const {
 #ifndef NDEBUG

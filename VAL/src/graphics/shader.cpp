@@ -38,6 +38,8 @@ namespace val {
 			printf("\nVAL: FAILED TO READ FILE FROM DISK: %ws\n", filepath.c_str());
 		}
 #endif // ! NDEBUG
+
+		return false;
 	}
 
 	void Shader::setEntryPoint(const std::string& entryPoint) {
@@ -227,10 +229,10 @@ namespace val {
 			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descWrite.dstBinding = _UBO_Handles[i].bindingIndex;
 			descWrite.descriptorType = _UBO_Handles[i].values[0]->getVkDescriptorType();
-			descWrite.descriptorCount = _UBO_Handles[i].values.size();
+			descWrite.descriptorCount = (uint32_t)_UBO_Handles[i].values.size();
 			descWrite.pBufferInfo = VK_NULL_HANDLE;
 		}
-		idx = _descriptorWrites.size();
+		idx = (uint32_t)_descriptorWrites.size();
 
 		_descriptorWrites.resize(_descriptorWrites.size() + _SSBO_Handles.size());
 		for (size_t i = 0; i < _SSBO_Handles.size(); ++i) {
@@ -241,10 +243,10 @@ namespace val {
 			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descWrite.dstBinding = _SSBO_Handles[i].bindingIndex;
 			descWrite.descriptorType = _SSBO_Handles[i].values[0]->getVkDescriptorType();
-			descWrite.descriptorCount = _SSBO_Handles[i].values.size();
+			descWrite.descriptorCount = (uint32_t)_SSBO_Handles[i].values.size();
 			descWrite.pBufferInfo = VK_NULL_HANDLE;
 		}
-		idx = _descriptorWrites.size();
+		idx = (uint32_t)_descriptorWrites.size();
 
 		/*
 #ifndef NDEBUG
@@ -262,7 +264,7 @@ namespace val {
 			for (int i = 0; i < imageInfos.size(); ++i) {
 				_descriptorWrites.resize(_descriptorWrites.size() + 1);
 
-				idx = _descriptorWrites.size() - 1;
+				idx = (uint32_t)(_descriptorWrites.size() - 1);
 
 				//// memset to VkWriteDescriptorSet 0
 				memset(&_descriptorWrites[idx], 0, sizeof(VkWriteDescriptorSet));
@@ -286,7 +288,7 @@ namespace val {
 					printf("VAL: ERROR: Samper at %p has an invalid sampler type of %d!\n", _imageSamplers[i].values[0], int(_imageSamplers[i].values[0]->getSamplerType()));
 					throw std::runtime_error("INVALID SAMPLER TYPE");
 				}
-				_descriptorWrites[idx].descriptorCount = imageInfos.size();  // One image sampler descriptor
+				_descriptorWrites[idx].descriptorCount = (uint32_t)imageInfos.size();  // One image sampler descriptor
 				if (imageInfos.size() > 0) {
 					_descriptorWrites[idx].pImageInfo = imageInfos.data();
 				}
@@ -297,7 +299,7 @@ namespace val {
 				_descriptorWrites[idx].pTexelBufferView = VK_NULL_HANDLE;
 			}
 		}
-		idx = _descriptorWrites.size();
+		idx = (uint32_t)_descriptorWrites.size();
 
 		_descriptorWrites.resize(_descriptorWrites.size() + _textures.size());
 		for (uint32_t i = 0; i < _textures.size(); ++i) {
@@ -308,10 +310,10 @@ namespace val {
 			descWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descWrite.dstBinding = _textures[i].bindingIndex;
 			descWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-			descWrite.descriptorCount = _textures[i].values.size();
+			descWrite.descriptorCount = (uint32_t)_textures[i].values.size();
 			descWrite.pImageInfo = NULL; // this is set later
 		}
-		idx = _descriptorWrites.size();
+		idx = (uint32_t)_descriptorWrites.size();
 
 		return &_descriptorWrites;
 	}
@@ -357,8 +359,21 @@ namespace val {
 		_attributes = attributes;
 	}
 
+	void Shader::setVertexAttributes(const tiny_vector<VkVertexInputAttributeDescription>& attributes)
+	{
+		_attributes.resize(attributes.size());
+		for (size_t i = 0; i < _attributes.size(); ++i)
+		{
+			_attributes[i] = attributes[i];
+		}
+	}
+
 	const std::vector<VkVertexInputAttributeDescription>& Shader::getVertexAttributes() noexcept {
 		return _attributes;
+	}
+
+	void Shader::setBindingDescriptions(const VkVertexInputBindingDescription& bindingDescription) {
+		_bindings = { bindingDescription };
 	}
 
 	void Shader::setBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions) {

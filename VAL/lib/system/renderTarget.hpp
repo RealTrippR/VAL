@@ -202,7 +202,7 @@ namespace val {
 
 		inline void setClearValues(std::vector<VkClearValue> clearValues) {
 			_clearValues = clearValues;
-			_renderPassBeginInfo.clearValueCount = _clearValues.size();
+			_renderPassBeginInfo.clearValueCount = (uint32_t)_clearValues.size();
 			_renderPassBeginInfo.pClearValues = _clearValues.data();
 		}
 
@@ -219,8 +219,14 @@ namespace val {
 			return _clearValues;
 		} 
 
+		inline void setQueue(Queue& queue) 
+		{
+			_queue = &queue;
+		}
 
 	protected:
+		Queue* _queue;
+
 		VkRenderPass _renderPass = VK_NULL_HANDLE;
 		
 		std::vector<VkClearValue> _clearValues;

@@ -82,15 +82,15 @@ namespace val {
 			stageFlags = 0x0;
 			if (hasVertexShaders)  // VERTEX
 			{
-				stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
+				stageFlags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
 			}
 			if (hasFragmentShaders) // FRAGMENT
 			{
-				stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+				stageFlags |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			}
 			if (hasComputeShaders)  // COMPUTE
 			{
-				stageFlags |= VK_SHADER_STAGE_COMPUTE_BIT;
+				stageFlags |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 			}
 			if (hasTransferShaders) // TRANSFER
 			{

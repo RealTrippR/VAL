@@ -22,8 +22,14 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/renderGraph/renderGraph.hpp>
 #include <VAL/lib/ext/streql.h>
+
+#include <algorithm>
+#include <fstream>
 #include <format>
 #include <regex>
+
+#define PASS_CONTEXT_ARG_NAME "passContext"
+#define VAL_PROC_ARG_NAME "valProc"
 
 #define PASS_BEGIN_KEYWORD "PASS_BEGIN"
 #define PASS_END_KEYWORD "PASS_END"
@@ -163,7 +169,7 @@ namespace val {
 
 	// ignores newlines, tabs, and spaces
 	bool ignoreCharactersNewlineTabAndSpace(const char c, uint32_t i) {
-		if (c == '\n' || c == '\t' || c == ' ') {
+		if (c == '\n' || c == '\t' || c == ' ' || c == '\r') {
 			return true;
 		}
 		return false;
@@ -514,9 +520,7 @@ namespace val {
 				// ignore any leading or trailing spaces, but mind that spacing in-between words are important and must be kept
 				const char tmp = str[i];
 				if (str[i] == seperatingCharacter || i == charLimit - 1) {
-
 					if (argclen > 0) {
-
 						// check for any trailing spaces,
 						// wind back argclen until they 
 						// are not considered as part of the arg
@@ -562,7 +566,7 @@ namespace val {
 
 		FILE* fptr = NULL;
 		fopen_s(&fptr, srcFileName.c_str(), "rb");
-		if (fptr) {
+		if (fptr!=NULL) {
 			fseek(fptr, 0, SEEK_SET);
 			uint64_t f_start = ftell(fptr);
 			fseek(fptr, 0, SEEK_END);
@@ -582,7 +586,7 @@ namespace val {
 
 			// null terminate and update length
 			srcFileContents[f_len] = '\0';
-			srcContentLen = f_len;
+			srcFileContentsLen = f_len;
 
 			if (fclose(fptr) == EOF) {
 				dbg::printError("Failed to close render graph source file");
@@ -599,7 +603,11 @@ namespace val {
 
 
 
-	VAL_RETURN_CODE RENDER_GRAPH::compile(const uint8_t framesInFlight, const filepath& compileToDir) {
+	VAL_RETURN_CODE RENDER_GRAPH::compile(const uint8_t framesInFlight, const filepath& compileToDir, const fs::path& HTMLdiagramFilepath) {
+
+		if (!srcFileContents) {
+			return VAL_FAILURE;
+		}
 
 		if (strlen(srcFileContents)==0) {
 			dbg::printError("Failed to compile render graph, the src file has not been loaded. Perhaps you forgot to call loadFromFile?");
@@ -610,7 +618,7 @@ namespace val {
 
 		char* errorMsg;
 		string processed_src;
-		const VAL_RETURN_CODE preprocess_res = preprocess(&processed_src, &errorMsg, framesInFlight);
+		const VAL_RETURN_CODE preprocess_res = preprocess(&processed_src, &errorMsg, framesInFlight, HTMLdiagramFilepath);
 		if (preprocess_res == VAL_FAILURE) {
 			dbg::printError("Failed to compile render pass : % s\n", errorMsg);
 			cleanup();
@@ -688,7 +696,7 @@ namespace val {
 				// check other passes and see if they write to an arg that we are reading from
 				for (uint32_t k = 0; k < passesToSearch[i].writeBlock.argCount; ++k)
 				{;
-					const char* arg_otherwrite = GET_ARG_FROM_ARG_BLOCK(&curPass->writeBlock, k);
+					const char* arg_otherwrite = GET_ARG_FROM_ARG_BLOCK(&passesToSearch[i].writeBlock, k);
 
 					if (streql(arg_curread, arg_otherwrite)) 
 					{
@@ -1008,7 +1016,122 @@ namespace val {
 		buff[buffSize-1] = '\0';
 	}
 
-	VAL_RETURN_CODE processFixedPass(const PASS_INFO* passInfo, string& processedSrc, const char* fixedBlockSrc, uint32_t blockSrcLen, uint32_t fixedBlockIndex, uint8_t framesInFlight) {
+
+	// render pass functions are not allowed in fixed subroutines,
+	// therefore they must be removed and placed in the pass main function.
+	const char* renderPass_f_table[] =
+	{
+		("BEGIN_RENDER_PASS"),
+		("BEGIN_RENDER_PASS("),
+		("END_RENDER_PASS"),
+		("END_RENDER_PASS(")
+	};
+
+	// find render graph functions and replace any instances of command buffers with the fixed command buffer
+	const char* f_table[] = {
+		("SET_PIPELINE(*,*,c)"), /*the extra parenthesis are to reduce the risk of joined string errors*/
+		("SET_PIPELINE("),		/*(C will automatically join strings together if they're not seperated by a comma)*/
+		("SET_VIEWPORT(*,c)"),
+		("SET_VIEWPORT("),
+		("SET_SCISSOR(*,c)"),
+		("SET_SCISSOR("),
+		("SET_INDEX_BUFFER(*,c)"),
+		("SET_INDEX_BUFFER("),
+		("SET_VERTEX_BUFFER(*,c)"),
+		("SET_VERTEX_BUFFER("),
+		("DRAW_INSTANCED_INDEXED(*,*,*,c)"),
+		("DRAW_INSTANCED_INDEXED("),
+		("DRAW_INSTANCED(*,*,c)"),
+		("DRAW_INSTANCED("),
+		("DRAW_INDEXED(*,c)"),
+		("DRAW_INDEXED("),
+		("DRAW(*,c)"),
+		("DRAW(")
+	};
+
+	VAL_RETURN_CODE getExecCmdBufferNameOfFixedSubroutine(const PASS_INFO* passInfo, const FIXED_BLOCK* fixedBlock, std::string* execCmdBuffNameOut) 
+	{
+		// scan the fixed subroutine statement by statement, as seperated by ';'
+		char* cur = (char*)passInfo->execSrc+fixedBlock->srcOffset;
+		for (uint32_t i = 0; i < UINT32_MAX; ++i)
+		{
+			const char* statementBegin = cur;
+			const char* statementEnd = findNextMatch(cur, ";");
+			if (!statementEnd) { break; }
+
+			const uint32_t statementLen = statementEnd - statementBegin;
+			uint32_t expectedArgCount = 0u;
+			uint32_t expectedCmdArgIdx = 0u;
+			uint16_t f_table_f_idx = 0u;
+			char* fmatch = NULL;
+			// check if the current statment matches a function in the function table
+			for (uint32_t j = 0; j < ARR_COUNT(f_table) / 2; ++j) {
+				const char* tfunc = f_table[j * 2 + 1];
+				fmatch = findNextMatchAdditive(cur, tfunc, statementLen + 1);
+				if (fmatch) {
+					// note that the data calculated here could be cached in a hash map
+					f_table_f_idx = j;
+					// calculate expected argument count by checking function table
+					const char* o_par = findNextMatch(f_table[j * 2], "(");
+					const char* c_par = getClosingParenthesis(o_par);
+					ARG_BLOCK f_args{};
+					readArgs(o_par + 1, &f_args, c_par - o_par);
+					expectedArgCount = f_args.argCount;
+					for (uint16_t k = 0; k < f_args.argCount; ++k) {
+						const char* arg = GET_ARG_FROM_ARG_BLOCK(&f_args, k);
+						if (streql(arg, "c") == true) {
+							expectedCmdArgIdx = k;
+						}
+					}
+					ARG_BLOCK_DESTROY(&f_args);
+					// we found the matching function, stop further checks
+					break;
+				}
+			}
+
+			
+			const char* cpar = NULL;
+			ARG_BLOCK f_args{};
+			uint32_t readLen=0;
+			if (!fmatch) { // the statement didn't contain a render pass function.
+				goto next_statement;
+			}
+
+			cpar = getClosingParenthesis(fmatch - 1);
+			if (!cpar) {
+				// no closing parenthesis
+				return VAL_FAILURE;
+			}
+			readLen  = cpar - fmatch + 1;
+			// now if the statement matches ( found a render command )
+			readArgs(fmatch, &f_args, readLen);
+			for (uint16_t j = 0; j < f_args.argCount; ++j) {
+				char* cmdArg = GET_ARG_FROM_ARG_BLOCK(&f_args, j);
+				if (j == expectedCmdArgIdx) {
+
+					if (execCmdBuffNameOut->empty()) {
+						*execCmdBuffNameOut = string(cmdArg);
+						ARG_BLOCK_DESTROY(&f_args);
+						return VAL_SUCCESS;
+					}
+				}
+			}
+			
+
+			ARG_BLOCK_DESTROY(&f_args);
+
+		next_statement:
+			// JUMP TO NEXT STATEMENT
+			i += statementEnd - statementBegin + 1;
+			// jump to the 1 past the end of the statement
+			cur += statementEnd - statementBegin + 1;
+		}
+
+		return VAL_FAILURE;
+	}
+
+	VAL_RETURN_CODE processFixedPass(const PASS_INFO* passInfo, string& processedSrc, const char* fixedBlockSrc, uint32_t blockSrcLen, uint32_t fixedBlockIndex, uint8_t framesInFlight) 
+	{
 
 		FIXED_BLOCK& fixedBlock = passInfo->fixedBlocks[fixedBlockIndex];
 
@@ -1039,13 +1162,13 @@ namespace val {
 			string("\nVkCommandBufferAllocateInfo allocInfo;\n"
 				"allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;\n"
 				"allocInfo.pNext = VK_NULL_HANDLE;\n"
-				"allocInfo.commandPool = V_PROC._commandPool;\n"
+				"allocInfo.commandPool = " VAL_PROC_ARG_NAME "._commandPool; \n"
 				"allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;\n"));
 		processedSrc.append(
 			string("allocInfo.commandBufferCount = ") + std::to_string(framesInFlight) + string(";\n")
 		);
 		processedSrc.append(
-			string("if (vkAllocateCommandBuffers(V_PROC._device, &allocInfo,") + cmdBuffName + string(") != VK_SUCCESS) {\n"
+			string("if (vkAllocateCommandBuffers(" VAL_PROC_ARG_NAME "._device, &allocInfo,") + cmdBuffName + string(") != VK_SUCCESS) {\n"
 					"val::dbg::printError(\"Failed to allocate command buffers for baking render graph.\");\n"
 					"throw std::runtime_error(\"Failed to allocate command buffers!\");\n"
 			"}\n")
@@ -1083,41 +1206,39 @@ namespace val {
 			"vkBeginCommandBuffer(" + string(cmdBuffName) + "[" + getCurrentFrameIndexArgName() + "]" + ", &beginInfo);\n"
 			"\n}\n"
 		);
-		// find render graph functions and replace any instances of command buffers with the fixed command buffer
-		const char* f_table[] = {
-			("SET_PIPELINE(*,*,c)"), /*the extra parenthesis are to reduce the risk of joined string errors*/
-			("SET_PIPELINE("),		/*(C will automatically join strings together if they're not seperated by a comma)*/
-			("SET_VIEWPORT(*,c)"),
-			("SET_VIEWPORT("),
-			("SET_SCISSOR(*,c)"),
-			("SET_SCISSOR("),
-			("SET_INDEX_BUFFER(*,c)"),
-			("SET_INDEX_BUFFER("),
-			("SET_VERTEX_BUFFER(*,c)"),
-			("SET_VERTEX_BUFFER("),
-			("DRAW_INSTANCED_INDEXED(*,*,*,c)"),
-			("DRAW_INSTANCED_INDEXED("),
-			("DRAW_INSTANCED(*,*,c)"),
-			("DRAW_INSTANCED("),
-			("DRAW_INDEXED(*,c)"),
-			("DRAW_INDEXED("),
-			("DRAW(*,c)"),
-			("DRAW(")
-		};
+
 
 	#ifndef NDEBUG
 		if (ARR_COUNT(f_table) % 2 != 0) {
 			assert("ERROR: F_TABLE MUST HAVE A LENGTH THAT IS A MULTIPLE OF 2");
 		}
+		if (ARR_COUNT(renderPass_f_table) % 2 != 0) {
+			assert("ERROR: F_TABLE MUST HAVE A LENGTH THAT IS A MULTIPLE OF 2");
+		}
 	#endif // !NDEBUG
 
+
+
+
+		uint32_t passCommandCount=0u;
 		// scan the fixed subroutine statement by statement, as seperated by ';'
 		char* cur = (char*)fixedBlockSrc;
 		for (uint32_t i = 0; i < UINT32_MAX; ++i)
 		{
 			const char* statementBegin = cur;
-			const char* statementEnd = findNextMatch(cur, ";");
-			if (!statementEnd) {break;}
+			const char* statementEnd = findNextMatch(cur, ";", true, UINT32_MAX, NULL, ignoreCharactersNewlineTabAndSpace);
+			if (!statementEnd) {
+				statementEnd = findNextMatch(cur, FIXED_END_KEYWORD, true, UINT32_MAX, NULL, ignoreCharactersNewlineTabAndSpace);
+				if (!statementEnd) {
+					// malformed pass: No FIXED_END
+					return VAL_FAILURE;
+				}
+			}
+
+			// we've exceeded the pass length
+			if (statementEnd >= fixedBlockSrc + blockSrcLen || statementBegin >= fixedBlockSrc + blockSrcLen) {
+				break;
+			}
 
 			const uint32_t statementLen = statementEnd - statementBegin;
 			uint32_t expectedArgCount = 0u;
@@ -1129,6 +1250,8 @@ namespace val {
 				const char* tfunc = f_table[j * 2 + 1];
 				fmatch = findNextMatchAdditive(cur, tfunc, statementLen+1);
 				if (fmatch) {
+
+					passCommandCount++;
 
 					// note that the data calculated here could be cached in a hash map
 					f_table_f_idx = j;
@@ -1154,18 +1277,50 @@ namespace val {
 			}
 
 			if (!fmatch) {
+				// check the render_pass_table for any matching functions
+				bool foundRenderPassCmd = false;
+				// check if the current statment matches a function in the function table
+				for (uint32_t j = 0; j < ARR_COUNT(renderPass_f_table) / 2; ++j) {
+					const char* tfunc = renderPass_f_table[j * 2 + 1];
+					bool rpfmatch = findNextMatchAdditive(cur, tfunc, statementLen + 1);
+					if (rpfmatch) {
+						foundRenderPassCmd = true;
+						break;
+					}
+				}
+
+
+				// return failure
+				if (foundRenderPassCmd) {
+					const char* tmp = fixedBlockSrc + blockSrcLen-0;
+					dbg::printError("Failed to compile render pass: RENDER_PASS_BEGIN and RENDER_PASS_END are not allowed inside fixed passes.");
+					return VAL_FAILURE;
+				}
+			}
+
+
+
+
+			// ensure that there all render pass commands are only at the beginning or end of the fixed subroutine
+
+			// the statement is not a render pass function
+			if (!fmatch) {
 				// insert source statement
 				processedSrc.append(statementBegin, statementEnd + 1);
-
+				// JUMP TO NEXT STATEMENT
 				i += statementEnd - statementBegin + 1;
 				// jump to the 1 past the end of the statement
 				cur += statementEnd - statementBegin + 1;
-				continue; // the statement is not a render pass function, skip it
+				continue; 
 			}
+
+
+			// increment pass cmd count
+			passCommandCount++;
 
 			const char* cpar = getClosingParenthesis(fmatch - 1);
 
-			// now if the statement matches
+			// now if the statement matches ( found a render command )
 			ARG_BLOCK f_args {};
 			readArgs(fmatch, &f_args, cpar - fmatch);
 			
@@ -1174,7 +1329,7 @@ namespace val {
 			for (uint16_t j = 0; j < f_args.argCount; ++j) {
 				char* cmdArg = GET_ARG_FROM_ARG_BLOCK(&f_args, j);
 				if (j == expectedCmdArgIdx) {
-				// remove existing cmd buffer and replace it with fixed command buffer
+					// remove existing cmd buffer and replace it with fixed command buffer
 					processedSrc.append(string(cmdBuffName) + "[" + getCurrentFrameIndexArgName() + "]");
 				}
 				else {
@@ -1187,6 +1342,8 @@ namespace val {
  
 			processedSrc.append((char*)cpar, (char*)statementEnd + 1);
 
+
+			// JUMP TO NEXT STATEMENT
 			i += statementEnd - statementBegin + 1;
 			// jump to the 1 past the end of the statement
 			cur += statementEnd - statementBegin + 1;
@@ -1214,7 +1371,7 @@ namespace val {
 		return VAL_SUCCESS;
 	}
 
-	VAL_RETURN_CODE RENDER_GRAPH::preprocess(string* processed_src_out, char** errorMsg, const uint8_t framesInFlight)
+	VAL_RETURN_CODE RENDER_GRAPH::preprocess(string* processed_src_out, char** errorMsg, const uint8_t framesInFlight, const fs::path& HTMLdiagramFilepath)
 	{
 		char* src = srcFileContents;
 
@@ -1259,13 +1416,12 @@ namespace val {
 		uint16_t passInfoCount = 0u;
 		
 		string srcBeforeFirstPass;
-
-		const char* passBeginKeyword = "PASS_BEGIN";
+		
 		uint32_t cur = 0u; // index of the char that is being scanned
-		while (cur < srcContentLen)
+		while (cur < srcFileContentsLen)
 		{
 			// look for PASS_BEGIN keyword
-			if (strneql(src + cur, passBeginKeyword, strlen(passBeginKeyword))) {
+			if (strneql(src + cur, PASS_BEGIN_KEYWORD, strlen(PASS_BEGIN_KEYWORD))) {
 				passInfoCount++;
 				PASS_INFO* tmpPassInfos = (PASS_INFO*)realloc(passInfos, passInfoCount * sizeof(PASS_INFO));
 
@@ -1278,6 +1434,7 @@ namespace val {
 				passInfos = tmpPassInfos;
 
 				PASS_INFO* curPassInfo = &passInfos[passInfoCount - 1];
+
 				memset(curPassInfo, 0, sizeof(PASS_INFO)); // 0 init pass info
 
 				// this marks the length between the beginning (first char)
@@ -1291,18 +1448,59 @@ namespace val {
 					return VAL_FAILURE;
 				}
 				
+				cur += jmpLen;
+				char* c = src+cur;
+				int i = 0;
 				//PRINT_ARG_BLOCK(&(curPassInfo->readBlock));
 			}
 
 			if (passInfoCount == 0) {
 				srcBeforeFirstPass.push_back(src[cur]);
 			}
-
 			cur++;
 		}
 
 		processedSrc.insert(0, srcBeforeFirstPass);
 		processedSrc.insert(0, "#include <VAL/lib/system/VAL_PROC.hpp>\n");
+
+		// we need to find pass dependencies and add pipeline barriers to pause execution
+
+		for (uint16_t i = 0; i < passInfoCount; ++i) {
+			PASS_INFO* curPassInfo = &passInfos[i];
+			std::vector<PASS_INFO*> dependentUpon;
+			findPassDependencies(curPassInfo, passInfos, passInfoCount, dependentUpon);
+
+
+			if (curPassInfo->dependentPasses) {
+				free(curPassInfo->dependentPasses);
+			}
+
+			const uint32_t dependentPassesPointerListSize = sizeof(PASS_INFO*) * dependentUpon.size();
+			curPassInfo->dependentPasses = NULL;
+			if (dependentPassesPointerListSize > 0) {
+				curPassInfo->dependentPasses = (PASS_INFO**)malloc(dependentPassesPointerListSize);
+				if (curPassInfo->dependentPasses == NULL)
+				{
+					curPassInfo->dependentPassesCount = 0u;
+					dbg::printError("Error preprocessing render graph: failed to allocate memory for dependentPassesPointerListSize.");
+					break;
+				}
+				else {
+					curPassInfo->dependentPassesCount = dependentUpon.size();
+					memcpy(curPassInfo->dependentPasses, dependentUpon.data(), dependentPassesPointerListSize);
+					int i=0;
+				}
+			}
+		}
+
+
+
+
+
+
+
+
+
 
 		/* 
 		* Deduplicate arguments, and append the them in this order:
@@ -1334,7 +1532,7 @@ namespace val {
 
 				//////////////////////////////////////////////////////////////////////
 				// add V_PROC
-				processedSrc.append("val::ValProc& V_PROC,");
+				processedSrc.append("val::ValProc& " VAL_PROC_ARG_NAME ", val::PASS_CONTEXT& " PASS_CONTEXT_ARG_NAME ", ");
 
 				//////////////////////////////////////////////////////////////////////
 				// add read args
@@ -1365,9 +1563,11 @@ namespace val {
 					// https://registry.khronos.org/vulkan/specs/latest/man/html/vkCmdExecuteCommands.html
 					char cmdBuffName[128];
 					getCommandBufferName(cmdBuffName, sizeof(cmdBuffName), passInfo.passName, j);
-					processedSrc.append(string("\n\t\tvkCmdExecuteCommands(") + string("cmd,1, &(") +
-						string(cmdBuffName) + "[V_PROC.getCurrentFrame()]" + string("));\n"));
-					//processFixedPass(&passInfo, processedSrc, fixedBlockSrc, fixedBlock.srcLength, i);
+				
+					std::string execCmdBuffName;
+					getExecCmdBufferNameOfFixedSubroutine(&passInfo, &fixedBlock, &execCmdBuffName);
+					processedSrc.append(string("\n\t\tvkCmdExecuteCommands(") + execCmdBuffName + string(",1, &(") +
+						string(cmdBuffName) + "[" VAL_PROC_ARG_NAME ".getCurrentFrame()]" + string("));\n"));
 
 					last_exec = passInfo.execSrc + fixedBlock.srcOffset + fixedBlock.srcLength;
 				}
@@ -1387,8 +1587,8 @@ namespace val {
 					processedSrc.append(getPassBakeFuncSig(passInfo.passName) + "(");
 
 					//////////////////////////////////////////////////////////////////////
-					// add V_PROC
-					processedSrc.append("val::ValProc& V_PROC,");
+					// add V_PROC & Pass context
+					processedSrc.append("val::ValProc&" VAL_PROC_ARG_NAME ", val::PASS_CONTEXT& " PASS_CONTEXT_ARG_NAME ", ");
 
 					// add read args
 					processedSrc.append(argBlockToString(passInfo.readBlock));
@@ -1430,7 +1630,7 @@ namespace val {
 							size_t start = beginKeywordStart - execGap.c_str();
 							size_t end = pEnd - execGap.c_str();
 
-							execGap.replace(start, end - start + 1, "{");
+							execGap.replace(start, end - start + 1, "{\n/*FIXED_BEGIN*/");
 						}
 
 						// remove FIXED_END
@@ -1439,8 +1639,34 @@ namespace val {
 							size_t start = endKeywordStart - execGap.c_str();
 							size_t end = (endKeywordStart + strlen(FIXED_END_KEYWORD)) - execGap.c_str();
 
-							execGap.replace(start, end - start + 1, "}");
+							execGap.replace(start, end - start + 1, "\n}/*FIXED_END*/");
 						}
+
+
+						// remove any render pass commands
+						for (uint32_t i = 0; i < ARR_COUNT(renderPass_f_table); ++i)
+						{
+						search_again:
+							// search render pass f_table
+							const uint32_t idx = i * 2 + 1;
+							const char* func = renderPass_f_table[idx];
+							const char* func_match = findNextMatch(execGap.c_str(), func, true, UINT32_MAX, discardMatchIfNoLeadingSpaceOrNewline, NULL);
+							if (func_match) {
+								const char* func_close = getClosingParenthesis(func_match + strlen(func) - 1);
+								if (func_close) {
+									size_t start = func_match - execGap.c_str();
+									size_t end = func_close - execGap.c_str();
+									execGap.replace(start, end - start + 1, "");
+
+								}
+								else {
+									dbg::printError("Failed to compile render graph, missing closing bracket.");
+								}
+								goto search_again;
+							
+							}
+						}
+
 
 						return true;
 					};
@@ -1481,6 +1707,10 @@ namespace val {
 			}
 		}
 
+		if (HTMLdiagramFilepath.empty() == false)
+		{
+			createHTMLdiagram(HTMLdiagramFilepath, passInfos, passInfoCount);
+		}
 
 		
 	bail:
@@ -1495,4 +1725,191 @@ namespace val {
 
 		return VAL_SUCCESS;
 	}
+
+	std::string drawLineHTML(const uint32_t x1, const uint32_t y1, const uint32_t x2, const uint32_t y2, const uint32_t lineWidth, std::string svgStyle)
+	{
+		using namespace std;
+		const uint32_t width = ((max(x1, x2) == x2 ? x2 - x1 : x1 - x2));
+		const uint32_t height = ((max(y1, y2) == y2 ? y2 - y1 : y1 - y2));
+		const uint32_t left = min(x1,x2);
+		const uint32_t top = min(y1,y2);
+		std::string res = 
+		("<svg width = "+ to_string(width+ lineWidth)+"px height = "+ to_string(height+ lineWidth)+"px style='z-index: 5; position: absolute; left: "+to_string(left)+"px; top: "+to_string(top) + "px;'>\n"
+			"<line x1='"+to_string(0)+"' y1 = '"+to_string(0)+"' x2 = '"+ to_string(width)+"' y2 = '"+ to_string(height)+"' style = '" + svgStyle + "'>\n"
+		"</svg>");
+
+		return res;
+	}
+
+
+
+	#define HTML_FRAME_WIDTH 350u
+	#define HTML_FRAME_HEIGHT 250u
+
+	#define HTML_FRAME_WIDTH_AS_STR "350px"
+	#define HTML_FRAME_HEIGHT_AS_STR "250px"
+
+	std::string escapeHTML(const std::string& text) 
+	{
+		std::string escaped;
+		for (char c : text) {
+			switch (c) {
+			case '&':  escaped += "&amp;";  break;
+			case '<':  escaped += "&lt;";   break;
+			case '>':  escaped += "&gt;";   break;
+			case '"':  escaped += "&quot;"; break;
+			case '\'': escaped += "&#39;";  break;
+			default:   escaped += c;        break;
+			}
+		}
+		return escaped;
+	}
+
+	
+	VAL_RETURN_CODE passInfoToHTMLframe(PASS_INFO& info, std::string& htmlOut, const uint32_t x, const uint32_t y) 
+	{
+		// find dependencies
+		
+		if (info.dependentPassesCount > 0u) 
+		{
+			htmlOut.append(drawLineHTML(x + HTML_FRAME_WIDTH / 2, y, x + HTML_FRAME_WIDTH / 2, y - 99, 6, "stroke:white; stroke-width:6;"));
+		}
+
+
+
+		using namespace std;
+		htmlOut.append("<DIV style = 'position: absolute; left: " + to_string(x) + "px; top: " + to_string(y) + "px; '>\n");
+		// pass name div
+		htmlOut.append("<DIV style = 'width: 100%; height: 25px; '>\n");
+
+		// name div
+		if (info.passName) {
+			htmlOut.append("<p class = 'centered_text'>\n");
+			htmlOut.append(info.passName);
+			htmlOut.append("\n</p>\n");
+		}
+		htmlOut.append("</DIV>\n");
+
+
+		// create read list
+
+		htmlOut.append("<DIV class = 'horz_scroll_div' style = 'height: 25px; margin-top:0px;'>\n");
+		htmlOut.append("<p class = 'std_text' style = 'margin-left: 5px;'>");
+
+		htmlOut.append("Reads: ");
+		for (uint8_t i = 0; i < info.readBlock.argCount; ++i) 
+		{
+			char* arg = GET_ARG_FROM_ARG_BLOCK(&info.readBlock, i);
+			htmlOut.append(escapeHTML(arg));
+			if (i != info.readBlock.argCount - 1) {
+				htmlOut.append(", ");
+			}
+		}
+
+		htmlOut.append("</p>");
+		htmlOut.append("</DIV>\n");
+
+		// create write list
+		htmlOut.append("<DIV class = 'horz_scroll_div' style = 'height: 25px; margin-top:0px;'>\n");
+		htmlOut.append("<p class = 'std_text' style = 'margin-left: 5px;'>");
+
+		htmlOut.append("Writes: ");
+		for (uint8_t i = 0; i < info.writeBlock.argCount; ++i)
+		{
+			char* arg = GET_ARG_FROM_ARG_BLOCK(&info.writeBlock, i);
+			htmlOut.append(escapeHTML(arg));
+			if (i != info.writeBlock.argCount - 1) {
+				htmlOut.append(", ");
+			}
+		}
+
+		htmlOut.append("</p>");
+		htmlOut.append("</DIV>");
+
+
+		// create input list
+		htmlOut.append("<DIV class = 'horz_scroll_div' style = 'height: 25px; margin-top:0px;'>\n");
+		htmlOut.append("<p class = 'std_text' style = 'margin-left: 5px;'>");
+
+		htmlOut.append("Input: ");
+		for (uint8_t i = 0; i < info.inputBlock.argCount; ++i)
+		{
+			char* arg = GET_ARG_FROM_ARG_BLOCK(&info.inputBlock, i);
+			htmlOut.append(escapeHTML(arg));
+			if (i != info.inputBlock.argCount - 1) {
+				htmlOut.append(", ");
+			}
+		}
+
+		htmlOut.append("</p>\n");
+		htmlOut.append("</div>\n");
+
+		htmlOut.append("</div>\n");
+
+		return VAL_SUCCESS;
+	}
+
+	VAL_RETURN_CODE RENDER_GRAPH::createHTMLdiagram(fs::path filepath, PASS_INFO* passInfos, uint16_t passInfoCount)
+	{
+		filepath /= fs::path(srcFileName).filename();
+		filepath.replace_extension(".html");
+
+		using namespace std;
+		VAL_RETURN_CODE retCode = VAL_SUCCESS;
+		
+		// Create and open a text file
+		ofstream htmlFile(filepath, ios::binary | ios::out);
+		if (!htmlFile.is_open()) {
+			retCode = VAL_FAILURE;
+			dbg::printWarning("Failed to open render pass HTML diagram for writing %s", filepath.string().c_str());
+			goto bail;
+		}
+
+		htmlFile << "<!DOCTYPE html>\n";
+		// begin HTML file
+		htmlFile << "<HTML>\n";
+
+		// begin head
+		htmlFile << "<head>\n";
+
+		// begin style
+		htmlFile << "<style>\n";
+
+		htmlFile << "body {background-color:#0b0b0b;}";
+		htmlFile << "div {background-color:#040404; padding: 0px; border:1px solid white; width: " HTML_FRAME_WIDTH_AS_STR "; height: " HTML_FRAME_HEIGHT_AS_STR "; }\n";
+		htmlFile << ".horz_scroll_div {max-width: 100%; overflow-x: auto; white-space: nowrap; background-color: #040404; border: 1px solid white; height: 350px;}\n";
+		htmlFile << ".centered_text {color:white; font-size: 16px; margin: 0 auto; text-align: center;}\n";
+		htmlFile << ".std_text {color:white; font-size: 12px; margin-top: 0px; padding-bottom: 0px}\n";
+		// end style
+		htmlFile << "</style>\n";
+		
+		// end head
+		htmlFile << "</head>\n";
+
+		// begin body
+		htmlFile << "<body>\n";
+
+		// write infos
+		for (uint16_t i = 0; i < passInfoCount; ++i)
+		{
+			PASS_INFO& passInfo = passInfos[i];
+			std::string passAsHTMLframe;
+			passInfoToHTMLframe(passInfo, passAsHTMLframe, 5,5 + (i * 350));
+			htmlFile << passAsHTMLframe;
+		}
+
+		// end body
+		htmlFile << "</body>\n";
+
+		// end HTML file
+		htmlFile << "</HTML>\n";
+
+	bail:
+		if (htmlFile.is_open()) {
+			htmlFile.close();
+		} 
+
+		return retCode;
+	}
+
 }

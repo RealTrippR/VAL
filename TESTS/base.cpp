@@ -74,11 +74,11 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
 	static colorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(CLEAR);
-	colorAttach.setStoreOperation(STORE);
+	colorAttach.setLoadOperation(Clear);
+	colorAttach.setStoreOperation(Store);
 	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	static subpass subpass(renderPassMngr, GRAPHICS);
+	static Subpass subpass(renderPassMngr, Graphics);
 	subpass.bindAttachment(&colorAttach);
 }
 
@@ -87,7 +87,6 @@ int main()
 #ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
 	using namespace val;
 
 	ValProc proc;
@@ -96,13 +95,13 @@ int main()
 
 	// Configure and create window
 	WindowProperties windowConfig;
-	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
+	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
 	Window window(windowConfig, 800, 800, "Base Test", proc);
 
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
 
 
 	// VAL uses the image format requirements to pick the best image format
@@ -111,7 +110,7 @@ int main()
 	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
 	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
 	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+	formatReqs.acceptedColorSpaces = { window.getColorSpace() };
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
 
@@ -119,13 +118,13 @@ int main()
 
 	val::UBO_Handle uboHdl(sizeof(ViewMatrix));
 	// load and configure vert shader
-	val::Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/shadervert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
 	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
-	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", SHADER_STAGE::Fragment, "main");
 	//////////////////////////////////////////////////////////////
 
 
@@ -136,14 +135,13 @@ int main()
 	val::renderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.setRenderPassManager(&renderPassMngr);
+
 	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 	
 
 
-
 	// why is this still here? - for attachments?
-	window.createSwapChainFrameBuffers(window.getSize(), {}, 0u, pipeline.getVkRenderPass(), proc._device);
-
+	window.createSwapChainFrameBuffers({}, 0u, pipeline.getVkRenderPass(), proc._device);
 
 
 
@@ -166,28 +164,30 @@ int main()
 	//////////////////////////////////////////////////////////////
 
 
+
+
+
+
+	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
+
+
+
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget;
+	renderTarget.setQueue(graphicsQueue);
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
 	renderTarget.setIndexBuffer(indices, indices.size());
 	renderTarget.setVertexBuffer(vertices, vertices.size());
-
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
 
 	
 	while (!window.shouldClose()) {
-		glfwPollEvents();
+		window.pollEvents();
 
-
-		auto& graphicsQueue = proc._graphicsQueue;
-		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = proc._currentFrame;
-
-		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		// Update view information, stored in a UBO
 		updateViewMatrix(proc, uboHdl);
 
@@ -202,8 +202,8 @@ int main()
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
-		renderTarget.submit(proc, { presentQueue.getSemaphore(currentFrame)}, window.getPresentFence());
-		window.display(imageFormat, { graphicsQueue.getSemaphore(currentFrame) });
+		renderTarget.submit(proc, {window.getPresentQueue().getSemaphore()}, window.getPresentFence());
+		window.display(imageFormat, { graphicsQueue.getSemaphore() });
 
 		proc.nextFrame();
 	}

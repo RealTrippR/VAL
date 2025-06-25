@@ -34,6 +34,10 @@
     </ClCompile>
     <ClCompile Include="deferredRendering.cpp" />
     <ClCompile Include="shadingTest.cpp" />
+    <ClCompile Include="experimental-features\deferredRendering.cpp">
+      <Filter>experimental-features</Filter>
+    </ClCompile>
+    <ClCompile Include="basicLightingTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
@@ -45,6 +49,12 @@
       <Filter>experimental-features</Filter>
     </ClInclude>
     <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.rg.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg__processed.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\deferred.rg.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
   </ItemGroup>
@@ -115,13 +125,16 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="README.MD" />
-    <None Include="shaders\Deffered1.frag">
+    <None Include="shaders\typicalLightingShader.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\Deferred1.vert">
+    <None Include="shaders\typicalLightingShader.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\DefferedLightingPass.frag">
+    <None Include="shaders\basicLighting.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\basicLighting.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

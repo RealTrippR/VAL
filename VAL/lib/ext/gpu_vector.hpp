@@ -19,6 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/ext/roundToNextPowerOf2.hpp>
 #include <initializer_list>
 #include <stdexcept>
+#include <algorithm>
 
 #ifndef VAL_GPU_VECTOR_HPP
 #define VAL_GPU_VECTOR_HPP
@@ -27,7 +28,16 @@ namespace val {
 	template<typename T, typename size_t = uint32_t>
 	class gpu_vector {
 	public:
+
+		gpu_vector() = default;
+
+		gpu_vector(const VkBufferUsageFlags& usage) 
+		{
+			_usage = usage;
+		}
+
 		gpu_vector(ValProc& proc, const VkBufferUsageFlags& usage) {
+			_usage = usage;
 			init(proc, 0);
 		}
 
@@ -65,12 +75,42 @@ namespace val {
 #endif // !NBDEUG
 		}
 
+		// Overload for non-const objects (allows modification)
+		T& operator[](size_t index) {
+#ifndef NDEBUG
+			if (index >= _size) {
+				throw std::out_of_range("Invalid gpu_vector write access index.");
+			}
+#endif
+			return data()[index];
+		}
+		// Overload for const objects (read-only access)
+		const T& operator[](size_t index) const {
+#ifndef NDEBUG
+			if (index >= _size) {
+				throw std::out_of_range("Invalid gpu_vector read access index.");
+			}
+#endif
+			return data()[index];
+		}
+
 		operator VkBuffer() {
 			return _buffer;
 		}
 
 		operator VkBuffer&() {
 			return _buffer;
+		}
+	public:
+
+		inline T& front()
+		{
+			return data()[0];
+		}
+
+		inline T& back() 
+		{
+			return data()[size()-1];
 		}
 	public:
 
@@ -82,88 +122,114 @@ namespace val {
 			return _buffer;
 		}
 
-		inline void init(ValProc& proc, size_t size) {
-			_size = size;
-
-			_capacity = roundToNextPowerOfTwo(_size + 1);
-			const VkDeviceSize buffSzeInbytes = _capacity * sizeof(T);
-
-
-			proc.createBuffer(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), _buffer, _memory);
-
-			vkMapMemory(proc._device, _memory, 0, _size, 0, (void**)&_mappedMemory);
+		inline void push_back(ValProc& proc, const T& obj)
+		{
+			resize(proc, size() + 1);
+			data()[size() - 1] = obj;
+			T& t = back();
+			int i = 0;
 		}
 
-		inline void resize(ValProc& proc, const size_t& newSize) {
+		inline void push_back(ValProc& proc, const T& obj, VkCommandBuffer cmdBuff)
+		{
+			resize(proc, size() + 1, cmdBuff);
+			data()[size() - 1] = obj;
+		}
+
+		inline void pop_back(ValProc& proc) 
+		{
+			if (size() > 0) {
+				resize(proc, size() - 1);
+			}
+		}
+
+		inline void pop_back(ValProc& proc, VkCommandBuffer cmdBuff)
+		{
+			if (size() > 0) {
+				resize(proc, size() - 1, cmdBuff);
+			}
+		}
+
+		inline void resize(ValProc& proc, const size_t& newSize) 
+		{
 			if (_size == newSize) { return; }
+			if (this->size() == 0) { init(proc, newSize); return; }
+
+
+			size_t tmp_capacity = roundToNextPowerOfTwo(newSize + 1);
+
+			if (tmp_capacity == _capacity)
+			{
+				if (newSize > _size) {
+					callConstructors(_size, newSize - 1);
+				}
+				else {
+					callDestructors(newSize, _size - 1);
+				}
+				_size = newSize;
+				return;
+			}
 
 			VkBuffer newBuffer;
 			VkDeviceMemory newMemory;
-
-			size_t tmp_capacity = roundToNextPowerOfTwo(newSize + 1);
+			T* newMappedMemory;
 
 			const VkDeviceSize buffSzeInbytes = tmp_capacity * sizeof(T);
 
 				
 			proc.createBuffer(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), newBuffer, newMemory);
 
-			if (newMemory) { // check if alloc succeeded
-				proc.copyBuffer(_buffer, newBuffer, buffSzeInbytes, 0u, 0u);
+			VkDeviceMemory oldMemory = _memory;
+			VkBuffer oldBuffer = _buffer;
 
-				// destroy the old buffer
-				if (_memory) {
-					vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
-					vkDestroyBuffer(proc._device, _buffer, VK_NULL_HANDLE);
-					_memory = VK_NULL_HANDLE;
-					_buffer = VK_NULL_HANDLE;
-				}
-					
-				_memory = newMemory;
-				_buffer = newBuffer;
-
-				_size = newSize;
-				_capacity = tmp_capacity;
-
-				vkMapMemory(proc._device, _memory, 0, _size, 0, (void**)& _mappedMemory);
-			}
-		}
-
-		inline void resize(ValProc& proc, const size_t& newSize, VkCommandBuffer& commandBuff) {
-			if (_size == newSize) { return; }
-
-			VkBuffer newBuffer;
-			VkDeviceMemory newMemory;
-
-			size_t tmp_capacity = roundToNextPowerOfTwo(newSize + 1);
-
-			const VkDeviceSize buffSzeInbytes = tmp_capacity * sizeof(T);
-
-
-			proc.createBuffer(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), newBuffer, newMemory);
-
-			if (newMemory) { // check if alloc succeeded
-				
-
-				// destroy the old buffer
-				if (_memory) {
-					vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
-					vkDestroyBuffer(proc._device, _buffer, VK_NULL_HANDLE);
-					_memory = VK_NULL_HANDLE;
-					_buffer = VK_NULL_HANDLE;
-				}
+			if (newMemory)
+			{ // check if alloc succeeded
+				proc.copyBuffer(_buffer, newBuffer, _size * sizeof(T), 0u, 0u);
 
 				_memory = newMemory;
 				_buffer = newBuffer;
 
+				vkMapMemory(proc._device, newMemory, 0, buffSzeInbytes, 0, (void**) & newMappedMemory);
+
+				std::copy(_mappedMemory, _mappedMemory + _size, newMappedMemory);
+#ifndef NDEBUG
+				if (newMappedMemory == nullptr) { throw std::runtime_error("gpu_vector: Failed to map newMappedMemory."); }
+#endif // !NDEBUG
+				_mappedMemory = newMappedMemory;
+
+				// destroy the old buffer
+				if (oldMemory) {
+					vkFreeMemory(proc._device, oldMemory, VK_NULL_HANDLE);
+					vkDestroyBuffer(proc._device, oldBuffer, VK_NULL_HANDLE);
+				}
+
+				if (newSize > _size) {
+					callConstructors(_size, newSize - 1);
+				}
+				else {
+					callDestructors(newSize, _size - 1);
+				}
+
 				_size = newSize;
 				_capacity = tmp_capacity;
-
-				vkMapMemory(proc._device, _memory, 0, _size, 0, &_mappedMemory);
 			}
 		}
 
-		inline void copy(ValProc& proc, VkBuffer& other, uint32_t otherSize, VkCommandBuffer& cmdBuff) {
+		// destroys the old memory and creates a new buffer - no copying will take place.
+		inline void setUsage(ValProc& proc, const VkBufferUsageFlags newUsage) 
+		{
+			destroy(proc);
+			_usage = newUsage;
+			init(proc, _size);
+		}
 
+		inline void copy(ValProc& proc, VkBuffer& other, uint32_t otherSize, VkCommandBuffer& cmdBuff)
+		{
+#ifndef NDEBUG
+			if (other.data() == NULL || other._buffer == NULL) {
+				throw std::runtime_error("gpu_vector::copy: `other` is an invalid/uninitialized vector.");
+			}
+#endif
 			VkBufferCopy copyRegion;
 			copyRegion.srcOffset = 0u; 
 			copyRegion.dstOffset = 0u;
@@ -177,11 +243,17 @@ namespace val {
 		
 
 			vkCmdCopyBuffer(cmdBuff, _buffer, other, 1, &copyRegion);
+			std::copy(_mappedMemory, _mappedMemory + _size, other._mappedMemory);
 		}
 
 
 		inline void copy(VAL_PROC& proc, gpu_vector& other, VkCommandBuffer& cmdBuff) {
 
+#ifndef NDEBUG
+			if (other.data() == NULL || other._buffer == NULL) {
+				throw std::runtime_error("gpu_vector::copy: `other` is an invalid/uninitialized vector.");
+			}
+#endif
 			if (other._size < _size) {
 				other.resize(proc, _size);
 			}
@@ -191,10 +263,14 @@ namespace val {
 			copyRegion.dstOffset = 0u;
 			copyRegion.size = _size * sizeof(T);
 			vkCmdCopyBuffer(cmdBuff, _buffer, other._buffer, 1, &copyRegion);
+
+			std::copy(_mappedMemory, _mappedMemory + _size, other._mappedMemory);
 		}
 
 		inline void destroy(ValProc& proc) {
 			if (_memory) {
+				callDestructors(0, _size-1);
+
 				vkDestroyBuffer(proc._device, _buffer, VK_NULL_HANDLE);
 				vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
 				_size = 0u;
@@ -207,6 +283,10 @@ namespace val {
 	public:
 		T* data() {
 			return (T*)_mappedMemory;
+		}
+
+		T* data(size_t i) {
+			return (T*)_mappedMemory+i;
 		}
 
 		const size_t& size() const {
@@ -238,6 +318,44 @@ namespace val {
 		}
 
 	private:
+
+		void callConstructors(size_t idxBegin, size_t idxEnd)
+		{
+
+			for (size_t i = idxBegin; i <= idxEnd; ++i)
+			{
+				new (data(i))  T();
+			}
+		}
+
+		void callDestructors(size_t idxBegin, size_t idxEnd)
+		{
+			for (size_t i = idxBegin; i <= idxEnd; ++i)
+			{
+				data(i)->~T();
+			}
+		}
+
+		inline void init(ValProc& proc, size_t size)
+		{
+			if (size == 0) { 
+				return;
+			}
+			_size = size;
+
+			_capacity = roundToNextPowerOfTwo(_size + 1);
+			const VkDeviceSize buffSzeInbytes = _capacity * sizeof(T);
+
+
+			proc.createBuffer(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), _buffer, _memory);
+
+			vkMapMemory(proc._device, _memory, 0, _size, 0, (void**)&_mappedMemory);
+			
+			callConstructors(0, size-1);
+		}
+
+	private:
+
 		VkBufferUsageFlags _usage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
 		size_t _capacity = 0u;
 		size_t _size = 0u;

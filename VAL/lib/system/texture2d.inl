@@ -24,6 +24,24 @@ namespace val {
 
 	/* PUBLIC: */
 
+	inline void Texture2D::setValProc(ValProc* proc)
+	{
+#ifndef NDEBUG
+		if (_proc) {
+			dbg::printError("Texture2D::setValProc: Texture2D @ %p: The ValProc of a Texture2D cannot be set more than once.", this);
+			throw std::runtime_error("Texture2D::setValProc: The ValProc of a Texture2D cannot be set more than once.");
+		}
+#endif // !NDEBUG
+
+		_proc = proc;
+	}
+
+	inline ValProc* Texture2D::getValProc()
+	{
+		return _proc;
+	}
+
+
 	inline stbi_uc* Texture2D::getPixels() const {
 		return _pixels;
 	}
@@ -70,7 +88,7 @@ namespace val {
 
 	inline void Texture2D::transitionLayout(VkCommandBuffer cmd_buff, VkImageLayout newLayout)
 	{
-		_proc.transitionImageLayout(_img, _format, _layout, newLayout, cmd_buff, _mipLevels);
+		_proc->transitionImageLayout(_img, _format, _layout, newLayout, cmd_buff, _mipLevels);
 		_layout = newLayout;
 	}
 }

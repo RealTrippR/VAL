@@ -20,8 +20,24 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_PROC_INLINE
 
 namespace val {
-	inline const uint8_t& ValProc::getFramesInFlight() {
+
+	inline void ValProc::nextFrame() {
+		_currentFrame = (_currentFrame + 1) % _MAX_FRAMES_IN_FLIGHT;
+	}
+
+	inline const uint32_t& ValProc::getCurrentFrame() const 
+	{
+		return _currentFrame;
+	}
+
+	inline const uint8_t& ValProc::getFramesInFlight() const 
+	{
 		return _MAX_FRAMES_IN_FLIGHT;
+	}
+
+	inline VkCommandPool ValProc::getCommandPool() const 
+	{
+		return _commandPool;
 	}
 
 }

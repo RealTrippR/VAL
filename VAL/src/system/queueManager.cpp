@@ -36,7 +36,8 @@ namespace val
 
 
 
-	void QueueManager::create(ValProc& proc, bool semaphoresNeeded, bool fencesNeeded) {
+	void QueueManager::create(ValProc& proc, bool semaphoresNeeded, bool fencesNeeded)
+	{
 		_commandBuffers.resize(proc._MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
@@ -45,7 +46,9 @@ namespace val
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = (uint32_t)_commandBuffers.size();
 
-		if (vkAllocateCommandBuffers(proc._device, &allocInfo, _commandBuffers.data()) != VK_SUCCESS) {
+		if (vkAllocateCommandBuffers(proc._device, &allocInfo, _commandBuffers.data()) != VK_SUCCESS) 
+		{
+			dbg::printError("Failed to allocate command buffers for QueueManager @ %p ", this);
 			throw std::runtime_error("failed to allocate command buffers!");
 		}
 
@@ -70,7 +73,7 @@ namespace val
 
 			for (uint32_t i = 0; i < _semaphores.size(); ++i) {
 				if (vkCreateSemaphore(proc._device, &semaphoreInfo, nullptr, &_semaphores[i]) != VK_SUCCESS) {
-					printf("VAL: FAILED TO CREATE SEMAPHORE #%d FOR QUEUE MANAGER: %h\n", i, this);
+					dbg::printError("Failed to create semaphore #%u for QueueManager @ %p ", i, this);
 					throw std::runtime_error("VAL: FAILED TO CREATE  SEMAPHORE FOR QUEUE MANAGER!");
 				}
 			}
@@ -85,8 +88,8 @@ namespace val
 
 			for (uint32_t i = 0; i < _fences.size(); ++i) {
 				if (vkCreateFence(proc._device, &fenceInfo, nullptr, &_fences[i]) != VK_SUCCESS) {
-					printf("VAL: FAILED TO CREATE FENCE #%d FOR QUEUE MANAGER: %h\n", i, this);
-					throw std::runtime_error("VAL: FAILED TO CREATE FENCE FOR QUEUE MANAGER!");
+					dbg::printError("Failed to create semaphore #%u for QueueManager @ %p ", i, this);
+					throw std::runtime_error("VAL: FAILED TO CREATE  SEMAPHORE FOR QUEUE MANAGER!");
 				}
 			}
 		}
