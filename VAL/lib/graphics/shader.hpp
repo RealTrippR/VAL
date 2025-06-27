@@ -75,7 +75,7 @@ namespace val {
 		const std::string& getEntryPoint();
 
 		// change to allow for multiple image samplers (only one allowed per image view)
-		void setImageSamplers(std::vector<descriptorBinding<val::sampler*>> samplerInfo);
+		void setImageSamplers(std::vector<descriptorBinding<val::Sampler*>> samplerInfo);
 
 		void createImageSamplers(ValProc* proc);
 
@@ -131,9 +131,9 @@ namespace val {
 		const std::vector<descriptorBinding<val::SSBO_Handle*>> getSSBOs() noexcept;
 
 	public:
-		void updateImageSampler(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler);
+		void updateImageSampler(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<Sampler&, uint32_t> sampler);
 
-		void updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight);
+		void updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<Sampler&, uint32_t> sampler, const uint8_t frameInFlight);
 		
 		void updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<ImageView&, uint32_t> texture, const uint16_t arrIdx = 0);
 
@@ -160,7 +160,7 @@ namespace val {
 		std::vector<pushDescriptor*> _pushDescriptors;
 		std::vector<descriptorBinding<UBO_Handle*>> _UBO_Handles;
 		std::vector<descriptorBinding<SSBO_Handle*>> _SSBO_Handles;
-		std::vector<descriptorBinding<val::sampler*>> _imageSamplers;
+		std::vector<descriptorBinding<val::Sampler*>> _imageSamplers;
 		std::vector<descriptorBinding<val::ImageView*>> _textures;
 		//std::vector<VkImageView*> _imageViews;
 

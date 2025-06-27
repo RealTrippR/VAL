@@ -24,7 +24,7 @@ namespace val {
 #ifndef NDEBUG
 
 		if (!std::filesystem::exists(filepath)) {
-			printf("VAL: WARNING: Attempted to load shader from invalid filepath: %ws\n", filepath.c_str());
+			dbg::printWarning("VAL: WARNING: Attempted to load shader from invalid filepath : % ws\n", filepath.c_str());
 			return false;
 		}
 
@@ -35,7 +35,7 @@ namespace val {
 		}
 #ifndef  NDEBUG
 		else {
-			printf("\nVAL: FAILED TO READ FILE FROM DISK: %ws\n", filepath.c_str());
+			dbg::printWarning("\nVAL: FAILED TO READ FILE FROM DISK: %ws\n", filepath.c_str());
 		}
 #endif // ! NDEBUG
 
@@ -51,7 +51,7 @@ namespace val {
 	}
 
 
-	void Shader::setImageSamplers(std::vector<descriptorBinding<val::sampler*>> samplerInfo) {
+	void Shader::setImageSamplers(std::vector<descriptorBinding<val::Sampler*>> samplerInfo) {
 		_imageSamplers = samplerInfo;
 		#ifndef NDEBUG
 		// validate the samplerInfo. Samplers cannot be binded as arrays.
@@ -144,17 +144,17 @@ namespace val {
 		}
 
 
-		std::vector<std::pair<val::sampler*, uint32_t>> combinedImageSamplers;
-		std::vector< std::pair<val::sampler*, uint32_t>> standaloneImageSamplers;
+		std::vector<std::pair<val::Sampler*, uint32_t>> combinedImageSamplers;
+		std::vector< std::pair<val::Sampler*, uint32_t>> standaloneImageSamplers;
 
 
-		for (val::descriptorBinding<val::sampler*>& descBinding : _imageSamplers) {
+		for (val::descriptorBinding<val::Sampler*>& descBinding : _imageSamplers) {
 #ifndef NDEBUG
 			if (descBinding.values.size()>1) {
 				printf("VAL: WARNING: descriptorBinding<val::sampler*> cannot have more than 1 value attached to it; it cannot be treated as an array!\n");
 			}
 #endif // NDEBUG
-			for (val::sampler* sampler : descBinding.values) {
+			for (val::Sampler* sampler : descBinding.values) {
 				if (sampler->getSamplerType() == combinedImage) {
 					combinedImageSamplers.push_back({ sampler,descBinding.bindingIndex});
 				}
@@ -276,7 +276,7 @@ namespace val {
 
 				//// Set up the VkWriteDescriptorSet for Image Sampler
 				_descriptorWrites[idx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				_descriptorWrites[idx].dstBinding = 1; // Binding index for image sampler
+				_descriptorWrites[idx].dstBinding = _imageSamplers[i].bindingIndex;
 				_descriptorWrites[idx].dstArrayElement = 0;
 				if (_imageSamplers[i].values[0]->getSamplerType() == combinedImage) {
 					_descriptorWrites[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -425,7 +425,7 @@ namespace val {
 		return _SSBO_Handles;
 	}
 
-	void Shader::updateImageSampler(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler) {
+	void Shader::updateImageSampler(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<Sampler&, uint32_t> sampler) {
 		for (uint16_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; ++i) {
 			VkDescriptorSet& descriptorSet = proc._descriptorSets[pipeline.pipelineIdx][i];
 
@@ -443,7 +443,7 @@ namespace val {
 		}
 	}
 	;
-	void Shader::updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<sampler&, uint32_t> sampler, const uint8_t frameInFlight)
+	void Shader::updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<Sampler&, uint32_t> sampler, const uint8_t frameInFlight)
 	{
 		VkWriteDescriptorSet descriptorWrite;
 		descriptorWrite.pNext = NULL;

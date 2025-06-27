@@ -142,7 +142,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\tiny-optional-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
@@ -351,8 +351,8 @@
     <None Include="README.MD">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="shaders\basicLighting.frag" />
-    <None Include="shaders\basicLighting.vert" />
+    <None Include="shaders\basicLightingTextured.frag" />
+    <None Include="shaders\basicLightingTextured.vert" />
     <None Include="shaders\colorshader.frag" />
     <None Include="shaders\doubleImageShader.frag" />
     <None Include="shaders\empty.frag" />

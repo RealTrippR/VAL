@@ -132,7 +132,7 @@ int main()
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::Shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::sampler imgSampler(proc, val::combinedImage);
+	val::Sampler imgSampler(proc, val::combinedImage);
 	imgSampler.setMaxAnisotropy(8.f);
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 

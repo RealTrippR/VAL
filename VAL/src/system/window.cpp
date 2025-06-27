@@ -44,18 +44,34 @@ namespace val {
 
 			_surface = NULL;
 			_presentFence = NULL;
+
+			_swapChainAttachmentCount = 0u;
+			_swapChainImageCount = 0u;
 		}
 	}
 
 
 	void Window::cleanupSwapChain() {
-		for (uint8_t i = 0; i < _swapChainImageCount; ++i)
-		{
-			vkDestroyFramebuffer(_procVAL->getVkLogicalDevice(), _swapChainFramebuffers[i], VK_NULL_HANDLE);
-			vkDestroyImageView(_procVAL->getVkLogicalDevice(), _swapChainImageViews[i], VK_NULL_HANDLE);
+		if (_swapChainFramebuffers && _swapChainImageViews) {
+			for (uint8_t i = 0; i < _swapChainImageCount; ++i)
+			{
+				vkDestroyFramebuffer(_procVAL->getVkLogicalDevice(), _swapChainFramebuffers[i], VK_NULL_HANDLE);
+				vkDestroyImageView(_procVAL->getVkLogicalDevice(), _swapChainImageViews[i], VK_NULL_HANDLE);
+			}
+
+			free(_swapChainFramebuffers);
+			free(_swapChainImageViews);
+			_swapChainFramebuffers = NULL;
+			_swapChainImageViews = NULL;
 		}
 		if (_swapChain) {
 			vkDestroySwapchainKHR(_procVAL->getVkLogicalDevice(), _swapChain, VK_NULL_HANDLE);
+		}
+
+		if (_swapChainImages != VK_NULL_HANDLE)
+		{ // prevent mem leak
+			free(_swapChainImages);
+			_swapChainImages = NULL;
 		}
 
 		_swapChainAttachmentCount = 0u;
@@ -182,37 +198,42 @@ namespace val {
 		_swapChainRenderPass = renderPass;
 
 
-		// allocate swap chain image views
-		VkFramebuffer* tmp = (VkFramebuffer*)realloc(_swapChainFramebuffers, sizeof(sizeof(VkFramebuffer) * _swapChainImageCount));
-		if (tmp == NULL) {
-			dbg::printError("Failed to allocate frambuffers of Window @ %p: out of system memory.", this);
-			return;
-		}
-		else { 
-			_swapChainFramebuffers = tmp;
-		}
-
-		
-		for (size_t i = 0; i < _swapChainImageCount; i++) {
-			//std::vector<VkImageView> attachmentsV = { _swapChainImageViews[i] };
-			std::vector<VkImageView> attachmentsV;
-			attachmentsV.resize(attachmentsV.size() + attachmentCount);
-			for (int i = 0; i < attachmentCount; ++i) {
-				attachmentsV[i] = Attachments[i];
+		if (_swapChainImageCount > 0) {
+			// allocate swap chain image views
+			VkFramebuffer* tmp = (VkFramebuffer*)realloc(_swapChainFramebuffers, sizeof(VkFramebuffer) * _swapChainImageCount);
+			if (tmp == NULL) {
+				if (_swapChainFramebuffers) {
+					free(_swapChainFramebuffers);
+					_swapChainFramebuffers = NULL;
+				}
+				dbg::printError("Failed to allocate frambuffers of Window @ %p: out of system memory.", this);
+				return;
 			}
-			attachmentsV.push_back(_swapChainImageViews[i]);
+			else {
+				_swapChainFramebuffers = tmp;
+			}
 
-			VkFramebufferCreateInfo framebufferInfo{};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = renderPass;
-			framebufferInfo.attachmentCount = attachmentsV.size();
-			framebufferInfo.pAttachments = attachmentsV.data();
-			framebufferInfo.width = _swapChainExtent.width;
-			framebufferInfo.height = _swapChainExtent.height;
-			framebufferInfo.layers = 1;
+			for (size_t i = 0; i < _swapChainImageCount; i++) {
+				//std::vector<VkImageView> attachmentsV = { _swapChainImageViews[i] };
+				std::vector<VkImageView> attachmentsV;
+				attachmentsV.resize(attachmentsV.size() + attachmentCount);
+				for (int i = 0; i < attachmentCount; ++i) {
+					attachmentsV[i] = Attachments[i];
+				}
+				attachmentsV.push_back(_swapChainImageViews[i]);
 
-			if (vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &_swapChainFramebuffers[i]) != VK_SUCCESS) {
-				throw std::runtime_error("FAILED TO CREATE FRAME BUFFER!");
+				VkFramebufferCreateInfo framebufferInfo{};
+				framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+				framebufferInfo.renderPass = renderPass;
+				framebufferInfo.attachmentCount = attachmentsV.size();
+				framebufferInfo.pAttachments = attachmentsV.data();
+				framebufferInfo.width = _swapChainExtent.width;
+				framebufferInfo.height = _swapChainExtent.height;
+				framebufferInfo.layers = 1;
+
+				if (vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &_swapChainFramebuffers[i]) != VK_SUCCESS) {
+					throw std::runtime_error("FAILED TO CREATE FRAME BUFFER!");
+				}
 			}
 		}
 	}
@@ -320,7 +341,7 @@ namespace val {
 		}
 
 		// allocate swap chain image views
-		VkImageView* tmp = (VkImageView*)realloc(_swapChainImageViews, sizeof(sizeof(VkImageView) * _swapChainImageCount));
+		VkImageView* tmp = (VkImageView*)realloc(_swapChainImageViews, sizeof(VkImageView) * _swapChainImageCount);
 		if (tmp == NULL) {
 			dbg::printError("Failed to allocate image views of Window @ %p: out of system memory.", this);
 			return;

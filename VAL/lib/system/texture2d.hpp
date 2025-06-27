@@ -32,6 +32,10 @@ namespace val {
 
 		Texture2D(ValProc& proc) : _proc(&proc) {};
 
+		Texture2D(ValProc& proc, const VkImageLayout layout) : _proc(&proc), _layout(layout) {};
+
+		Texture2D(ValProc& proc, const VkImageLayout layout, const VkFormat format) : _proc(&proc), _layout(layout), _format(format) {};
+
 		Texture2D(ValProc& proc, void* memory, size_t memorySize, const uint16_t width, const uint16_t height, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
 		{
@@ -60,6 +64,8 @@ namespace val {
 		inline void setValProc(ValProc* proc);
 
 		inline ValProc* getValProc();
+
+		inline void discardPixels();
 
 		inline stbi_uc* getPixels() const;
 
@@ -105,7 +111,7 @@ namespace val {
 		VkDeviceMemory _imgMemory = VK_NULL_HANDLE;
 		ValProc* _proc;
 
-		VkImageLayout _layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		VkImageLayout _layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		VkFormat _format = VK_FORMAT_UNDEFINED;
 
 		uint16_t _width = 0u;

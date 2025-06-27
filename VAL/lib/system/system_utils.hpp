@@ -187,14 +187,14 @@ namespace val {
 
 
 	VkImage createTextureImage16BitFromDisk(ValProc* proc, fs::path imgFilepath, VkFormat* autoFormatOut, stbi_us** pixelsOut,
-		VkDeviceMemory* textureImageMemory, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
+		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
 		const bufferSpace& buffSpace = GPU_ONLY);
 
 	VkImage createTextureImage8BitFromDisk(ValProc* proc, fs::path imgFilepath, stbi_uc** pixelsOut,
-		VkDeviceMemory* textureImageMemory, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
+		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
-		const bufferSpace& buffSpace = GPU_ONLY, VkFormat* autoFormatOut = NULL);
+		const bufferSpace& buffSpace = GPU_ONLY);
 	
 
 

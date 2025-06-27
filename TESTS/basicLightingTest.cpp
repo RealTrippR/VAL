@@ -1,3 +1,21 @@
+/*
+Copyright © 2025 Tripp Robins
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the “Software”), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+
 #include <iostream>
 #include <string>
 #include <chrono>
@@ -107,124 +125,144 @@ int main()
 #ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-	using namespace val;
 
-	ValProc proc;
-
-	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
-
-	// Configure and create window
-	WindowProperties windowConfig;
-	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
-	Window window(windowConfig, 800, 800, "Base Test", proc);
-
-
-	// creates Vulkan logical and physical devices
-	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
-
-
-	// VAL uses the image format requirements to pick the best image format
-	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	val::ImageFormatRequirements formatReqs;
-	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
-	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
-	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { window.getColorSpace() };
-	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
-
-
-
-
-	UBO_Handle viewUBO(sizeof(ViewMatrix));
-	UBO_Handle lightUBO(sizeof(Light));
-
-	// load and configure vert shader
-	val::Shader vertShader("shaders-compiled/basicLightingvert.spv", SHADER_STAGE::Vertex, "main");
-	vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
-	vertShader.setBindingDescriptions(VertexTxtr::getBindingDescription());
-	vertShader.setUBOs({ { &viewUBO, 0 } });
-
-	// load and configure frag shader
-	val::Shader fragShader ("shaders-compiled/basicLightingfrag.spv", SHADER_STAGE::Fragment, "main");
-	fragShader.setUBOs({ { &lightUBO, 1 } });
-	//////////////////////////////////////////////////////////////
-
-
-	val::GraphicsPipeline pipeline;
-	pipeline.shaders = { &vertShader,&fragShader };
-	setGraphicsPipelineInfo(pipeline);
-
-	val::renderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat);
-	pipeline.setRenderPassManager(&renderPassMngr);
-
-	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
-
-
-
-	// why is this still here? - for attachments?
-	window.createSwapChainFrameBuffers({}, 0u, pipeline.getVkRenderPass(), proc._device);
-
-	val::Mesh<VertexTxtr, 1> mesh;
-
-	mesh.loadFromFile(proc, "res/Cube.fbx");
-
-	//////////////////////////////////////////////////////////////
-	// create descriptor sets - this should be merged into the
-	// pipeline creation function
-	proc.createDescriptorSets(&pipeline);
-	//////////////////////////////////////////////////////////////
-
-	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
-
-
-	// configure the render target, setting vertex buffers, scissors, area, etc
-	val::renderTarget renderTarget;
-	renderTarget.setQueue(graphicsQueue);
-	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window.getSize());
-	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
-	renderTarget.setIndexBuffer(mesh.indices, mesh.indices.size());
-	renderTarget.setVertexBuffer(mesh.vertices, mesh.vertices.size());
-	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
-
-
-	while (!window.shouldClose()) 
 	{
-		window.pollEvents();
+		using namespace val;
 
-		calculateTime();
+		ValProc proc;
 
-		// Update view information, stored in a UBO
-		updateViewMatrix(proc, viewUBO);
-		updateLight(proc, lightUBO);
+		PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
-		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.begin(proc);
+		// Configure and create window
+		WindowProperties windowConfig;
+		windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
+		Window window(windowConfig, 800, 800, "Base Test", proc);
 
-		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
-		renderTarget.updateBuffers(proc);
-		renderTarget.updatePipeline(proc, pipeline);
-		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
-		renderTarget.render(proc);
-		renderTarget.endPass(proc);
 
-		renderTarget.submit(proc, { window.getPresentQueue().getSemaphore() }, window.getPresentFence());
-		window.display(imageFormat, { graphicsQueue.getSemaphore() });
+		// creates Vulkan logical and physical devices
+		// if a window is passed through, the windowSurface is also created
+		proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
 
-		proc.nextFrame();
+
+		// VAL uses the image format requirements to pick the best image format
+		// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
+		val::ImageFormatRequirements formatReqs;
+		formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
+		formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
+		formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+		formatReqs.acceptedColorSpaces = { window.getColorSpace() };
+		VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
+
+
+		UBO_Handle viewUBO(sizeof(ViewMatrix));
+		UBO_Handle lightUBO(sizeof(Light));
+
+		//////////////////////////////////////////////////////////////
+		// load mesh, texture, and create img sampler
+		val::Mesh<VertexTxtr, 1> mesh;
+
+		val::ObjScene obj("res/Cube.obj");
+		val::FbxScene fbx("res/WoodenCube.fbx");
+		//mesh.importFromScene(proc, fbx, 0);
+		mesh.importFromScene(proc, obj, 0);
+
+		Texture2D texture(proc, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB);
+		fbx.importTexture2D(&texture, proc, 0, 0, FBX_MATERIAL_PROPERTY::diffuse);
+		//mesh.setTexture(texture, 0, 0);
+
+		// this will happen automatically upon the call of it's destructor, 
+		// but it's best practice to destroy once we're done using it
+		fbx.destroy();
+
+		ImageView imgView(proc, texture, VK_IMAGE_ASPECT_COLOR_BIT);
+
+		Sampler imgSampler(proc, val::combinedImage);
+		imgSampler.bindImageView(imgView);
+
+
+
+
+		// load and configure vert shader
+		val::Shader vertShader("shaders-compiled/basicLightingTexturedvert.spv", SHADER_STAGE::Vertex, "main");
+		vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
+		vertShader.setBindingDescriptions(VertexTxtr::getBindingDescription());
+		vertShader.setUBOs({ { &viewUBO, 0 } });
+
+		// load and configure frag shader
+		val::Shader fragShader("shaders-compiled/basicLightingTexturedfrag.spv", SHADER_STAGE::Fragment, "main");
+		fragShader.setUBOs({ { &lightUBO, 1 } });
+		fragShader.setImageSamplers({ { &imgSampler, 2 } });
+
+		//////////////////////////////////////////////////////////////
+
+		val::GraphicsPipeline pipeline;
+		pipeline.shaders = { &vertShader,&fragShader };
+		setGraphicsPipelineInfo(pipeline);
+
+		val::renderPassManager renderPassMngr(proc);
+		setRenderPass(renderPassMngr, imageFormat);
+		pipeline.setRenderPassManager(&renderPassMngr);
+
+		//////////////////////////////////////////////////////////////
+		proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
+
+		// why is this still here? - for attachments?
+		window.createSwapChainFrameBuffers({}, 0u, pipeline.getVkRenderPass(), proc._device);
+
+		//////////////////////////////////////////////////////////////
+		// create descriptor sets - this should be merged into the
+		// pipeline creation function
+		proc.createDescriptorSets(&pipeline);
+		//////////////////////////////////////////////////////////////
+
+		Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
+
+
+		// configure the render target, setting vertex buffers, scissors, area, etc
+		val::renderTarget renderTarget;
+		renderTarget.setQueue(graphicsQueue);
+		renderTarget.setFormat(imageFormat);
+		renderTarget.setRenderArea(window.getSize());
+		renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+		// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
+		renderTarget.setIndexBuffer(mesh.indices, mesh.indices.size());
+		renderTarget.setVertexBuffer(mesh.vertices, mesh.vertices.size());
+		// config viewport, covers the entire size of the window
+		VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
+
+
+		while (!window.shouldClose())
+		{
+			window.pollEvents();
+
+			calculateTime();
+
+			// Update view information, stored in a UBO
+			updateViewMatrix(proc, viewUBO);
+			updateLight(proc, lightUBO);
+
+			VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+			renderTarget.begin(proc);
+
+			renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+			renderTarget.updateBuffers(proc);
+			renderTarget.updatePipeline(proc, pipeline);
+			renderTarget.updateViewport(proc, viewport, 0);
+			renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
+			renderTarget.render(proc);
+			renderTarget.endPass(proc);
+
+			renderTarget.submit(proc, { window.getPresentQueue().getSemaphore() }, window.getPresentFence());
+			window.display(imageFormat, { graphicsQueue.getSemaphore() });
+
+			proc.nextFrame();
+		}
+
+		mesh.destroy(proc);
+
+		glfwTerminate();
 	}
 
-	mesh.destroy(proc);
-
-	glfwTerminate();
-#ifndef NDEBUG
-	_CrtDumpMemoryLeaks();
-#endif // !NDEBUG
 
 	return EXIT_SUCCESS;
 }

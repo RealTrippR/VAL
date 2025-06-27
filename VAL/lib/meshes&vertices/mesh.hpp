@@ -22,12 +22,11 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/ext/gpu_vector.hpp>
 
-#include <stdlib.h>
+#include <VAL/lib/meshes&vertices/fbxScene.hpp>
+#include <VAL/lib/meshes&vertices/objScene.hpp>
 
-#ifndef VAL_TINY_OBJ_H
-#define VAL_TINY_OBJ_H
-#include <ExternalLibraries/tiny_obj_loader.h>
-#endif // !VAL_TINY_OBJ_H
+#include <inttypes.h>
+#include <stdlib.h>
 
 #include <unordered_map>
 #include <VAL/lib/ext/ubfx.h>
@@ -56,7 +55,7 @@ namespace val
 		~Mesh()
 		{
 #ifndef NDEBUG
-			if (indices.getVkBuffer() != NULL || vertices.getVkBuffer())
+			if (indices.empty() == false || vertices.empty() == false)
 			{
 				dbg::printError("Mesh @ %p has not been properly destroyed.");
 				throw std::runtime_error("Mesh has not been properly destroyed.");
@@ -70,340 +69,227 @@ namespace val
 			indices.destroy(proc);
 		}
 
-		VAL_RETURN_CODE loadFromFile(ValProc& proc, const std::filesystem::path& filepath, bool deduplicate = true)
-		{
-			indices.setUsage(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-			vertices.setUsage(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		VAL_RETURN_CODE importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices = true);
 
-			std::string ext = filepath.extension().string();
-			if (ext == ".fbx") {
-				return loadFromFBX(proc, filepath, deduplicate);
+		VAL_RETURN_CODE importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices = true);
+
+		void setTexture(Texture2D& texture, const uint32_t bindingIndex, const uint32_t location)
+		{
+#ifndef NDEBUG
+			if (bindingIndex >= NTextures) {
+				dbg::printError("Mesh::setTexture: Attempted to set texture at an invalid binding index of %lu for Mesh @ %p", bindingIndex, this);
 			}
-			else if (ext == ".obj") {
-				return loadFromOBJ(proc, filepath, deduplicate);
-			}
-			else {
-				return VAL_FAILURE;
-			}
+#endif // !NDEBUG
+			textureBindings[bindingIndex].layoutIdx = 0u;// = { &texture, bindingIndex };
 		}
 
-		void setTexture(ValProc& proc, uint8_t location, const Texture2D& texture) const
+		const Texture2D* getTexture(uint8_t bindingIndex) const
 		{
-
+			return textureBindings[bindingIndex].texture;
 		}
 
-		const Texture2D& getTexture(uint8_t location) const
-		{
-
+		const TextureUVBinding& getTextureBinding(uint8_t bindingIndex) {
+			return textureBindings[bindingIndex];
 		}
 
 	private:
-		VAL_RETURN_CODE loadFromOBJ(ValProc& proc, const std::filesystem::path& filepath, bool deduplicateVertices)
-		{
-			const bool triangulate = true;
 
-			vertices.destroy(proc);
-			indices.destroy(proc);
 
-			tinyobj::attrib_t attrib;
-			std::vector<tinyobj::shape_t> shapes;
-			std::vector<tinyobj::material_t> materials;
-			std::string warn, err;
 
-			if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str(), NULL, triangulate))
-			{
-				dbg::printWarning("Mesh::loadFromOBJ: Failed to load .OBJ mesh for Mesh @ %p. tinyobj err: %s",this, err);
-				return VAL_FAILURE;
+	};
+
+
+	// import from scene, FBX
+	template <typename VT/*vertex type*/, uint16_t NTextures>
+	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices)
+	{
+		vertices.destroy(proc);
+		indices.destroy(proc);
+
+		indices.setUsage(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		vertices.setUsage(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+		size_t totalIndexCount = 0u;
+		for (size_t ni = 0; ni < scene->nodes.count; ni++) {
+			ufbx_node* node = scene->nodes.data[ni];
+			if (node->is_root) continue;
+			if (node->mesh) {
+				totalIndexCount += node->mesh->vertices.count;
 			}
-
-			size_t totalIndexCount = 0u;
-
-			// first calculate the total index count
-			for (const auto& shape : shapes)
-			{
-				totalIndexCount += shape.mesh.indices.size();
-			}
-
-			if (totalIndexCount == 0) {
-				return VAL_SUCCESS; // there no mesh to load
-			}
-			
-			uint32_t lastIndex = 0u;
-			std::unordered_map<VT, uint32_t> uniqueVertices{};
-			if (deduplicateVertices == false) 
-			{
-				vertices.resize(proc, uint32_t(totalIndexCount));
-				indices.resize(proc, uint32_t(totalIndexCount));
-			}
-
-
-			for (size_t i = 0; i < shapes.size(); ++i) 
-			{
-				const auto& shape = shapes[i];
-
-				for (size_t j = 0; j < shape.mesh.indices.size(); ++j)
-				{
-					const tinyobj::index_t& index = shape.mesh.indices[j];
-					if (3 * index.vertex_index + 2 >= attrib.vertices.size()) 
-					{
-						break;
-					}
-
-					const glm::vec3 pos = {
-						attrib.vertices[3 * index.vertex_index + 0],
-						attrib.vertices[3 * index.vertex_index + 1],
-						attrib.vertices[3 * index.vertex_index + 2]
-					};
-
-					const glm::vec2 texCoord = {
-					  attrib.texcoords[2 * index.texcoord_index + 0],
-					  1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-					};
-
-					const glm::vec4 color = { 1.f,1.f,1.f,1.f };
-
-					if (deduplicateVertices) {
-						VT vertex;
-						vertex.loadFromAttributes(pos, lastIndex, color, { 0.f,0.f,0.f }, {texCoord});
-						
-						if (uniqueVertices.count(vertex) == 0) {
-							uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-							vertices.push_back(proc,vertex);
-						}
-
-						indices.push_back(proc,uniqueVertices[vertex]);
-					}
-					else {
-						VT* vertex = &vertices[lastIndex];
-						vertex->loadFromAttributes(pos, lastIndex, color, { 0.f,0.f,0.f }, {texCoord});
-						indices[lastIndex] = lastIndex;
-					}
-
-					lastIndex++;
-
-					// add index associated with unique vertex to index list
-				}
-			}
-
-			return VAL_SUCCESS;
+		}
+		if (totalIndexCount > UINT32_MAX) {
+			dbg::printWarning("mesh::importFromScene: Failed to load mesh, vertex count exceeds UINT32_MAX");
+			return VAL_FAILURE;
+		}
+		if (totalIndexCount == 0) {
+			return VAL_SUCCESS; // there no mesh to load
 		}
 
-		VAL_RETURN_CODE loadFromFBX(ValProc& proc, const std::filesystem::path& filepath, bool deduplicateVertices)
+
+
+		uint32_t lastIndex = 0u;
+		std::unordered_map<VT, uint32_t> uniqueVertices{};
+
+		for (size_t ni = 0; ni < scene->nodes.count; ni++)
 		{
-			const bool triangulate = true;
+			ufbx_node* node = scene->nodes.data[ni];
+			if (node->is_root) continue;
 
-			vertices.destroy(proc);
-			indices.destroy(proc);
-
-			ufbx_load_opts opts = { 0 }; // Optional, pass NULL for defaults
-			ufbx_error error; // Optional, pass NULL if you don't care about errors
-			ufbx_scene* scene = ufbx_load_file(filepath.string().c_str(), &opts, &error);
-			if (!scene) {
-				dbg::printWarning("Mesh::loadFromFBX: Failed to load FBX file %s for Mesh @ %p. ufbx error: %s", filepath.u8string().c_str(), this, error.description.data);
-				return VAL_FAILURE;
-			}
-
-			deduplicateVertices = false;
-
-			size_t totalIndexCount = 0u;
-
-			for (size_t ni = 0; ni < scene->nodes.count; ni++)
+			if (node->mesh)
 			{
-				ufbx_node* node = scene->nodes.data[ni];
-				if (node->is_root) continue;
-				if (node->mesh)
-				{
-					totalIndexCount += node->mesh->vertices.count;
-				}
-			}
+				ufbx_mesh* mesh = node->mesh;
 
-			if (totalIndexCount == 0) {
-				return VAL_SUCCESS; // there no mesh to load
-			}
+				// load vertices and indices from triangulated faces.
+				for (size_t fi = 0; fi < mesh->faces.count; ++fi) {
+					ufbx_face& face = mesh->faces[fi];
 
-			size_t lastIndex = 0u;
-			if (deduplicateVertices) {
+					tiny_vector<uint32_t> faceIndices((face.num_indices - 2) * 3/*max possible*/);
+					uint32_t triCount = ufbx_triangulate_face(faceIndices.data(), faceIndices.size(), mesh, face);
 
-			}
-			else {
-				
-
-				/*vertices.resize(proc, totalIndexCount);
-				indices.resize(proc, totalIndexCount);*/
-			}
-
-
-			std::unordered_map<std::filesystem::path,Texture2D> loadedTextures_fromFile;
-
-			std::unordered_map<uint32_t/*textureID*/,Texture2D> loadedTextures_fromEmbedded;
-
-			for (size_t ni = 0; ni < scene->nodes.count; ni++)
-			{
-				ufbx_node* node = scene->nodes.data[ni];
-				if (node->is_root) continue;
-
-				if (node->mesh) 
-				{
-					ufbx_mesh* mesh = node->mesh;
-
-					for (size_t fi = 0; fi < mesh->faces.count; ++fi)
+					// Loop through the vertex indices of the face
+					for (size_t i = 0; i < triCount * 3; ++i)
 					{
-						ufbx_face& face = mesh->faces[fi];
+						const uint32_t cornerIndex = faceIndices[i];
+						const uint32_t vertexIndex = mesh->vertex_indices[cornerIndex];
 
-						tiny_vector<uint32_t> faceIndices((face.num_indices-2) * 3/*max possible*/);
-						uint32_t triCount = ufbx_triangulate_face(faceIndices.data(), faceIndices.size(), mesh, face);
+						const ufbx_vec3& v = mesh->vertices[vertexIndex];
+						glm::vec3 vPos = { v.x,v.y,v.z };
+						glm::vec3 vNormal = { 0,0,0 };
+						glm::vec4 vColor = { 1.f, 1.f, 1.f, 1.f };
 
-						// Loop through the vertex indices of the face
-						for (size_t i = 0; i < triCount*3; ++i)
+						glm::vec2 vTexCoord;
+						if (mesh->vertex_uv.exists) {
+							const uint32_t uv_index = mesh->vertex_uv.indices[cornerIndex];
+							ufbx_vec2 uv = mesh->vertex_uv.values[uv_index];
+							vTexCoord = { uv.x, uv.y };
+						}
+
+						if (mesh->vertex_normal.exists) {
+							const uint32_t nml_index = mesh->vertex_normal.indices[cornerIndex];
+							const ufbx_vec3 nml = mesh->vertex_normal.values[nml_index];
+							vNormal = { nml.x, nml.y, nml.z };
+						}
+
+						tiny_vector<glm::vec2> vUVs = { vTexCoord };
+
+						//// create VT type vertex and load it
+
+						VT vertex;
+						if (deduplicateVertices) 
 						{
-
-							const uint32_t cornerIndex = faceIndices[i];
-							const uint32_t vertexIndex = mesh->vertex_indices[cornerIndex];
-
-							const ufbx_vec3& v = mesh->vertices[vertexIndex];
-							glm::vec3 vPos = { v.x,v.y,v.z };
-
-							tiny_vector<glm::vec2> vUVs;
-							glm::vec4 vColor = { 1.f, 1.f, 1.f, 1.f };
-							glm::vec3 vNormal = { 0,0,0 };
-
-							//// create VT type vertex and load it
-							VT vertex;
 							vertex.loadFromAttributes(vPos, lastIndex, vColor, vNormal, vUVs);
-							
+
+							if (uniqueVertices.count(vertex) == 0) {
+								uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+								vertices.push_back(proc, vertex);
+							}
+
+							indices.push_back(proc, uniqueVertices[vertex]);
+						}
+						else {
+
 							vertices.push_back(proc, vertex);
 							indices.push_back(proc, lastIndex);
-
-							lastIndex++;
 						}
-					}
-
-					continue;
-
-					// load materials (if applicable)
-					for (size_t mi = 0; mi < mesh->materials.count; ++mi)
-					{
-
-						ufbx_material* material = mesh->materials[mi];
-
-						// get textures of material
-						for (size_t ti = 0; ti < mesh->materials.count; ++ti)
-						{
-							ufbx_material_texture* matTexture = &material->textures[ti];
-							ufbx_texture* texture = matTexture->texture;
-
-							if (texture->type == UFBX_TEXTURE_FILE)
-							{
-								// it must be retrieved from disk
-								if (texture->has_file) 
-								{
-									// load texture from disk (if it hasn't already)
-									//fs::path filepath = fs::path(cstrtexture->absolute_filename.data);
-
-									// first check if the texture is loaded.
-									if (loadedTextures_fromFile.count(filepath) == 0) {
-										Texture2D& texture2D = loadedTextures_fromFile[filepath];
-										texture2D.setValProc(&proc);
-										texture2D.createFromDisk(texture->absolute_filename.data,
-											VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-											bufferSpace::GPU_ONLY, 1u,
-											USE_SOURCE_DIMENSION, USE_SOURCE_DIMENSION);
-										//loadedTextures_fromFile[filepath];
-									}
-								}
-								// it's embedded
-								if (texture->content.size != 0)
-								{
-									// load texture from embedded data
-								}
-							}
-
-							//texture->has_file;
-							//// relative to currently loaded file
-							//texture->filename;
-
-							//const ufbx_texture_type	textureType = texture->type;
-						}
-					}
-					//ufbx_material* material = material->textures.count
-					//material.textures;
-
-					// load UVs (if applicable)
-
-
-
-
-
-
-
-					/*
-					ufbx_uv_set_list& uv_sets = mesh->uv_sets;
-
-					for (size_t vi = 0; vi < mesh->vertices.count; ++vi)
-					{
-						const ufbx_vec3 ufbx_vertex = mesh->vertices[vi];
-						const glm::vec3 vPos = { ufbx_vertex.x, ufbx_vertex.y, ufbx_vertex.z };
-						tiny_vector<glm::vec2> vUVs;
-						glm::vec4 vColor = { 0,0,0,0 };
-						glm::vec3 vNormal = { 0,0,0 };
-
-
-						// create VT type vertex and load it
-						VT& vertex = vertices[lastIndex];
-						vertex.loadFromAttributes(vPos, lastIndex, vColor, vNormal, vUVs);
-						indices[lastIndex] = lastIndex;
-
 						lastIndex++;
 					}
-					*/
-
-
-
-
-					/*if (mesh->vertex_color.exists)
-					{
-						ufbx_vec4 color = mesh->vertex_color.values[vi];
-						vColor = { color.x,color.y,color.z,color.w };
-					}*/
-
-					/*	if (uv_sets.count > 0)
-						{
-							for (size_t uvi = 0u; uvi < uv_sets.count; ++uvi)
-							{
-								ufbx_uv_set& uv_set = mesh->uv_sets[uvi];
-								ufbx_vec2& ufbx_uv = uv_set.vertex_uv[vi];
-								vUVs.push_back({ ufbx_uv.x, ufbx_uv.y });
-							}
-						}*/
-
-
-						/*	if (mesh->normals.count > 0)
-							{
-								ufbx_vec3 ufbx_normal = mesh->normals.data[vi];
-								vNormal = { ufbx_normal.x, ufbx_normal.y, ufbx_normal.z };
-							}*/
-
-
-					// get materials
-					/*
-					ufbx_mesh* mesh = node->mesh;
-
-					// Get the material for the whole mesh (or per-face if using subsets)
-					if (mesh->materials.count > 0)
-					{
-						ufbx_material* material = mesh->material_slots[0].material;
-						printf("Material name: %s\n", material->name.data);
-					}
-					*/
 				}
 			}
-
-			ufbx_free_scene(scene);
-
-
-			return VAL_SUCCESS;
 		}
-	};
+
+		return VAL_SUCCESS;
+	}
+
+
+
+	// load from scene, OBJ
+	template <typename VT/*vertex type*/, uint16_t NTextures>
+	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices)
+	{
+		const bool triangulate = true;
+
+		vertices.destroy(proc);
+		indices.destroy(proc);
+
+		indices.setUsage(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		vertices.setUsage(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+
+		tinyobj::attrib_t& attrib = scene._attrib;
+		std::vector<tinyobj::shape_t>& shapes = scene._shapes;
+		std::vector<tinyobj::material_t>& materials = scene._materials;
+		std::string warn, err;
+
+		size_t totalIndexCount = 0u;
+
+		// first calculate the total index count
+		for (const auto& shape : shapes)
+		{
+			totalIndexCount += shape.mesh.indices.size();
+		}
+
+		if (totalIndexCount == 0) {
+			return VAL_SUCCESS; // there no mesh to load
+		}
+
+		uint32_t lastIndex = 0u;
+		std::unordered_map<VT, uint32_t> uniqueVertices{};
+		if (deduplicateVertices == false)
+		{
+			vertices.resize(proc, uint32_t(totalIndexCount));
+			indices.resize(proc, uint32_t(totalIndexCount));
+		}
+
+
+		for (size_t i = 0; i < shapes.size(); ++i)
+		{
+			const auto& shape = shapes[i];
+
+			for (size_t j = 0; j < shape.mesh.indices.size(); ++j)
+			{
+				const tinyobj::index_t& index = shape.mesh.indices[j];
+				if (3 * index.vertex_index + 2 >= attrib.vertices.size())
+				{
+					break;
+				}
+
+				const glm::vec3 pos = {
+					attrib.vertices[3 * index.vertex_index + 0],
+					attrib.vertices[3 * index.vertex_index + 1],
+					attrib.vertices[3 * index.vertex_index + 2]
+				};
+
+				const glm::vec2 texCoord = {
+				  attrib.texcoords[2 * index.texcoord_index + 0],
+				  1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+				};
+
+				const glm::vec4 color = { 1.f,1.f,1.f,1.f };
+
+				if (deduplicateVertices) {
+					VT vertex;
+					vertex.loadFromAttributes(pos, lastIndex, color, { 0.f,0.f,0.f }, { texCoord });
+
+					if (uniqueVertices.count(vertex) == 0) {
+						uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+						vertices.push_back(proc, vertex);
+					}
+
+					indices.push_back(proc, uniqueVertices[vertex]);
+				}
+				else {
+					VT* vertex = &vertices[lastIndex];
+					vertex->loadFromAttributes(pos, lastIndex, color, { 0.f,0.f,0.f }, { texCoord });
+					indices[lastIndex] = lastIndex;
+				}
+
+				lastIndex++;
+
+				// add index associated with unique vertex to index list
+			}
+		}
+
+		return VAL_SUCCESS;
+	}
 }
 
 #endif // !VAL_MESH_HPP

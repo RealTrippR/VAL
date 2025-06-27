@@ -169,7 +169,7 @@ int main()
 	// load and configure frag shader
 	Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	sampler imgSampler(proc, val::combinedImage);
+	Sampler imgSampler(proc, val::combinedImage);
 	imgSampler.setMaxAnisotropy(8.f);
 	fragShaderImage.setImageSamplers({ { &imgSampler, 1 } });
 

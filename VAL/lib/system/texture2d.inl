@@ -41,6 +41,13 @@ namespace val {
 		return _proc;
 	}
 
+	inline void Texture2D::discardPixels()
+	{
+		if (_pixels) {
+			stbi_image_free(_pixels);
+			_pixels = NULL;
+		}
+	}
 
 	inline stbi_uc* Texture2D::getPixels() const {
 		return _pixels;

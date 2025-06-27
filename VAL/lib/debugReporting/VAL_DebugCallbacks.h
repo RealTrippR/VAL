@@ -19,6 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define VAL_DEBUG_CALLBACKS_H
 
 #include <VAL/lib/C_compatibleBinding.h>
+#include <VAL/lib/ext/ansiColorCodes.h>
 #include <stdbool.h>
 
 #include <VAL/lib/debugReporting/VAL_DebugIntercept.h>

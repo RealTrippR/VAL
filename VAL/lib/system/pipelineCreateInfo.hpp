@@ -40,9 +40,9 @@ namespace val {
 		virtual const std::vector<VkShaderStageFlags> getShaderStages()const;
 
 	public:
-		void pushDescriptor_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler);
+		void pushDescriptor_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, Sampler& sampler);
 
-		void pushDescriptor_COMBINED_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler);
+		void pushDescriptor_COMBINED_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, Sampler& sampler);
 
 		void pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, ImageView& imgView);
 		void pushDescriptor_SAMPLED_IMAGE(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const uint16_t arrIdx, ImageView& imgView);

@@ -7,7 +7,16 @@ namespace val
 	// uint16: queue family, bool: supports present
 	static std::map<QUEUE_FLAGS, std::pair<uint16_t, bool>> queueFlagsToFamilyIndicesCache;
 
-	void Queue::create()
+	void Queue::create(ValProc& proc, const QUEUE_FLAGS flags)
+	{
+		destroy();
+		_queueFlags = flags;
+		_proc = &proc;
+		create();
+	}
+
+	void Queue::
+		create()
 	{
 		
 		if (_proc == NULL || _proc->getVkLogicalDevice() == NULL) 
@@ -117,9 +126,10 @@ namespace val
 				}
 				free(_semaphores);
 			}
-			_commandBuffers = VK_NULL_HANDLE;
-			_semaphores = VK_NULL_HANDLE;
 		}
+		_commandBuffers = VK_NULL_HANDLE;
+		_semaphores = VK_NULL_HANDLE;
+		_proc = NULL;
 	}
 
 	void Queue::copyToOther(Queue* other) const

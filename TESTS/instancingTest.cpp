@@ -207,7 +207,7 @@ int main()
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
 	val::Shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::sampler imgSampler(proc, val::combinedImage);
+	val::Sampler imgSampler(proc, val::combinedImage);
 	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline

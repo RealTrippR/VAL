@@ -116,6 +116,7 @@ namespace val
 
 		static uint8_t findQueueFamilyOfQueueFlags(QUEUE_FLAGS flag, ValProc* proc, VkSurfaceKHR surface/*optional*/, bool* success/*optional*/);
 
+		void create(ValProc& proc, const QUEUE_FLAGS flags);
 	protected:
 		friend Window;
 		friend ValProc;

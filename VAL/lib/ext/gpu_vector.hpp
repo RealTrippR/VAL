@@ -289,6 +289,10 @@ namespace val {
 			return (T*)_mappedMemory+i;
 		}
 
+		inline bool empty() const
+		{
+			return _size == 0;
+		}
 		const size_t& size() const {
 			return _size;
 		}

@@ -22,15 +22,20 @@ namespace val {
 	void Texture2D::destroy()
 	{
 		if (_imgMemory) {
-			_imgMemory = VK_NULL_HANDLE;
 			vkFreeMemory(_proc->_device, _imgMemory, VK_NULL_HANDLE);
+			dbg::recordVkObjectDestruction(_proc->_device,_imgMemory);
+
+			_imgMemory = VK_NULL_HANDLE;
 		}
 		if (_img) {
-			_img = VK_NULL_HANDLE;
 			vkDestroyImage(_proc->_device, _img, VK_NULL_HANDLE);
+			dbg::recordVkObjectDestruction(_proc->_device, _img);
+
+			_img = VK_NULL_HANDLE;
 		}
 		if (_pixels) {
 			stbi_image_free(_pixels);
+
 			_pixels = NULL;
 		}
 	}
@@ -38,6 +43,8 @@ namespace val {
 	void Texture2D::createFromMemory(void* memory, size_t memorySize, const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const bufferSpace memspac, const uint8_t mipLevels)
 	{
+		destroy();
+		_layout = layout;
 #ifndef NDEBUG
 		if (mipLevels == 0u) {
 			dbg::printError("Mip levels of Texture2D img must not be 0. The minimum is 1.");
@@ -59,24 +66,26 @@ namespace val {
 	void Texture2D::createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels, const uint16_t maxWidth, const uint16_t maxHeight)
 	{
+		destroy();
+		_layout = layout;
 #ifndef NDEBUG
 		if (mipLevels == 0u) {
 			dbg::printError("Mip levels of Texture2D img must not be 0. The minimum is 1.");
 			throw std::runtime_error("Invalid mip levels. The minimum is 1.");
 		}
 #endif // !NDEBUG
-		destroy();
 		_mipLevels = mipLevels;
 
 		int widthtmp;
 		int heightmp;
 
-		_img = createTextureImage8BitFromDisk(_proc, srcpath.string().c_str(), &_pixels, &_imgMemory, usages, mipLevels,
-			&widthtmp, &heightmp, &_channels, memspace, &_format);
-		
+		_img = createTextureImage8BitFromDisk(_proc, srcpath.string().c_str(), &_pixels, &_imgMemory, _layout, _format, usages, mipLevels,
+			&widthtmp, &heightmp, &_channels, memspace);
+		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
+		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
+
 		/*_img = createTextureImage(_proc, srcpath, &_pixels, _format, _imgMemory,
 			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);*/
-		_layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		if (maxWidth == USE_SOURCE_DIMENSION) {
 			_width = widthtmp;
 		}
@@ -98,6 +107,7 @@ namespace val {
 	void Texture2D::create(const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
 	{
+		destroy();
 #ifndef NDEBUG
 		if (format == TEXTURE_FORMAT_AUTO) {
 			dbg::printError("Texture2D::create: TEXTURE_FORMAT_AUTO is not allowed here - format cannot be automatically deduced without external information, such as that loaded from a file.");
@@ -105,8 +115,6 @@ namespace val {
 		}
 #endif // !NDEBUG
 
-	
-		destroy();
 
 
 #ifndef NDEBUG
@@ -122,7 +130,10 @@ namespace val {
 		_format = format;
 		_mipLevels = mipLevels;
 		_proc->createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
+		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
+		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
 	}
+
 
 	/* PRIVATE: */
 
@@ -140,8 +151,13 @@ namespace val {
 #endif // !NDEBUG
 
 
+		
 
 		VkCommandBuffer commandBuffer = _proc->beginSingleTimeCommands();
+
+		if (_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+			_proc->transitionImageLayout(_img, _format, _layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandBuffer, mipLevels);
+		}
 
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -190,7 +206,7 @@ namespace val {
 				VK_FILTER_LINEAR);
 
 			barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-			barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			barrier.newLayout = _layout;
 			barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
@@ -206,7 +222,7 @@ namespace val {
 
 		barrier.subresourceRange.baseMipLevel = mipLevels - 1;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.newLayout = _layout;
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
@@ -217,5 +233,9 @@ namespace val {
 			1, &barrier);
 
 		_proc->endSingleTimeCommands(commandBuffer);
+
+	/*	if (_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+			_proc->transitionImageLayout(_img, _format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _layout, commandBuffer, mipLevels);
+		}*/
 	}
 }

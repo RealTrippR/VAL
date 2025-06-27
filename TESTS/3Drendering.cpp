@@ -117,29 +117,29 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, V
 	renderPassMngr.setMSAAsamples(MSAAsamples); // required for multisampling
 
 
-	static subpass subpass(renderPassMngr, GRAPHICS);
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 
 	{
 		static depthAttachment depthAttach;
 		depthAttach.setImgFormat(depthFormat);
-		depthAttach.setLoadOperation(CLEAR);
-		depthAttach.setStoreOperation(DISCARD);
+		depthAttach.setLoadOperation(Clear);
+		depthAttach.setStoreOperation(Discard);
 		depthAttach.setFinalLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 		subpass.bindAttachment(&depthAttach);
 	}
 	{
 		static colorAttachment colorAttach;
 		colorAttach.setImgFormat(imgFormat);
-		colorAttach.setLoadOperation(CLEAR);
-		colorAttach.setStoreOperation(STORE);
+		colorAttach.setLoadOperation(Clear);
+		colorAttach.setStoreOperation(Store);
 		colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		subpass.bindAttachment(&colorAttach);
 	}
 	{
 		static resolveAttachment resolveAttach; // required for multisampling
 		resolveAttach.setImgFormat(imgFormat);
-		resolveAttach.setLoadOperation(DISCARD);
-		resolveAttach.setStoreOperation(STORE);
+		resolveAttach.setLoadOperation(Discard);
+		resolveAttach.setStoreOperation(Store);
 		resolveAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		subpass.bindAttachment(&resolveAttach);
 	}
@@ -153,13 +153,13 @@ int main() {
 	deviceRequirements.deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 	MeshTextured mesh(proc);
-	sampler imgSampler(proc, val::combinedImage);
+	Sampler imgSampler(proc, val::combinedImage);
 	imgSampler.bindImageView(mesh.getTextureImageView());
 
 	
 	// Configure and create window
 	WindowProperties windowConfig;
-	windowConfig.setProperty(WN_BOOL_PROPERTY::RESIZABLE, true);
+	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
 	Window window(windowConfig, 800, 800, "3D Rendering Test", proc);
 
 
@@ -186,8 +186,8 @@ int main() {
 	// load and configure shaders
 	val::Shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(val::vertex3D::getAttributeDescriptions());
-	vertShader.setBindingDescriptions({ val::vertex3D::getBindingDescription() });
-	vertShader._UBO_Handles = { { &uboHdl, 0 } };
+	vertShader.setBindingDescription(val::vertex3D::getBindingDescription() );
+	vertShader.setUBOs({{&uboHdl, 0}});
 
 	// load and configure frag shader
 	val::Shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
@@ -236,7 +236,7 @@ int main() {
 
 	val::renderTarget renderTarget;
 	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window._swapChainExtent);
+	renderTarget.setRenderArea(window.getSize());
 	renderTarget.setClearValues({
 		{.depthStencil { 1.0f, 0 } },
 		{.color { 0.0f, 0.0f, 0.0f, 1.0f } }
@@ -245,7 +245,7 @@ int main() {
 	renderTarget.setVertexBuffers({ mesh._vertexBuffer }, mesh._vertices.size());
 
 	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+	VkViewport viewport{ 0,0, window.getWidth(), window.getHeight(), 0.f, 1.f};
 
 	while (!window.shouldClose()) {
 		glfwPollEvents();

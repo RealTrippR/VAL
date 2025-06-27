@@ -21,7 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	void sampler::create() 
+	void Sampler::create() 
 	{
 		const VkPhysicalDeviceProperties& properties = _proc._physicalDeviceProperties;
 		
@@ -33,29 +33,29 @@ namespace val {
 		_VKdescriptorInfo.sampler = _sampler;
 	}
 
-	void sampler::destroy() {
+	void Sampler::destroy() {
 		if (_sampler) {
 			vkDestroySampler(_proc._device, _sampler, NULL);
 			_sampler = NULL;
 		}
 	}
 
-	void sampler::bindImageView(ImageView& imageView) {
+	void Sampler::bindImageView(ImageView& imageView) {
 		_imgView = &imageView;
 		_VKdescriptorInfo.imageView = _imgView->getImageView();
 		_VKdescriptorInfo.sampler = _sampler;
 	}
 
-	ImageView* sampler::getImageView() {
+	ImageView* Sampler::getImageView() {
 		return _imgView;
 	}
 	
-	void sampler::setSamplerType(const samplerType& type) {
+	void Sampler::setSamplerType(const samplerType& type) {
 		_samplerType = type;
 	}
 
 
-	void sampler::setMaxAnisotropy(const float& anisoLevel) {
+	void Sampler::setMaxAnisotropy(const float& anisoLevel) {
 		if (anisoLevel > 0) {
 			_samplerCreateInfo.anisotropyEnable = VK_TRUE;
 			_samplerCreateInfo.maxAnisotropy = anisoLevel;
@@ -65,36 +65,36 @@ namespace val {
 		}
 	}
 
-	void sampler::setMagnificationFilter(const VkFilter& filterType) {
+	void Sampler::setMagnificationFilter(const VkFilter& filterType) {
 		_samplerCreateInfo.magFilter = filterType;
 	}
 
-	void sampler::setMinificationFilter(const VkFilter& filterType) {
+	void Sampler::setMinificationFilter(const VkFilter& filterType) {
 		_samplerCreateInfo.minFilter = filterType;
 	}
 
-	void sampler::setMipmapMode(VkSamplerMipmapMode mipMapMode) {
+	void Sampler::setMipmapMode(VkSamplerMipmapMode mipMapMode) {
 		_samplerCreateInfo.mipmapMode = mipMapMode;
 	}
 
 	// U direction (horizontal)
-	void sampler::setAddressModeU(const VkSamplerAddressMode& addrMode) {
+	void Sampler::setAddressModeU(const VkSamplerAddressMode& addrMode) {
 		_samplerCreateInfo.addressModeU = addrMode;
 	}
 	// V direction (vertical)
-	void sampler::setAddressModeV(const VkSamplerAddressMode& addrMode) {
+	void Sampler::setAddressModeV(const VkSamplerAddressMode& addrMode) {
 		_samplerCreateInfo.addressModeV = addrMode;
 	}
 	// W direction (depth)
-	void sampler::setAddressModeW(const VkSamplerAddressMode& addrMode) {
+	void Sampler::setAddressModeW(const VkSamplerAddressMode& addrMode) {
 		_samplerCreateInfo.addressModeW = addrMode;
 	}
 
-	void sampler::useNormalizedCoordinates(const bool& val) {
+	void Sampler::useNormalizedCoordinates(const bool& val) {
 		_samplerCreateInfo.unnormalizedCoordinates = !val;
 	}
 
-	void sampler::setCompareMode(VkCompareOp cmpOp/*Set to VK_COMPARE_OP_NEVER to disable*/) {
+	void Sampler::setCompareMode(VkCompareOp cmpOp/*Set to VK_COMPARE_OP_NEVER to disable*/) {
 		switch (cmpOp)
 		{
 		case VK_COMPARE_OP_NEVER:
@@ -108,61 +108,61 @@ namespace val {
 		}
 	}
 
-	void sampler::setMipLodBias(const float& mipLOD) {
+	void Sampler::setMipLodBias(const float& mipLOD) {
 		_samplerCreateInfo.mipLodBias = mipLOD;
 	}
 
-	void sampler::setFromVkSamplerCreateInfo(const VkSamplerCreateInfo& createInfo) {
+	void Sampler::setFromVkSamplerCreateInfo(const VkSamplerCreateInfo& createInfo) {
 		_samplerCreateInfo = createInfo;
 	}
 
 	/////////////////////////////////////////
 
-	const samplerType& sampler::getSamplerType() {
+	const samplerType& Sampler::getSamplerType() {
 		return _samplerType;
 	}
 
 
-	const float& sampler::getMaxAnisotropy() {
+	const float& Sampler::getMaxAnisotropy() {
 		return _samplerCreateInfo.maxAnisotropy;
 	}
-	const VkFilter& sampler::getMagnificationFilter() {
+	const VkFilter& Sampler::getMagnificationFilter() {
 		return _samplerCreateInfo.magFilter;
 	}
-	const VkFilter& sampler::getMinificationFilter() {
+	const VkFilter& Sampler::getMinificationFilter() {
 		return _samplerCreateInfo.minFilter;
 	}
-	const VkSamplerMipmapMode& sampler::getMipmapMode() {
+	const VkSamplerMipmapMode& Sampler::getMipmapMode() {
 		return _samplerCreateInfo.mipmapMode;
 	}
-	const VkSamplerAddressMode& sampler::getAddressModeU() {
+	const VkSamplerAddressMode& Sampler::getAddressModeU() {
 		return _samplerCreateInfo.addressModeU;
 	}
-	const VkSamplerAddressMode& sampler::getAddressModeV() {
+	const VkSamplerAddressMode& Sampler::getAddressModeV() {
 		return _samplerCreateInfo.addressModeV;
 	}
-	const VkSamplerAddressMode& sampler::getAddressModeW() {
+	const VkSamplerAddressMode& Sampler::getAddressModeW() {
 		return _samplerCreateInfo.addressModeW;
 	}
-	const bool& sampler::unnormalizedCoordinates() {
+	const bool& Sampler::unnormalizedCoordinates() {
 		return _samplerCreateInfo.unnormalizedCoordinates;
 	}
-	const VkCompareOp& sampler::getCompareMode() {
+	const VkCompareOp& Sampler::getCompareMode() {
 		return _samplerCreateInfo.compareOp;
 	}
-	const VkBool32& sampler::getCompareEnabled() {
+	const VkBool32& Sampler::getCompareEnabled() {
 		return _samplerCreateInfo.compareEnable;
 	}
 
-	const VkSamplerCreateInfo& sampler::getSamplerCreateInfo() {
+	const VkSamplerCreateInfo& Sampler::getSamplerCreateInfo() {
 		return _samplerCreateInfo;
 	}
 
-	VkSampler& sampler::getVkSampler() {
+	VkSampler& Sampler::getVkSampler() {
 		return _sampler;
 	}
 
-	VkDescriptorImageInfo& sampler::getVkDescriptorImageInfo() {
+	VkDescriptorImageInfo& Sampler::getVkDescriptorImageInfo() {
 		_VKdescriptorInfo.imageView = _imgView->getImageView();
 		_VKdescriptorInfo.sampler = _sampler;
 		_VKdescriptorInfo.imageLayout = _imgView->getLayout();

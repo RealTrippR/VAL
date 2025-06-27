@@ -143,7 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -206,6 +206,7 @@
     <ClInclude Include="lib\debugReporting\VAL_DebugCallbacks.h" />
     <ClInclude Include="lib\debugReporting\VAL_DebugIntercept.h" />
     <ClInclude Include="lib\debugUtils\dbgUtils.hpp" />
+    <ClInclude Include="lib\ext\ansiColorCodes.h" />
     <ClInclude Include="lib\ext\gpu_vector.hpp" />
     <ClInclude Include="lib\ext\hashmap.h" />
     <ClInclude Include="lib\ext\roundToNextPowerOf2.hpp" />
@@ -213,6 +214,8 @@
     <ClInclude Include="lib\ext\tiny_vector.hpp" />
     <ClInclude Include="lib\ext\ubfx.h" />
     <ClInclude Include="lib\ext\VkPipelineStagesToString.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\fbxMaterialProperty.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\fbxScene.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\mesh.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshPBR.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshSimple.hpp" />
@@ -220,6 +223,7 @@
     <ClInclude Include="lib\meshes&amp;vertices\loadModels.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\objScene.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertexAttributeType.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertexBase.hpp" />
@@ -258,6 +262,8 @@
     <ClInclude Include="lib\system\computeTarget.hpp" />
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
+    <ClInclude Include="lib\system\descriptorSheet.hpp" />
+    <ClInclude Include="lib\system\descriptorSheetElement.hpp" />
     <ClInclude Include="lib\system\descType.hpp" />
     <ClInclude Include="lib\system\framebuffer.hpp" />
     <ClInclude Include="lib\system\graphicsPipeline.hpp" />
@@ -297,6 +303,7 @@
     <ClCompile Include="src\ext\tiny_obj.cpp" />
     <ClCompile Include="src\ext\ufbx.c" />
     <ClCompile Include="src\graphics\shader.cpp" />
+    <ClCompile Include="src\meshes&amp;vertices\fbxScene.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -306,6 +313,7 @@
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\objScene.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\vertexAttributeType.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\vertexInputAttribute.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\vertexInputAttributeList.cpp" />

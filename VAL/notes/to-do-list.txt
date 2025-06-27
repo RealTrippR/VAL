@@ -27,6 +27,9 @@ The Vulkan Abstraction Library is missing the following key features:
 
 ----------------------------------------------------------------------------------------------------------------
 
+[ ] Disconnect descriptor sets from ValProc and place them in the DescriptorSheet class, 
+	which would allow descriptor sets to be easily swapped out at runtime with no performance overhead.
+
 [!] Add warnings when a outdated render pass is ran
 
 [!] Add resize method to window class 

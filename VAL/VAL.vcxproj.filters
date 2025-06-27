@@ -374,6 +374,24 @@
     <ClInclude Include="lib\system\texture2d16bit.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\fbxScene.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\objScene.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\descriptorSheet.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\descriptorSheetElement.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\fbxMaterialProperty.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ext\ansiColorCodes.h">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -519,6 +537,12 @@
     </ClCompile>
     <ClCompile Include="src\ext\tiny_obj.cpp">
       <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\fbxScene.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\objScene.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

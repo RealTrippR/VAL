@@ -30,7 +30,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 	class Shader; // forward declaration
-	class sampler; // forward declaration
+	class Sampler; // forward declaration
 
 	class GraphicsPipeline : public pipelineCreateInfo {
 	public:		

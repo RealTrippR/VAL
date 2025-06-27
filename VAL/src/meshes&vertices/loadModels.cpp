@@ -16,7 +16,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 */
 
 #include <VAL/lib/meshes&vertices/loadModels.hpp>
-
 namespace val {
 
  namespace fs = std::filesystem;

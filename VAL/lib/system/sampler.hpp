@@ -11,13 +11,13 @@ namespace val {
 		immutable = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER //  // equivalent to combinedImage except it cannot be changed and is baked into the graphics pipeline
 	};
 
-	class sampler {
+	class Sampler {
 	public:
-		sampler(ValProc& proc) : _proc(proc) { initDefaultValues(); };
-		sampler(ValProc& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
-		sampler(ValProc& proc, val::ImageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
+		Sampler(ValProc& proc) : _proc(proc) { initDefaultValues(); };
+		Sampler(ValProc& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
+		Sampler(ValProc& proc, val::ImageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
 
-		~sampler() {
+		~Sampler() {
 			destroy();
 		}
 	public:

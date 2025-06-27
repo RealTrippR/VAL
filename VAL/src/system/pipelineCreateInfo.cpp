@@ -118,7 +118,7 @@ namespace val {
 	}
 
 
-	void pipelineCreateInfo::pushDescriptor_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
+	void pipelineCreateInfo::pushDescriptor_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, Sampler& sampler) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo = sampler.getVkDescriptorImageInfo();
@@ -141,7 +141,7 @@ namespace val {
 		);
 	}
 
-	void pipelineCreateInfo::pushDescriptor_COMBINED_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, sampler& sampler) {
+	void pipelineCreateInfo::pushDescriptor_COMBINED_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, Sampler& sampler) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
 
 		VkDescriptorImageInfo imageInfo = sampler.getVkDescriptorImageInfo();

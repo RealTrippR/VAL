@@ -150,7 +150,7 @@ namespace val
 			if (asDepthAttachment) {
 #ifndef NDEBUG
 				if (_depthStencilAttachment.has_value()) {
-					printf("VAL: Warning: The depth stencil attachment of subpass at address %h was overwritten during bindAttachment(), this is likely not intended behavior!\n", this);
+					dbg::printWarning("Subpass::bindAttachment: The depth stencil attachment of subpass at address %p was overwritten during bindAttachment(), this is likely not intended behavior.\n", this);
 				}
 #endif // !NDEBUG
 				_depthStencilAttachment = vkRef;
