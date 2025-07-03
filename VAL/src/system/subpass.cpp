@@ -123,7 +123,7 @@ namespace val
 
 		// Input attachments
 		_subpassDesc.pInputAttachments = _inputAttachments.data();
-		_subpassDesc.inputAttachmentCount = _inputAttachments.size();
+		_subpassDesc.inputAttachmentCount = (uint32_t)_inputAttachments.size();
 	}
 
 	void Subpass::bindAttachment(renderAttachment* attachment) {

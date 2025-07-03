@@ -29,14 +29,40 @@ namespace val {
 	class UBO_Handle {
 	public:
 		UBO_Handle(uint16_t sizeOfUBO, bufferSpace space = CPU_GPU) : _size(sizeOfUBO), _space(space) {};
+
 		UBO_Handle(uint16_t sizeOfUBO, bufferSpace space, VkBufferUsageFlags additionalUsageFlags) : _size(sizeOfUBO), _space(space), _additionalUsageFlags(additionalUsageFlags){};
 
+	public:
+
+		static inline VkDescriptorType getVkDescriptorType() {
+			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		}
+
+		inline static void toObjectDescriptorInfo(ObjectDescriptorInfo* descInfo)
+		{
+			UBO_Handle* self = (UBO_Handle*)descInfo->valObject;
+			descInfo->bufferInfos = { { self->getBuffer(), self->_offset, self->_size} };
+			descInfo->type = self->getVkDescriptorType();
+			descInfo->arrCount = 1u;
+			descInfo->valObject = self;
+		}
+
+		operator const ObjectDescriptorInfo()
+		{
+			ObjectDescriptorInfo info { 
+				.valObject = this ,
+				.updateDataCallback = toObjectDescriptorInfo
+			};
+			toObjectDescriptorInfo(&info);
+			return info;
+		}
+		
 	public:
 		void* getData(ValProc& proc);
 
 		void* getData(ValProc& proc, const uint8_t frameIdx);
 
-		VkBuffer getBuffer(ValProc& proc);
+		VkBuffer getBuffer();
 
 		void update(ValProc& proc, void* data);
 
@@ -45,11 +71,9 @@ namespace val {
 		uboArraySubset* getUBOarraySubset(ValProc& proc);
 
 
-		//void* getMappedData(VAL_PROC& pro);
+		//void* ge9+tMappedData(VAL_PROC& pro);
 
 		VkMemoryPropertyFlags getMemoryPropertyFlags();
-
-		static inline VkDescriptorType getVkDescriptorType() { return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; }
 
 	public:
 		const uint32_t _size = 0u; // Vulkan spec states that every device must support at least 16KB as the max size in bytes of a UBO buffer, some go up to 64 KB in size

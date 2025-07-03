@@ -125,16 +125,31 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="README.MD" />
-    <None Include="shaders\typicalLightingShader.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\typicalLightingShader.vert">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="shaders\basicLightingTextured.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\basicLightingTextured.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\basic.rgen">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\image2D.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\image2D.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\basic.rahit">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\dummy.rgen">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\dummy.rchit">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\dummy.rmiss">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

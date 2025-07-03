@@ -2,7 +2,18 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void ImageView::create(val::Image& img, const VkImageAspectFlags& aspectFlags)
+	void ImageView::create(ImageViewBindInfo& bindInfo, const VkImageAspectFlags aspectFlags)
+	{
+		_layout = bindInfo.layout;
+		_aspectFlags = aspectFlags;
+
+		if (_imgView != VK_NULL_HANDLE) {
+			destroy();
+		}
+
+		_proc.createImageView(bindInfo.image, bindInfo.format, aspectFlags, &_imgView);
+	}
+	/*void ImageView::create(val::Image& img, const VkImageAspectFlags& aspectFlags)
 	{
 		_layout = &img._imgLayout;
 		if (_imgView != VK_NULL_HANDLE) {
@@ -22,7 +33,7 @@ namespace val {
 		}
 		_aspectFlags = aspectFlags;
 		_proc.createImageView(texture.getVkImage(), texture.getVkFormat(), aspectFlags, &_imgView);
-	}
+	}*/
 
 	void ImageView::create(VkImage img, VkFormat format, const VkImageAspectFlags& aspectFlags)
 	{

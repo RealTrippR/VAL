@@ -35,16 +35,14 @@ namespace val
 		bool operator==(const VertexTxtr&) const = default;
 
 	public:
-
 		glm::vec3 pos;
-		glm::vec3 color;
 		glm::vec2 texCoord;
 		glm::vec3 normal;
+
 	public:
 		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs) override
 		{
 			this->pos = pos;
-			this->color = color;
 			if (!UVs.empty()) 
 			{
 				this->texCoord = UVs[0];
@@ -54,13 +52,15 @@ namespace val
 
 		static const tiny_vector<VkVertexInputAttributeDescription>& getInputAttributeDescriptions()
 		{
+			static tiny_vector<VkVertexInputAttributeDescription> r;
+			if (r.size() > 0)
+				return r;
 			static const VertexInputAttributeList vertexAttributes = {
-				   VertexInputAttribute(0, vec3, offsetof(VertexTxtr, pos)),
-				   VertexInputAttribute(1, vec3, offsetof(VertexTxtr, color)),
-				   VertexInputAttribute(2, vec2, offsetof(VertexTxtr, texCoord)),
-				   VertexInputAttribute(3, vec3, offsetof(VertexTxtr, normal))
+				   VertexInputAttribute(0, (VERTEX_ATTRIBUTE_TYPE)getPositionFormat(), offsetof(VertexTxtr, pos)),
+				   VertexInputAttribute(1, vec2, offsetof(VertexTxtr, texCoord)),
+				   VertexInputAttribute(2, vec3, offsetof(VertexTxtr, normal))
 			};
-			static const tiny_vector<VkVertexInputAttributeDescription> r = vertexAttributes.toVkVertexInputAttributeDescription();
+			r = vertexAttributes.toVkVertexInputAttributeDescription();
 			return r;
 		}
 
@@ -74,6 +74,14 @@ namespace val
 			};
 			return bindingDescription;
 		}
+
+		inline static VkDeviceSize getStride() {
+			return sizeof(VertexTxtr);
+		}
+
+		inline static VkFormat getPositionFormat() {
+			return (VkFormat)VERTEX_ATTRIBUTE_TYPE::vec3;
+		}
 	};
 }
 
@@ -84,15 +92,5 @@ namespace std {
 		size_t operator()(val::VertexTxtr const& vertex) const {
 			return (hash<glm::vec3>()(vertex.pos));
 		}
-
-	/*	bool operator==(const val::VertexTxtr& other) const {
-			return pos == other.pos &&
-			color == other.color &&
-			texCoord == other.texCoord &&
-			normal == other.normal;
-		}*/
-		/*bool operator==(const hash<val::VertexTxtr>& other) const {
-			return (memcmp(this, &other, sizeof(this)) == 0);
-		}*/
 	};
 }

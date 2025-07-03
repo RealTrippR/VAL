@@ -46,15 +46,18 @@ namespace val {
 	
 	std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPES flag);
 	
-	enum class DEVICE_FEATURES : uint8_t
+	enum class DEVICE_FEATURES : uint16_t
 	{
-		DEVICE_FEATURE_UNDEFINED = 0,
+		undefined = 0,
 		raytracing = 1 << 0,
 		anisotropicFiltering = 1 << 1,
 		variableRateShading = 1 << 2,
 		geometryShader = 1 << 3,
 		tesselationShader = 1 << 4,
-		cubeMaps = 1 << 5
+		cubeMaps = 1 << 5,
+		deviceBufferAddressing = 1 << 6,
+		accelerationStructures = 1 << 7,
+		robustBufferAccessing = 1 << 8
 	};
 
 #ifndef DEVICE_FEATURE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
@@ -63,7 +66,7 @@ namespace val {
 #endif
 
 
-	struct physicalDevicePriorities
+	struct PhysicalDevicePriorities
 	{
 		float bandwidthCapability = 1.f;
 		float memoryCapability = 1.f;
@@ -85,7 +88,7 @@ namespace val {
 	public:
 		DEVICE_TYPES deviceTypes = (DEVICE_TYPES::integrated_GPU | DEVICE_TYPES::dedicated_GPU);
 		DEVICE_FEATURES deviceFeatures{};
-		physicalDevicePriorities priorities{};
+		PhysicalDevicePriorities priorities{};
 		std::optional<uint32_t> deviceID;
 		std::optional<uint32_t> vendorID;
 		std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };

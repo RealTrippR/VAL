@@ -34,6 +34,16 @@ namespace val
 		virtual void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
 		{}
 
+		inline static VkDeviceSize getStride() {
+			dbg::printWarning("VertexBase::getPositionFormat was called. This function is of a base class and should never be called. This likely indicates an error in the program.");
+			return 0u;
+		}
+
+		inline static VkFormat getPositionFormat() {
+			dbg::printWarning("VertexBase::getPositionFormat was called. This function is of a base class and should never be called. This likely indicates an error in the program.");
+			return VK_FORMAT_UNDEFINED;
+		}
+
 		static const tiny_vector<VkVertexInputAttributeDescription>& getInputAttributeDescriptions() {
 			dbg::printWarning("VertexBase::getInputAttributeDescriptions was called. This function is of a base class and should never be called. This likely indicates an error in the program.");
 			return {}; 

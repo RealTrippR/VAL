@@ -179,8 +179,8 @@ namespace val {
 	// if a match is found, it will return the distance from beforeStr to cstr begin,
 	// otherwise it will return -1.
 	int64_t findLastMatch(const char* cstrBegin, const char* beforeStr, const char* targ, const bool ignoreCommented = true) {
-		const uint32_t targLen = strlen(targ);
-		uint32_t i = 0u;
+		const size_t targLen = strlen(targ);
+		size_t i = 0u;
 
 		while (beforeStr - i > cstrBegin) {
 			if (ignoreCommented) {
@@ -201,7 +201,7 @@ namespace val {
 
 			// Scan backwards for the target string
 			bool match = true;
-			for (uint32_t j = 0; j < targLen; ++j) {
+			for (size_t j = 0; j < targLen; ++j) {
 				if (*(beforeStr - i - j) != targ[targLen - j - 1]) {
 					match = false;
 					break;
@@ -211,7 +211,7 @@ namespace val {
 			if (match) {
 				// first check to ensure that this line isn't commented out
 				if (ignoreCommented) {
-					uint32_t j = 0;
+					size_t j = 0;
 					while (j < UINT32_MAX)
 					{
 						if (beforeStr - i - j == cstrBegin || beforeStr - i - j - 1 == cstrBegin) {
@@ -247,7 +247,7 @@ namespace val {
 		uint32_t limit = UINT32_MAX, bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL,
 		bool (*ignoreCharacterConditional)(const char /*char*/, const uint32_t /*char index*/) = NULL)
 	{
-		const uint32_t targlen = strlen(targ);
+		const uint32_t targlen = (uint32_t)strlen(targ);
 		COMMENT_TYPE comment = NONE;
 		for (uint32_t i = 0; i < limit; ++i) {
 			if (cstr[i] == '\0') {
@@ -501,7 +501,7 @@ namespace val {
 				if (str[i] == '(') {
 					const char* cpar = getClosingParenthesis(str + i);
 					if (cpar) {
-						const uint32_t jmplen = cpar - (str + i);
+						const uint32_t jmplen = (uint32_t)(cpar - (str + (size_t)i));
 						i += jmplen;
 						argclen += jmplen;
 					}
@@ -742,7 +742,7 @@ namespace val {
 				*error = (char*)"Name closing parenthesis ')' is missing";
 				return VAL_FAILURE;
 			}
-			uint8_t passNameLen = nameClosingBracket - nameOpeningParen - 1;
+			uint8_t passNameLen = uint8_t(nameClosingBracket - nameOpeningParen - 1);
 		
 			// alloc pass name
 			passInfo.passName = (char*)realloc(passInfo.passName, passNameLen + 1);
@@ -1053,7 +1053,7 @@ namespace val {
 	{
 		// scan the fixed subroutine statement by statement, as seperated by ';'
 		char* cur = (char*)passInfo->execSrc+fixedBlock->srcOffset;
-		for (uint32_t i = 0; i < UINT32_MAX; ++i)
+		for (size_t i = 0; i < UINT64_MAX; ++i)
 		{
 			const char* statementBegin = cur;
 			const char* statementEnd = findNextMatch(cur, ";");
@@ -1065,7 +1065,7 @@ namespace val {
 			uint16_t f_table_f_idx = 0u;
 			char* fmatch = NULL;
 			// check if the current statment matches a function in the function table
-			for (uint32_t j = 0; j < ARR_COUNT(f_table) / 2; ++j) {
+			for (size_t j = 0; j < ARR_COUNT(f_table) / 2; ++j) {
 				const char* tfunc = f_table[j * 2 + 1];
 				fmatch = findNextMatchAdditive(cur, tfunc, statementLen + 1);
 				if (fmatch) {
@@ -1475,7 +1475,7 @@ namespace val {
 				free(curPassInfo->dependentPasses);
 			}
 
-			const uint32_t dependentPassesPointerListSize = sizeof(PASS_INFO*) * dependentUpon.size();
+			const uint32_t dependentPassesPointerListSize = sizeof(PASS_INFO*) * (uint32_t)dependentUpon.size();
 			curPassInfo->dependentPasses = NULL;
 			if (dependentPassesPointerListSize > 0) {
 				curPassInfo->dependentPasses = (PASS_INFO**)malloc(dependentPassesPointerListSize);
@@ -1486,7 +1486,7 @@ namespace val {
 					break;
 				}
 				else {
-					curPassInfo->dependentPassesCount = dependentUpon.size();
+					curPassInfo->dependentPassesCount = (uint16_t)dependentUpon.size();
 					memcpy(curPassInfo->dependentPasses, dependentUpon.data(), dependentPassesPointerListSize);
 					int i=0;
 				}

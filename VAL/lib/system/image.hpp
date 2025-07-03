@@ -15,108 +15,98 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_IMAGE_HPP
-#define VAL_IMAGE_HPP
+#include <VAL/lib/system/system_utils.hpp>
 
-#define GLFW_INCLUDE_VULKAN
+#ifndef VAL_STORAGE_IMAGE_HPP
+#define VAL_STORAGE_IMAGE_HPP
 
-#include <GLFW/glfw3.h>
-
-#include <ExternalLibraries/stb_image.h>;
-
-#include <VAL/lib/system/VAL_PROC.hpp>
-#include <filesystem>
-#include <stdexcept>
-#include <stdlib.h>
-
-namespace val {
-	class imageView; // forward declaration
-
-	class Image {
+namespace val
+{
+	class Image
+	{
 	public:
 		Image() = default;
-		Image(ValProc& proc, const std::filesystem::path path, const VkFormat& format, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : Image() {
-			create(proc, path, format, mipLevels, MSAA_samples);
-		}
-		Image(ValProc& proc, const std::filesystem::path path, const VkFormat& format, VkImageLayout imgLayout, uint8_t mipLevels = 1U, VkSampleCountFlagBits MSAA_samples = VK_SAMPLE_COUNT_1_BIT) : Image() {
-			_imgLayout = imgLayout;
-			create(proc, path, format, mipLevels, MSAA_samples);
-		}
-		~Image() {
-			destroy();
+
+		Image(ValProc& proc, uint16_t width, uint16_t height, VkFormat format, VkImageLayout imgLayout, VkImageUsageFlags usages)
+		{
+			_width = width;
+			_height = height;
+			_format = format;
+			_layout = imgLayout;
+			_usages = usages;
+			create(proc);
 		}
 
-		void recreate(ValProc& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U);
-
-		inline const stbi_uc* pixels() {
-			return _pixels;
-		}
-
-		inline VkImage& getImage() {
-			return _image;
-		}
-
-		inline const int32_t& getWidth() {
-			return _width;
-		}
-
-		inline const int32_t& getHeight() {
-			return _height;
-		}
-
-		inline const uint8_t& getChannels() {
-			return _channels;
-		}
-
-		inline const VkFormat& getFormat() {
-			return _format;
-		}
-
-		inline VkDeviceMemory& getMemory() {
-			return _img_memory;
-		}
-
-		inline const uint8_t getMipLevels() {
-			return _mipLevels;
-		}
-
-		inline const void destroy() {
-			if (_img_memory) {
-				vkDestroyImage(_device, _image, NULL);
-				vkFreeMemory(_device, _img_memory, NULL);
-				_img_memory = NULL;
+		~Image()
+		{
+#ifndef NDEBUG
+			if (_img != NULL) {
+				dbg::printError("Image::~Image: Image @ %p was not properly destroyed.", this);
+				throw std::runtime_error("Image::~Image");
 			}
-			if (_pixels) {
-				stbi_image_free(_pixels);
-				_pixels = NULL;
-			}
+#endif // !NDEBUG
 		}
 
-		void transitionImgLayout(ValProc& proc, VkCommandBuffer cmdbuff, VkImageLayout newLayout);
-
-		inline const VkImageLayout getLayout() {
-			return _imgLayout;
+		static inline VkDescriptorType getVkDescriptorType() {
+			return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		}
+
+
+		inline ImageViewBindInfo toImageViewBindInfo()
+		{
+			ImageViewBindInfo bindInfo;
+			bindInfo.format = _format;
+			bindInfo.layout = &_layout;
+			bindInfo.image = _img;
+			return bindInfo;
+		}
+
+		operator ImageViewBindInfo()
+		{
+			return toImageViewBindInfo();
+		}
+		
 	public:
+		void create(ValProc& proc);
 
-		void create(ValProc& proc, const std::filesystem::path path, const VkFormat& format, const uint8_t& mipLevels = 1U, const VkSampleCountFlagBits& MSAA_samples = VK_SAMPLE_COUNT_1_BIT);
+		void resize(ValProc& proc, uint16_t newWidth, uint16_t newHeight);
 
-		void generateMipmaps(ValProc& proc, const uint8_t mipLevels);
+		void destroy(ValProc& proc);
 
-	protected:
+		void copyToOther(ValProc& proc, Image* other);
 
-		friend ImageView;
+		inline VkImage getVkImage() const { return _img; };
 
-		stbi_uc* _pixels = NULL;
-		VkImage _image{};
-		VkImageLayout _imgLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
-		VkFormat _format{};
-		int32_t _width{}; // source image width
-		int32_t _height{}; // source image height
-		uint8_t _channels{};
-		uint8_t _mipLevels{};
-		VkDeviceMemory _img_memory{};
-		VkDevice _device{};
+		inline VkDeviceMemory getDeviceMemory() const { return _imgMemory; };
+
+		inline uint16_t getWidth() const { return _width; };
+
+		void setWidth(ValProc& proc, const uint16_t width);
+
+		inline uint16_t getHeight() const { return _height; };
+
+		void setHeight(ValProc& proc, const uint16_t height);
+
+		inline VkImageUsageFlags getUsages() const { return _usages; };
+
+		void setUsages(ValProc& proc, VkImageUsageFlags usages);
+
+		inline uint8_t getMipmapLevel() const { return _mipMapLevel; };
+
+		void setMipmapLevel(ValProc& proc, const uint8_t mipmaplevel);
+
+	private:
+		VkImage _img = NULL;
+		VkDeviceMemory _imgMemory;
+
+		VkImageLayout _layout;
+		VkFormat _format;
+		VkImageUsageFlags _usages;
+
+		uint16_t _width;
+		uint16_t _height;
+		uint8_t _mipMapLevel = 1u;
 	};
 }
-#endif // !VAL_IMAGE_HPP
+
+#endif // !VAL_STORAGE_IMAGE_HPP

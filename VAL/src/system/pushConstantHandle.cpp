@@ -18,20 +18,20 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/pushConstantHandle.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/graphics/shader.hpp>
-#include <VAL/lib/system/pipelineCreateInfo.hpp>
+#include <VAL/lib/system/pipelineBase.hpp>
 
 namespace val {
-	void pushConstantHandle::update(ValProc& proc, void* data, const pipelineCreateInfo& pipeline, const Shader& shdr, VkCommandBuffer& cmdBuffer) {
+	void pushConstantHandle::update(ValProc& proc, void* data, const PipelineBase& pipeline, const Shader& shdr, VkCommandBuffer& cmdBuffer) {
 #ifndef NDEBUG
 		if (_size % 4 != 0) {
-			printf("VAL: WARNING: Push constant at memory address %h has a size that is not a multiple of 4! It's size is: %d", this, _size);
+			printf("VAL: WARNING: Push constant at memory address %p has a size that is not a multiple of 4! It's size is: %d", this, _size);
 		}
 
 #endif // !NDEBUG
 
 		vkCmdPushConstants(
 			cmdBuffer,
-			proc._pipelineLayouts[pipeline.pipelineIdx],
+			proc._graphicsPipelineLayouts[pipeline.pipelineIdx],
 			shdr._shaderStageFlags,
 			_offset,
 			_size,
@@ -39,10 +39,10 @@ namespace val {
 		);
 	}
 
-	void pushConstantHandle::update(ValProc& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer& cmdBuffer) {
+	void pushConstantHandle::update(ValProc& proc, void* data, const PipelineBase& pipeline, VkCommandBuffer& cmdBuffer) {
 		vkCmdPushConstants(
 			cmdBuffer,
-			proc._pipelineLayouts[pipeline.pipelineIdx],
+			proc._graphicsPipelineLayouts[pipeline.pipelineIdx],
 			_stageFlags,
 			_offset,
 			_size,

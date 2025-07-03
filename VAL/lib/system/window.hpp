@@ -132,7 +132,13 @@ namespace val {
 		inline static void pollEvents() {
 			glfwPollEvents();
 		}
+
+		void createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass);
 	
+		void createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass);
+
+		void createSwapChainFrameBuffers(ValProc& proc, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass);
+
 		void createSwapChainFrameBuffers(VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
 	protected:
@@ -154,8 +160,6 @@ namespace val {
 
 		Queue _presentQueue;
 
-		VkColorSpaceKHR _colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-
 		VkSurfaceKHR _surface{};
 		////////////////// SWAPCHAIN //////////////////
 
@@ -168,24 +172,23 @@ namespace val {
 
 		VkFence _presentFence = VK_NULL_HANDLE;
 
-		uint8_t _swapChainImageCount = 0u;
-
-		uint16_t _swapChainAttachmentCount = 0u;
-
-		uint32_t _currentSwapChainImageIndex = 0;
-		// Because windows can be created from an existing GLFW handle,
-		// this is used to avoid the destruction of a window that it doesn't own.
-		bool _ownsGLFWwindow = true;
-		// this can be consolidated
-		/*
-		tiny_vector<VkImage, uint8_t> _swapChainImages;
-		tiny_vector<VkImageView, uint8_t> _swapChainImageViews;
-		tiny_vector<VkFramebuffer, uint8_t> _swapChainFrameBuffers;
-		*/
-
 		// this data is used to recreate the swap chain when it's out of date.
 		VkImageView* _swapChainAttachments = NULL;
 		VkRenderPass _swapChainRenderPass{};
+
+		VkColorSpaceKHR _colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+
+		uint32_t _currentSwapChainImageIndex = 0;
+
+		uint16_t _swapChainAttachmentCount = 0u;
+
+		uint8_t _swapChainImageCount = 0u;
+
+		// Because windows can be created from an existing GLFW handle,
+		// this is used to avoid the destruction of a window that it doesn't own.
+		bool _ownsGLFWwindow = true;
+
+		bool _frameBufferResized = false;
 	};
 }
 

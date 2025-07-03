@@ -47,7 +47,7 @@ void updateStorageBuffers() {
 
 }
 
-void setGraphicsPipelineInfo(val::pipelineCreateInfo& info) {
+void setGraphicsPipelineInfo(val::PipelineBase& info) {
 	VkPipelineRasterizationStateCreateInfo& rasterizer = info.rasterizer;
 	rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterizer.depthClampEnable = VK_FALSE;
@@ -166,7 +166,7 @@ int main() {
 
 	val::Shader polygonFragShader("shaders/polygonfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::pipelineCreateInfo pipelineInfo;
+	val::PipelineBase pipelineInfo;
 
 	pipelineInfo.shaders.push_back(&polygonVertShader);
 	pipelineInfo.shaders.push_back(&polygonFragShader);

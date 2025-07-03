@@ -21,6 +21,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 	namespace dbg {
+		VERBOSITY_FLAGS curVerbosity = VERBOSITY_FLAGS::errors | VERBOSITY_FLAGS::warnings | VERBOSITY_FLAGS::notes;
+
 		void addNoteIntercept(VAL_DEBUG_INTERCEPT intercept) {
 			VAL_NOTE_DEBUG_ADD_INTERCEPT(intercept);
 		}
@@ -45,7 +47,21 @@ namespace val {
 			VAL_ERROR_DEBUG_REMOVE_INTERCEPT(intercept);
 		}
 
+		void setVerbosityFlags(const VERBOSITY_FLAGS verbosity)
+		{
+			curVerbosity = verbosity;
+		}
+
+		VERBOSITY_FLAGS getVerbosityFlags()
+		{
+			return curVerbosity;
+		}
+
 		void printNote(const char* format_msg, ...) {
+			if (bool(curVerbosity & VERBOSITY_FLAGS::notes)==false) {
+				return;
+			}
+
 			char msg[512];
 			va_list args;
 			va_start(args, format_msg);
@@ -55,6 +71,9 @@ namespace val {
 		}
 
 		void printWarning(const char* format_msg, ...) {
+			if (bool(curVerbosity & VERBOSITY_FLAGS::warnings) == false) {
+				return;
+			}
 			char msg[512];
 			va_list args;
 			va_start(args, format_msg);
@@ -64,6 +83,9 @@ namespace val {
 		}
 
 		void printError(const char* format_msg, ...) {
+			if (bool(curVerbosity & VERBOSITY_FLAGS::errors) == false) {
+				return;
+			}
 			char msg[512];
 			va_list args;
 			va_start(args, format_msg);

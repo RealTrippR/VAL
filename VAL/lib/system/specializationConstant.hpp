@@ -12,13 +12,11 @@ namespace val {
 			_data = data;
 			_dataSize = dataSize;
 			_dataOffset = dataOffset;
-#ifndef NDEBUG
+
 			if (dataOffset > dataSize) {
-				printf("VAL: ERROR: The offset of a specializationConstant cannot be greater than it's size!\n");
-				printf("Size: %u, Offset: %u", dataSize, dataOffset);
-				throw std::logic_error("VAL: ERROR: The offset of a specializationConstant cannot be greater than it's size!");
+				dbg::printError("specializationConstant::specializationConstant: The offset of specializationConstant @ %p with id %u and offset of %u is greater than its size of %u", this, id, dataOffset, dataSize);
+				return;
 			}
-#endif // !NDEBUG
 		}
 
 		// VkSpecializationMapEntry to specializationConstant

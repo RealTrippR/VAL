@@ -33,7 +33,7 @@ namespace val {
 
 		for (size_t i = 0; i < graphicsPipelines.size(); ++i) 
 		{
-			const GraphicsPipeline& pipeline = graphicsPipelines[i];
+			const GraphicsPipeline& pipeline = graphicsPipelines[(uint32_t)i];
 
 			if (pipeline.getDepthStencilState() != NULL) {
 				hasDepthBuffer = true;

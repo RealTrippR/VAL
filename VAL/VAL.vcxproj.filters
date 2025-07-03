@@ -72,6 +72,12 @@
     <Filter Include="src\debugUtils">
       <UniqueIdentifier>{c903a468-41a5-4e2e-91db-db9af32cfa7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\descriptorSheet">
+      <UniqueIdentifier>{a21c1ef1-d9bb-4bf7-b082-fe55d3325543}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\descriptorSheets">
+      <UniqueIdentifier>{0bd0912a-06aa-4bb3-8fe5-0b1193d84615}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\VAL_PROC.hpp">
@@ -113,7 +119,7 @@
     <ClInclude Include="lib\system\queueManager.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\pipelineCreateInfo.hpp">
+    <ClInclude Include="lib\system\pipelineBase.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\renderTarget.hpp">
@@ -138,9 +144,6 @@
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\descriptorBinding.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\system\image.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
     <ClInclude Include="lib\system\tiedGraphicsObject.hpp">
@@ -380,17 +383,47 @@
     <ClInclude Include="lib\meshes&amp;vertices\objScene.hpp">
       <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
-    <ClInclude Include="lib\system\descriptorSheet.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\system\descriptorSheetElement.hpp">
-      <Filter>lib\system</Filter>
-    </ClInclude>
     <ClInclude Include="lib\meshes&amp;vertices\fbxMaterialProperty.hpp">
       <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
     <ClInclude Include="lib\ext\ansiColorCodes.h">
       <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\descriptorSheets\descriptorSheet.hpp">
+      <Filter>lib\descriptorSheet</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\descriptorSheets\descriptorSheetElement.hpp">
+      <Filter>lib\descriptorSheet</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\descriptorSheets\objectDescriptorInfo.h">
+      <Filter>lib\descriptorSheet</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\valProcCreateInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\raytracingPipeline.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\accelerationStructureGeometry.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\accelerationStructureInstance.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\accelerationStructure.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\debugReporting\DbgVerbosityFlags.hpp">
+      <Filter>lib\debugReporting</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\vertexTxtr2D.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\image.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\imageViewBindInfo.hpp">
+      <Filter>lib\system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -406,9 +439,6 @@
     <ClCompile Include="src\graphics\shader.cpp">
       <Filter>src\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\image.cpp">
-      <Filter>src\system</Filter>
-    </ClCompile>
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp">
       <Filter>src\meshes&amp;vertices</Filter>
     </ClCompile>
@@ -421,7 +451,7 @@
     <ClCompile Include="src\system\pushConstantHandle.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\pipelineCreateInfo.cpp">
+    <ClCompile Include="src\system\pipelineBase.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\system\queueManager.cpp">
@@ -543,6 +573,27 @@
     </ClCompile>
     <ClCompile Include="src\meshes&amp;vertices\objScene.cpp">
       <Filter>src\meshes&amp;vertices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\descriptorSheets\descriptorSheet.cpp">
+      <Filter>src\descriptorSheets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\descriptorSheets\descriptorSheetElement.cpp">
+      <Filter>src\descriptorSheets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\accelerationStructureGeometry.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\accelerationStructure.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\accelerationStructureInstance.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\raytracingPipeline.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\image.cpp">
+      <Filter>src\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -22,7 +22,7 @@ const bool enableValidationLayers = true;
 #define STB_IMAGE_IMPLEMENTATION
 #include <ExternalLibraries/stb_image.h>
 
-struct uniformBufferObject {
+struct ViewMatrix {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
@@ -32,23 +32,29 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
-	using namespace val;
-	VkExtent2D extent = proc._windowVAL->getSize();
+float time_sec = 0u;
+void calculateTime()
+{
 	static auto startTime = std::chrono::high_resolution_clock::now();
-
+	static std::chrono::steady_clock::time_point lastTime;
 	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	const auto dt = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime);
+	printf("FPS: %f\n", 1 / dt.count());
+	time_sec = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	lastTime = currentTime;
+}
 
-	static uniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+void updateViewMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
+{
+	using namespace val;
+	const VkExtent2D& extent = proc._windowVAL->getSize();
+
+	ViewMatrix& ubo = *(ViewMatrix*)hdl.getData(proc);
+	ubo.model = glm::rotate(glm::mat4(1.0f), time_sec * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
-
-	hdl.update(proc, &ubo);
 }
-
 
 void setGraphicsPipelineInfo1(val::GraphicsPipeline& pipeline)
 {
@@ -125,6 +131,7 @@ void setRenderPass2(val::renderPassManager& renderPassMngr, VkFormat imgFormat) 
 int main()
 {
 	using namespace val;
+
 	ValProc proc;
 	PhysicalDeviceRequirements deviceRequirements(val::DEVICE_TYPES::dedicated_GPU | val::DEVICE_TYPES::integrated_GPU);
 
@@ -164,23 +171,30 @@ int main()
 	GraphicsPipeline pipeline1;
 
 	// UBO which stores view information
-	UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl(sizeof(ViewMatrix));
 
-	// load and configure frag shader
-	Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+
+
 
 	Sampler imgSampler(proc, val::combinedImage);
-	imgSampler.setMaxAnisotropy(8.f);
-	fragShaderImage.setImageSamplers({ { &imgSampler, 1 } });
+
+	DescriptorSheet descriptorSheet1(
+		{{0, uboHdl, SHADER_STAGE::Vertex},
+		 {1, imgSampler, SHADER_STAGE::Fragment} },
+		FRAMES_IN_FLIGHT
+	);
+
+
+	// load and configure frag shader
+	Shader fragShaderImage("shaders-compiled/imageshader.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
 
 	// load and configure vert shader
-	Shader vertShader("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	Shader vertShader("shaders-compiled/shader.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
-	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	pipeline1.shaders = { &vertShader,&fragShaderImage };
-
+	pipeline1.setDescriptorSheet(&descriptorSheet1);
 	setGraphicsPipelineInfo1(pipeline1);
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
@@ -195,16 +209,20 @@ int main()
 
 	GraphicsPipeline pipeline2;
 
-	UBO_Handle uboHdl2(sizeof(uniformBufferObject));
+	UBO_Handle uboHdl2(sizeof(ViewMatrix));
 
-	val::Shader vertShader2("shaders-compiled/shadervert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	DescriptorSheet descriptorSheet2(
+		{ {0, uboHdl2, SHADER_STAGE::Vertex} },
+		FRAMES_IN_FLIGHT
+	);
+
+	val::Shader vertShader2("shaders-compiled/shader.vert.spv", SHADER_STAGE::Vertex);
 	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader2.setBindingDescriptions({ res::vertex::getBindingDescription() });
 
-	vertShader2._UBO_Handles = {{ &uboHdl2,0 }};
-
-	Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	Shader fragShaderColor("shaders-compiled/colorshader.frag.spv", SHADER_STAGE::Fragment);
 	pipeline2.shaders = { &vertShader2,&fragShaderColor };
+	pipeline2.setDescriptorSheet(&descriptorSheet2);
 
 	setGraphicsPipelineInfo2(pipeline2);
 
@@ -224,24 +242,10 @@ int main()
 	//////////////////////////////////////////////////////////////////
 	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline1, &pipeline2 });
 
-	/*
-	texture2d(VAL_PROC& proc, const uint16_t width, const uint16_t height, const VkFormat format,
-		const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace buffspace = GPU_ONLY, const uint8_t mipLevels = 0u) : _proc(proc)
-	{
-		create(width, height, space, format, usages, layout, buffspace, mipLevels);
-	}
-		
-	*/
-
 	val::Texture2D renderTargetImg(proc, 800, 800, imageFormat, 
 		VkImageUsageFlagBits(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT  | VK_IMAGE_USAGE_SAMPLED_BIT), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	val::ImageView renderTargImgView(proc, renderTargetImg, VK_IMAGE_ASPECT_COLOR_BIT);
-
-
-
-	window.createSwapChainFrameBuffers({}, 0u, pipeline1.getVkRenderPass(), proc._device);
-
 
 	val::gpu_vector<res::vertex> vertices1(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
@@ -266,15 +270,22 @@ int main()
 
 
 
+
 	val::Framebuffer renderTargetFramebuffer(proc, 800, 800, pipeline2.getVkRenderPass(), renderTargImgView);
 	
 	////////////////////////////////////////////////////////////
 	imgSampler.bindImageView(renderTargImgView);
+	imgSampler.create();
 
-	////////////////// CREATE DESCRIPTOR SETS //////////////////
-	proc.createDescriptorSets(&pipeline1);
-	proc.createDescriptorSets(&pipeline2);
-	////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////
+		// create swapchain frame buffers and descriptor sets
+	window.createSwapChainFrameBuffers({}, 0u, pipeline1.getVkRenderPass(), proc._device);
+
+	pipeline1.allocateAndWriteDescriptorSets(proc);
+	pipeline2.allocateAndWriteDescriptorSets(proc);
+
+	//////////////////////////////////////////////////////////////
 
 	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Compute);
 
@@ -296,8 +307,9 @@ int main()
 	{
 
 		glfwPollEvents();
-		updateUniformBuffer(proc, uboHdl);
-		updateUniformBuffer(proc, uboHdl2);
+		calculateTime();
+		updateViewMatrix(proc, uboHdl);
+		updateViewMatrix(proc, uboHdl2);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 
@@ -308,8 +320,8 @@ int main()
 		/*PIPELINE 2: COLOR PIPELINE*/
 
 		renderTarget.beginPass(proc, pipeline2.getVkRenderPass(), renderTargetFramebuffer);
-
 		renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+		renderTarget.updateDescriptorSet(proc, pipeline2, descriptorSheet2, proc.getCurrentFrame());
 		renderTarget.updatePipeline(proc, pipeline2);
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
 		renderTarget.updateViewport(proc, viewport);
@@ -330,7 +342,7 @@ int main()
 		renderTarget.setIndexBuffer(indices.getVkBuffer(), indices.size());
 		renderTarget.setVertexBuffer(vertices2, vertices2.size());
 		renderTarget.setClearValues({ { 0.0f, 0.2f, 0.5f, 1.0f } });
-
+		renderTarget.updateDescriptorSet(proc, pipeline1, descriptorSheet1, proc.getCurrentFrame());
 		renderTarget.updatePipeline(proc, pipeline1);
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
 		renderTarget.updateViewport(proc, viewport);

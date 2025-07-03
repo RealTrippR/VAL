@@ -50,7 +50,7 @@ namespace val {
 		return _MSAAsamples;
 	}
 
-	const std::vector<VkSubpassDependency>& renderPassManager::createSubpassDependencies() {
+	const tiny_vector<VkSubpassDependency>& renderPassManager::createSubpassDependencies() {
 		// subpasses must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
 
 		_VkSubpassDependencies.resize(_subpasses.size());

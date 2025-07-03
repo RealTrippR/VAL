@@ -69,6 +69,8 @@ namespace val {
 		/************************************************************************************************************/
 		/* BUFFER MANIPULATION */
 
+		void updateDescriptorSet(ValProc& proc, GraphicsPipeline& pipeline, DescriptorSheet& sheet, const uint32_t setIndex);
+
 		void updateIndexBuffer(ValProc& proc);
 
 		void updateVertexBuffers(ValProc& proc);

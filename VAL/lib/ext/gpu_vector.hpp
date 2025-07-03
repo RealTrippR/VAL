@@ -94,6 +94,14 @@ namespace val {
 			return data()[index];
 		}
 
+		operator const VkBuffer() const {
+			return _buffer;
+		}
+
+		operator const VkBuffer&() const {
+			return _buffer;
+		}
+
 		operator VkBuffer() {
 			return _buffer;
 		}
@@ -158,6 +166,7 @@ namespace val {
 
 			size_t tmp_capacity = roundToNextPowerOfTwo(newSize + 1);
 
+			// don't alloc or dealloc data, just call constructors
 			if (tmp_capacity == _capacity)
 			{
 				if (newSize > _size) {
@@ -176,8 +185,7 @@ namespace val {
 
 			const VkDeviceSize buffSzeInbytes = tmp_capacity * sizeof(T);
 
-				
-			proc.createBuffer(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), newBuffer, newMemory);
+			proc.createBufferAutoMemoryAllocFlags(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), newBuffer, newMemory);
 
 			VkDeviceMemory oldMemory = _memory;
 			VkBuffer oldBuffer = _buffer;
@@ -216,18 +224,39 @@ namespace val {
 		}
 
 		// destroys the old memory and creates a new buffer - no copying will take place.
-		inline void setUsage(ValProc& proc, const VkBufferUsageFlags newUsage) 
+		inline void setUsagesNoCopy(ValProc& proc, const VkBufferUsageFlags newUsages) 
 		{
-			destroy(proc);
-			_usage = newUsage;
-			init(proc, _size);
+			if (_size > 0) {
+				destroy(proc);
+				init(proc, _size);
+			}
+			_usage = newUsages;
 		}
 
-		inline void copy(ValProc& proc, VkBuffer& other, uint32_t otherSize, VkCommandBuffer& cmdBuff)
+		// destroys the old memory and creates a new buffer
+		inline void setUsages(ValProc& proc, const VkBufferUsageFlags newUsages)
+		{
+			if (_size > 0) {
+				gpu_vector<T, size_t> newSelf;
+				newSelf.init(proc, _size);
+				newSelf._usage = newUsages;
+				VkCommandBuffer cmd = proc.beginSingleTimeCommands();
+				copy(proc, newSelf, cmd);
+				proc.endSingleTimeCommands(cmd);
+				destroy(proc);
+				*this = newSelf;
+			}
+			else {
+				_usage = newUsages;
+			}
+		}
+		
+		// copies data from this into other
+		inline void copy(ValProc& proc, VkBuffer& dst, uint32_t otherSize, VkCommandBuffer cmdBuff, void* dstMappedMemory)
 		{
 #ifndef NDEBUG
-			if (other.data() == NULL || other._buffer == NULL) {
-				throw std::runtime_error("gpu_vector::copy: `other` is an invalid/uninitialized vector.");
+			if (dst == NULL) {
+				throw std::runtime_error("gpu_vector::copy: `dst` is an invalid/uninitialized buffer.");
 			}
 #endif
 			VkBufferCopy copyRegion;
@@ -241,30 +270,37 @@ namespace val {
 #endif // !NDEBUG
 
 		
-
-			vkCmdCopyBuffer(cmdBuff, _buffer, other, 1, &copyRegion);
-			std::copy(_mappedMemory, _mappedMemory + _size, other._mappedMemory);
+			if (dstMappedMemory && _mappedMemory) {
+				std::copy(_mappedMemory, _mappedMemory + _size, dstMappedMemory);
+			}
+			else {
+				vkCmdCopyBuffer(cmdBuff, _buffer, dst, 1, &copyRegion);
+			}
 		}
+		// copies  data from this into other
 
-
-		inline void copy(VAL_PROC& proc, gpu_vector& other, VkCommandBuffer& cmdBuff) {
+		inline void copy(ValProc& proc, gpu_vector<T, size_t>& dst, VkCommandBuffer cmdBuff) {
 
 #ifndef NDEBUG
-			if (other.data() == NULL || other._buffer == NULL) {
-				throw std::runtime_error("gpu_vector::copy: `other` is an invalid/uninitialized vector.");
+			if (dst._buffer == NULL) {
+				throw std::runtime_error("gpu_vector::copy: `dst` is an invalid/uninitialized gpu_vector.");
 			}
 #endif
-			if (other._size < _size) {
-				other.resize(proc, _size);
+			if (dst._size < _size) {
+				dst.resize(proc, _size);
 			}
 
 			VkBufferCopy copyRegion;
 			copyRegion.srcOffset = 0u;
 			copyRegion.dstOffset = 0u;
 			copyRegion.size = _size * sizeof(T);
-			vkCmdCopyBuffer(cmdBuff, _buffer, other._buffer, 1, &copyRegion);
 
-			std::copy(_mappedMemory, _mappedMemory + _size, other._mappedMemory);
+			if (dst._mappedMemory && _mappedMemory) {
+				std::copy(_mappedMemory, _mappedMemory + _size, dst._mappedMemory);
+			}
+			else {
+				vkCmdCopyBuffer(cmdBuff, _buffer, dst.getVkBuffer(), 1, &copyRegion);
+			}
 		}
 
 		inline void destroy(ValProc& proc) {
@@ -350,8 +386,7 @@ namespace val {
 			_capacity = roundToNextPowerOfTwo(_size + 1);
 			const VkDeviceSize buffSzeInbytes = _capacity * sizeof(T);
 
-
-			proc.createBuffer(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), _buffer, _memory);
+			proc.createBufferAutoMemoryAllocFlags(buffSzeInbytes, _usage, bufferSpaceToVkMemoryProperty(CPU_GPU), _buffer, _memory);
 
 			vkMapMemory(proc._device, _memory, 0, _size, 0, (void**)&_mappedMemory);
 			

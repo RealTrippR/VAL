@@ -103,7 +103,7 @@ namespace val
 			tinyobj::shape_t& shapes = _shapes[i];
 			printf("\n===== SHAPE %llu =====\n", i);
 			printf("\tname: %s\n", shapes.name.c_str());
-			printf("\tline count: %llu\n", shapes.lines.num_line_vertices);
+			printf("\tline count: %llu\n", shapes.lines.indices.size()/2);
 			printf("\tindex count: %llu\n", shapes.mesh.indices.size());
 			printf("\tmaterial count: %llu\n", shapes.mesh.material_ids.size());
 			printf("\t----------------\n");

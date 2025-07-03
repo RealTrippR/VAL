@@ -47,6 +47,8 @@ namespace val
 
 		const tiny_vector<VertexInputAttribute>& getVertexAttributes() const;
 
+		tiny_vector<VertexInputAttribute>& getVertexAttributes();
+
 	private:
 		tiny_vector<VertexInputAttribute> vertexInputAttributes;
 	};

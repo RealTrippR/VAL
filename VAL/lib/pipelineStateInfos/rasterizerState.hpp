@@ -27,37 +27,37 @@ namespace val {
 
 		void setEnableDepthBias(const bool& enable);
 
-		const bool& getEnableDepthBias();
+		const bool& getEnableDepthBias() const;
 
 		void setConstantDepthBias(const float& bias);
 
-		const float& getConstantDepthBias();
+		const float& getConstantDepthBias() const;
 
 		void setEnableDepthBiasClamp(const bool& enabled);
 
-		const bool& getEnableDepthBiasClamp();
+		const bool& getEnableDepthBiasClamp() const;
 		
 		void setDepthBiasClamp(const float& clamp);
 
-		const float& getDepthBiasClamp();
+		const float& getDepthBiasClamp() const;
 
 		void setLineWidth(const float& width, const PIPELINE_PROPERTY_STATE& state = PIPELINE_PROPERTY_STATE::STATIC);
 
-		const float& getLineWidth();
+		const float& getLineWidth() const;
 
 		void setLineWidthState(const PIPELINE_PROPERTY_STATE& state);
 
-		const PIPELINE_PROPERTY_STATE& getLineWidthState();
+		const PIPELINE_PROPERTY_STATE& getLineWidthState() const;
 
 		void setTopologyMode(const TOPOLOGY_MODE& polygonMode);
 
-		const TOPOLOGY_MODE& getPolygonMode();
+		const TOPOLOGY_MODE getPolygonMode() const;
 
 		void setCullMode(const CULL_MODE& cullMode);
 
-		const CULL_MODE& getCullMode();
+		const CULL_MODE getCullMode() const;
 
-		VkPipelineRasterizationStateCreateInfo* getVkPipelineRasterizationStateCreateInfo();
+		VkPipelineRasterizationStateCreateInfo* getVkPipelineRasterizationStateCreateInfo() ;
 
 	protected:
 		friend class ValProc;

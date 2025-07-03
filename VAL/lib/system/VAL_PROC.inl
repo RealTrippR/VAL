@@ -40,5 +40,11 @@ namespace val {
 		return _commandPool;
 	}
 
+	inline VkDescriptorPool ValProc::getVkDescriptorPool() const
+	{
+		return _descriptorPool;
+	}
+
+
 }
 #endif // !VAL_PROC_INLINE

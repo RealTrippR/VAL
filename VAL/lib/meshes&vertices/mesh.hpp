@@ -39,7 +39,7 @@ namespace val
 
 		// the UV / layout index which corresponds
 		// to a (layout = n) in a shader.
-		uint32_t layoutIdx;
+		uint32_t layoutIdx=0u;
 	};
 
 	template <typename VT/*vertex type*/, uint16_t NTextures>
@@ -69,9 +69,11 @@ namespace val
 			indices.destroy(proc);
 		}
 
-		VAL_RETURN_CODE importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices = true);
+		VAL_RETURN_CODE importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices = true,
+				const VkBufferUsageFlags additionalVertexBufferUsages = 0x0, const VkBufferUsageFlags additionalIndexBufferUsages = 0x0);
 
-		VAL_RETURN_CODE importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices = true);
+		VAL_RETURN_CODE importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices = true,
+				const VkBufferUsageFlags additionalVertexBufferUsages = 0x0, const VkBufferUsageFlags additionalIndexBufferUsages = 0x0);
 
 		void setTexture(Texture2D& texture, const uint32_t bindingIndex, const uint32_t location)
 		{
@@ -101,13 +103,13 @@ namespace val
 
 	// import from scene, FBX
 	template <typename VT/*vertex type*/, uint16_t NTextures>
-	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices)
+	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices, const VkBufferUsageFlags additionalVertexBufferUsages, const VkBufferUsageFlags additionalIndexBufferUsages)
 	{
 		vertices.destroy(proc);
 		indices.destroy(proc);
 
-		indices.setUsage(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-		vertices.setUsage(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		vertices.setUsages(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalVertexBufferUsages);
+		indices.setUsages(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalIndexBufferUsages);
 
 		size_t totalIndexCount = 0u;
 		for (size_t ni = 0; ni < scene->nodes.count; ni++) {
@@ -204,15 +206,15 @@ namespace val
 
 	// load from scene, OBJ
 	template <typename VT/*vertex type*/, uint16_t NTextures>
-	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices)
+	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices, const VkBufferUsageFlags additionalVertexBufferUsages, const VkBufferUsageFlags additionalIndexBufferUsages)
 	{
 		const bool triangulate = true;
 
 		vertices.destroy(proc);
 		indices.destroy(proc);
 
-		indices.setUsage(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-		vertices.setUsage(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		vertices.setUsages(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalVertexBufferUsages);
+		indices.setUsages(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalIndexBufferUsages);
 
 		tinyobj::attrib_t& attrib = scene._attrib;
 		std::vector<tinyobj::shape_t>& shapes = scene._shapes;

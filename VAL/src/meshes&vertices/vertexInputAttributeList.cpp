@@ -72,4 +72,9 @@ namespace val
 	{
 		return vertexInputAttributes;
 	}
+
+	tiny_vector<VertexInputAttribute>& VertexInputAttributeList::getVertexAttributes()
+	{
+		return vertexInputAttributes;
+	}
 }

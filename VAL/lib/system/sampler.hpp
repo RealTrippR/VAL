@@ -13,15 +13,54 @@ namespace val {
 
 	class Sampler {
 	public:
-		Sampler(ValProc& proc) : _proc(proc) { initDefaultValues(); };
-		Sampler(ValProc& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues(); };
-		Sampler(ValProc& proc, val::ImageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) { initDefaultValues();  bindImageView(imgView); };
+		Sampler(ValProc& proc) : _proc(proc) 
+		{ 
+			initDefaultCreateInfoValues();
+		};
+		Sampler(ValProc& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) 
+		{
+			initDefaultCreateInfoValues(); 
+		};
+		Sampler(ValProc& proc, val::ImageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) 
+		{
+			initDefaultCreateInfoValues();
+			bindImageView(imgView); 
+		};
 
 		~Sampler() {
 			destroy();
 		}
+
+		inline VkDescriptorType getVkDescriptorType() {
+			return (VkDescriptorType)_samplerType;
+		}
+
+		inline static void toObjectDescriptorInfo(ObjectDescriptorInfo* descInfo)
+		{
+			Sampler* self = (Sampler*)descInfo->valObject;
+			if (self->getImageView()) {
+				descInfo->imageInfos = { {self->getVkSampler(), self->getImageView()->getImageView(), self->getImageView()->getLayout()} };
+			}
+			else {
+				descInfo->imageInfos = { {self->getVkSampler(), NULL, VK_IMAGE_LAYOUT_GENERAL } };
+			}
+			descInfo->type = self->getVkDescriptorType();
+			descInfo->arrCount = 1u;;
+			descInfo->pNext = VK_NULL_HANDLE;
+		}
+
+		operator const ObjectDescriptorInfo()
+		{
+			ObjectDescriptorInfo info {
+				.valObject = this ,
+				.updateDataCallback = toObjectDescriptorInfo
+			};
+			toObjectDescriptorInfo(&info);
+			return info;
+		}
+
 	public:
-		void create();
+		VAL_RETURN_CODE create(bool keepCreateInfo = false);
 
 		void destroy();
 		//void recreate();
@@ -55,62 +94,32 @@ namespace val {
 		void setMipLodBias(const float& mipLOD);
 
 		void setFromVkSamplerCreateInfo(const VkSamplerCreateInfo& createInfo);
-
 	public:
 
-		const samplerType& getSamplerType();
+		const samplerType& getSamplerType()const ;
 
-		const float& getMaxAnisotropy();
-
-		const VkFilter& getMagnificationFilter();
-
-		const VkFilter& getMinificationFilter();
-
-		const VkSamplerMipmapMode& getMipmapMode();
-
-		const VkSamplerAddressMode& getAddressModeU();
-
-		const VkSamplerAddressMode& getAddressModeV();
-
-		const VkSamplerAddressMode& getAddressModeW();
-
-		const bool& unnormalizedCoordinates();
-
-		const VkCompareOp& getCompareMode();
-
-		const VkBool32& getCompareEnabled();
-
-		const VkSamplerCreateInfo& getSamplerCreateInfo();
-
-		VkSampler& getVkSampler();
+		const VkSampler& getVkSampler() const;
 
 		VkDescriptorImageInfo& getVkDescriptorImageInfo();
 
 	private:
-		inline void initDefaultValues() {
-			_samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-			_samplerCreateInfo.anisotropyEnable = VK_FALSE;  // Enable anisotropic filtering
-			_samplerCreateInfo.maxAnisotropy = 0.0f;
-			_samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			_samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			_samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			_samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
-			_samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-			_samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-			_samplerCreateInfo.compareEnable = VK_FALSE;
-			_samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
-			_samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;  // Use normalized coordinates
-			_samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
-		}
+
+		// may or may not exist
+		std::optional<VkSamplerCreateInfo> getCreateInfo();
+
+		void initDefaultCreateInfoValues();
 
 	protected:
 		friend ValProc;
 		ValProc& _proc;
-		samplerType _samplerType = combinedImage;
-		VkSampler _sampler = VK_NULL_HANDLE;
-		VkSamplerCreateInfo _samplerCreateInfo{};
+
+		// sampler can be stored in VkDescriptorImageInfo
+		//VkSampler _sampler = VK_NULL_HANDLE;
+		//VkSamplerCreateInfo _samplerCreateInfo{};
 		ImageView* _imgView;
+		// VkSampler reference is stored in here
 		VkDescriptorImageInfo _VKdescriptorInfo{.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+		samplerType _samplerType = combinedImage;
 	};
 }
 

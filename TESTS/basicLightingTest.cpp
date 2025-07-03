@@ -20,11 +20,13 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <string>
 #include <chrono>
 
+
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
-
+const std::vector<const char*> validationLayers = {};
 #else
 const bool enableValidationLayers = true;
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 #endif //!NDEBUG
 
 #define FRAMES_IN_FLIGHT 2u
@@ -34,11 +36,10 @@ const bool enableValidationLayers = true;
 #include <VAL/lib/ext/gpu_vector.hpp>
 #include <VAL/lib/meshes&vertices/mesh.hpp>
 #include <VAL/lib/meshes&vertices/vertexTxtr.hpp>
+#include <VAL/lib/descriptorSheets/descriptorSheet.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#include "vertex.hpp"
 
 // it is important that this comes last
 #define STB_IMAGE_IMPLEMENTATION
@@ -55,15 +56,17 @@ struct Light {
 	alignas(16) glm::vec3 color;
 };
 
-const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-
 static float time_sec = 0u;
 
 void calculateTime() 
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
+	static std::chrono::steady_clock::time_point lastTime;
 	auto currentTime = std::chrono::high_resolution_clock::now();
+	const auto dt = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime);
+	//printf("FPS: %f\n",1/dt.count());
 	time_sec = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	lastTime = currentTime;
 }
 
 void updateViewMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
@@ -122,10 +125,7 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 
 int main()
 {
-#ifndef NDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
 	{
 		using namespace val;
 
@@ -136,13 +136,11 @@ int main()
 		// Configure and create window
 		WindowProperties windowConfig;
 		windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
-		Window window(windowConfig, 800, 800, "Base Test", proc);
-
+		Window window(windowConfig, 800, 800, "Basic Lighting Test", proc);
 
 		// creates Vulkan logical and physical devices
 		// if a window is passed through, the windowSurface is also created
 		proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
-
 
 		// VAL uses the image format requirements to pick the best image format
 		// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
@@ -161,14 +159,11 @@ int main()
 		// load mesh, texture, and create img sampler
 		val::Mesh<VertexTxtr, 1> mesh;
 
-		val::ObjScene obj("res/Cube.obj");
 		val::FbxScene fbx("res/WoodenCube.fbx");
-		//mesh.importFromScene(proc, fbx, 0);
-		mesh.importFromScene(proc, obj, 0);
+		mesh.importFromScene(proc, fbx, 0);
 
-		Texture2D texture(proc, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_FORMAT_R8G8B8A8_SRGB);
+		Texture2D texture(proc, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, imageFormat);
 		fbx.importTexture2D(&texture, proc, 0, 0, FBX_MATERIAL_PROPERTY::diffuse);
-		//mesh.setTexture(texture, 0, 0);
 
 		// this will happen automatically upon the call of it's destructor, 
 		// but it's best practice to destroy once we're done using it
@@ -178,25 +173,32 @@ int main()
 
 		Sampler imgSampler(proc, val::combinedImage);
 		imgSampler.bindImageView(imgView);
+		imgSampler.create();
 
 
-
+		DescriptorSheet descriptorSheet(
+		   {{0, viewUBO, SHADER_STAGE::Vertex},
+			{1, lightUBO, SHADER_STAGE::Fragment},
+			{2, imgSampler, SHADER_STAGE::Fragment}}, 
+			FRAMES_IN_FLIGHT
+		);
 
 		// load and configure vert shader
-		val::Shader vertShader("shaders-compiled/basicLightingTexturedvert.spv", SHADER_STAGE::Vertex, "main");
-		vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
-		vertShader.setBindingDescriptions(VertexTxtr::getBindingDescription());
-		vertShader.setUBOs({ { &viewUBO, 0 } });
+		Shader fragShader("shaders-compiled/basicLightingTextured.frag.spv", SHADER_STAGE::Fragment);
 
-		// load and configure frag shader
-		val::Shader fragShader("shaders-compiled/basicLightingTexturedfrag.spv", SHADER_STAGE::Fragment, "main");
-		fragShader.setUBOs({ { &lightUBO, 1 } });
-		fragShader.setImageSamplers({ { &imgSampler, 2 } });
+		// load and configure vert shader
+		Shader vertShader("shaders-compiled/basicLightingTextured.vert.spv", SHADER_STAGE::Vertex);
+		vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
+		vertShader.setBindingDescription(VertexTxtr::getBindingDescription());
+
+
 
 		//////////////////////////////////////////////////////////////
 
 		val::GraphicsPipeline pipeline;
-		pipeline.shaders = { &vertShader,&fragShader };
+		pipeline.setDescriptorSheet(&descriptorSheet);
+		pipeline.setShaders({ &vertShader, &fragShader });
+
 		setGraphicsPipelineInfo(pipeline);
 
 		val::renderPassManager renderPassMngr(proc);
@@ -206,13 +208,9 @@ int main()
 		//////////////////////////////////////////////////////////////
 		proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
 
-		// why is this still here? - for attachments?
-		window.createSwapChainFrameBuffers({}, 0u, pipeline.getVkRenderPass(), proc._device);
+		window.createSwapChainFrameBuffers(proc, pipeline.getVkRenderPass());
 
-		//////////////////////////////////////////////////////////////
-		// create descriptor sets - this should be merged into the
-		// pipeline creation function
-		proc.createDescriptorSets(&pipeline);
+		pipeline.allocateAndWriteDescriptorSets(proc);
 		//////////////////////////////////////////////////////////////
 
 		Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
@@ -245,6 +243,7 @@ int main()
 			renderTarget.begin(proc);
 
 			renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+			renderTarget.updateDescriptorSet(proc, pipeline, descriptorSheet, proc.getCurrentFrame());
 			renderTarget.updateBuffers(proc);
 			renderTarget.updatePipeline(proc, pipeline);
 			renderTarget.updateViewport(proc, viewport, 0);
@@ -259,10 +258,8 @@ int main()
 		}
 
 		mesh.destroy(proc);
-
-		glfwTerminate();
 	}
 
-
+	glfwTerminate();
 	return EXIT_SUCCESS;
 }

@@ -191,6 +191,21 @@ namespace val {
 		createSwapChainFrameBuffers(_swapChainAttachments, _swapChainAttachmentCount, _swapChainRenderPass, _procVAL->_device);
 	}
 
+	void Window::createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass)
+	{
+		createSwapChainFrameBuffers({}, 0u, renderPass, device);
+	}
+
+	void Window::createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass)
+	{
+		createSwapChainFrameBuffers({}, 0u, renderPass, proc.getVkLogicalDevice());
+	}
+
+	void Window::createSwapChainFrameBuffers(ValProc& proc, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass)
+	{
+		createSwapChainFrameBuffers(Attachments, attachmentCount, renderPass, proc.getVkLogicalDevice());
+	}
+
 	void Window::createSwapChainFrameBuffers(VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice)
 	{
 		_swapChainAttachments = Attachments;
@@ -225,7 +240,7 @@ namespace val {
 				VkFramebufferCreateInfo framebufferInfo{};
 				framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 				framebufferInfo.renderPass = renderPass;
-				framebufferInfo.attachmentCount = attachmentsV.size();
+				framebufferInfo.attachmentCount = (uint32_t)attachmentsV.size();
 				framebufferInfo.pAttachments = attachmentsV.data();
 				framebufferInfo.width = _swapChainExtent.width;
 				framebufferInfo.height = _swapChainExtent.height;
@@ -246,7 +261,7 @@ namespace val {
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
 		// wait on the signalSemaphores to signaled
-		presentInfo.waitSemaphoreCount = waitOn.size();
+		presentInfo.waitSemaphoreCount = (uint32_t)waitOn.size();
 		presentInfo.pWaitSemaphores = waitOn.data();
 
 		VkSwapchainKHR swapChains[] = { _swapChain };
@@ -262,8 +277,7 @@ namespace val {
 			recreateSwapChain(imageFormat);
 		}
 		else if (result != VK_SUCCESS) {
-			printf("VAL: FAILED TO PRESENT SWAPCHAIN IMAGE\n");
-			throw std::runtime_error("VAL: FAILED TO PRESENT SWAPCHAIN IMAGE");
+			dbg::printError("Window::updateSwapChain::Failed to update swapchain of Window @ %p: result is %lu", this, result);
 		}
 	}
 

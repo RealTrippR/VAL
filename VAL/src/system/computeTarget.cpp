@@ -15,8 +15,6 @@ namespace val {
 
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, proc._computePipelines[computePipeline.pipelineIdx]);
-		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, proc._computePipelineLayouts[computePipeline.pipelineIdx],
-			0, 1, &proc._descriptorSets[computePipeline.descriptorsIdx][currentFrame], 0, nullptr);
 	}
 
 	void computeTarget::begin(Queue& queue)
@@ -53,7 +51,7 @@ namespace val {
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = waitSemaphores.size();
+		submitInfo.waitSemaphoreCount = (uint32_t)waitSemaphores.size();
 		submitInfo.pWaitSemaphores = waitSemaphores.data();
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;

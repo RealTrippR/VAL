@@ -66,7 +66,7 @@ namespace val
 		info.flags = VkPipelineColorBlendStateCreateFlags(0);
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		info.pNext = VK_NULL_HANDLE;
-		info.attachmentCount = VKattachments->size();
+		info.attachmentCount = (uint32_t)VKattachments->size();
 		info.pAttachments = VKattachments->data();
 		memcpy(info.blendConstants, _blendConstantsColors, sizeof(info.blendConstants));
 		info.logicOpEnable = _logicOpEnabled;

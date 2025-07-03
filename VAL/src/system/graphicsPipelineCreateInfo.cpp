@@ -90,13 +90,4 @@ namespace val
 		return _topology;
 	}
 
-	void GraphicsPipeline::setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates) 
-	{
-		_dynamicStates = dynamicStates;
-	}
-
-	const std::vector<DYNAMIC_STATE>& GraphicsPipeline::getDynamicStates() const 
-	{
-		return _dynamicStates;
-	}
 }

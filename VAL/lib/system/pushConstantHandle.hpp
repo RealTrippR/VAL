@@ -22,7 +22,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 	class ValProc; // forward declaration
-	class pipelineCreateInfo; // forward declaration
+	class PipelineBase; // forward declaration
 	class Shader; // forward declaration
 	struct pushConstantHandle {
 		pushConstantHandle() = default;
@@ -33,9 +33,9 @@ namespace val {
 			_procMemoryOffset = 0;
 		}
 
-		void update(ValProc& proc, void* data, const pipelineCreateInfo& pipeline, const Shader& shdr, VkCommandBuffer& cmdBuffer);
+		void update(ValProc& proc, void* data, const PipelineBase& pipeline, const Shader& shdr, VkCommandBuffer& cmdBuffer);
 		
-		void update(ValProc& proc, void* data, const pipelineCreateInfo& pipeline, VkCommandBuffer& cmdBuffer);
+		void update(ValProc& proc, void* data, const PipelineBase& pipeline, VkCommandBuffer& cmdBuffer);
 
 		VkPushConstantRange toVkPushConstantRange();
 	public:

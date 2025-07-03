@@ -59,7 +59,7 @@ namespace val {
 
 		Shader(fs::path filepath, VkShaderStageFlags shaderStageFlags, std::string entryPoint = "main") {
 			loadFromFile(filepath);
-			_entryPoint = entryPoint;
+			_entryPoint = entryPoint.c_str();
 			_shaderStageFlags = shaderStageFlags;
 		}
 
@@ -72,12 +72,9 @@ namespace val {
 
 		void setEntryPoint(const std::string& entryPoint);
 
-		const std::string& getEntryPoint();
+		void setEntryPoint(const tiny_vector<char>& entryPoint);
 
-		// change to allow for multiple image samplers (only one allowed per image view)
-		void setImageSamplers(std::vector<descriptorBinding<val::Sampler*>> samplerInfo);
-
-		void createImageSamplers(ValProc* proc);
+		const tiny_vector<char>& getEntryPoint() const;
 
 		const fs::path& getFilepath() noexcept;
 
@@ -85,78 +82,43 @@ namespace val {
 
 		void deleteByteCode();
 
+
 		void setStageFlags(const VkShaderStageFlags& stageFlags);
 
 		VkShaderStageFlags getStageFlags() noexcept;
 
-		virtual std::vector<VkDescriptorSetLayoutBinding>* getLayoutBindings() noexcept;
-
-		virtual std::vector<VkDescriptorSetLayoutBinding>* getPushDescriptorLayoutBindings() noexcept;
-
-		virtual std::vector<VkWriteDescriptorSet>* getDescriptorWrites();
-
-		// outer vector is for each frame in flight, second is for the buffer info for that frame
-		virtual std::vector<std::vector<std::vector<VkDescriptorBufferInfo>>>* getDescriptorBufferInfos(ValProc& proc);
-
-		void setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes);
-
-		void setVertexAttributes(const tiny_vector<VkVertexInputAttributeDescription>& attributes);
-
-		const std::vector<VkVertexInputAttributeDescription>& getVertexAttributes() noexcept;
-
-		void setBindingDescriptions(const VkVertexInputBindingDescription& bindingDescription);
-
-		void setBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
-
-		const std::vector<VkVertexInputBindingDescription>& getBindingDescriptions() noexcept;
 
 		void setPushConstant(pushConstantHandle* pushConstant);
 
 		pushConstantHandle* getPushConstant() noexcept;
 
-		void addPushDescriptor(val::pushDescriptor& pushDesc);
+		void setVertexAttributes(const tiny_vector<VkVertexInputAttributeDescription>& attributes);
 
-		void setPushDescriptors(const std::vector<val::pushDescriptor*> pushDescriptors);
+		void setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes);
 
-		void setTextures(const std::vector<descriptorBinding<val::ImageView*>>& textures);
+		const tiny_vector<VkVertexInputAttributeDescription>& getVertexAttributes() noexcept;
 
-		const std::vector<descriptorBinding<val::ImageView*>>& getTextures() noexcept;
 
-		void setUBOs(const std::vector<descriptorBinding<UBO_Handle*>>& ubos);
+		void setBindingDescription(const VkVertexInputBindingDescription& bindingDescription);
 
-		const std::vector<descriptorBinding<val::UBO_Handle*>> getUBOS() noexcept;
+		void setBindingDescriptions(const tiny_vector<VkVertexInputBindingDescription>& bindingDescriptions);
 
-		void setSSBOs(const std::vector<descriptorBinding<SSBO_Handle*>>& SSBOs);
-
-		const std::vector<descriptorBinding<val::SSBO_Handle*>> getSSBOs() noexcept;
+		const tiny_vector<VkVertexInputBindingDescription>& getBindingDescriptions() noexcept;
 
 	public:
-		void updateImageSampler(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<Sampler&, uint32_t> sampler);
-
-		void updateImageSamplerAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<Sampler&, uint32_t> sampler, const uint8_t frameInFlight);
-		
-		void updateTexture(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<ImageView&, uint32_t> texture, const uint16_t arrIdx = 0);
-
-		void updateTextureAtFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<ImageView&, uint32_t> texture, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
-
-		void updateUBO(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint16_t arrIdx = 0);
-
-		void updateUBOatFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<UBO_Handle&, uint32_t> UBO, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
-
-		void updateSSBO(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint16_t arrIdx = 0);
-
-		void updateSSBOatFrame(ValProc& proc, const pipelineCreateInfo& pipeline, std::pair<SSBO_Handle, uint32_t> SSBO, const uint8_t frameInFlight, const uint16_t arrIdx = 0);
-
-	public:
-		VkShaderStageFlags _shaderStageFlags;
-
-		std::string _entryPoint = "main";
+		tiny_vector<char> _entryPoint = "main";
 		tiny_vector<char> _byteCode;
 		fs::path _filepath;
 
-		std::vector<descriptorBinding<specializationConstant*/*Constant*/>> _specializationConstants;
-		pushConstantHandle* _pushConstant = NULL;
+		tiny_vector<descriptorBinding<specializationConstant*/*Constant*/>> _specializationConstants;
+		//tiny_vector<VkDescriptorSetLayoutBinding> _pushDescriptorLayoutBindings;
 
+		pushConstantHandle* _pushConstant = NULL;
+		VkShaderStageFlags _shaderStageFlags;
+
+		tiny_vector<VkVertexInputAttributeDescription> _attributes;
+		tiny_vector<VkVertexInputBindingDescription> _bindings;
+		/*
 		std::vector<pushDescriptor*> _pushDescriptors;
 		std::vector<descriptorBinding<UBO_Handle*>> _UBO_Handles;
 		std::vector<descriptorBinding<SSBO_Handle*>> _SSBO_Handles;
@@ -173,6 +135,7 @@ namespace val {
 
 		std::vector<VkVertexInputAttributeDescription> _attributes;
 		std::vector< VkVertexInputBindingDescription> _bindings;
+		*/
 		/*VkVertexInputAttributeDescription* _attributes = NULL;
 		uint32_t _attribCount = 0;
 		VkVertexInputBindingDescription* _bindingDescription = NULL;

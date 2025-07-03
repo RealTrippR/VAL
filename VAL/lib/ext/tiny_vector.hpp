@@ -36,6 +36,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 template <typename t, typename size_type = uint32_t>
 class tiny_vector {
 public:
+
+    static_assert(!std::is_signed<size_type>::value, "tiny_vector: size_type must be unsigned");
+
     tiny_vector() 
     {
         _size = 0u;
@@ -44,6 +47,16 @@ public:
 
     tiny_vector(size_type size) {
         resize(size);
+    }
+
+    template <typename U = t, typename = std::enable_if_t<std::is_trivially_copyable<U>::value>>
+    tiny_vector(const char* cstr) {
+        const uint64_t len = std::strlen(cstr);
+        if ((len + 1) > static_cast<size_t>(-1)) {
+            return; // Prevent overflow
+        }
+        resize(static_cast<size_type>(len + 1));
+        std::memcpy(_data, cstr, len + 1); // Safe because t is trivially copyable
     }
 
     tiny_vector(size_type size, const t& value) {
@@ -76,7 +89,7 @@ public:
         }
     }
 
-    tiny_vector(tiny_vector<t>&& other) {
+    tiny_vector(tiny_vector<t>&& other) noexcept {
         _size = other._size;
         _data = other._data;
         other._data = NULL;
@@ -96,6 +109,17 @@ public:
 #endif // !NDEBUG
 
         return _data[index];
+    }
+
+    // assignment to cstr
+    template <typename U = t>
+    std::enable_if_t<std::is_trivially_copyable<U>::value, tiny_vector&>
+        operator=(const char* cstr) {
+        const size_t len = std::strlen(cstr);
+        if ((len + 1) > static_cast<size_t>(-1)) return *this;
+        resize(static_cast<size_type>(len + 1));
+        std::memcpy(_data, cstr, len + 1); // Assumes U is 1-byte
+        return *this;
     }
 
     // getter
@@ -124,6 +148,12 @@ public:
         back() = val;
     }
 
+    template<typename... Args>
+    t& emplace_back(Args&&... args) {
+        growNoConstructor();
+        new(&_data[_size-1]) t(std::forward<Args>(args)...);
+        return _data[_size - 1];
+    }
     /**********************************************/
     /* iterators */
 public:
@@ -229,7 +259,7 @@ public:
     const_iterator begin() const {
         return const_iterator(_data);
     }
-
+    
     // End function returning a const iterator to the end - note that according to the C++ standard, the end is just beyond the last valid element
     const_iterator end() const {
         return const_iterator(_data + _size);
@@ -246,6 +276,11 @@ public:
     }
 
 public:
+    inline void insert(iterator it, const t& val) {
+        resize(size() + 1);
+        *it = val;
+    }
+
     inline void clear() {
         if (!_data) { return; }
         for (size_t i = 0; i < _size; ++i) {
@@ -285,9 +320,6 @@ public:
                     free(tmp);
                 }
                 else {
-                    // realloc succeeded, assign _data to tmp I know that it seems redundant, but if
-                    // realloc can't find space it may destroy the old block and then
-                    // make a call to malloc (depending on it's implementation)
                     _data = tmp;
                 }
                 // alloc succeeded, call constructors
@@ -306,7 +338,6 @@ public:
         _size = newSize;
     }
 
-
     void erase(size_type index) {
         if (index >= _size) {
             throw std::out_of_range("BAD ACCESS: index exceeds vector size");
@@ -320,7 +351,7 @@ public:
         resize(_size - 1);
     }
 
-    void erase(iterator pos) {
+    iterator erase(iterator pos) {
         if (pos >= end() || pos < begin()) {
             throw std::out_of_range("BAD ACCESS: iterator out of range");
         }
@@ -330,7 +361,7 @@ public:
         }
 
         resize(_size - 1);
-        return pos;
+        return begin() + _size;
     }
 
 
@@ -361,6 +392,11 @@ public:
         return (t*)_data;
     }
 
+    // getters
+    const t* data() const {
+        return (t*)_data;
+    }
+
     bool empty() const {
         return _size == 0;
     }
@@ -383,6 +419,28 @@ public:
     }
 
 private:
+
+    void growNoConstructor() 
+    {
+        const size_t newSize = _size + 1;
+         t* tmp = (t*)realloc(_data, sizeof(t) * newSize);
+        if (!tmp) {
+            // realloc failed
+            tmp = _data; // we'll free this when we're done
+            _data = (t*)malloc(newSize * sizeof(t));
+            if (!_data) throw std::bad_alloc();
+            // allocate and copy the old memory
+            memcpy(_data, tmp, _size * sizeof(t));
+
+            free(tmp);
+        }
+        else {
+            _data = tmp;
+        }
+        _size = newSize;
+    }
+
+
     const t& get(const size_type idx) const {
 #ifndef NDEBUG
         if (_size == 0u || idx > _size - 1) {

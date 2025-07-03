@@ -25,6 +25,9 @@ from operator import index
 from sqlite3 import Timestamp
 import subprocess
 import os
+from xml.etree.ElementTree import tostring
+
+from termcolor import colored, cprint
 
 import time
 from datetime import UTC, datetime, timezone
@@ -125,21 +128,34 @@ def compileShaders(shadersToCompile):
         extension = shader.split(".")[1]
         glslc = "\""+str(os.path.dirname(__file__))+"\\glslc.exe"+"\""
 
+        '''
+        --target-spv=<spirv-version>
+        Set the SPIR-V version to be used for the generated SPIR-V
+        module.  The default is the highest version of SPIR-V
+        required to be supported for the target environment.
+        For example, default for vulkan1.0 is spv1.0, and
+        the default for vulkan1.1 is spv1.3,
+        the default for vulkan1.2 is spv1.5.
+        Values are:
+            spv1.0, spv1.1, spv1.2, spv1.3, spv1.4, spv1.5
+        '''
+
         shaderSRCdir = "\""+SHADER_SOURCE_DIR + shader+"\""
-        shaderCMPdir = "\""+COMPILE_TO_DIR + compileName+extension+".spv"+"\""
-        cmdLineArgs = glslc+" -c "+shaderSRCdir+" -o "+shaderCMPdir
+        shaderCMPdir = "\""+COMPILE_TO_DIR + compileName+"."+extension+".spv"+"\""
+        targetSPV = " --target-spv=spv1.5"
+        cmdLineArgs = glslc+" "+targetSPV+" "+" -c "+shaderSRCdir+" -o "+shaderCMPdir
 
         #print(cmdLineArgs)
         
         result = subprocess.run(cmdLineArgs,capture_output=True)
 
         if result.returncode == 0:
-            print("Succesfully compiled: " + shader + " to " + compileName+extension+".spv") 
+            print("Succesfully compiled: " + shader + " to " + compileName+"."+extension+".spv") 
             shadersSuccessfullyCompiled.append(shader)
         else:
-            print(result.stdout)
-            print(result.stderr)
-            print("Failed to compile:", result.returncode)
+            print(result.stdout.decode('ascii'))
+            print(result.stderr.decode('ascii'))
+            print(colored("Failed to compile: "+str(result.returncode), 'red'))
     
     return shadersSuccessfullyCompiled
 

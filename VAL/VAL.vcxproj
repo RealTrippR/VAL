@@ -67,7 +67,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -143,7 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -164,7 +164,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -187,8 +187,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -202,10 +203,14 @@
   <ItemGroup>
     <ClInclude Include="lib\classEnumBitOps.hpp" />
     <ClInclude Include="lib\C_compatibleBinding.h" />
+    <ClInclude Include="lib\debugReporting\DbgVerbosityFlags.hpp" />
     <ClInclude Include="lib\debugReporting\debugCallbacks.hpp" />
     <ClInclude Include="lib\debugReporting\VAL_DebugCallbacks.h" />
     <ClInclude Include="lib\debugReporting\VAL_DebugIntercept.h" />
     <ClInclude Include="lib\debugUtils\dbgUtils.hpp" />
+    <ClInclude Include="lib\descriptorSheets\descriptorSheet.hpp" />
+    <ClInclude Include="lib\descriptorSheets\descriptorSheetElement.hpp" />
+    <ClInclude Include="lib\descriptorSheets\objectDescriptorInfo.h" />
     <ClInclude Include="lib\ext\ansiColorCodes.h" />
     <ClInclude Include="lib\ext\gpu_vector.hpp" />
     <ClInclude Include="lib\ext\hashmap.h" />
@@ -224,6 +229,7 @@
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\objScene.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\valProcCreateInfo.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertexAttributeType.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertexBase.hpp" />
@@ -231,6 +237,7 @@
     <ClInclude Include="lib\meshes&amp;vertices\vertexInputAttribute.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertexInputAttributeList.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertexTxtr.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\vertexTxtr2D.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\colorBlendStateAttachment.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\depthStencilState.hpp" />
     <ClInclude Include="lib\pipelineStateInfos\rasterizerState.hpp" />
@@ -256,18 +263,19 @@
     <ClInclude Include="lib\renderGraph\renderGraphBlock.h" />
     <ClInclude Include="lib\renderGraph\renderGraphError.h" />
     <ClInclude Include="lib\renderGraph\renderPassBeginType.hpp" />
+    <ClInclude Include="lib\system\accelerationStructure.hpp" />
+    <ClInclude Include="lib\system\accelerationStructureGeometry.hpp" />
+    <ClInclude Include="lib\system\accelerationStructureInstance.hpp" />
     <ClInclude Include="lib\system\buffer.hpp" />
     <ClInclude Include="lib\system\bufferUsageEnum.hpp" />
     <ClInclude Include="lib\system\computePipelineCreateInfo.hpp" />
     <ClInclude Include="lib\system\computeTarget.hpp" />
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
-    <ClInclude Include="lib\system\descriptorSheet.hpp" />
-    <ClInclude Include="lib\system\descriptorSheetElement.hpp" />
     <ClInclude Include="lib\system\descType.hpp" />
     <ClInclude Include="lib\system\framebuffer.hpp" />
     <ClInclude Include="lib\system\graphicsPipeline.hpp" />
-    <ClInclude Include="lib\system\image.hpp" />
+    <ClInclude Include="lib\system\imageViewBindInfo.hpp" />
     <ClInclude Include="lib\system\multisamplerConfig.hpp" />
     <ClInclude Include="lib\system\physicalDeviceRequirements.hpp" />
     <ClInclude Include="lib\system\pipelineStages.hpp" />
@@ -276,16 +284,18 @@
     <ClInclude Include="lib\system\queue.hpp" />
     <ClInclude Include="lib\system\queueFlags.hpp" />
     <ClInclude Include="lib\system\queueGroup.hpp" />
+    <ClInclude Include="lib\system\raytracingPipeline.hpp" />
     <ClInclude Include="lib\system\renderPass.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
     <ClInclude Include="lib\system\imageView.hpp" />
-    <ClInclude Include="lib\system\pipelineCreateInfo.hpp" />
+    <ClInclude Include="lib\system\pipelineBase.hpp" />
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\renderTarget.hpp" />
     <ClInclude Include="lib\system\shaderStageEnum.hpp" />
     <ClInclude Include="lib\system\specializationConstant.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
+    <ClInclude Include="lib\system\image.hpp" />
     <ClInclude Include="lib\system\subpass.hpp" />
     <ClInclude Include="lib\system\texture2d.hpp" />
     <ClInclude Include="lib\system\texture2d16bit.hpp" />
@@ -299,6 +309,8 @@
     <ClCompile Include="src\debugReporting\debugCallbacks.cpp" />
     <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c" />
     <ClCompile Include="src\debugUtils\dbgUtils.cpp" />
+    <ClCompile Include="src\descriptorSheets\descriptorSheet.cpp" />
+    <ClCompile Include="src\descriptorSheets\descriptorSheetElement.cpp" />
     <ClCompile Include="src\ext\hashmap.c" />
     <ClCompile Include="src\ext\tiny_obj.cpp" />
     <ClCompile Include="src\ext\ufbx.c" />
@@ -306,12 +318,18 @@
     <ClCompile Include="src\meshes&amp;vertices\fbxScene.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\loadModels.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\meshes&amp;vertices\meshSimple.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\meshes&amp;vertices\meshTextured.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\meshes&amp;vertices\objScene.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\vertexAttributeType.cpp" />
@@ -327,6 +345,9 @@
     <ClCompile Include="src\renderGraph\passContext.cpp" />
     <ClCompile Include="src\renderGraph\passInfo.c" />
     <ClCompile Include="src\renderGraph\renderGraph.cpp" />
+    <ClCompile Include="src\system\accelerationStructure.cpp" />
+    <ClCompile Include="src\system\accelerationStructureGeometry.cpp" />
+    <ClCompile Include="src\system\accelerationStructureInstance.cpp" />
     <ClCompile Include="src\system\buffer.cpp" />
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
@@ -335,22 +356,25 @@
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\multisamplerManager.cpp" />
     <ClCompile Include="src\system\physicalDeviceRequirements.cpp" />
-    <ClCompile Include="src\system\pipelineCreateInfo.cpp" />
-    <ClCompile Include="src\system\image.cpp" />
+    <ClCompile Include="src\system\pipelineBase.cpp" />
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\pushDescriptor.cpp" />
     <ClCompile Include="src\system\queue.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
+    <ClCompile Include="src\system\raytracingPipeline.cpp" />
     <ClCompile Include="src\system\renderPass.cpp" />
     <ClCompile Include="src\system\renderTarget.cpp" />
     <ClCompile Include="src\system\sampler.cpp" />
     <ClCompile Include="src\system\SSBO_Handle.cpp" />
+    <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\subpass.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />
     <ClInclude Include="lib\system\windowProperties.hpp" />
     <ClInclude Include="lib\VALreturnCode.h" />
     <ClInclude Include="src\meshes&amp;vertices\meshPBR.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Static|x64'">true</ExcludedFromBuild>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

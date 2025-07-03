@@ -40,7 +40,7 @@ namespace val {
 
 		VkRenderPass& getVkRenderPass();
 
-		const std::vector<VkSubpassDependency>& createSubpassDependencies();
+		const tiny_vector<VkSubpassDependency>& createSubpassDependencies();
 
 		void update();
 
@@ -62,20 +62,20 @@ namespace val {
 		ValProc* _procVAL = NULL;
 		/******************************************/
 
-		VkSampleCountFlagBits _MSAAsamples = VK_SAMPLE_COUNT_1_BIT;
-
 		// these must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
-		std::vector<Subpass*> _subpasses;
+		tiny_vector<Subpass*> _subpasses;
 
-		std::vector<VkSubpassDescription> _VkSubpasses;
+		tiny_vector<VkSubpassDescription> _VkSubpasses;
 
-		std::vector<val::renderAttachment*> _attachments;
+		tiny_vector<val::renderAttachment*> _attachments;
 
-		std::vector<VkAttachmentDescription> _VkAttachments;
+		tiny_vector<VkAttachmentDescription> _VkAttachments;
 
-		std::vector<VkSubpassDependency> _VkSubpassDependencies;
+		tiny_vector<VkSubpassDependency> _VkSubpassDependencies;
 
 		VkRenderPass _VKrenderPass = VK_NULL_HANDLE;
+
+		VkSampleCountFlagBits _MSAAsamples = VK_SAMPLE_COUNT_1_BIT;
 	};
 }
 

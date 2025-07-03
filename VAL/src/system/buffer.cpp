@@ -19,201 +19,128 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/buffer.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 
+
 namespace val
 {
 	void buffer::create(ValProc& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage, uint16_t frameCount) {
-		_proc = proc;
 		_size = size;
 		_space = space;
 		_usage = bufferUsage;
 		
-		_buffers.resize(frameCount);
-		_memory.resize(frameCount);
-		_dataMapped.resize(frameCount);
-
-		for (uint16_t fIdx = 0; fIdx < frameCount; ++fIdx) {
-			_proc.createBuffer(size, bufferUsage, bufferSpaceToVkMemoryProperty(space), _buffers[fIdx], _memory[fIdx]);
-			// create mapped data memory
-			if (CPU_GPU == space) {
-				vkMapMemory(_proc._device, _memory[fIdx], 0u, size, 0u, &_dataMapped[fIdx]);
-			}
+		proc.createBuffer(size, bufferUsage, bufferSpaceToVkMemoryProperty(space), _buffer, _memory);
+		// create mapped data memory
+		if (CPU_GPU == space) {
+			vkMapMemory(proc._device, _memory, 0u, size, 0u, &_dataMapped);
 		}
-	}
-
-
-	void buffer::overwriteFromStagingBuffer(void* data, uint64_t dataSize, uint16_t frameIdx, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
-	{
-#ifndef NDEBUG
-		__VAL_DEBUG_ValidateBufferCopy(_size, dataSize, srcOffset, dstOffset);
-#endif // !NDEBUG
-
-		// create staging buffer
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		_proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-		void* stagingData;
-		vkMapMemory(_proc._device, stagingBufferMemory, 0, dataSize, 0, &stagingData);
-		memcpy(stagingData, data, (size_t)dataSize);
-		vkUnmapMemory(_proc._device, stagingBufferMemory);
-
-		_proc.copyBuffer(stagingBuffer, _buffers[frameIdx], (VkDeviceSize)dataSize, srcOffset, dstOffset);
-		// cleanup staging buffer
-		vkDestroyBuffer(_proc._device, stagingBuffer, VK_NULL_HANDLE);
-		vkFreeMemory(_proc._device, stagingBufferMemory, VK_NULL_HANDLE);
 	}
 
 	// overwrites from a staging buffer for all frames in flight
-	void buffer::overwriteFromStagingBuffer(void* data, uint64_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
-		overwriteFromStagingBuffer(data, dataSize, 0u, _buffers.size(), srcOffset, dstOffset);
-	}
-
-	// overwrites from a staging buffer for all frames within the specified range 
-	void buffer::overwriteFromStagingBuffer(void* data, uint64_t dataSize, uint16_t frameIdxBegin, uint16_t frameRangeEnd, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
+	void buffer::overwriteFromStagingBuffer(ValProc& proc, void* data, uint64_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset) 
 	{
-#ifndef NDEBUG
-		__VAL_DEBUG_ValidateBufferCopy(_size, dataSize, srcOffset, dstOffset);
-#endif // !NDEBUG
-
 		// create staging buffer
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
-		_proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+		proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 		void* stagingData;
-		vkMapMemory(_proc._device, stagingBufferMemory, 0, dataSize, 0, &stagingData);
+		vkMapMemory(proc._device, stagingBufferMemory, 0, dataSize, 0, &stagingData);
 		memcpy(stagingData, data, (size_t)dataSize);
-		vkUnmapMemory(_proc._device, stagingBufferMemory);
+		vkUnmapMemory(proc._device, stagingBufferMemory);
 
-		for (uint8_t fIdx = frameIdxBegin; fIdx < frameRangeEnd; ++fIdx) {
-			_proc.copyBuffer(stagingBuffer, _buffers[fIdx], (VkDeviceSize)dataSize, srcOffset, dstOffset);
-		}
+		proc.copyBuffer(stagingBuffer, _buffer, (VkDeviceSize)dataSize, srcOffset, dstOffset);
 
 		// cleanup staging buffer
-		vkDestroyBuffer(_proc._device, stagingBuffer, VK_NULL_HANDLE);
-		vkFreeMemory(_proc._device, stagingBufferMemory, VK_NULL_HANDLE);
+		vkDestroyBuffer(proc._device, stagingBuffer, VK_NULL_HANDLE);
+		vkFreeMemory(proc._device, stagingBufferMemory, VK_NULL_HANDLE);
 	}
 
 
 
-	void buffer::overwriteFromBuffer(buffer& srcBuffer, VkDeviceSize srcBufferRange, uint16_t srcFrameIdx, uint16_t dstFrameIdx, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
+	void buffer::overwriteFromBuffer(ValProc& proc, buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
 #ifndef NDEBUG
 		__VAL_DEBUG_ValidateBufferCopy(_size, srcBufferRange, srcOffset, dstOffset);
 #endif // !NDEBUG
 
-		_proc.copyBuffer(_buffers[dstFrameIdx], srcBuffer._buffers[srcFrameIdx], srcBufferRange, srcOffset, dstOffset);
+		proc.copyBuffer(_buffer, srcBuffer._buffer, srcBufferRange, srcOffset, dstOffset);
 	}
 
-	// overwrites all buffers for every frame in flight;
-	// both buffers must have the same number of frames in flight
-	void buffer::overwriteFromBuffer(buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
-#ifndef NDEBUG
-		if (getFrameCount() != srcBuffer.getFrameCount()) {
-			printf("VAL::ERROR: Cannot overwrite all frames of the this buffer with the source buffer, as the number of frames in flight are not equal!\n\t%d ≠ %d frames\n", getFrameCount(),srcBuffer.getFrameCount());
-			throw std::runtime_error("VAL::ERROR: Cannot overwrite all frames of the this buffer with the source buffer, as the number of frames in flight are not equal!");
-		}
-#endif // !NDEBUG
-
-		for (uint32_t fIdx = 0; fIdx < _buffers.size(); ++fIdx) {
-			overwriteFromBuffer(srcBuffer, srcBufferRange, fIdx, fIdx, srcOffset, dstOffset);
-		}
-	}
-
-	void buffer::resize(uint32_t newSize) {
+	void buffer::resize(ValProc& proc, uint32_t newSize) {
 		// only resize if needed
 		if (newSize != _size) {
-			for (uint8_t fIdx = 0; fIdx < _buffers.size(); ++fIdx) {
-				VkBuffer tmpBuffer;
-				VkDeviceMemory tmpMem;
+			VkBuffer tmpBuffer;
+			VkDeviceMemory tmpMem;
 
-				// create new buffer and copy the old one into it
-				_proc.createBuffer(newSize, _usage, bufferSpaceToVkMemoryProperty(_space), tmpBuffer, tmpMem);
-				_proc.copyBuffer(tmpBuffer, _buffers[fIdx], 0u, 0u);
+			// create new buffer and copy the old one into it
+			proc.createBuffer(newSize, _usage, bufferSpaceToVkMemoryProperty(_space), tmpBuffer, tmpMem);
+			proc.copyBuffer(tmpBuffer, _buffer, 0u, 0u);
 
-				// destroy the old buffer
-				vkDestroyBuffer(_proc._device, tmpBuffer, VK_NULL_HANDLE);
-				vkFreeMemory(_proc._device, _memory[fIdx], VK_NULL_HANDLE);
+			// destroy the old buffer
+			vkDestroyBuffer(proc._device, tmpBuffer, VK_NULL_HANDLE);
+			vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
 
-				// remap memory needed
-				if (CPU_GPU == _space) {
-					vkUnmapMemory(_proc._device, _memory[fIdx]);
-					vkMapMemory(_proc._device, tmpMem, 0u, _size, 0u, &_dataMapped[fIdx]);
-				}
-
-				_buffers[fIdx] = tmpBuffer;
-				_memory[fIdx] = tmpMem;
-				_size = newSize;
+			// remap memory needed
+			if (CPU_GPU == _space) {
+				vkUnmapMemory(proc._device, _memory);
+				vkMapMemory(proc._device, tmpMem, 0u, _size, 0u, &_dataMapped);
 			}
+
+			_buffer = tmpBuffer;
+			_memory  = tmpMem;
+			_size = newSize;
 		}
 	}
 
-	void buffer::destroy() {
-		_dataMapped.clear();
-		for (uint8_t fIdx = 0; fIdx < _buffers.size(); ++fIdx) {
-			
-			if (_memory[fIdx]) {
-				vkFreeMemory(_proc._device, _memory[fIdx], VK_NULL_HANDLE);
-			}
-			if (_buffers[fIdx]) {
-				vkDestroyBuffer(_proc._device, _buffers[fIdx], VK_NULL_HANDLE);
-			}
+	void buffer::destroy(ValProc& proc) {
+		if (_memory) {
+			vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
+			_memory = VK_NULL_HANDLE;
 		}
-		_buffers.clear();
-		_memory.clear();
+		if (_buffer) {
+			vkDestroyBuffer(proc.getVkLogicalDevice(), _buffer, VK_NULL_HANDLE);
+			_buffer = VK_NULL_HANDLE;
+		}
 	}
 
 	const bufferSpace& buffer::getBufferSpace() const  {
 		return _space;
 	}
 
-	const uint32_t& buffer::getFrameCount() const {
-		return _buffers.size();
-	}
-
 	const uint32_t& buffer::size() const {
 		return _size;
 	}
 
-	VkBuffer& buffer::getVkBuffer(const uint8_t frameIdx) {
-		return _buffers[frameIdx];
+	VkBuffer& buffer::getVkBuffer() {
+		return _buffer;
 	}
 
-	const VkDeviceMemory& buffer::getDeviceMemory(const uint8_t frameIdx) {
-		return _memory[frameIdx];
+	const VkDeviceMemory& buffer::getDeviceMemory() {
+		return _memory;
 	}
 
-	void* buffer::getDataMapped(const uint8_t frameIdx) {
-		return _dataMapped[frameIdx];
+	void* buffer::getDataMapped() {
+		return _dataMapped;
 	}
 
-	const VkBufferUsageFlags& buffer::getUsageFlags() const {
+
+	VkBufferUsageFlags buffer::getUsageFlags() const
+	{
 		return _usage;
 	}
-
-	ValProc* buffer::getVAL_Proc() const {
-		return  &_proc;
-	}
-
 	////////////////////////////////////////////////////////////////////////////
-	void buffer::copy(const buffer& other) {
-		const uint32_t frameCount = other._buffers.size();
+	void buffer::copyFrom(ValProc& proc, const buffer& other) 
+	{
 		// cleanup old data.
-		this->destroy();
+		this->destroy(proc);
 
 		_size = other._size;
 		_space = other._space;
-		_proc = other._proc;
 
-		_buffers.resize(frameCount);
-		_memory.resize(frameCount);
-		_dataMapped.resize(frameCount);
 
 		
-		for (uint16_t fIdx = 0; fIdx < frameCount; ++fIdx) {
-			_proc.createBuffer(other._size, other._usage, bufferSpaceToVkMemoryProperty(_space), _buffers[fIdx], _memory[fIdx]);
-			// create mapped data memory
-			if (CPU_GPU == _space) {
-				vkMapMemory(_proc._device, _memory[fIdx], 0u, _size, 0u, &_dataMapped[fIdx]);
-			}
-			_proc.copyBuffer(other._buffers[fIdx], _buffers[fIdx], _size);
+		proc.createBuffer(other._size, other._usage, bufferSpaceToVkMemoryProperty(_space), _buffer, _memory);
+		// create mapped data memory
+		if (CPU_GPU == _space) {
+			vkMapMemory(proc._device, _memory, 0u, _size, 0u, &_dataMapped);
 		}
+		proc.copyBuffer(other._buffer, _buffer, _size);
 	}
 }

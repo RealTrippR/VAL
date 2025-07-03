@@ -6,7 +6,7 @@ namespace val
 		_VKrasterizerState.depthBiasEnable = enable;
 	}
 
-	const bool& rasterizerState::getEnableDepthBias() {
+	const bool& rasterizerState::getEnableDepthBias() const {
 		return _VKrasterizerState.depthBiasEnable;
 	}
 
@@ -14,7 +14,7 @@ namespace val
 		_VKrasterizerState.depthBiasConstantFactor = bias;
 	}
 
-	const float& rasterizerState::getConstantDepthBias() {
+	const float& rasterizerState::getConstantDepthBias() const {
 		return _VKrasterizerState.depthBiasConstantFactor;
 	}
 
@@ -22,7 +22,7 @@ namespace val
 		_VKrasterizerState.depthClampEnable = enabled;
 	}
 
-	const bool& rasterizerState::getEnableDepthBiasClamp() {
+	const bool& rasterizerState::getEnableDepthBiasClamp() const {
 		return _VKrasterizerState.depthClampEnable;
 	}
 
@@ -30,7 +30,7 @@ namespace val
 		_VKrasterizerState.depthBiasClamp = clamp;
 	}
 
-	const float& rasterizerState::getDepthBiasClamp() {
+	const float& rasterizerState::getDepthBiasClamp() const {
 		return _VKrasterizerState.depthBiasClamp;
 	}
 
@@ -39,7 +39,7 @@ namespace val
 		_VKrasterizerState.lineWidth = width;
 	}
 
-	const float& rasterizerState::getLineWidth() {
+	const float& rasterizerState::getLineWidth() const {
 		return _VKrasterizerState.lineWidth;
 	}
 
@@ -47,7 +47,7 @@ namespace val
 		_lineWidthState = state;
 	}
 
-	const PIPELINE_PROPERTY_STATE& rasterizerState::getLineWidthState() {
+	const PIPELINE_PROPERTY_STATE& rasterizerState::getLineWidthState() const {
 		return _lineWidthState;
 	}
 
@@ -55,11 +55,11 @@ namespace val
 		_VKrasterizerState.polygonMode = VkPolygonMode(polygonMode);
 	}
 
-	const TOPOLOGY_MODE& rasterizerState::getPolygonMode() {
+	const TOPOLOGY_MODE rasterizerState::getPolygonMode() const {
 		return (TOPOLOGY_MODE)_VKrasterizerState.polygonMode;
 	}
 
-	const CULL_MODE& rasterizerState::getCullMode() {
+	const CULL_MODE rasterizerState::getCullMode() const {
 		return CULL_MODE(_VKrasterizerState.cullMode);
 	}
 

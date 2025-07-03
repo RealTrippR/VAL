@@ -11,6 +11,8 @@
 
 namespace val
 {
+	constexpr VkAttachmentReference NullAttachment = { VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_UNDEFINED };
+
 	class renderPassManager; // forward declaration
 
 	class Subpass {
@@ -41,12 +43,12 @@ namespace val
 		/******************************************/
 		VkSubpassDescription _subpassDesc{};
 		VkSubpassDependency _dependency{};
-		std::vector<VkAttachmentReference> _attachmentReferences;
+		tiny_vector<VkAttachmentReference> _attachmentReferences;
 		/******************************************/
-		std::vector<VkAttachmentReference> _colorAttachments;
+		tiny_vector<VkAttachmentReference> _colorAttachments;
 		std::optional<VkAttachmentReference> _depthStencilAttachment; // subpasses can only have 1 depth attachment
-		std::vector<VkAttachmentReference> _resolveAttachments;
-		std::vector<VkAttachmentReference> _inputAttachments;
+		tiny_vector<VkAttachmentReference> _resolveAttachments;
+		tiny_vector<VkAttachmentReference> _inputAttachments;
 	protected:
 		void attachToRenderPassManager();
 	};

@@ -9,75 +9,57 @@ namespace val
 	{
 	public:
 
-		buffer(ValProc& proc) : _proc(proc) {}
+		buffer() = default;
 
 		// creates the buffer from the input values.
 		buffer(ValProc& proc, const uint32_t& size, const bufferSpace& space, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u)
-			: _proc(proc) {
+		{
 			create(proc, size, space, bufferUsage, frameCount);
 		}
 		~buffer() {
-			destroy();
+			//destroy();
 		}
 
-		buffer(const buffer& other) : _proc(other._proc) {
-			this->copy(other);
-		}
-		buffer& operator=(const buffer& other) {
-			this->copy(other);
+		buffer(ValProc& proc, const buffer& other) {
+			this->copyFrom(proc,other);
 		}
 
 	public:
 		void create(ValProc& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u);
 
-		void overwriteFromStagingBuffer(void* data, uint64_t dataSize, uint16_t frameIdx, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
-
 		// overwrites from a staging buffer for all frames in flight
-		void overwriteFromStagingBuffer(void* data, uint64_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
-
-		// overwrites from a staging buffer for all frames within the specified range 
-		void overwriteFromStagingBuffer(void* data, uint64_t dataSize, uint16_t frameIdxBegin, uint16_t frameRangeEnd, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
+		void overwriteFromStagingBuffer(ValProc& proc, void* data, uint64_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
 		// overwrites a buffer at dstFrameIdx with from another buffer at srcFrameIdx
-		void overwriteFromBuffer(buffer& srcBuffer, VkDeviceSize srcBufferRange, uint16_t srcFrameIdx, uint16_t dstFrameIdx, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
-		
-		// overwrites all buffers for every frame in flight;
-		// both buffers must have the same number of frames in flight
-		void overwriteFromBuffer(buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
+		void overwriteFromBuffer(ValProc& proc, buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
 
-		void resize(uint32_t newSize);
+		void resize(ValProc& proc, uint32_t newSize);
 
-		void destroy();
+		void destroy(ValProc& proc);
 
 	public:
 		const bufferSpace& getBufferSpace() const;
 
-		const uint32_t& getFrameCount() const;
-
 		const uint32_t& size() const;
 
-		VkBuffer& getVkBuffer(const uint8_t frameIdx = 0);
+		VkBuffer& getVkBuffer();
 
-		const VkDeviceMemory& getDeviceMemory(const uint8_t frameIdx);
+		const VkDeviceMemory& getDeviceMemory();
 
-		void* getDataMapped(const uint8_t frameIdx = 0u);
+		void* getDataMapped();
 
-		const VkBufferUsageFlags& getUsageFlags() const;
-
-		ValProc* getVAL_Proc() const;
+		VkBufferUsageFlags getUsageFlags() const;
 
 	protected:
-		void copy(const buffer& other);
+		void copyFrom(ValProc& proc, const buffer& src);
 
 	protected:
-		ValProc& _proc;  // Store a reference
-		uint32_t _size = 0u;
+		VkBuffer _buffer;
+		VkDeviceMemory _memory;
+		void* _dataMapped;
 		bufferSpace _space{};
+		uint32_t _size = 0u;
 		VkBufferUsageFlags _usage = 0;
-		// each vector has a size equivalent to the frame count that it was initialized with
-		std::vector<VkBuffer> _buffers; // it would be more efficient to pack this data into just 1 buffer. i.e. VkBuffer* (which includes the data for both frames that can be accessed with an offset)
-		std::vector<VkDeviceMemory> _memory;
-		std::vector<void*> _dataMapped;
 	};
 }
 

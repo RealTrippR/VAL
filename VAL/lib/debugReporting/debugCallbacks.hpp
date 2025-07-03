@@ -20,6 +20,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <iostream>
 #include <VAL/lib/debugReporting/VAL_DebugIntercept.h>
+#include <VAL/lib/debugReporting/DbgVerbosityFlags.hpp>
 
 namespace val 
 {
@@ -37,6 +38,10 @@ namespace val
 		void removeWarnIntercept(VAL_DEBUG_INTERCEPT intercept);
 
 		void removeErrorIntercept(VAL_DEBUG_INTERCEPT intercept);
+
+		void setVerbosityFlags(const VERBOSITY_FLAGS verbosity);
+
+		VERBOSITY_FLAGS getVerbosityFlags();
 
 		void printNote(const char* format_msg, ...);
 

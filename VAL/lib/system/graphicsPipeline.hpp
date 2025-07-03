@@ -19,7 +19,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef FML_GRAPHICS_PIPELINE_CREATE_INFO_HPP
 #define FML_GRAPHICS_PIPELINE_CREATE_INFO_HPP
 
-#include <VAL/lib/system/pipelineCreateInfo.hpp>
+#include <VAL/lib/system/pipelineBase.hpp>
 #include <VAL/lib/system/renderPass.hpp>
 #include <VAL/lib/system/system_utils.hpp>
 
@@ -32,7 +32,7 @@ namespace val {
 	class Shader; // forward declaration
 	class Sampler; // forward declaration
 
-	class GraphicsPipeline : public pipelineCreateInfo {
+	class GraphicsPipeline : public PipelineBase {
 	public:		
 		GraphicsPipeline() { _bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; }
 	public:
@@ -64,10 +64,7 @@ namespace val {
 
 		VkPrimitiveTopology getTopology() const;
 
-		void setDynamicStates(const std::vector<DYNAMIC_STATE>& dynamicStates);
-
-		const std::vector<DYNAMIC_STATE>& getDynamicStates() const;
-
+	
 	public: 
 
 		//void pushDescriptor_UNIFORM_BUFFER_DYNAMIC(VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, );
@@ -84,11 +81,9 @@ namespace val {
 	protected:
 		friend ValProc;
 	protected:
-		uint32_t subpassIndex = 0u;
 
+	
 		renderPassManager* renderPass = NULL;
-
-		VkPrimitiveTopology _topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
 		rasterizerState* _rasterizerState = NULL;
 		colorBlendState* _colorBlendState = NULL;
@@ -96,10 +91,10 @@ namespace val {
 		depthStencilState* _depthStencilState = NULL;
 
 		VkSampleCountFlags _sampleCountMSAA = VK_SAMPLE_COUNT_1_BIT;
+		uint32_t subpassIndex = 0u;
+		VkPrimitiveTopology _topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		bool _sampleShadingEnabled = false;
-		
-		// VAL::DYNAMIC_STATE maps directly to VkDynamicState
-		std::vector<DYNAMIC_STATE> _dynamicStates;
+
 	};
 }
 

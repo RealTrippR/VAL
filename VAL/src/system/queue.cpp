@@ -129,7 +129,6 @@ namespace val
 		}
 		_commandBuffers = VK_NULL_HANDLE;
 		_semaphores = VK_NULL_HANDLE;
-		_proc = NULL;
 	}
 
 	void Queue::copyToOther(Queue* other) const
@@ -198,7 +197,7 @@ namespace val
 				VkBool32 presentSupport = false;
 
 			
-				if (queueProperties.queueFlags & VkQueueFlags(queueFlags));
+				if (queueProperties.queueFlags & VkQueueFlags(queueFlags))
 				{
 					if (surface)
 					{
@@ -223,7 +222,7 @@ namespace val
 			}
 		}
 		else {
-			queueFamily = queueFlagsToFamilyIndicesCache[queueFlags].first;
+			queueFamily = (uint8_t)queueFlagsToFamilyIndicesCache[queueFlags].first;
 			if (success) {
 				*success = true;
 			}

@@ -61,14 +61,14 @@ static inline bool streql(const char* str1, const char* str2)
     while (true)
     {
         // Load next 16 bytes from str1 and str2
-        register __m128i va = _mm_loadu_si128((const __m128i*)str1);
-        register __m128i vb = _mm_loadu_si128((const __m128i*)str2);
+        __m128i va = _mm_loadu_si128((const __m128i*)str1);
+        __m128i vb = _mm_loadu_si128((const __m128i*)str2);
         // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#ig_expand=4842,1047&text=cmpistr
         if (_mm_cmpistrc(va, vb, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_NEGATIVE_POLARITY)) {
             return false; // not equal
         }
         // https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#ig_expand=4842,1042&text=cmpistr
-        if (_mm_cmpistrz(va, vb, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH) == true) {
+        if (_mm_cmpistrz(va, vb, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH) == (int)true) {
             // a null terminator was hit
             return true;
         }

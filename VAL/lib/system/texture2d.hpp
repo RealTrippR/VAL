@@ -36,10 +36,10 @@ namespace val {
 
 		Texture2D(ValProc& proc, const VkImageLayout layout, const VkFormat format) : _proc(&proc), _layout(layout), _format(format) {};
 
-		Texture2D(ValProc& proc, void* memory, size_t memorySize, const uint16_t width, const uint16_t height, const VkFormat format,
+		Texture2D(ValProc& proc, void* memory, size_t memorySize, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
 		{
-			//createFromMemory(memory, memorySize, width, height, format, usages, layout, memspace, mipLevels);
+			createFromMemory(memory, memorySize, usages, layout, memspace, mipLevels);
 		}
 
 		Texture2D(ValProc& proc, std::filesystem::path srcpath, const VkFormat format,
@@ -58,7 +58,20 @@ namespace val {
 		~Texture2D() {
 			destroy();
 		}
-		
+
+		inline ImageViewBindInfo toImageViewBindInfo()
+		{
+			ImageViewBindInfo bindInfo;
+			bindInfo.format = _format;
+			bindInfo.layout = &_layout;
+			bindInfo.image = _img;
+			return bindInfo;
+		}
+
+		operator ImageViewBindInfo()
+		{
+			return toImageViewBindInfo();
+		}
 	public:
 		
 		inline void setValProc(ValProc* proc);
@@ -87,7 +100,7 @@ namespace val {
 
 		inline void transitionLayout(VkCommandBuffer cmd_buff, VkImageLayout newLayout);
 
-		void createFromMemory(void* memory, size_t memorySize, const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
+		void createFromMemory(const void* memory, const size_t memorySize, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
 
 		void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,

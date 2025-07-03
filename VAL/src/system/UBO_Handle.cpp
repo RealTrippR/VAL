@@ -28,7 +28,7 @@ namespace val {
 		return (char*)_arrSubset->getMappedDataOfFrame(frameIdx) + _offset;
 	}
 
-	VkBuffer UBO_Handle::getBuffer(ValProc& proc) {
+	VkBuffer UBO_Handle::getBuffer() {
 		return _arrSubset ? _arrSubset->_vkBuff : VK_NULL_HANDLE;
 	}
 

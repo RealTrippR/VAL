@@ -38,8 +38,6 @@ namespace val {
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelines[pipelineIdx]);
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._pipelineLayouts[pipelineIdx],
-			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 	}
 
 	void renderTarget::updatePipeline(ValProc& proc, const GraphicsPipeline& pipeline)
@@ -48,8 +46,6 @@ namespace val {
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelines[pipelineIdx]);
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._pipelineLayouts[pipelineIdx],
-			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 	}
 
 	void renderTarget::updateViewport(ValProc& proc, const VkViewport& viewport)
@@ -131,6 +127,15 @@ namespace val {
 		}
 	}
 
+	void renderTarget::updateDescriptorSet(ValProc& proc, GraphicsPipeline& pipeline, DescriptorSheet& sheet, const uint32_t setIndex)
+	{
+		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(proc),
+			//0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
+			0, 1, &(sheet.getVkDescriptorSets()[setIndex]), 0, VK_NULL_HANDLE);
+	}
+
+	
 	void renderTarget::updateIndexBuffer(ValProc& proc) {
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
 		if (_indexCount > 0) {
@@ -237,8 +242,6 @@ namespace val {
 
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelines[pipelineIdx]);
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._pipelineLayouts[pipelineIdx],
-			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 
 		// bind buffers
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
@@ -299,7 +302,7 @@ namespace val {
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = waitSemaphores.size();
+		submitInfo.waitSemaphoreCount = (uint32_t)waitSemaphores.size();
 		submitInfo.pWaitSemaphores = waitSemaphores.data();
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;

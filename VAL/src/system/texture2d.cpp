@@ -19,6 +19,22 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
+
+	bool isValidFormatForTexture2D(VkFormat f)
+	{
+#ifndef NDEBUG
+		if (f == VK_FORMAT_R8_SRGB || f == VK_FORMAT_R8G8_SRGB || f == VK_FORMAT_R8G8B8_SRGB || f == VK_FORMAT_R8G8B8A8_SRGB)
+		{
+			return true;
+		}
+		dbg::printWarning("isValidFormatForTexture2D: Format f `%lu` may not be a valid VkFormat for Texture2D.", f);
+		return false;
+#endif
+	}
+
+
+
+
 	void Texture2D::destroy()
 	{
 		if (_imgMemory) {
@@ -40,8 +56,8 @@ namespace val {
 		}
 	}
 
-	void Texture2D::createFromMemory(void* memory, size_t memorySize, const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
-		const VkImageLayout layout, const bufferSpace memspac, const uint8_t mipLevels)
+	void Texture2D::createFromMemory(const void* memory, const size_t memorySize, const VkImageUsageFlagBits usages,
+		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
 	{
 		destroy();
 		_layout = layout;
@@ -53,14 +69,19 @@ namespace val {
 #endif // !NDEBUG
 
 
-		_format = format;
 		_mipLevels = mipLevels;
 
 		int widthtmp;
 		int heightmp;
-		/*_img = createTextureImageFromMemory(_proc, memory, memorySize, &_pixels, _format, _imgMemory,
-			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);*/
-		throw std::runtime_error("INCOMPLETE");
+		_img = createTextureImage8BitFromMemory(_proc, memory, memorySize, &_pixels, &_imgMemory, _layout, _format,
+			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);
+		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
+		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
+
+
+
+
+		isValidFormatForTexture2D(_format);
 	}
 
 	void Texture2D::createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
@@ -102,6 +123,9 @@ namespace val {
 		if (mipLevels > 0) {
 			generateMipmaps(mipLevels);
 		}
+
+		isValidFormatForTexture2D(_format);
+
 	}
 
 	void Texture2D::create(const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
@@ -132,6 +156,9 @@ namespace val {
 		_proc->createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
+
+		isValidFormatForTexture2D(_format);
+
 	}
 
 

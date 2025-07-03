@@ -13,14 +13,16 @@ namespace val {
 	public:
 		ImageView(ValProc& proc) : _proc(proc) {};
 		ImageView(ValProc& proc, VkImageLayout* layout) : _proc(proc) { _layout = layout; };
-		ImageView(ValProc& proc, val::Image& img, const VkImageAspectFlags& aspectFlags) : _proc(proc)
+		ImageView(ValProc& proc, ImageViewBindInfo bindInfo, const VkImageAspectFlags& aspectFlags, const VkDescriptorType type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc)
 		{
-			create(img, aspectFlags);
+			_type = type;
+			create(bindInfo, aspectFlags);
 		}
 
-		ImageView(ValProc& proc, val::Texture2D& texture, const VkImageAspectFlags& aspectFlags) : _proc(proc)
+		ImageView(ValProc& proc, VkImage img,VkFormat format, const VkImageAspectFlags& aspectFlags, const VkDescriptorType type= VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc)
 		{
-			create(texture, aspectFlags);
+			_type = type;
+			create(img,format, aspectFlags);
 		}
 
 		~ImageView() {
@@ -35,11 +37,32 @@ namespace val {
 			return &_imgView;
 		}
 
-
 	public:
-		void create(val::Image& img, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
+		inline VkDescriptorType getVkDescriptorType() {
+			return _type;
+		}
 
-		void create(val::Texture2D& texture, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
+		inline static void toObjectDescriptorInfo(ObjectDescriptorInfo* descInfo)
+		{
+			ImageView* self = (ImageView*)descInfo->valObject;
+			descInfo->imageInfos = { VkDescriptorImageInfo{VK_NULL_HANDLE, self->getImageView(),self->getLayout()}};
+			descInfo->type = self->getVkDescriptorType();
+			descInfo->arrCount = 1u;
+			descInfo->pNext = VK_NULL_HANDLE;
+		}
+
+		operator const ObjectDescriptorInfo()
+		{
+			ObjectDescriptorInfo info{
+				.valObject = this ,
+				.updateDataCallback = toObjectDescriptorInfo
+			};
+			toObjectDescriptorInfo(&info);
+			return info;
+		}
+	public:
+
+		void create(ImageViewBindInfo& bindInfo, const VkImageAspectFlags aspectFlags);
 
 		void create(VkImage img, VkFormat format, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
 
@@ -54,11 +77,16 @@ namespace val {
 		VkImageView& getImageView();
 
 		const VkImageAspectFlags& getAspectFlags();
+
+		inline VkDescriptorType getType() { return _type; };
+
+		inline void setType(const VkDescriptorType type) { _type = type; };
 	protected:
 		ValProc& _proc;  // Store a reference
 		VkImageLayout* _layout = NULL;
 		VkImageView _imgView = VK_NULL_HANDLE;
 		VkImageAspectFlags _aspectFlags{};
+		VkDescriptorType _type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 	};
 }
 

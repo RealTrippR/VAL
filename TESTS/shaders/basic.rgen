@@ -1,0 +1,25 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+
+// RAY-GEN
+
+layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS;
+layout(set = 0, binding = 1, rgba32f) uniform image2D outputImage;
+
+layout(location = 0) rayPayloadEXT vec4 payload;
+
+void main() {
+    payload = vec4(1.0, 0.0, 0.0, 1.0); // Red
+    traceRayEXT(
+        topLevelAS,                         // acceleration structure
+        gl_RayFlagsOpaqueEXT,               // ray flags
+        0xFF,                               // cull mask
+        0, 1, 0,                            // sbtRecordOffset, sbtRecordStride, missIndex
+        vec3(0.0, 0.0, 0.0),                // ray origin
+        0.0,                                // tmin
+        vec3(0.0, 0.0, -1.0),               // ray direction
+        10000.0,                            // tmax
+        0                                   // location of payload
+    );
+    imageStore(outputImage, ivec2(gl_LaunchIDEXT.xy), payload);
+}
