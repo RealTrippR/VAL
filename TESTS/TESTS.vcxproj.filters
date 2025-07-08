@@ -131,7 +131,7 @@
     <None Include="shaders\basicLightingTextured.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\basic.rgen">
+    <None Include="shaders\test.rgen">
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\image2D.frag">
@@ -140,7 +140,7 @@
     <None Include="shaders\image2D.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\basic.rahit">
+    <None Include="shaders\test.rahit">
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\dummy.rgen">
@@ -150,6 +150,15 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\dummy.rmiss">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\basic.rgen">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\basic.rchit">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\basic.rmiss">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

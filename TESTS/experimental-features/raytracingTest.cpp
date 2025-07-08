@@ -19,10 +19,12 @@ const bool enableValidationLayers = true;
 
 #define FRAMES_IN_FLIGHT 2u
 
-struct ViewMatrix {
-	alignas(16) glm::mat4 model;
-	alignas(16) glm::mat4 view;
+
+struct RayGenViewInfo
+{
 	alignas(16) glm::mat4 proj;
+	alignas(16) glm::mat4 view;
+	alignas(16) glm::vec2 resolution;
 };
 
 struct Light {
@@ -42,17 +44,21 @@ void calculateTime()
 	lastTime = currentTime;
 }
 
-void updateViewMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
+void updateRayViewUBO(val::ValProc& proc, val::UBO_Handle& hdl, val::Window& window)
 {
 	using namespace val;
 	const VkExtent2D& extent = proc._windowVAL->getSize();
 
-	ViewMatrix& ubo = *(ViewMatrix*)hdl.getData(proc);
-	ubo.model = glm::rotate(glm::mat4(1.0f), time_sec * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+	const float ARM_DIST = .01f;
+	const float EYE_HEIGHT = .01f;
+	RayGenViewInfo& ubo = *(RayGenViewInfo*)hdl.getData(proc);
+	ubo.view = glm::lookAt(glm::vec3(sin(time_sec)* ARM_DIST, EYE_HEIGHT, cos(time_sec)* ARM_DIST), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view[1][1] *= -1;
+	ubo.view = glm::inverse(ubo.view);
+	ubo.proj = glm::perspective(glm::radians(35.0f), extent.width / (float)extent.height, 0.01f, 100.0f);
 	ubo.proj[1][1] *= -1;
-
+	//ubo.proj = glm::inverse(ubo.proj);
+	ubo.resolution = { window.getWidth(), window.getHeight() };
 }
 
 void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
@@ -73,7 +79,7 @@ void setImgGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	// state infos
 	static rasterizerState rasterizer;
-	rasterizer.setCullMode(CULL_MODE::BACK);
+	rasterizer.setCullMode(CULL_MODE::NONE); // for 2D shapes, set CULL_MODE::NONE
 	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
 	pipeline.setRasterizer(&rasterizer);
 
@@ -104,11 +110,11 @@ int main()
 		ValProc proc;
 
 		PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU,
-													  DEVICE_FEATURES::raytracing | DEVICE_FEATURES::accelerationStructures 
-																				  | DEVICE_FEATURES::deviceBufferAddressing);
-		deviceRequirements.deviceExtensions = { 
+			DEVICE_FEATURES::raytracing | DEVICE_FEATURES::accelerationStructures
+			| DEVICE_FEATURES::deviceBufferAddressing);
+		deviceRequirements.deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-			VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,	
+			VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
 			VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
 			VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
 			VK_KHR_RAY_QUERY_EXTENSION_NAME,
@@ -137,51 +143,63 @@ int main()
 
 		//////////////////////////////////////////////////////////////
 		// load mesh
-		Mesh<VertexTxtr2D, 1> screenMesh;
+		Mesh<VertexTxtr, 0> mesh;
 
 
-		FbxScene fbx("res/WoodenCube.fbx");
-		screenMesh.importFromScene(proc, fbx, 0, true, BUFFER_USAGE::ShaderDeviceAddress | BUFFER_USAGE::AccelerationStructureBuildInput,
-												 BUFFER_USAGE::ShaderDeviceAddress | BUFFER_USAGE::AccelerationStructureBuildInput);
+		PlyScene ply("res/bun_zipper.ply");
+		
+		mesh.importFromScene(proc, ply, BUFFER_USAGE::ShaderDeviceAddress | BUFFER_USAGE::AccelerationStructureBuildInput,
+			BUFFER_USAGE::ShaderDeviceAddress | BUFFER_USAGE::AccelerationStructureBuildInput);
+		ply.destroy();
 
 		//Texture2D texture(proc, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, imageFormat);
 		//fbx.importTexture2D(&texture, proc, 0, 0, FBX_MATERIAL_PROPERTY::diffuse);
 
 		//////////////////////////////////////////////////////////////
 		// create acceleration structures and raytracing pipeline
+
 		AccelerationStructureGeometry cubeAccelGeometry;
 		cubeAccelGeometry.setTriangleGeometryData(proc, VertexTxtr::getStride(), VertexTxtr::getPositionFormat(),
-				screenMesh.vertices.getVkBuffer(), screenMesh.indices.getVkBuffer(), screenMesh.vertices.size());
+			mesh.vertices.getVkBuffer(), mesh.indices.getVkBuffer(), mesh.indices.size());
 
 		Queue rayQueue(proc, QUEUE_FLAGS::Graphics);
-
 		AccelerationStructure BLAS;
 		BLAS.setGeometries({ &cubeAccelGeometry });
-		BLAS.buildAsBottomLevel(proc, rayQueue);
+		BLAS.buildAsBottomLevel(proc, rayQueue, mesh.vertices.size(), mesh.indices.size());
 
 		AccelerationStructure TLAS;
 		TLAS.buildAsTopLevel(proc, BLAS, rayQueue);
 
 
-		val::Image rayOutputImg(proc, 800, 800, 
+		val::Image rayOutputImg(proc, 800, 800,
 			VK_FORMAT_R32G32B32A32_SFLOAT, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
 
 		ImageView rayOutputImgView(proc, rayOutputImg, VK_IMAGE_ASPECT_COLOR_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 
-		DescriptorSheet rayDescSheet(
-		   {{0, TLAS, SHADER_STAGE::Raygen},
-			{1, rayOutputImgView, SHADER_STAGE::Raygen}},
+		UBO_Handle raygenUBO(sizeof(RayGenViewInfo));
+
+		DescriptorSheet rayDescSheet({
+			{0, TLAS, SHADER_STAGE::Raygen},
+			{1, rayOutputImgView, SHADER_STAGE::Raygen},
+			{2, raygenUBO, SHADER_STAGE::Raygen}},
 			FRAMES_IN_FLIGHT
 		);
-		
-		Shader raygenShader("shaders-compiled/basic.rgen.spv", SHADER_STAGE::Raygen);
-		Shader anyHitShader("shaders-compiled/basic.rahit.spv", SHADER_STAGE::AnyHit);
+
+
+		Shader raygenShdr("shaders-compiled/basic.rgen.spv", SHADER_STAGE::Raygen);
+		Shader missShdr("shaders-compiled/basic.rmiss.spv", SHADER_STAGE::Miss);
+		Shader closestHitShdr("shaders-compiled/basic.rchit.spv", SHADER_STAGE::ClosestHit);
 
 		RaytracingPipeline rayPipeline;
 		rayPipeline.setDescriptorSheet(&rayDescSheet);
-		rayPipeline.setShaders({&raygenShader, &anyHitShader});
-
+		rayPipeline.setShaders({ &raygenShdr,&missShdr,&closestHitShdr });
+		rayPipeline.setMaxRayRecursionDepth(2);
+		rayPipeline.setRaygroups({
+			{RAYGROUP::General, {&raygenShdr}},
+			{RAYGROUP::General, {&missShdr}},
+			{RAYGROUP::Triangles, {&closestHitShdr}},
+		});
 
 
 
@@ -197,22 +215,16 @@ int main()
 		//////////////////////////////////////////////////////////////
 		// create image rendering pipeline
 
-		// UBO which stores view information
-		UBO_Handle viewUBO(sizeof(ViewMatrix));
-		UBO_Handle lightUBO(sizeof(Light));
-
-
 		Sampler imgSampler(proc, val::combinedImage);
 		imgSampler.bindImageView(rayOutputImgView);
 		imgSampler.create();
 
-		DescriptorSheet descriptorSheetImgPipeline(
-			{ {0, viewUBO, SHADER_STAGE::Vertex},
-			{1, imgSampler, SHADER_STAGE::Fragment} },
+		DescriptorSheet descriptorSheetImgPipeline({
+			{ 1, imgSampler, SHADER_STAGE::Fragment }},
 			FRAMES_IN_FLIGHT
 		);
 
-		
+
 		// load and configure frag shader
 		Shader fragShader("shaders-compiled/image2d.frag.spv", SHADER_STAGE::Fragment);
 
@@ -232,14 +244,36 @@ int main()
 		imgRenderingPipeline.setRenderPassManager(&renderPassMngr);
 
 		//////////////////////////////////////////////////////////////
-		proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &imgRenderingPipeline }, {}, {&rayPipeline });
+		proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &imgRenderingPipeline }, {}, { &rayPipeline });
 
 		//////////////////////////////////////////////////////////////
-		window.createSwapChainFrameBuffers(proc,imgRenderingPipeline.getVkRenderPass());
+		window.createSwapChainFrameBuffers(proc, imgRenderingPipeline.getVkRenderPass());
 
 
 		rayPipeline.allocateAndWriteDescriptorSets(proc);
 		imgRenderingPipeline.allocateAndWriteDescriptorSets(proc);
+
+
+
+
+
+		//////////////////////////////////////////////////////////////
+		// create screen mesh - the ray output image will be displayed using this
+		Mesh<VertexTxtr2D, 0> screenMesh;
+
+		screenMesh.setVertices(proc, {
+			{ {-0.9f, -0.9f}, {0.0f, 1.0f} },
+			{ {0.9f, -0.9f}, {1.0f, 1.0f} },
+			{ {0.9f, 0.9f}, {1.0f, 0.0f} },
+			{ {-0.9f, 0.9f},{0.0f, 0.0f} }
+		});
+	/*	{ { -0.9f, -0.9f }, { 1.0f, 0.0f } },
+		{ {0.9f, -0.9f}, {0.0f, 0.0f} },
+		{ {0.9f, 0.9f}, {0.0f, 1.0f} },
+		{ {-0.9f, 0.9f},{1.0f, 1.0f} }*/
+		screenMesh.setIndices(proc,
+			{ 0, 1, 2, 2, 3, 0 }
+		);
 
 		//////////////////////////////////////////////////////////////
 		Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
@@ -263,73 +297,17 @@ int main()
 
 
 
-		VkPhysicalDeviceRayTracingPipelinePropertiesKHR rtProps = {};
-		rtProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
-		VkPhysicalDeviceProperties2 props2 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
-		props2.pNext = &rtProps;
-		vkGetPhysicalDeviceProperties2(proc.getVkPhysicalDevice(), &props2);
-
-		uint32_t handleSize = rtProps.shaderGroupHandleSize;
-		uint32_t handleAlignment = rtProps.shaderGroupBaseAlignment;
-
-		const uint32_t groupCount = 3; // raygen, miss, hit (or whatever you have)
-		const uint32_t alignedHandleSize = alignUp(handleSize, handleAlignment);
-		const VkDeviceSize sbtSize = groupCount * alignedHandleSize;
-
-		std::vector<uint8_t> shaderHandleStorage(sbtSize);
-		vkGetRayTracingShaderGroupHandlesKHR(proc.getVkLogicalDevice(), proc._raytracingPipelines[0], 0, groupCount, sbtSize, shaderHandleStorage.data());
-
-
-
-		// SHADER BINDING TABLE
-		VkBuffer sbtBuffer;
-		VkDeviceMemory sbtMemory;
-		// Create with VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT
-		// Memory should be VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | HOST_COHERENT
-		
-		proc.createBuffer(handleSize, VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT, sbtBuffer, sbtMemory );
-
-		// Map and copy aligned shader handles
-		uint8_t* mapped = ...; // map sbtMemory
-		for (uint32_t i = 0; i < groupCount; ++i) {
-			memcpy(mapped + i * alignedHandleSize, shaderHandleStorage.data() + i * handleSize, handleSize);
-		}
-		// unmap
-		VkDeviceAddress sbtAddress = vkGetBufferDeviceAddress(proc.getVkLogicalDevice(), sbtBuffer);
-
-		VkStridedDeviceAddressRegionKHR raygenRegion = {
-			.deviceAddress = sbtAddress + 0 * alignedHandleSize,
-			.stride = alignedHandleSize,
-			.size = alignedHandleSize
-		};
-
-		VkStridedDeviceAddressRegionKHR missRegion = {
-			.deviceAddress = sbtAddress + 1 * alignedHandleSize,
-			.stride = alignedHandleSize,
-			.size = alignedHandleSize
-		};
-
-		VkStridedDeviceAddressRegionKHR hitRegion = {
-			.deviceAddress = sbtAddress + 2 * alignedHandleSize,
-			.stride = alignedHandleSize,
-			.size = alignedHandleSize
-		};
-
-		VkStridedDeviceAddressRegionKHR callableRegion = {}; // leave zeroed
-
-
-
-
-	
 
 
 
 
 
 
+		PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR =
+			(PFN_vkCmdTraceRaysKHR)vkGetDeviceProcAddr(proc.getVkLogicalDevice(), "vkCmdTraceRaysKHR");
 
-
+		ShaderBindingTable sbt;
+		sbt.createForRaytracingPipeline(proc, rayPipeline);
 
 
 
@@ -342,7 +320,7 @@ int main()
 			calculateTime();
 
 			// Update view information, stored in a UBO
-			updateViewMatrix(proc, viewUBO);
+			updateRayViewUBO(proc, raygenUBO, window);
 
 			VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 			renderTarget.begin(proc);
@@ -368,10 +346,10 @@ int main()
 			// https://www.gsn-lib.org/docs/nodes/raytracing.php
 			vkCmdTraceRaysKHR(
 				cmd,
-				&raygenRegion,
-				&missRegion,
-				&hitRegion,
-				&callableRegion,
+				&sbt.getRaygenRegion(),
+				&sbt.getMissRegion(),
+				&sbt.getHitRegion(),
+				&sbt.getCallableRegion(),
 				window.getWidth(),
 				window.getHeight(),
 				1.0

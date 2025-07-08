@@ -352,10 +352,13 @@
     <None Include="README.MD">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="shaders\basic.rahit" />
+    <None Include="shaders\basic.rchit" />
+    <None Include="shaders\basic.rgen" />
+    <None Include="shaders\basic.rmiss" />
+    <None Include="shaders\test.rahit" />
     <None Include="shaders\basicLightingTextured.frag" />
     <None Include="shaders\basicLightingTextured.vert" />
-    <None Include="shaders\basic.rgen" />
+    <None Include="shaders\test.rgen" />
     <None Include="shaders\colorshader.frag" />
     <None Include="shaders\doubleImageShader.frag" />
     <None Include="shaders\dummy.rgen" />

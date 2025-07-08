@@ -47,18 +47,27 @@ namespace val
 	{
 	public:
 
+		VertexTxtr2D() = default;
+
+		VertexTxtr2D(glm::vec2 _pos, glm::vec2 _texCoord)
+		{
+			pos = _pos;
+			texCoord = _texCoord;
+		}
 		VertexTxtr2D& operator=(const VertexTxtr2D&) = default;
 
 		bool operator==(const VertexTxtr2D&) const = default;
+
 
 	public:
 
 		glm::vec2 pos;
 		glm::vec2 texCoord;
 	public:
-		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs) override
+		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
 		{
-			this->pos = pos * .97f;
+			this->pos.x = pos.x;
+			this->pos.y = pos.y;
 			if (!UVs.empty())
 			{
 				this->texCoord = UVs[0];
@@ -95,13 +104,13 @@ namespace val
 		}
 
 		inline static VkFormat getPositionFormat() {
-			return (VkFormat)VERTEX_ATTRIBUTE_TYPE::vec3;
+			return (VkFormat)VERTEX_ATTRIBUTE_TYPE::vec2;
 		}
 	};
 }
 
 
-
+// A hash function is required for vertex deduplication
 namespace std {
 	template<> struct hash<val::VertexTxtr2D> {
 		size_t operator()(val::VertexTxtr2D const& vertex) const {

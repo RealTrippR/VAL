@@ -24,7 +24,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/meshes&vertices/fbxScene.hpp>
 #include <VAL/lib/meshes&vertices/objScene.hpp>
+#include <VAL/lib/meshes&vertices/plyScene.hpp>
 
+#include <VAL/lib/ext/streql.h>
 #include <inttypes.h>
 #include <stdlib.h>
 
@@ -45,6 +47,8 @@ namespace val
 	template <typename VT/*vertex type*/, uint16_t NTextures>
 	class Mesh
 	{
+	public:
+		using VertexType = VT;
 	public:
 		gpu_vector<VT> vertices;
 		gpu_vector<uint32_t> indices;
@@ -69,11 +73,18 @@ namespace val
 			indices.destroy(proc);
 		}
 
-		VAL_RETURN_CODE importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices = true,
-				const VkBufferUsageFlags additionalVertexBufferUsages = 0x0, const VkBufferUsageFlags additionalIndexBufferUsages = 0x0);
+		void setVertices(ValProc& proc, const tiny_vector<VT>& vertices, const VkBufferUsageFlags additionalBufferUsages = 0x0);
 
-		VAL_RETURN_CODE importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices = true,
-				const VkBufferUsageFlags additionalVertexBufferUsages = 0x0, const VkBufferUsageFlags additionalIndexBufferUsages = 0x0);
+		void setIndices(ValProc& proc, const tiny_vector<uint32_t>& indices, const VkBufferUsageFlags additionalBufferUsages = 0x0);
+
+		VAL_RETURN_CODE importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex,
+				const VkBufferUsageFlags additionalVertexBufferUsages = 0x0, const VkBufferUsageFlags additionalIndexBufferUsages = 0x0, bool deduplicateVertices = true);
+
+		VAL_RETURN_CODE importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex,
+				const VkBufferUsageFlags additionalVertexBufferUsages = 0x0, const VkBufferUsageFlags additionalIndexBufferUsages = 0x0, bool deduplicateVertices = true);
+
+		VAL_RETURN_CODE importFromScene(ValProc& proc, const val::PlyScene& scene,
+			const VkBufferUsageFlags additionalVertexBufferUsages = 0x0, const VkBufferUsageFlags additionalIndexBufferUsages = 0x0);
 
 		void setTexture(Texture2D& texture, const uint32_t bindingIndex, const uint32_t location)
 		{
@@ -103,7 +114,7 @@ namespace val
 
 	// import from scene, FBX
 	template <typename VT/*vertex type*/, uint16_t NTextures>
-	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, bool deduplicateVertices, const VkBufferUsageFlags additionalVertexBufferUsages, const VkBufferUsageFlags additionalIndexBufferUsages)
+	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ufbx_scene* scene, const uint32_t meshIndex, const VkBufferUsageFlags additionalVertexBufferUsages, const VkBufferUsageFlags additionalIndexBufferUsages, bool deduplicateVertices)
 	{
 		vertices.destroy(proc);
 		indices.destroy(proc);
@@ -206,12 +217,13 @@ namespace val
 
 	// load from scene, OBJ
 	template <typename VT/*vertex type*/, uint16_t NTextures>
-	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, bool deduplicateVertices, const VkBufferUsageFlags additionalVertexBufferUsages, const VkBufferUsageFlags additionalIndexBufferUsages)
+	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, ObjScene& scene, const uint32_t meshIndex, const VkBufferUsageFlags additionalVertexBufferUsages, const VkBufferUsageFlags additionalIndexBufferUsages, bool deduplicateVertices)
 	{
 		const bool triangulate = true;
 
 		vertices.destroy(proc);
 		indices.destroy(proc);
+
 
 		vertices.setUsages(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalVertexBufferUsages);
 		indices.setUsages(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalIndexBufferUsages);
@@ -292,6 +304,181 @@ namespace val
 
 		return VAL_SUCCESS;
 	}
+
+
+
+
+
+
+	// load from scene, PLY
+	template <typename VT/*vertex type*/, uint16_t NTextures>
+	VAL_RETURN_CODE Mesh<VT, NTextures>::importFromScene(ValProc& proc, const val::PlyScene& scenePLYVAL,
+		const VkBufferUsageFlags additionalVertexBufferUsages, const VkBufferUsageFlags additionalIndexBufferUsages)
+	{
+		vertices.destroy(proc);
+		indices.destroy(proc);
+
+		vertices.setUsages(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalVertexBufferUsages);
+		indices.setUsages(proc, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | additionalIndexBufferUsages);
+
+
+		// read more
+		// https://paulbourke.net/dataformats/ply/ 
+		// see UNC paper about suggested extensions (color, normal, etc)
+		// https://gamma.cs.unc.edu/POWERPLANT/papers/ply.pdf
+
+		uint32_t lastIndex = 0u;
+		
+		using namespace cply;
+		const cply::PlyScene* scene = scenePLYVAL.getPlyScene();
+		for (U64 eId = 0; eId < scene->elementCount; ++eId)
+		{
+			PlyElement* ele = scene->elements + eId;
+			for (U64 lno = 0; lno < ele->dataLineCount; ++lno)
+			{
+				if (streql(ele->name, "vertex")) {
+					glm::vec3 pos = { 0,0,0 };
+					glm::vec3 normal = { 0,0,0 };
+					glm::vec4 color = { 1.f,1.f,1.f,1.f };
+
+					for (U64 pId = 0; pId < ele->propertyCount; ++pId)
+					{
+						PlyProperty* prop = ele->properties + pId;
+						// pos x
+						if (streql(prop->name, "x"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							pos.x = val;
+						}
+						// pos y
+						else if (streql(prop->name, "y"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							pos.y = val;
+						}
+						// pos z
+						else if (streql(prop->name, "z"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							pos.z = val;
+						}
+						// normal x
+						else if (streql(prop->name, "nx"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							normal.x = val;
+						}
+						// normal y
+						else if (streql(prop->name, "ny"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							normal.y = val;
+						}
+						// normal z
+						else if (streql(prop->name, "nz"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							normal.z = val;
+						}
+						// red color
+						else if (streql(prop->name, "red"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							color.r = val;
+						}
+						// green color
+						else if (streql(prop->name, "green"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							color.g = val;
+						}
+						// blue color
+						else if (streql(prop->name, "blue"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							color.b = val;
+						}
+						// alpha color
+						else if (streql(prop->name, "alpha"))
+						{
+							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
+							color.a = val;
+						}
+					}
+
+					const glm::vec2 texCoord = {
+						0,
+						0
+					};
+
+
+					VT vertex;
+					vertex.loadFromAttributes(pos, lastIndex, color, normal, { texCoord });
+					vertices.push_back(proc,vertex);
+				}
+				else if (streql(ele->name, "face"))
+				{
+					for (U64 pId = 0; pId < ele->propertyCount; ++pId)
+					{
+						PlyProperty* prop = ele->properties + pId;
+						if (prop->dataType == PLY_DATA_TYPE_LIST) {
+							U64 indexArrCount = 0u;
+							scenePLYVAL.getDataFromPropertyOfElementAsList(NULL, NULL, &indexArrCount, ele, prop, lno, NULL);
+							
+							if (!indexArrCount) // nothing to alloc
+								continue;
+							
+							double* data = (double*)calloc(indexArrCount, sizeof(double));
+							if (!data)
+								return VAL_FAILURE;
+
+							scenePLYVAL.getDataFromPropertyOfElementAsList(data, indexArrCount * sizeof(double), NULL, ele, prop, lno, NULL);
+
+							if (indexArrCount < 3)
+								goto skip_loop; // indices don't make a valid face
+
+
+							
+							// do a fan triangulation: for a polygon with N indices, create (N - 2) triangles
+							for (U64 i = 1; i < indexArrCount - 1; ++i)
+							{
+								indices.push_back(proc, data[0]);
+								indices.push_back(proc, data[i]);
+								indices.push_back(proc, data[i + 1]);
+							}
+
+						skip_loop:
+							free(data);
+						}
+					}
+				}
+			}
+		}
+
+		return VAL_SUCCESS;
+	}
+
+
+	template <typename VT/*vertex type*/, uint16_t NTextures>
+	void Mesh<VT, NTextures>::setVertices(ValProc& proc, const tiny_vector<VT>& _vertices, const VkBufferUsageFlags usages)
+	{
+		vertices.destroy(proc);
+		vertices.setUsages(proc, usages | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		vertices.resize(proc, _vertices.size());
+		
+		memcpy(vertices.data(), _vertices.data(), _vertices.size() * sizeof(VT));
+	}
+
+	template <typename VT/*vertex type*/, uint16_t NTextures>
+	void Mesh<VT, NTextures>::setIndices(ValProc& proc, const tiny_vector<uint32_t>& _indices, const VkBufferUsageFlags usages)
+	{
+		indices.destroy(proc);
+		indices.setUsages(proc, usages | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		indices.resize(proc,_indices.size());
+
+		memcpy(indices.data(), _indices.data(), _indices.size() * sizeof(uint32_t));
+	}
+
 }
 
 #endif // !VAL_MESH_HPP

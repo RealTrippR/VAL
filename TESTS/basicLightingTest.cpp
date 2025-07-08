@@ -74,9 +74,10 @@ void updateViewMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
 	using namespace val;
 	const VkExtent2D& extent = proc._windowVAL->getSize();
 
+	const float ARM_DIST = .3f;
 	ViewMatrix& ubo = *(ViewMatrix*)hdl.getData(proc);
 	ubo.model = glm::rotate(glm::mat4(1.0f), time_sec * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(glm::vec3(ARM_DIST), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 }
@@ -157,10 +158,10 @@ int main()
 
 		//////////////////////////////////////////////////////////////
 		// load mesh, texture, and create img sampler
-		val::Mesh<VertexTxtr, 1> mesh;
+		Mesh<VertexTxtr, 1> mesh;
 
-		val::FbxScene fbx("res/WoodenCube.fbx");
-		mesh.importFromScene(proc, fbx, 0);
+		FbxScene fbx("res/WoodenCube.fbx");
+		//mesh.importFromScene(proc, fbx, 0);
 
 		Texture2D texture(proc, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, imageFormat);
 		fbx.importTexture2D(&texture, proc, 0, 0, FBX_MATERIAL_PROPERTY::diffuse);
@@ -168,6 +169,9 @@ int main()
 		// this will happen automatically upon the call of it's destructor, 
 		// but it's best practice to destroy once we're done using it
 		fbx.destroy();
+
+		PlyScene scene("res/bun_zipper.ply");
+		mesh.importFromScene(proc, scene);
 
 		ImageView imgView(proc, texture, VK_IMAGE_ASPECT_COLOR_BIT);
 

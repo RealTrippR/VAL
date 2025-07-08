@@ -393,6 +393,8 @@ namespace val {
 		else if (keyword == INPUT_KEYWORD) {
 			return 1 + getClosingParenthesis(-1 + kywrdBegin + strlen(INPUT_KEYWORD));
 		}
+		dbg::printWarning("RenderGraph.cpp: findKeywordEnd: no valid keyword found.");
+		return NULL;
 	}
 
 

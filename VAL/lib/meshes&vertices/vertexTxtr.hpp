@@ -29,18 +29,26 @@ namespace val
 	class VertexTxtr : public VertexBase
 	{
 	public:
+		VertexTxtr() = default;
+		VertexTxtr(glm::vec3 _pos, glm::vec2 _texCoord, glm::vec3 _normal)
+		{
+			pos = _pos;
+			//texCoord = _texCoord;
+			//normal = _normal;
+		}
 
 		VertexTxtr& operator=(const VertexTxtr&) = default;
 
 		bool operator==(const VertexTxtr&) const = default;
 
+		
 	public:
 		glm::vec3 pos;
-		glm::vec2 texCoord;
 		glm::vec3 normal;
+		glm::vec2 texCoord;
 
 	public:
-		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs) override
+		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
 		{
 			this->pos = pos;
 			if (!UVs.empty()) 
@@ -56,9 +64,9 @@ namespace val
 			if (r.size() > 0)
 				return r;
 			static const VertexInputAttributeList vertexAttributes = {
-				   VertexInputAttribute(0, (VERTEX_ATTRIBUTE_TYPE)getPositionFormat(), offsetof(VertexTxtr, pos)),
-				   VertexInputAttribute(1, vec2, offsetof(VertexTxtr, texCoord)),
-				   VertexInputAttribute(2, vec3, offsetof(VertexTxtr, normal))
+				   VertexInputAttribute(0, (VERTEX_ATTRIBUTE_TYPE)getPositionFormat(), offsetof(VertexTxtr, pos))
+				   //VertexInputAttribute(1, vec2, offsetof(VertexTxtr, texCoord)),
+				   //VertexInputAttribute(2, vec3, offsetof(VertexTxtr, normal))
 			};
 			r = vertexAttributes.toVkVertexInputAttributeDescription();
 			return r;

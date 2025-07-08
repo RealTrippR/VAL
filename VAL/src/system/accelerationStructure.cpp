@@ -18,6 +18,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/accelerationStructure.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/buffer.hpp>
+#include <VAL/lib/ext/roundToNextPowerOf2.hpp>
 
 namespace val
 {
@@ -46,13 +47,11 @@ namespace val
 		return _instances;
 	}
 
-	VAL_RETURN_CODE AccelerationStructure::buildAsBottomLevel(ValProc& proc, Queue& rayqueue)
+	VAL_RETURN_CODE AccelerationStructure::buildAsBottomLevel(ValProc& proc, Queue& rayqueue, uint32_t vertexCount, uint32_t indexCount)
 	{
 		const VkBuildAccelerationStructureFlagsKHR ACCEL_BUILD_FLAGS = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 		const VkAccelerationStructureTypeKHR ACCEL_STRUCT_TYPE = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
 
-		PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR =
-			(PFN_vkGetAccelerationStructureBuildSizesKHR)vkGetDeviceProcAddr(proc.getVkLogicalDevice(), "vkGetAccelerationStructureBuildSizesKHR");
 
 		PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR = 
 			(PFN_vkCmdBuildAccelerationStructuresKHR)vkGetDeviceProcAddr(proc.getVkLogicalDevice(), "vkCmdBuildAccelerationStructuresKHR");
@@ -72,8 +71,17 @@ namespace val
 
 		for (uint32_t i = 0; i < _geometries.size(); ++i)
 		{
-			primitiveCounts[i] = _geometries[i]->geometry.triangles.maxVertex;
+			if (indexCount>0) {
+				primitiveCounts[i] = indexCount / 3;
+			}
+			else {
+				primitiveCounts[i] = vertexCount / 3;
+			}
+			
 			geometriesAsLinearMemory[i] = *(VkAccelerationStructureGeometryKHR*)(_geometries[i]);
+
+			geometriesAsLinearMemory[i].geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+			geometriesAsLinearMemory[i].flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 		}
 		
 		// https://registry.khronos.org/vulkan/specs/latest/man/html/VkAccelerationStructureBuildGeometryInfoKHR.html
@@ -90,34 +98,21 @@ namespace val
 															dstAccelerationStructure acceleration structure when mode
 															is VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR.*/
 
-		VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
-		sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
-		sizeInfo.pNext = NULL;
-
-		//https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetAccelerationStructureBuildSizesKHR.html
-		// we need to get the size before we can create the BLAS
-		vkGetAccelerationStructureBuildSizesKHR(
-			proc.getVkLogicalDevice(),
-			VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
-			&buildInfo,
-			primitiveCounts.data(),
-			&sizeInfo /*pSizeInfo is a pointer to a VkAccelerationStructureBuildSizesInfoKHR structure
-						which returns the size required for an acceleration structure and the sizes
-						required for the scratch buffers, given the build parameters.*/
-		);
-
+		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = getBuildSizes(proc, &buildInfo, primitiveCounts.data());
 
 
 		// CREATE SCRATCH BUFFER
 		proc.createBuffer(sizeInfo.buildScratchSize, 
 			VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, _transientScratchBuffer, _transientScratchMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT,
+			_transientScratchBuffer, _transientScratchMemory);
 
 
 		// CREATE ACCELERATION STRUCTURE BUFFER
 		proc.createBuffer(sizeInfo.accelerationStructureSize,
 			VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, _accelStructBuffer, _accelStructMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT,
+			_accelStructBuffer, _accelStructMemory);
 
 
 		// https://registry.khronos.org/vulkan/specs/latest/man/html/VkAccelerationStructureCreateInfoKHR.html
@@ -129,23 +124,23 @@ namespace val
 			.offset = 0x0,
 			.size = sizeInfo.accelerationStructureSize,
 			.type = ACCEL_STRUCT_TYPE,
+			.deviceAddress = NULL //  If deviceAddress is zero, no specific address is requested.
 		};
-
-		if (vkCreateAccelerationStructureKHR(proc.getVkLogicalDevice(), &AccelStructCreateInfo, nullptr, &_accelStructure) != VK_SUCCESS) {
-			dbg::printError("AccelerationStructure::buildAsBottomLevel: Failed to create acceleration structure for AccelerationStructure %p", this);
-			return VAL_FAILURE;
-		}
-
 
 
 		// update build info with scratch buffer address
 		const VkBufferDeviceAddressInfo scratchBuffAddressInfo =
 		{
 			.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
-			.pNext = VK_NULL_HANDLE,
 			.buffer = _transientScratchBuffer
 		};
-		buildInfo.scratchData = (VkDeviceOrHostAddressKHR)vkGetBufferDeviceAddress(proc.getVkLogicalDevice(), &scratchBuffAddressInfo);
+		buildInfo.scratchData.deviceAddress = vkGetBufferDeviceAddress(proc.getVkLogicalDevice(), &scratchBuffAddressInfo);
+
+		if (vkCreateAccelerationStructureKHR(proc.getVkLogicalDevice(), &AccelStructCreateInfo, nullptr, &_accelStructure) != VK_SUCCESS) {
+			dbg::printError("AccelerationStructure::buildAsBottomLevel: Failed to create acceleration structure for AccelerationStructure %p", this);
+			return VAL_FAILURE;
+		}
+
 
 		// update accel struct to build to, now that it has been created
 		buildInfo.dstAccelerationStructure = _accelStructure;
@@ -178,6 +173,20 @@ namespace val
 			}
 		}
 
+		VkFence fence;
+		VkFenceCreateInfo fenceCreateInfo =
+		{
+			.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+			.pNext = NULL,
+			.flags = 0x0
+		};
+
+
+		vkCreateFence(proc, &fenceCreateInfo, NULL, &fence);
+
+		const VkShaderStageFlags stageFlags = VK_SHADER_STAGE_ALL;
+
+
 		rayqueue.begin();
 	
 		vkCmdBuildAccelerationStructuresKHR(
@@ -185,9 +194,15 @@ namespace val
 			infoCount,
 			&buildInfo,
 			buildRanges);
-
 		rayqueue.end();
-		
+
+		rayqueue.submit(NULL, 0, &stageFlags, fence, 0, false);
+
+		// wait for acceleration structure to build (silent errors may occur otherwise)
+		vkWaitForFences(proc, 1, &fence, VK_TRUE, UINT64_MAX);
+
+		vkDestroyFence(proc, fence, NULL);
+
 		// destroy build ranges
 		for (uint32_t i = 0; i < infoCount; ++i)
 		{
@@ -238,18 +253,25 @@ namespace val
 
 			// create acceleration structure instance(s)
 			//https://registry.khronos.org/vulkan/specs/latest/man/html/VkAccelerationStructureInstanceKHR.html
-			dbg::printWarning(" AccelerationStructure::buildAsTopLevel is incomplete.");
 			VkAccelerationStructureInstanceKHR AS_Instance{};
-			AS_Instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+			AS_Instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR | VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR;
 			AS_Instance.accelerationStructureReference = BLAS_acstAddress;
 			AS_Instance.instanceCustomIndex = 0;
 			AS_Instance.mask = 0xFF;
+			AS_Instance.instanceShaderBindingTableRecordOffset = 0;
+			/* The transform defines the transformation of an instance of bottom level geometry.
+			* it includes rotation, scale, shear, and position data/
+			| R11 R12 R13 X |
+			| R21 R22 R23 Y |
+			| R31 R32 R33 Z |
+			*/
+			const float X = 0, Y = 0, Z = 0;
 			AS_Instance.transform = {
-				1,0,0,0,
-				0,1,0,0,
-				0,0,1,0
+				1, 0, 0, X,
+				0, 1, 0, Y,
+				0, 0, 1, Z
 			};
-			AS_Instance.instanceShaderBindingTableRecordOffset =0;
+
 
 			const uint32_t instanceBuffSize = sizeof(VkAccelerationStructureInstanceKHR);
 
@@ -284,7 +306,6 @@ namespace val
 			// Get device address of instance buffer
 			VkBufferDeviceAddressInfo addressInfo = {
 				.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
-				.pNext = VK_NULL_HANDLE,
 				.buffer = _instanceBuff
 			};
 			instanceBufferDeviceAddress.deviceAddress = vkGetBufferDeviceAddress(proc.getVkLogicalDevice(), &addressInfo);
@@ -294,7 +315,7 @@ namespace val
 		geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
 		geometry.pNext = VK_NULL_HANDLE;
 		geometry.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
-		geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
+		geometry.flags = 0x0; // must be either 0 or VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR
 		geometry.geometry.instances.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
 		geometry.geometry.instances.pNext = VK_NULL_HANDLE;
 		geometry.geometry.instances.arrayOfPointers = VK_FALSE;
@@ -302,28 +323,14 @@ namespace val
 
 		instanceBuildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
 		instanceBuildInfo.pNext = VK_NULL_HANDLE;
+		instanceBuildInfo.flags = ACCEL_BUILD_FLAGS;
+		instanceBuildInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
 		instanceBuildInfo.type = ACCEL_STRUCT_TYPE;
 		instanceBuildInfo.flags = ACCEL_BUILD_FLAGS;
 		instanceBuildInfo.geometryCount = 1;
 		instanceBuildInfo.pGeometries = &geometry;
 
-		VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
-		sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
-		sizeInfo.pNext = NULL;
-
-		//https://registry.khronos.org/vulkan/specs/latest/man/html/vkGetAccelerationStructureBuildSizesKHR.html
-		// we need to get the size before we can create the BLAS
-		vkGetAccelerationStructureBuildSizesKHR(
-			proc.getVkLogicalDevice(),
-			VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
-			&instanceBuildInfo,
-			&AS_instancesCount,
-			&sizeInfo /*pSizeInfo is a pointer to a VkAccelerationStructureBuildSizesInfoKHR structure
-						which returns the size required for an acceleration structure and the sizes
-						required for the scratch buffers, given the build parameters.*/
-		);
-
-
+		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = getBuildSizes(proc, &instanceBuildInfo, &AS_instancesCount);
 
 		// CREATE SCRATCH BUFFER
 		proc.createBuffer(sizeInfo.buildScratchSize,
@@ -359,14 +366,27 @@ namespace val
 			.pNext = VK_NULL_HANDLE,
 			.buffer = _transientScratchBuffer
 		};
-		instanceBuildInfo.scratchData = (VkDeviceOrHostAddressKHR)vkGetBufferDeviceAddress(proc.getVkLogicalDevice(), &scratchBuffAddressInfo);
+		instanceBuildInfo.scratchData.deviceAddress = vkGetBufferDeviceAddress(proc.getVkLogicalDevice(), &scratchBuffAddressInfo);
 		// set accel structure to build to
 		instanceBuildInfo.dstAccelerationStructure = _accelStructure;
 
 		VkAccelerationStructureBuildRangeInfoKHR buildRange{};
-		buildRange.primitiveCount = 1u;
+		buildRange.primitiveCount = 1u; // 1 for 1 instance (VkAccelerationStructureGeometryKHR)
 
 		const VkAccelerationStructureBuildRangeInfoKHR* pRanges = &buildRange;
+
+		VkFence fence;
+		VkFenceCreateInfo fenceCreateInfo =
+		{
+			.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+			.pNext = NULL,
+			.flags = 0x0
+		};
+
+
+		vkCreateFence(proc, &fenceCreateInfo, NULL, &fence);
+
+		const VkShaderStageFlags stageFlags = VK_SHADER_STAGE_ALL;
 
 		rayqueue.begin();
 
@@ -377,12 +397,59 @@ namespace val
 			&pRanges);
 
 		rayqueue.end();
-		
+
+	
+		rayqueue.submit(NULL, 0, &stageFlags, fence, 0, false);
+
+		// wait for acceleration structure to build (silent errors may occur otherwise)
+		vkWaitForFences(proc, 1, &fence, VK_TRUE, UINT64_MAX);
+
+		vkDestroyFence(proc, fence, NULL);
 
 		return VAL_SUCCESS;
 	}
 
 
+	uint64_t roundUp(uint64_t size, uint64_t multiple)
+	{
+		const uint64_t u = (size + multiple-1) / multiple;
+		return u * multiple;
+	}
+
+	VkAccelerationStructureBuildSizesInfoKHR AccelerationStructure::getBuildSizes(ValProc& proc, const VkAccelerationStructureBuildGeometryInfoKHR* pBuildInfo, const uint32_t* pMaxPrimitiveCounts) const
+	{
+
+		PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR =
+			(PFN_vkGetAccelerationStructureBuildSizesKHR)vkGetDeviceProcAddr(proc, "vkGetAccelerationStructureBuildSizesKHR");
+
+		VkPhysicalDeviceAccelerationStructurePropertiesKHR accelProps = {
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR
+		};
+
+
+		VkPhysicalDeviceProperties2 props2 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
+		props2.pNext = &accelProps;
+		vkGetPhysicalDeviceProperties2(proc.getVkPhysicalDevice(), &props2);
+
+		VkAccelerationStructureBuildSizesInfoKHR sizeInfo = {};
+		sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+
+		vkGetAccelerationStructureBuildSizesKHR(
+			proc.getVkLogicalDevice(),
+			VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
+			pBuildInfo,
+			pMaxPrimitiveCounts,
+			&sizeInfo);
+
+		// AccelerationStructure offset needs to be 256 bytes aligned, as per vulkan spec
+		const uint64_t AccelerationStructureAlignment = 256;
+		const uint64_t ScratchAlignment = accelProps.minAccelerationStructureScratchOffsetAlignment;
+
+		sizeInfo.accelerationStructureSize = roundUp(sizeInfo.accelerationStructureSize, AccelerationStructureAlignment);
+		sizeInfo.buildScratchSize = roundUp(sizeInfo.buildScratchSize, ScratchAlignment);
+
+		return sizeInfo;
+	}
 
 
 

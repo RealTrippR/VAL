@@ -25,7 +25,7 @@ namespace val
 
 	}
 	
-	void AccelerationStructureGeometry::setTriangleGeometryData(VkDevice device, const VkDeviceSize vertexStride, const VkFormat positionFormat, const VkBuffer vertexBuffer, const uint32_t vertexCount)
+	void AccelerationStructureGeometry::setTriangleGeometryData(VkDevice device, const VkDeviceSize vertexStride, const VkFormat positionFormat, const VkBuffer vertexBuffer, const uint32_t indexCount)
 	{
 		geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 
@@ -40,11 +40,10 @@ namespace val
 		};
 		geometry.triangles.vertexData = (VkDeviceOrHostAddressConstKHR)vkGetBufferDeviceAddress(device, &vertexBuffAddressInfo);
 		geometry.triangles.vertexStride = vertexStride;
-		geometry.triangles.maxVertex = vertexCount;
+		geometry.triangles.maxVertex = indexCount;
 		geometry.triangles.indexType = VK_INDEX_TYPE_NONE_KHR;
 		geometry.triangles.indexData = { NULL };
 		//geometry.triangles.transformData = (VkDeviceOrHostAddressConstKHR)vkGetBufferDeviceAddress(device, &indexBuffAddressInfo);
-		dbg::printWarning("Incomplete: transformData is missing.");
 	}
 
 	void AccelerationStructureGeometry::setTriangleGeometryData(VkDevice device, const VkDeviceSize vertexStride, const VkFormat positionFormat, const VkBuffer vertexBuffer, const VkBuffer indexBuffer, const uint32_t vertexCount)
@@ -53,26 +52,36 @@ namespace val
 		geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
 		geometry.triangles.pNext = VK_NULL_HANDLE;
 		geometry.triangles.vertexFormat = positionFormat;
-		const VkBufferDeviceAddressInfo vertexBuffAddressInfo =
-		{
+#ifndef NDEBUG
+		if (!vertexBuffer) {
+			dbg::printError("AccelerationStructureGeometry::setTriangleGeometryData: vertexBuffer is NULL, cannot set geometry data.");
+			throw std::runtime_error("AccelerationStructureGeometry::setTriangleGeometryData: vertexBuffer is NULL, cannot set geometry data.");
+		}
+#endif // !NDEBUG
+
+		const VkBufferDeviceAddressInfo vertexBuffAddressInfo = {
 			.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
-			.pNext = VK_NULL_HANDLE,
 			.buffer = vertexBuffer
 		};
-		geometry.triangles.vertexData = (VkDeviceOrHostAddressConstKHR)vkGetBufferDeviceAddress(device, &vertexBuffAddressInfo);
+
+		geometry.triangles.vertexData.deviceAddress = vkGetBufferDeviceAddress(device, &vertexBuffAddressInfo);
 		geometry.triangles.vertexStride = vertexStride;
-		geometry.triangles.maxVertex = vertexCount;
-		geometry.triangles.indexType = VK_INDEX_TYPE_UINT32;
-		const VkBufferDeviceAddressInfo indexBuffAddressInfo =
-		{
-			.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
-			.pNext = VK_NULL_HANDLE,
-			.buffer = indexBuffer
-		};
-		geometry.triangles.indexData = (VkDeviceOrHostAddressConstKHR)vkGetBufferDeviceAddress(device, &indexBuffAddressInfo);
+		geometry.triangles.maxVertex = vertexCount - 1; // maxVertex is the number of vertices in vertexData minus one.
+
+		geometry.triangles.indexType = indexBuffer ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_NONE_KHR;
+
+		if (indexBuffer) {
+			const VkBufferDeviceAddressInfo indexBuffAddressInfo = {
+				.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
+				.buffer = indexBuffer
+			};
+			geometry.triangles.indexData.deviceAddress = vkGetBufferDeviceAddress(device, &indexBuffAddressInfo);
+		}
+		else {
+			geometry.triangles.indexData.deviceAddress = NULL;
+		}
 		geometry.triangles.transformData = { NULL };
 		//geometry.triangles.transformData = (VkDeviceOrHostAddressConstKHR)vkGetBufferDeviceAddress(device, &indexBuffAddressInfo);
-		dbg::printWarning("Incomplete: transformData is missing.");
 	}
 
 	void AccelerationStructureGeometry::setAabbGeometryData()

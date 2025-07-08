@@ -161,7 +161,22 @@ namespace val
 	{
 		ufbx_scene* scene = _scene;
 
+		throw std::runtime_error("IMPLEMENT THIS!");
+		// Compute normal when no normal were provided.
+		/*if (attrib.normals.empty())
+		{
+			for (size_t i = 0; i < m_indices.size(); i += 3)
+			{
+				VertexObj& v0 = m_vertices[m_indices[i + 0]];
+				VertexObj& v1 = m_vertices[m_indices[i + 1]];
+				VertexObj& v2 = m_vertices[m_indices[i + 2]];
 
+				glm::vec3 n = glm::normalize(glm::cross((v1.pos - v0.pos), (v2.pos - v0.pos)));
+				v0.nrm = n;
+				v1.nrm = n;
+				v2.nrm = n;
+			}
+		}*/
 		for (size_t ni = 0; ni < scene->nodes.count; ni++)
 		{
 			ufbx_node* node = scene->nodes.data[ni];

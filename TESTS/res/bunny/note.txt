@@ -1,0 +1,1 @@
+This model of the Stanford Bunny is sourced from the Stanford University Computer Graphics Laboratory. You can find it on their website here, along with other models, many of which are historically significant in the field of Digital Graphics: https://graphics.stanford.edu/data/3Dscanrep/

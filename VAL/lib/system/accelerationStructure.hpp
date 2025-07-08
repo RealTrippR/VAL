@@ -38,12 +38,12 @@ namespace val
 
 		const tiny_vector<AccelerationStructureInstance*>& getAccelerationStructureInstances() const;
 
-		VAL_RETURN_CODE buildAsBottomLevel(ValProc& proc, Queue& rayqueue);
+		VAL_RETURN_CODE buildAsBottomLevel(ValProc& proc, Queue& rayqueue, uint32_t vertexCount, uint32_t indexCount);
 
 		VAL_RETURN_CODE buildAsTopLevel(ValProc& proc, AccelerationStructure& TLAS, Queue& rayqueue);
 
-
-
+		VkAccelerationStructureBuildSizesInfoKHR getBuildSizes(ValProc& proc, const VkAccelerationStructureBuildGeometryInfoKHR* pBuildInfo, const uint32_t* pMaxPrimitiveCounts) const;
+	
 		VkDescriptorType getVkDescriptorType() {
 			return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 		}

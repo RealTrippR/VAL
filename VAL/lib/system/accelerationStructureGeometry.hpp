@@ -65,7 +65,7 @@ namespace val
 		const void* pNext = VK_NULL_HANDLE;
 		VkGeometryTypeKHR                         geometryType;
 		VkAccelerationStructureGeometryDataKHR    geometry;
-		VkGeometryFlagsKHR                        flags = 0x0;
+		VkGeometryFlagsKHR                        flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 	};
 }
 

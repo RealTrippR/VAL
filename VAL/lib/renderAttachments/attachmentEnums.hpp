@@ -42,6 +42,7 @@ namespace val {
 			return VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			break;
 		}
+		return VK_ATTACHMENT_STORE_OP_NONE;
 	}
 
 	constexpr VkAttachmentLoadOp RENDER_ATTACHMENT_OPERATION_TO_VkAttachmentLoadOp(RENDER_ATTACHMENT_OPERATION& opType) {
@@ -59,6 +60,7 @@ namespace val {
 			return VK_ATTACHMENT_LOAD_OP_CLEAR;
 			break;
 		}
+		return VK_ATTACHMENT_LOAD_OP_NONE;
 	}
 }
 

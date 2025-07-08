@@ -57,7 +57,7 @@ namespace val
 		case VERTEX_ATTRIBUTE_TYPE::mat3x4:
 			return tiny_vector<VkFormat>(3, VK_FORMAT_R32G32B32A32_SFLOAT);
 		default:
-			break;
+			return VK_FORMAT_R8_SINT;
 		}
 
 	}

@@ -121,7 +121,6 @@ int main()
 	val::Shader vertShader("shaders-compiled/shadervert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
-	vertShader._UBO_Handles = { {&uboHdl,0} };
 
 	// load and configure frag shader
 	val::Shader fragShader("shaders-compiled/colorshaderfrag.spv", SHADER_STAGE::Fragment, "main");

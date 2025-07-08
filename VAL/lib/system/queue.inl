@@ -66,6 +66,7 @@ namespace val
 		dbgValidateSelfUse();
 #endif // !NDEBUG
 		VkSubmitInfo submitInfo;
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pNext = VK_NULL_HANDLE;
 		submitInfo.pCommandBuffers = &_commandBuffers[_proc->getFramesInFlight()];
 		submitInfo.commandBufferCount = 1u;
@@ -104,8 +105,9 @@ namespace val
 		dbgValidateSelfUse();
 #endif // !NDEBUG
 		VkSubmitInfo submitInfo;
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pNext = VK_NULL_HANDLE;
-		submitInfo.pCommandBuffers = &_commandBuffers[_proc->getFramesInFlight()];
+		submitInfo.pCommandBuffers = &(getCommandBuffer());
 		submitInfo.commandBufferCount = 1u;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &_semaphores[_proc->getCurrentFrame()];
@@ -123,8 +125,9 @@ namespace val
 		dbgValidateSelfUse();
 #endif // !NDEBUG
 		VkSubmitInfo submitInfo;
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pNext = VK_NULL_HANDLE;
-		submitInfo.pCommandBuffers = &_commandBuffers[_proc->getFramesInFlight()];
+		submitInfo.pCommandBuffers = &_commandBuffers[_proc->getCurrentFrame()];
 		submitInfo.commandBufferCount = 1u;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &_semaphores[_proc->getCurrentFrame()];
@@ -135,6 +138,30 @@ namespace val
 		vkQueueSubmit(_vkQueue, 1, &submitInfo, fence);
 	}
 
+	inline void Queue::submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
+		const VkShaderStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence, uint8_t frameIdx, bool signal)
+	{
+#ifndef NDEBUG
+		dbgValidateSelfUse();
+#endif // !NDEBUG
+		VkSubmitInfo submitInfo;
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.pNext = VK_NULL_HANDLE;
+		submitInfo.pCommandBuffers = &_commandBuffers[frameIdx];
+		submitInfo.commandBufferCount = 1u;
+		if (signal) {
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = &_semaphores[frameIdx];
+		}
+		else {
+			submitInfo.signalSemaphoreCount = 0u;
+		}
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.waitSemaphoreCount = waitSemaphoreCount;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+
+		vkQueueSubmit(_vkQueue, 1, &submitInfo, fence);
+	}
 
 	inline uint8_t Queue::getCommandBufferCount() const
 	{

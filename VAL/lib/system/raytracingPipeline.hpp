@@ -24,6 +24,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/accelerationStructureGeometry.hpp>
 #include <VAL/lib/system/accelerationStructureInstance.hpp>
 #include <VAL/lib/system/accelerationStructure.hpp>
+#include <VAL/lib/system/rayTracingGroup.hpp>
+#include <VAL/lib/system/shaderBindingTable.hpp>
 
 namespace val
 {
@@ -38,8 +40,15 @@ namespace val
 
 		uint32_t getMaxRayRecursionDepth() const;
 
+		void setRaygroups(const tiny_vector<RaytracingGroup>& raygroups);
+
+		const tiny_vector<RaytracingGroup>& getRaygroups() const;
+
+		tiny_vector<RaytracingGroup>& getRaygroups();
+
 	private:
-		uint32_t _maxRayRecursionDepth;
+		uint32_t _maxRayRecursionDepth = 16u;
+		tiny_vector<RaytracingGroup> _raygroups;
 	};
 }
 

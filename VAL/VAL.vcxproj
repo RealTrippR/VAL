@@ -146,6 +146,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <TreatSpecificWarningsAsErrors>4715;</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -167,6 +168,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatSpecificWarningsAsErrors>4715;</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -190,6 +192,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <TreatSpecificWarningsAsErrors>4715;</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -201,6 +204,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\ExternalLibraries\cply\c_polygon.h" />
     <ClInclude Include="lib\classEnumBitOps.hpp" />
     <ClInclude Include="lib\C_compatibleBinding.h" />
     <ClInclude Include="lib\debugReporting\DbgVerbosityFlags.hpp" />
@@ -229,6 +233,7 @@
     <ClInclude Include="lib\meshes&amp;vertices\meshTextured.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\meshUtils.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\objScene.hpp" />
+    <ClInclude Include="lib\meshes&amp;vertices\plyScene.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\valProcCreateInfo.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertex.hpp" />
     <ClInclude Include="lib\meshes&amp;vertices\vertexAttributeType.hpp" />
@@ -284,6 +289,8 @@
     <ClInclude Include="lib\system\queue.hpp" />
     <ClInclude Include="lib\system\queueFlags.hpp" />
     <ClInclude Include="lib\system\queueGroup.hpp" />
+    <ClInclude Include="lib\system\raytracingEnums.hpp" />
+    <ClInclude Include="lib\system\rayTracingGroup.hpp" />
     <ClInclude Include="lib\system\raytracingPipeline.hpp" />
     <ClInclude Include="lib\system\renderPass.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
@@ -292,6 +299,7 @@
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\renderTarget.hpp" />
+    <ClInclude Include="lib\system\shaderBindingTable.hpp" />
     <ClInclude Include="lib\system\shaderStageEnum.hpp" />
     <ClInclude Include="lib\system\specializationConstant.hpp" />
     <ClInclude Include="lib\system\SSBO_Handle.hpp" />
@@ -306,6 +314,7 @@
     <ClInclude Include="lib\system\VAL_PROC.hpp" />
     <ClInclude Include="lib\system\system_utils.hpp" />
     <ClInclude Include="lib\system\window.hpp" />
+    <ClCompile Include="..\ExternalLibraries\cply\c_polygon.c" />
     <ClCompile Include="src\debugReporting\debugCallbacks.cpp" />
     <ClCompile Include="src\debugReporting\VAL_DebugCallbacks.c" />
     <ClCompile Include="src\debugUtils\dbgUtils.cpp" />
@@ -332,6 +341,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Static|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\meshes&amp;vertices\objScene.cpp" />
+    <ClCompile Include="src\meshes&amp;vertices\plyScene.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\vertexAttributeType.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\vertexInputAttribute.cpp" />
     <ClCompile Include="src\meshes&amp;vertices\vertexInputAttributeList.cpp" />
@@ -361,10 +371,12 @@
     <ClCompile Include="src\system\pushDescriptor.cpp" />
     <ClCompile Include="src\system\queue.cpp" />
     <ClCompile Include="src\system\queueManager.cpp" />
+    <ClCompile Include="src\system\raygroup.cpp" />
     <ClCompile Include="src\system\raytracingPipeline.cpp" />
     <ClCompile Include="src\system\renderPass.cpp" />
     <ClCompile Include="src\system\renderTarget.cpp" />
     <ClCompile Include="src\system\sampler.cpp" />
+    <ClCompile Include="src\system\shaderBindingTable.cpp" />
     <ClCompile Include="src\system\SSBO_Handle.cpp" />
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\subpass.cpp" />

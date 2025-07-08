@@ -22,16 +22,22 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
+	/// @brief VertexBase - the base class for all vertices.
+	/// The Vertex base class must not have any virtual functions, 
+	/// and all classes that inherit from it should contain position 
+	/// data as the first member element.
 	class VertexBase
 	{
 	public:
+		VertexBase() = default;
+
 		VertexBase& operator=(const VertexBase&) = default;
 
 		bool operator==(const VertexBase&) const = default;
 
-		virtual ~VertexBase() = default;
+		~VertexBase() = default;
 	public:
-		virtual void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
+		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
 		{}
 
 		inline static VkDeviceSize getStride() {

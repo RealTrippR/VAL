@@ -425,6 +425,21 @@
     <ClInclude Include="lib\system\imageViewBindInfo.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\raytracingEnums.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\rayTracingGroup.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\system\shaderBindingTable.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ExternalLibraries\cply\c_polygon.h">
+      <Filter>lib\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\meshes&amp;vertices\plyScene.hpp">
+      <Filter>lib\meshes&amp;vertices</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -594,6 +609,18 @@
     </ClCompile>
     <ClCompile Include="src\system\image.cpp">
       <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\raygroup.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\shaderBindingTable.cpp">
+      <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ExternalLibraries\cply\c_polygon.c">
+      <Filter>src\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshes&amp;vertices\plyScene.cpp">
+      <Filter>src\meshes&amp;vertices</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -41,6 +41,10 @@ namespace val {
 
 		virtual const std::vector<VkShaderStageFlags> getShaderStages()const;
 
+
+		// returns -1 if not found, otherwise returns the index as a uint32_t
+		int64_t getShaderIndexOfShaderInPipeline(Shader* shdr);
+
 	public:
 		void pushDescriptor_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, Sampler& sampler);
 

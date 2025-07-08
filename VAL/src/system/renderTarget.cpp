@@ -206,7 +206,7 @@ namespace val {
 		setVertexBuffer(vertexBuffer, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 		if (_indexCount > 0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
@@ -217,7 +217,7 @@ namespace val {
 		setIndexBuffer(indexBuffer, indexCount);
 
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 		if (_indexCount > 0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
@@ -228,7 +228,7 @@ namespace val {
 		setIndexBuffer(indexBuffer, indexCount);
 
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 		if (_indexCount > 0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
@@ -244,12 +244,12 @@ namespace val {
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelines[pipelineIdx]);
 
 		// bind buffers
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 		if (_indexCount>0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}
 
-		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
+		vkCmdSetViewport(commandBuffer, 0, (uint32_t)viewports.size(), viewports.data());
 	}
 
 	void renderTarget::begin(ValProc& proc)

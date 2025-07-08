@@ -148,6 +148,17 @@ namespace val {
 		return stages;
 	}
 
+	int64_t PipelineBase::getShaderIndexOfShaderInPipeline(Shader* shdr)
+	{
+		for (uint32_t i = 0; i < shaders.size(); ++i)
+		{
+			if (shaders[i] == shdr)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
 
 	void PipelineBase::pushDescriptor_SAMPLER(ValProc& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, Sampler& sampler) {
 		VAL_VALIDATE_PUSH_DESCRIPTOR_EXT;
