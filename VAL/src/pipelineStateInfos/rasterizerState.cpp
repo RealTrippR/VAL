@@ -6,7 +6,7 @@ namespace val
 		_VKrasterizerState.depthBiasEnable = enable;
 	}
 
-	const bool& rasterizerState::getEnableDepthBias() const {
+	const bool rasterizerState::getEnableDepthBias() const {
 		return _VKrasterizerState.depthBiasEnable;
 	}
 
@@ -14,7 +14,7 @@ namespace val
 		_VKrasterizerState.depthBiasConstantFactor = bias;
 	}
 
-	const float& rasterizerState::getConstantDepthBias() const {
+	const float rasterizerState::getConstantDepthBias() const {
 		return _VKrasterizerState.depthBiasConstantFactor;
 	}
 
@@ -22,7 +22,7 @@ namespace val
 		_VKrasterizerState.depthClampEnable = enabled;
 	}
 
-	const bool& rasterizerState::getEnableDepthBiasClamp() const {
+	const bool rasterizerState::getEnableDepthBiasClamp() const {
 		return _VKrasterizerState.depthClampEnable;
 	}
 

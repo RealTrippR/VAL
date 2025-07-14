@@ -13,14 +13,14 @@ namespace val
 {
 	constexpr VkAttachmentReference NullAttachment = { VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_UNDEFINED };
 
-	class renderPassManager; // forward declaration
+	class RenderPassManager; // forward declaration
 
 	class Subpass {
 	public:
-		Subpass(renderPassManager& rpManager) : _rpMngr(&rpManager) {
+		Subpass(RenderPassManager& rpManager) : _rpMngr(&rpManager) {
 			attachToRenderPassManager();
 		};
-		Subpass(renderPassManager& rpManager, PIPELINE_TYPE pipelineBindPoint) : _rpMngr(&rpManager) {
+		Subpass(RenderPassManager& rpManager, PIPELINE_TYPE pipelineBindPoint) : _rpMngr(&rpManager) {
 			_subpassDesc.pipelineBindPoint = PIPELINE_TYPE_To_VkPipelineBindPoint(pipelineBindPoint);
 			attachToRenderPassManager();
 		}
@@ -37,9 +37,9 @@ namespace val
 		friend ValProc;
 		friend Subpass;
 		friend renderAttachment;
-		friend renderPassManager;
+		friend RenderPassManager;
 		/******************************************/
-		renderPassManager* _rpMngr;
+		RenderPassManager* _rpMngr;
 		/******************************************/
 		VkSubpassDescription _subpassDesc{};
 		VkSubpassDependency _dependency{};

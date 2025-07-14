@@ -12,11 +12,29 @@ namespace val
 		destroy();
 		_queueFlags = flags;
 		_proc = &proc;
+		_cmdBuffAndSemaphoreBufferCount = proc.getFramesInFlight();
+#ifndef NDEBUG
+		dbgValidateSelfUse();
+
+		if (proc.getFramesInFlight() == 0){
+			dbg::printError("Frame count is %d, cannot create Queue @ %p.", proc.getFramesInFlight(), this);
+			throw std::runtime_error("Frame count is 0, cannot create Queue.");
+		}
+#endif // !NDEBUG
 		create();
 	}
 
-	void Queue::
-		create()
+	void Queue::create(ValProc& proc, const uint8_t cmdBuffAndSemaphoreCount, const QUEUE_FLAGS flags)
+	{
+		destroy();
+		_queueFlags = flags;
+		_proc = &proc;
+		_cmdBuffAndSemaphoreBufferCount = cmdBuffAndSemaphoreCount;
+		create();
+	}
+
+
+	void Queue::create()
 	{
 		
 		if (_proc == NULL || _proc->getVkLogicalDevice() == NULL) 
@@ -25,17 +43,6 @@ namespace val
 			throw std::runtime_error("Cannot create Queue, the ValProc it's associated with is uninitialized");
 		}
 
-		const uint8_t frameCount = _proc->getFramesInFlight();
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-
-		if (frameCount == 0)
-		{
-			dbg::printError("Frame count is %d, cannot create Queue @ %p.", frameCount, this);
-			throw std::runtime_error("Frame count is 0, cannot create Queue.");
-			return;
-		}
-#endif // !NDEBUG
 
 
 		uint8_t qfam = 0x0;
@@ -50,7 +57,7 @@ namespace val
 		vkGetDeviceQueue(_proc->getVkLogicalDevice(), qfam, 0, &_vkQueue);
 
 		// alloc command buffers, create fences, etc
-		uint8_t cmdBufferAndSemaphoreCount = _proc->getFramesInFlight();
+		const uint8_t cmdBufferAndSemaphoreCount = _cmdBuffAndSemaphoreBufferCount;
 		VkCommandBufferAllocateInfo allocInfo;
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.commandPool = _proc->getCommandPool();
@@ -58,14 +65,14 @@ namespace val
 		allocInfo.commandBufferCount = cmdBufferAndSemaphoreCount;
 		allocInfo.pNext = NULL;
 
-		_commandBuffers = (VkCommandBuffer*)malloc(sizeof(VkCommandBuffer) * frameCount);
+		_commandBuffers = (VkCommandBuffer*)malloc(sizeof(VkCommandBuffer) * cmdBufferAndSemaphoreCount);
 #ifndef NDEBUG
 		if (_commandBuffers == NULL) {
 			dbg::printError("Failed to allocate command buffer pointers for Queue @ %p", this);
 			return;
 		}
 
-		memset(_commandBuffers, 0, sizeof(VkCommandBuffer) * frameCount);
+		memset(_commandBuffers, 0, sizeof(VkCommandBuffer) * cmdBufferAndSemaphoreCount);
 #endif
 		VkResult vkresCMD = vkAllocateCommandBuffers(_proc->getVkLogicalDevice(), &allocInfo, _commandBuffers);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _commandBuffers[0]);
@@ -76,7 +83,7 @@ namespace val
 			return;
 		}
 #endif // !NDEBUG
-		_semaphores = (VkSemaphore*)malloc(sizeof(VkSemaphore) * frameCount);
+		_semaphores = (VkSemaphore*)malloc(sizeof(VkSemaphore) * cmdBufferAndSemaphoreCount);
 		if (_semaphores == NULL)
 		{
 			dbg::printError("Failed to allocate semaphore pointers for Queue @ %p.", this);
@@ -87,7 +94,7 @@ namespace val
 		semaphoreCreateInfo.pNext = NULL;
 		semaphoreCreateInfo.flags = 0x0;
 
-		for (uint8_t i = 0; i < frameCount; ++i)
+		for (uint8_t i = 0; i < cmdBufferAndSemaphoreCount; ++i)
 		{
 			VkSemaphore* semaphoreToSet = &_semaphores[i];
 			VkResult vkresSEM = vkCreateSemaphore(_proc->getVkLogicalDevice(), &semaphoreCreateInfo, NULL, semaphoreToSet);
@@ -99,6 +106,19 @@ namespace val
 			}
 #endif // !NDEBUG
 		}
+	}
+
+	void Queue::setCmdBuffAndSemaphoreCountFromProc(ValProc& proc)
+	{
+#ifndef NDEBUG
+		dbgValidateSelfUse();
+
+		if (proc.getFramesInFlight() == 0) {
+			dbg::printError("Frame count is %d, cannot create Queue @ %p.", proc.getFramesInFlight(), this);
+			throw std::runtime_error("Frame count is 0, cannot create Queue.");
+		}
+#endif // !NDEBUG
+		_cmdBuffAndSemaphoreBufferCount = proc.getFramesInFlight();
 	}
 
 	void Queue::destroy()
@@ -113,6 +133,7 @@ namespace val
 		{
 			if (_commandBuffers) {
 				dbg::recordVkObjectDestruction(_proc->getVkLogicalDevice(), _commandBuffers[0]);
+				VkCommandBuffer b =_commandBuffers[1];
 				vkFreeCommandBuffers(_proc->getVkLogicalDevice(), _proc->getCommandPool(), _proc->getFramesInFlight(), _commandBuffers);
 
 				free(_commandBuffers);

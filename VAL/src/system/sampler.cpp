@@ -28,7 +28,7 @@ namespace val
 	VAL_RETURN_CODE Sampler::create(bool keepCreateInfo)
 	{
 #ifndef NDEBUG
-		if (_imgView == NULL && _samplerType != samplerType::standalone)
+		if (_imgView == NULL && _samplerType != SAMPLER_TYPE::standalone)
 		{
 			dbg::printError("Sampler::create: standalone Sampler @ %p cannot be created without an image view.",this);
 				return VAL_FAILURE;
@@ -72,7 +72,7 @@ namespace val
 	}
 
 
-	void Sampler::setSamplerType(const samplerType& type)
+	void Sampler::setSamplerType(const SAMPLER_TYPE& type)
 	{
 		_samplerType = type;
 	}
@@ -203,7 +203,7 @@ namespace val
 		return _imgView;
 	}
 
-	const samplerType& Sampler::getSamplerType() const {
+	const SAMPLER_TYPE& Sampler::getSamplerType() const {
 		return _samplerType;
 	}
 

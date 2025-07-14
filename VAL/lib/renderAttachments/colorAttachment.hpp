@@ -5,11 +5,11 @@
 
 namespace val
 {
-	class colorAttachment : public renderAttachment
+	class ColorAttachment : public renderAttachment
 	{
 	public:
-		colorAttachment() : renderAttachment() {}
-		colorAttachment(RENDER_ATTACHMENT_USAGE usage) : renderAttachment(usage) {}
+		ColorAttachment() : renderAttachment() {}
+		ColorAttachment(RENDER_ATTACHMENT_USAGE usage) : renderAttachment(usage) {}
 	public:
 		constexpr VkImageLayout getRefLayout() const override {
 			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;

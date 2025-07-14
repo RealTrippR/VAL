@@ -31,12 +31,16 @@ namespace val {
 		Texture2D() = default;
 
 		Texture2D(ValProc& proc) : _proc(&proc) {};
-
+		
 		Texture2D(ValProc& proc, const VkImageLayout layout) : _proc(&proc), _layout(layout) {};
+
+		Texture2D(ValProc& proc, const IMAGE_LAYOUT layout) : _proc(&proc), _layout((VkImageLayout)layout) {};
 
 		Texture2D(ValProc& proc, const VkImageLayout layout, const VkFormat format) : _proc(&proc), _layout(layout), _format(format) {};
 
-		Texture2D(ValProc& proc, void* memory, size_t memorySize, const VkFormat format,
+		Texture2D(ValProc& proc, const IMAGE_LAYOUT layout, const VkFormat format) : _proc(&proc), _layout((VkImageLayout)layout), _format(format) {};
+
+		Texture2D(ValProc& proc, void* memory, uint32_t memorySize, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
 		{
 			createFromMemory(memory, memorySize, usages, layout, memspace, mipLevels);
@@ -100,8 +104,14 @@ namespace val {
 
 		inline void transitionLayout(VkCommandBuffer cmd_buff, VkImageLayout newLayout);
 
-		void createFromMemory(const void* memory, const size_t memorySize, const VkImageUsageFlagBits usages,
+		void createFromMemory(const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
+
+		inline void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
+			const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION)
+		{
+			createFromDisk(srcpath, usages, (VkImageLayout)layout, memspace, mipLevels, maxWidth, maxHeight);
+		}
 
 		void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION);

@@ -24,6 +24,6 @@ void main()
 
     vec3 finalColor = ambient + diffuse;
 
-    outColor = texture(texSampler, fragTexCoord);
+    outColor = texture(texSampler, fragTexCoord) + vec4(finalColor, 1.0);
     //outColor = texture(texSampler, fragTexCoord) + vec4(fragColor + finalColor, 1.0);
 }

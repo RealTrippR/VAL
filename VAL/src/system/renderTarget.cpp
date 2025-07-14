@@ -151,7 +151,7 @@ namespace val {
 	/*****************************************************************************************************************************/
 	/* BUFFER MANIPULATION*/
 
-	void renderTarget::updateAndSetIndexBuffer(ValProc& proc, val::buffer& buffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetIndexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& indexCount) {
 		setIndexBuffer(buffer, indexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
 		if (_indexCount > 0) {
@@ -174,7 +174,7 @@ namespace val {
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
-	void renderTarget::updateAndSetVertexBuffer(ValProc& proc, val::buffer& buffer, const uint32_t& vertexCount) {
+	void renderTarget::updateAndSetVertexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& vertexCount) {
 		setVertexBuffer(buffer, vertexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
@@ -186,13 +186,13 @@ namespace val {
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
-	void renderTarget::updateAndSetVertexBuffers(ValProc& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount) {
+	void renderTarget::updateAndSetVertexBuffers(ValProc& proc, const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
 		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
-	void renderTarget::updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, val::buffer& vertexBuffer, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, val::Buffer& vertexBuffer, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount) {
 		setVertexBuffer(vertexBuffer, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
@@ -212,7 +212,7 @@ namespace val {
 		}
 	}
 
-	void renderTarget::updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount) {
+	void renderTarget::updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 

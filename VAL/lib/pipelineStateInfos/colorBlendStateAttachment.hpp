@@ -22,11 +22,11 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
-	class colorBlendStateAttachment
+	class ColorBlendStateAttachment
 	{
 	public:
-		colorBlendStateAttachment() = default;
-		colorBlendStateAttachment(bool blendEnabled) {
+		ColorBlendStateAttachment() = default;
+		ColorBlendStateAttachment(bool blendEnabled) {
 			_VKblendAttachment.blendEnable = blendEnabled;
 		}
 	public:

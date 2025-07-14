@@ -2,40 +2,40 @@
 
 namespace val
 {
-	void colorBlendStateAttachment::setBlendEnabled(bool blendEnabled) {
+	void ColorBlendStateAttachment::setBlendEnabled(bool blendEnabled) {
 		_VKblendAttachment.blendEnable = blendEnabled;
 	}
 
-	bool colorBlendStateAttachment::getBlendEnabled() {
+	bool ColorBlendStateAttachment::getBlendEnabled() {
 		return _VKblendAttachment.blendEnable;
 	}
 
 
-	void colorBlendStateAttachment::setColorWriteMask(const VkColorComponentFlags& writeMask) {
+	void ColorBlendStateAttachment::setColorWriteMask(const VkColorComponentFlags& writeMask) {
 		_VKblendAttachment.colorWriteMask = writeMask;
 	}
 
-	VkColorComponentFlags colorBlendStateAttachment::getColorWriteMask() {
+	VkColorComponentFlags ColorBlendStateAttachment::getColorWriteMask() {
 		return _VKblendAttachment.colorWriteMask;
 	}
 
-	void colorBlendStateAttachment::setColorOp(const VkBlendOp& op) {
+	void ColorBlendStateAttachment::setColorOp(const VkBlendOp& op) {
 		_VKblendAttachment.colorBlendOp = op;
 	}
 
-	const VkBlendOp& colorBlendStateAttachment::getColorOp() {
+	const VkBlendOp& ColorBlendStateAttachment::getColorOp() {
 		return _VKblendAttachment.colorBlendOp;
 	}
 
-	void colorBlendStateAttachment::setAlphaOp(const VkBlendOp& op) {
+	void ColorBlendStateAttachment::setAlphaOp(const VkBlendOp& op) {
 		_VKblendAttachment.alphaBlendOp = op;
 	}
 
-	const VkBlendOp& colorBlendStateAttachment::getAlphaOp() {
+	const VkBlendOp& ColorBlendStateAttachment::getAlphaOp() {
 		return _VKblendAttachment.alphaBlendOp;
 	}
 
-	void colorBlendStateAttachment::setBlendFactor(const BLEND_POS& pos, const VkBlendFactor& colorBlend, const VkBlendFactor& alphaBlend) {
+	void ColorBlendStateAttachment::setBlendFactor(const BLEND_POS& pos, const VkBlendFactor& colorBlend, const VkBlendFactor& alphaBlend) {
 		if (pos == BLEND_POS::SOURCE) {
 			_VKblendAttachment.srcColorBlendFactor = colorBlend;
 			_VKblendAttachment.srcAlphaBlendFactor = alphaBlend;
@@ -46,7 +46,7 @@ namespace val
 		}
 	}
 
-	void colorBlendStateAttachment::setColorBlendFactor(const BLEND_POS& pos, const VkBlendFactor& colorBlend) {
+	void ColorBlendStateAttachment::setColorBlendFactor(const BLEND_POS& pos, const VkBlendFactor& colorBlend) {
 		if (pos == BLEND_POS::SOURCE) {
 			_VKblendAttachment.srcColorBlendFactor = colorBlend;
 		}
@@ -55,7 +55,7 @@ namespace val
 		}
 	}
 
-	void colorBlendStateAttachment::setAlphaBlendFactor(const BLEND_POS& pos, const VkBlendFactor& alphaBlend) {
+	void ColorBlendStateAttachment::setAlphaBlendFactor(const BLEND_POS& pos, const VkBlendFactor& alphaBlend) {
 		if (pos == BLEND_POS::SOURCE) {
 			_VKblendAttachment.srcAlphaBlendFactor = alphaBlend;
 		}
@@ -64,7 +64,7 @@ namespace val
 		}
 	}
 
-	VkBlendFactor colorBlendStateAttachment::getColorBlendFactor(const BLEND_POS& pos) {
+	VkBlendFactor ColorBlendStateAttachment::getColorBlendFactor(const BLEND_POS& pos) {
 		if (pos == BLEND_POS::SOURCE) {
 			return _VKblendAttachment.srcColorBlendFactor;
 		}
@@ -73,7 +73,7 @@ namespace val
 		}
 	}
 
-	VkBlendFactor colorBlendStateAttachment::getAlphaBlendFactor(const BLEND_POS& pos) {
+	VkBlendFactor ColorBlendStateAttachment::getAlphaBlendFactor(const BLEND_POS& pos) {
 		if (pos == BLEND_POS::SOURCE) {
 			return _VKblendAttachment.srcAlphaBlendFactor;
 		}
@@ -82,11 +82,11 @@ namespace val
 		}
 	}
 
-	void colorBlendStateAttachment::setFromVkPipelineColorBlendAttachmentState(const VkPipelineColorBlendAttachmentState& state) {
+	void ColorBlendStateAttachment::setFromVkPipelineColorBlendAttachmentState(const VkPipelineColorBlendAttachmentState& state) {
 		_VKblendAttachment = state;
 	}
 
-	VkPipelineColorBlendAttachmentState& colorBlendStateAttachment::getVkColorBlendAttachmentState() {
+	VkPipelineColorBlendAttachmentState& ColorBlendStateAttachment::getVkColorBlendAttachmentState() {
 		return _VKblendAttachment;
 	}
 }

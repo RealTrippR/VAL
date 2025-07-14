@@ -70,21 +70,21 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	// the color blend state affects how the output of the fragmennt shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment;
+	static ColorBlendStateAttachment colorBlendAttachment;
 	colorBlendAttachment.setBlendEnabled(false);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
-	static colorBlendState blendState;
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
 
-val::Subpass& setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) 
+val::Subpass& setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) 
 {
 	using namespace val;
-	static colorAttachment colorAttach;
+	static ColorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
 	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
@@ -144,7 +144,7 @@ int main()
 
 	/* * * * * * * * * * * * * * * * * * * */
 	// configure render pass and subpass
-	renderPassManager renderPassMngr(proc);
+	RenderPassManager renderPassMngr(proc);
 	Subpass subpass = setRenderPass(renderPassMngr, imageFormat);
 	/* * * * * * * * * * * * * * * * * * * */
 
@@ -166,15 +166,11 @@ int main()
 	);
 
 	//////////////////////////////////////////////////////////////
-	proc.createDescriptorSets(&pipeline);
+
+	pipeline.allocateAndWriteDescriptorSets(proc);
+
 	//////////////////////////////////////////////////////////////
 
-	//// Note that simply setting the index and vertex buffers does not automatically update
-	//// them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
-	//// every frame that the command buffer is reset
-	//renderTarget.setIndexBuffer(indexBuffer, indices.size());
-	//renderTarget.setVertexBuffer(vertexBuffer, vertices.size());
-	
 	RENDER_GRAPH renderGraph;
 	renderGraph.loadFromFile("experimental-features/renderGraph_Draft.hpp");
 	renderGraph.compile(proc.getFramesInFlight(), filepath("experimental-features"), "experimental-features/renderGraphDiagrams");

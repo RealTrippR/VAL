@@ -22,7 +22,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
-	void buffer::create(ValProc& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage, uint16_t frameCount) {
+	void Buffer::create(ValProc& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage, uint16_t frameCount) {
 		_size = size;
 		_space = space;
 		_usage = bufferUsage;
@@ -35,7 +35,7 @@ namespace val
 	}
 
 	// overwrites from a staging buffer for all frames in flight
-	void buffer::overwriteFromStagingBuffer(ValProc& proc, void* data, uint64_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset) 
+	void Buffer::overwriteFromStagingBuffer(ValProc& proc, void* data, uint64_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset) 
 	{
 		// create staging buffer
 		VkBuffer stagingBuffer;
@@ -55,7 +55,7 @@ namespace val
 
 
 
-	void buffer::overwriteFromBuffer(ValProc& proc, buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
+	void Buffer::overwriteFromBuffer(ValProc& proc, Buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset) {
 #ifndef NDEBUG
 		__VAL_DEBUG_ValidateBufferCopy(_size, srcBufferRange, srcOffset, dstOffset);
 #endif // !NDEBUG
@@ -63,7 +63,7 @@ namespace val
 		proc.copyBuffer(_buffer, srcBuffer._buffer, srcBufferRange, srcOffset, dstOffset);
 	}
 
-	void buffer::resize(ValProc& proc, uint32_t newSize) {
+	void Buffer::resize(ValProc& proc, uint32_t newSize) {
 		// only resize if needed
 		if (newSize != _size) {
 			VkBuffer tmpBuffer;
@@ -89,7 +89,7 @@ namespace val
 		}
 	}
 
-	void buffer::destroy(ValProc& proc) {
+	void Buffer::destroy(ValProc& proc) {
 		if (_memory) {
 			vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
 			_memory = VK_NULL_HANDLE;
@@ -100,33 +100,33 @@ namespace val
 		}
 	}
 
-	const bufferSpace& buffer::getBufferSpace() const  {
+	const bufferSpace& Buffer::getBufferSpace() const  {
 		return _space;
 	}
 
-	const uint32_t& buffer::size() const {
+	const uint32_t& Buffer::size() const {
 		return _size;
 	}
 
-	VkBuffer& buffer::getVkBuffer() {
+	VkBuffer& Buffer::getVkBuffer() {
 		return _buffer;
 	}
 
-	const VkDeviceMemory& buffer::getDeviceMemory() {
+	const VkDeviceMemory& Buffer::getDeviceMemory() {
 		return _memory;
 	}
 
-	void* buffer::getDataMapped() {
+	void* Buffer::getDataMapped() {
 		return _dataMapped;
 	}
 
 
-	VkBufferUsageFlags buffer::getUsageFlags() const
+	VkBufferUsageFlags Buffer::getUsageFlags() const
 	{
 		return _usage;
 	}
 	////////////////////////////////////////////////////////////////////////////
-	void buffer::copyFrom(ValProc& proc, const buffer& other) 
+	void Buffer::copyFrom(ValProc& proc, const Buffer& other) 
 	{
 		// cleanup old data.
 		this->destroy(proc);

@@ -101,8 +101,20 @@ namespace val {
 		//VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getVkPipeline(proc));
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._pipelineLayouts[pipelineIdx],
-			0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
+	}
+
+	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer)
+	{
+		const auto& pipelineIdx = pipeline.pipelineIdx;
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelineLayouts[pipelineIdx],
+			0, 1, &(pipeline.getDescriptorSheet()->getVkDescriptorSets()[proc.getCurrentFrame()]), 0, nullptr);
+	}
+
+	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, uint32_t setIndex, const VkCommandBuffer& commandBuffer)
+	{
+		const auto& pipelineIdx = pipeline.pipelineIdx;
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelineLayouts[pipelineIdx],
+			0, 1, &(pipeline.getDescriptorSheet()->getVkDescriptorSets()[setIndex]), 0, nullptr);
 	}
 
 	inline void SET_VIEWPORT(const VkViewport& viewport, const VkCommandBuffer& commandBuffer) {
@@ -126,13 +138,13 @@ namespace val {
 		vkCmdBindIndexBuffer(commandBuffer, buffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 
-	inline void DRAW_INSTANCED_INDEXED(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount,
+	inline void DRAW_INSTANCED_INDEXED(val::Buffer& vertexBuffer, val::Buffer& indexBuffer, const uint32_t& instanceCount,
 		const VkCommandBuffer& cmd, const uint32_t& firstIndex, const uint32_t& firstVertex, const uint32_t& firstInstance)
 	{
 		vkCmdDrawIndexed(cmd, indexBuffer.size(), instanceCount, firstIndex, firstVertex, firstInstance);
 	}
 
-	inline void DRAW_INSTANCED(val::buffer& vertexBuffer, const uint32_t& instanceCount,
+	inline void DRAW_INSTANCED(val::Buffer& vertexBuffer, const uint32_t& instanceCount,
 		const VkCommandBuffer& cmd, const uint32_t& firstInstance, const uint32_t& firstVertex)
 	{
 		vkCmdDraw(cmd, vertexBuffer.size(), instanceCount, firstVertex, firstInstance);

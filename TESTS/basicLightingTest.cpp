@@ -101,20 +101,20 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	// the color blend state affects how the output of the fragmennt shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
-	static colorBlendState blendState;
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
-	static colorAttachment colorAttach;
+	static ColorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(Clear);
 	colorAttach.setStoreOperation(Store);
@@ -205,7 +205,7 @@ int main()
 
 		setGraphicsPipelineInfo(pipeline);
 
-		val::renderPassManager renderPassMngr(proc);
+		val::RenderPassManager renderPassMngr(proc);
 		setRenderPass(renderPassMngr, imageFormat);
 		pipeline.setRenderPassManager(&renderPassMngr);
 

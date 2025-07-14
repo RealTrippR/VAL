@@ -15,10 +15,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <VAL/lib/system/system_utils.hpp>
-
 #ifndef VAL_VERTEX_BASE_HPP
 #define VAL_VERTEX_BASE_HPP
+
+#include <VAL/lib/system/system_utils.hpp>
 
 namespace val
 {
@@ -37,8 +37,22 @@ namespace val
 
 		~VertexBase() = default;
 	public:
+		
+		/* CORE FUNCTIONS: all classes that inherit from VertexBase must implement these: */
 		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
 		{}
+
+		inline void setPositionFromVec3(glm::vec3 v) {}
+
+		inline void setNormalFromVec3(glm::vec3 v) {}
+
+		inline void setColorFromVec4(glm::vec3 v) {}
+
+		inline glm::vec3 getPositionAsVec3() const
+		{
+			dbg::printWarning("VertexBase::getPositionAsVec3 was called. This function is of a base class and should never be called. This likely indicates an error in the program.");
+			return { -1,-1,-1 };
+		}
 
 		inline static VkDeviceSize getStride() {
 			dbg::printWarning("VertexBase::getPositionFormat was called. This function is of a base class and should never be called. This likely indicates an error in the program.");

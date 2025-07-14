@@ -31,23 +31,28 @@ namespace val
 		Queue(ValProc* proc) : _proc(proc)
 		{
 			if (proc != NULL) {
+				setCmdBuffAndSemaphoreCountFromProc(*proc);
 				create();
 			}
 		}
 		Queue(ValProc& proc) : _proc(&proc) 
 		{
+			setCmdBuffAndSemaphoreCountFromProc(proc);
 			create();
 		}
 
 		Queue(ValProc& proc, const QUEUE_FLAGS flags) : _proc(&proc)
 		{
 			_queueFlags = flags;
+			setCmdBuffAndSemaphoreCountFromProc(proc);
 			create();
 		}
 
 		Queue(ValProc& proc, const VkQueueFlags flags) : _proc(&proc)
 		{
 			_queueFlags = (QUEUE_FLAGS)flags;
+			setCmdBuffAndSemaphoreCountFromProc(proc);
+
 			create();
 		}
 
@@ -111,7 +116,7 @@ namespace val
 		inline QUEUE_FLAGS getQueueFlags() const ;
 
 		inline uint8_t getQueueFamily() const;
-
+		
 		inline VkQueue getVkQueue() const;
 
 		inline ValProc* getValProc() const;
@@ -119,14 +124,18 @@ namespace val
 		static uint8_t findQueueFamilyOfQueueFlags(QUEUE_FLAGS flag, ValProc* proc, VkSurfaceKHR surface/*optional*/, bool* success/*optional*/);
 
 		void create(ValProc& proc, const QUEUE_FLAGS flags);
+
+		void create(ValProc& proc, const uint8_t cmdBuffAndSemaphoreCount, const QUEUE_FLAGS flags);
+
+		// release allocated objects
+		void destroy();
 	protected:
 		friend Window;
 		friend ValProc;
 
 		void create();
 
-		// release allocated objects
-		void destroy();
+		void setCmdBuffAndSemaphoreCountFromProc(ValProc& proc);
 
 		void copyToOther(Queue* other) const;
 
@@ -139,12 +148,15 @@ namespace val
 
 	private:
 		VkQueue _vkQueue = NULL;
-		QUEUE_FLAGS _queueFlags = QUEUE_FLAGS::Graphics;
-		uint8_t _queueFamily = 0;
 		ValProc* _proc = NULL;
 
 		VkCommandBuffer* _commandBuffers = NULL;
 		VkSemaphore* _semaphores = NULL;
+
+		QUEUE_FLAGS _queueFlags = QUEUE_FLAGS::Graphics;
+
+		uint8_t _queueFamily = 0;
+		uint8_t _cmdBuffAndSemaphoreBufferCount = 0u;
 	};
 }
 

@@ -200,7 +200,7 @@ int main() {
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	val::renderPassManager renderPassMNGR(proc);
+	val::RenderPassManager renderPassMNGR(proc);
 	setRenderPass(renderPassMNGR, imageFormat);
 	pipeline.renderPass = &renderPassMNGR;
 	// 1 renderPass per pipeline

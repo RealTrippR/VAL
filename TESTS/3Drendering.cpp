@@ -93,7 +93,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline, const VkSampleCoun
 
 	// the color blend state affects how the output of the fragment shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	static depthStencilState depthState;
@@ -101,7 +101,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline, const VkSampleCoun
 	depthState.setCompareOp(VK_COMPARE_OP_LESS);
 	pipeline.setDepthStencilState(&depthState);
 
-	static colorBlendState blendState;
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 
 	pipeline.setColorBlendState(&blendState);
@@ -111,7 +111,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline, const VkSampleCoun
 	pipeline.setSampleCount(MSAAsamples); // required for multisampling
 }
 
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, VkFormat depthFormat, VkSampleCountFlagBits MSAAsamples)
+void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat, VkFormat depthFormat, VkSampleCountFlagBits MSAAsamples)
 { using namespace val;
 
 	renderPassMngr.setMSAAsamples(MSAAsamples); // required for multisampling
@@ -120,7 +120,7 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, V
 	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 
 	{
-		static depthAttachment depthAttach;
+		static DepthAttachment depthAttach;
 		depthAttach.setImgFormat(depthFormat);
 		depthAttach.setLoadOperation(Clear);
 		depthAttach.setStoreOperation(Discard);
@@ -128,7 +128,7 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, V
 		subpass.bindAttachment(&depthAttach);
 	}
 	{
-		static colorAttachment colorAttach;
+		static ColorAttachment colorAttach;
 		colorAttach.setImgFormat(imgFormat);
 		colorAttach.setLoadOperation(Clear);
 		colorAttach.setStoreOperation(Store);
@@ -136,7 +136,7 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat, V
 		subpass.bindAttachment(&colorAttach);
 	}
 	{
-		static resolveAttachment resolveAttach; // required for multisampling
+		static ResolveAttachment resolveAttach; // required for multisampling
 		resolveAttach.setImgFormat(imgFormat);
 		resolveAttach.setLoadOperation(Discard);
 		resolveAttach.setStoreOperation(Store);
@@ -208,7 +208,7 @@ int main() {
 	VkFormat depthFormat = val::findSupportedImageFormat(proc._physicalDevice, depthFormatReqs);
 
 
-	renderPassManager renderPassMngr(proc);
+	RenderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat, depthFormat, multisampler.getSampleCount());
 	pipeline.renderPass = &renderPassMngr;
 

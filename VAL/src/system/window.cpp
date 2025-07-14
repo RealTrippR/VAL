@@ -82,8 +82,7 @@ namespace val {
 
 	void Window::createPresentQueue()
 	{
-		_presentQueue._proc = _procVAL;
-		_presentQueue.create();
+		_presentQueue.create(*_procVAL, QUEUE_FLAGS::Graphics);
 	}
 
 

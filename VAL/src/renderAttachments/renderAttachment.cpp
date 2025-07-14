@@ -44,16 +44,24 @@ namespace val
 		return _storeOp;
 	}
 
-	void renderAttachment::setImgFormat(const VkFormat& format) {
+	void renderAttachment::setImgFormat(const VkFormat format) {
 		_imgFormat = format;
 	}
 
-	void renderAttachment::setInitialLayout(const VkImageLayout& l) {
+	void renderAttachment::setInitialLayout(const VkImageLayout l) {
 		_initialLayout = l;
 	}
 
-	void renderAttachment::setFinalLayout(const VkImageLayout& l) {
+	void renderAttachment::setFinalLayout(const VkImageLayout l) {
 		_finalLayout = l;
+	}
+
+	void renderAttachment::setInitialLayout(const IMAGE_LAYOUT l) {
+		_initialLayout = (VkImageLayout)l;
+	}
+
+	void renderAttachment::setFinalLayout(const IMAGE_LAYOUT l) {
+		_finalLayout = (VkImageLayout)l;
 	}
 
 	const VkFormat& renderAttachment::getImgFormat() {

@@ -40,7 +40,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define __STR2__(x) #x
 #define __STR__(x) __STR2__(x)
 
-#ifdef VAL_RENDER_PASS_COMPILE_MODE
+#ifdef VAL_RENDER_GRAPH_COMPILE_MODE
 #define GRAPH_FILE(...) <VAL\lib\renderGraph\blank.h>
 #else
 #define GRAPH_FILE(x) __STR__(__CONCAT__(x, __processed.hpp))

@@ -138,7 +138,7 @@ namespace val
 		/***********************************************/
 		{
 			// handle color attachment
-			colorAttachment* asColorAttachment = dynamic_cast<colorAttachment*>(attachment);
+			ColorAttachment* asColorAttachment = dynamic_cast<ColorAttachment*>(attachment);
 			if (asColorAttachment) {
 				_colorAttachments.push_back(vkRef);
 				return;
@@ -146,7 +146,7 @@ namespace val
 		}
 		{
 			// handle depth attachment
-			depthAttachment* asDepthAttachment = dynamic_cast<depthAttachment*>(attachment);
+			DepthAttachment* asDepthAttachment = dynamic_cast<DepthAttachment*>(attachment);
 			if (asDepthAttachment) {
 #ifndef NDEBUG
 				if (_depthStencilAttachment.has_value()) {
@@ -160,7 +160,7 @@ namespace val
 		}
 		{
 			// handle resolve attachment
-			resolveAttachment* asResolveAttachment = dynamic_cast<resolveAttachment*>(attachment);
+			ResolveAttachment* asResolveAttachment = dynamic_cast<ResolveAttachment*>(attachment);
 			if (asResolveAttachment) {
 				_resolveAttachments.push_back(vkRef);
 				return;
@@ -168,7 +168,7 @@ namespace val
 		}
 		{
 			// handle input attachment
-			inputAttachment* asInputAttachment = dynamic_cast<inputAttachment*>(attachment);
+			InputAttachment* asInputAttachment = dynamic_cast<InputAttachment*>(attachment);
 			if (asInputAttachment) {
 				_inputAttachments.push_back(vkRef);
 				return;

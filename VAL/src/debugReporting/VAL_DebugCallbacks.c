@@ -120,7 +120,7 @@ void VAL_NOTE_DEBUG_PRINT(const char* msg)
 	size_t iter = 0;
 	VAL_DEBUG_INTERCEPT* intercept;
 	if (noteInterceptMap) {
-		while (hashmap_iter(noteInterceptMap, &iter, &intercept)) {
+		while (hashmap_iter(noteInterceptMap, &iter, &(void*)intercept)) {
 			if (!(*intercept)) {
 				printf("VAL: Debug note intercept #%llu is null\n", iter);
 			}
@@ -147,7 +147,7 @@ void VAL_WARN_DEBUG_PRINT(const char* msg)
 	size_t iter = 0;
 	VAL_DEBUG_INTERCEPT* intercept;
 	if (warnInterceptMap) {
-		while (hashmap_iter(warnInterceptMap, &iter, &intercept)) {
+		while (hashmap_iter(warnInterceptMap, &iter, &(void*)intercept)) {
 			if (!intercept) {
 				printf("VAL: Debug warn intercept #%llu is null\n", iter);
 			}
@@ -174,7 +174,7 @@ void VAL_ERROR_DEBUG_PRINT(const char* msg)
 	size_t iter = 0;
 	VAL_DEBUG_INTERCEPT* intercept;
 	if (errInterceptMap) {
-		while (hashmap_iter(errInterceptMap, &iter, &intercept)) {
+		while (hashmap_iter(errInterceptMap, &iter, &(void*)intercept)) {
 			if (!intercept) {
 				printf("VAL: Debug error intercept #%llu is null\n", iter);
 			}

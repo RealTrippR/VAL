@@ -131,7 +131,7 @@ namespace val
 			}
 		}
 		if (totalIndexCount > UINT32_MAX) {
-			dbg::printWarning("mesh::importFromScene: Failed to load mesh, vertex count exceeds UINT32_MAX");
+			dbg::printWarning("mesh::importFromScene: Failed to load mesh, index count exceeds UINT32_MAX");
 			return VAL_FAILURE;
 		}
 		if (totalIndexCount == 0) {
@@ -233,13 +233,17 @@ namespace val
 		std::vector<tinyobj::material_t>& materials = scene._materials;
 		std::string warn, err;
 
+		if (meshIndex >= shapes.size() || shapes.size() == 0)
+		{
+			dbg::printError("Mesh::importFromScene: Failed, invalid meshIndex %lu exceeds mesh count of %lu.", meshIndex, shapes.size());
+			return VAL_FAILURE;
+		}
+
+
 		size_t totalIndexCount = 0u;
 
-		// first calculate the total index count
-		for (const auto& shape : shapes)
-		{
-			totalIndexCount += shape.mesh.indices.size();
-		}
+		totalIndexCount += shapes[meshIndex].mesh.indices.size();
+		
 
 		if (totalIndexCount == 0) {
 			return VAL_SUCCESS; // there no mesh to load
@@ -254,52 +258,91 @@ namespace val
 		}
 
 
-		for (size_t i = 0; i < shapes.size(); ++i)
+		auto& shape = shapes[meshIndex];
+
+		// create normals if they don't exist
+		if (attrib.normals.empty())
 		{
-			const auto& shape = shapes[i];
+			attrib.normals.resize(attrib.vertices.size(), 0.0f);
 
-			for (size_t j = 0; j < shape.mesh.indices.size(); ++j)
+			for (size_t i = 0; i < shape.mesh.indices.size(); i += 3)
 			{
-				const tinyobj::index_t& index = shape.mesh.indices[j];
-				if (3 * index.vertex_index + 2 >= attrib.vertices.size())
-				{
-					break;
-				}
+				tinyobj::index_t& index = shape.mesh.indices[i];
 
-				const glm::vec3 pos = {
-					attrib.vertices[3 * index.vertex_index + 0],
-					attrib.vertices[3 * index.vertex_index + 1],
-					attrib.vertices[3 * index.vertex_index + 2]
+				glm::vec3 pos0 = {
+					attrib.vertices[3 * i + 0],
+					attrib.vertices[3 * i + 1],
+					attrib.vertices[3 * i + 2]
+				};
+				glm::vec3 pos1 = {
+						attrib.vertices[3 * (i + 1) + 0],
+						attrib.vertices[3 * (i + 1) + 1],
+						attrib.vertices[3 * (i + 1) + 2]
+				};
+				glm::vec3 pos2 = {
+					attrib.vertices[3 * (i + 2) + 0],
+					attrib.vertices[3 * (i + 2) + 1],
+					attrib.vertices[3 * (i + 2) + 2]
 				};
 
-				const glm::vec2 texCoord = {
-				  attrib.texcoords[2 * index.texcoord_index + 0],
-				  1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-				};
+				glm::vec3 n = glm::normalize(glm::cross((pos1 - pos0), (pos2 - pos0)));
 
-				const glm::vec4 color = { 1.f,1.f,1.f,1.f };
+				attrib.normals[i + 0] = n.x;
+				attrib.normals[i + 1] = n.y;
+				attrib.normals[i + 2] = n.z;
 
-				if (deduplicateVertices) {
-					VT vertex;
-					vertex.loadFromAttributes(pos, lastIndex, color, { 0.f,0.f,0.f }, { texCoord });
-
-					if (uniqueVertices.count(vertex) == 0) {
-						uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-						vertices.push_back(proc, vertex);
-					}
-
-					indices.push_back(proc, uniqueVertices[vertex]);
-				}
-				else {
-					VT* vertex = &vertices[lastIndex];
-					vertex->loadFromAttributes(pos, lastIndex, color, { 0.f,0.f,0.f }, { texCoord });
-					indices[lastIndex] = lastIndex;
-				}
-
-				lastIndex++;
-
-				// add index associated with unique vertex to index list
+				index.normal_index = i / 3;
 			}
+		}
+
+
+
+		for (size_t j = 0; j < shape.mesh.indices.size(); ++j)
+		{
+			const tinyobj::index_t& index = shape.mesh.indices[j];
+			if (3 * index.vertex_index + 2 >= attrib.vertices.size())
+			{
+				break;
+			}
+			const glm::vec3& normal = {
+				attrib.normals[3 * index.normal_index + 0],
+				attrib.normals[3 * index.normal_index + 1],
+				attrib.normals[3 * index.normal_index + 2]
+			};
+
+			const glm::vec3 pos = {
+				attrib.vertices[3 * index.vertex_index + 0],
+				attrib.vertices[3 * index.vertex_index + 1],
+				attrib.vertices[3 * index.vertex_index + 2]
+			};
+
+			const glm::vec2 texCoord = {
+				attrib.texcoords[2 * index.texcoord_index + 0],
+				1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+			};
+
+			const glm::vec4 color = { 1.f,1.f,1.f,1.f };
+
+			if (deduplicateVertices) {
+				VT vertex;
+				vertex.loadFromAttributes(pos, lastIndex, color, normal, { texCoord });
+
+				if (uniqueVertices.count(vertex) == 0) {
+					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+					vertices.push_back(proc, vertex);
+				}
+
+				indices.push_back(proc, uniqueVertices[vertex]);
+			}
+			else {
+				VT* vertex = &vertices[lastIndex];
+				vertex->loadFromAttributes(pos, lastIndex, color, normal, { texCoord });
+				indices[lastIndex] = lastIndex;
+			}
+
+			lastIndex++;
+
+			// add index associated with unique vertex to index list
 		}
 
 		return VAL_SUCCESS;
@@ -331,12 +374,16 @@ namespace val
 		
 		using namespace cply;
 		const cply::PlyScene* scene = scenePLYVAL.getPlyScene();
+
+		bool hasNormals = false;
+
 		for (U64 eId = 0; eId < scene->elementCount; ++eId)
 		{
 			PlyElement* ele = scene->elements + eId;
 			for (U64 lno = 0; lno < ele->dataLineCount; ++lno)
 			{
-				if (streql(ele->name, "vertex")) {
+				if (streql(ele->name, "vertex")) 
+				{
 					glm::vec3 pos = { 0,0,0 };
 					glm::vec3 normal = { 0,0,0 };
 					glm::vec4 color = { 1.f,1.f,1.f,1.f };
@@ -348,61 +395,64 @@ namespace val
 						if (streql(prop->name, "x"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							pos.x = val;
+							pos.x = (float)val;
 						}
 						// pos y
 						else if (streql(prop->name, "y"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							pos.y = val;
+							pos.y = (float)val;
 						}
 						// pos z
 						else if (streql(prop->name, "z"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							pos.z = val;
+							pos.z = (float)val;
 						}
 						// normal x
 						else if (streql(prop->name, "nx"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							normal.x = val;
+							normal.x = (float)val;
+							hasNormals = true;
 						}
 						// normal y
 						else if (streql(prop->name, "ny"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
 							normal.y = val;
+							hasNormals = true;
 						}
 						// normal z
 						else if (streql(prop->name, "nz"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							normal.z = val;
+							normal.z = (float)val;
+							hasNormals = true;
 						}
 						// red color
 						else if (streql(prop->name, "red"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							color.r = val;
+							color.r = (float)val;
 						}
 						// green color
 						else if (streql(prop->name, "green"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							color.g = val;
+							color.g = (float)val;
 						}
 						// blue color
 						else if (streql(prop->name, "blue"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							color.b = val;
+							color.b = (float)val;
 						}
 						// alpha color
 						else if (streql(prop->name, "alpha"))
 						{
 							double val = scenePLYVAL.getDataFromPropertyOfElement(ele, prop, lno, NULL);
-							color.a = val;
+							color.a = (float)val;
 						}
 					}
 
@@ -439,12 +489,26 @@ namespace val
 
 
 							
-							// do a fan triangulation: for a polygon with N indices, create (N - 2) triangles
+							// do a fan triangulation: for a face with N indices, create (N - 2) triangles
 							for (U64 i = 1; i < indexArrCount - 1; ++i)
 							{
 								indices.push_back(proc, data[0]);
 								indices.push_back(proc, data[i]);
 								indices.push_back(proc, data[i + 1]);
+
+								// perform normal calculation (if normals don't already exist)
+								if (hasNormals == false) {
+
+									glm::vec3 p0 = vertices[data[0]].getPositionAsVec3();
+									glm::vec3 p1 = vertices[data[i]].getPositionAsVec3();
+									glm::vec3 p2 = vertices[data[i + 1]].getPositionAsVec3();
+									
+									glm::vec3 n = glm::normalize(glm::cross((p1 - p0), (p2 - p0)));
+
+									vertices[data[0]].setNormalFromVec3(n);
+									vertices[data[i]].setNormalFromVec3(n);
+									vertices[data[i + 1]].setNormalFromVec3(n);
+								}
 							}
 
 						skip_loop:

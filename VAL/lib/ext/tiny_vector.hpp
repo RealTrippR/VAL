@@ -24,6 +24,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <stdlib.h>
 #include <initializer_list>
 #include <memory>
+#include <limits> // Required for std::numeric_limits
 
 // @brief A small vector class optimized for vectors where the size does not change frequently.
 // 
@@ -82,7 +83,14 @@ public:
     }
 
     tiny_vector(std::initializer_list<t> list) {
-        resize(list.size());
+#ifndef NDEBUG
+        if (list.size() > max_size())
+        {
+            throw std::out_of_range("tiny_vector: The size of std::initializer_list<t> list exceeds the maximum size of this tiny_vector.");
+        }
+#endif // !NDEBUG
+
+        resize((size_type)list.size());
         size_type i = 0;
         for (const t& value : list) {
             _data[i++] = value;
@@ -242,26 +250,34 @@ public:
     };
 
 
+public:
+    // iterator constructors
+    tiny_vector(iterator begin, iterator end)
+    {
+        const size_t count = static_cast<size_t>(end - begin);
+        resize(count);
+        std::copy(begin, end, _data);
+    }
 
 
 public:
     // Begin function returning a non-const iterator to the start
-    iterator begin() {
+    iterator begin() noexcept {
         return iterator(_data);
     }
 
     // End function returning a non-const iterator to the end - note that according to the C++ standard, the end is just beyond the last valid element
-    iterator end() {
+    iterator end() noexcept {
         return iterator(_data + _size);
     }
 
     // Begin function returning a const iterator to the start
-    const_iterator begin() const {
+    const_iterator begin() const noexcept {
         return const_iterator(_data);
     }
     
     // End function returning a const iterator to the end - note that according to the C++ standard, the end is just beyond the last valid element
-    const_iterator end() const {
+    const_iterator end() const noexcept {
         return const_iterator(_data + _size);
     }
 
@@ -388,21 +404,25 @@ public:
 public:
 
     // getters
-    t* data() {
+    t* data() noexcept {
         return (t*)_data;
     }
 
     // getters
-    const t* data() const {
+    const t* data() const noexcept {
         return (t*)_data;
     }
 
-    bool empty() const {
+    bool empty() const noexcept {
         return _size == 0;
     }
 
-    size_type size() const {
+    size_type size() const noexcept {
         return _size;
+    }
+
+    constexpr size_type max_size() const noexcept {
+        return std::numeric_limits<size_type>::max();
     }
 
     t& front() const {
@@ -422,7 +442,8 @@ private:
 
     void growNoConstructor() 
     {
-        const size_t newSize = _size + 1;
+        const size_type newSize = _size + 1;
+
          t* tmp = (t*)realloc(_data, sizeof(t) * newSize);
         if (!tmp) {
             // realloc failed

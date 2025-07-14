@@ -33,6 +33,10 @@ namespace val
 
 		// allocate sbt
 		const VkDeviceSize sbtSize = groupCount * alignedHandleSize;
+		if (sbtSize > UINT32_MAX) {
+			dbg::printError("ShaderBindingTable::createForRaytracingPipeline: Failed to allocate Shader Binding Table buffer for ShaderBindingTable @ %p ShaderBindingTable: size exceeds UINT32_MAX.", true);
+			return VAL_FAILURE;
+		}
 
 		shaderHandleStorage.resize(sbtSize);
 		vkGetRayTracingShaderGroupHandlesKHR(proc.getVkLogicalDevice(), proc._raytracingPipelines[0], 0, groupCount, sbtSize, shaderHandleStorage.data());

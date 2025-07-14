@@ -148,7 +148,7 @@ namespace val {
 		return stages;
 	}
 
-	int64_t PipelineBase::getShaderIndexOfShaderInPipeline(Shader* shdr)
+	int32_t PipelineBase::getShaderIndexOfShaderInPipeline(Shader* shdr)
 	{
 		for (uint32_t i = 0; i < shaders.size(); ++i)
 		{

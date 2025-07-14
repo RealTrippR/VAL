@@ -23,13 +23,13 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/renderAttachments/renderAttachment.hpp>
 
 namespace val {
-	class renderPassManager
+	class RenderPassManager
 	{
 	public:
-		renderPassManager(ValProc& proc) { _procVAL = &proc; };
-		renderPassManager(ValProc& proc, VkSampleCountFlagBits MSAAsamples) { _procVAL = &proc; _MSAAsamples = MSAAsamples; };
+		RenderPassManager(ValProc& proc) { _procVAL = &proc; };
+		RenderPassManager(ValProc& proc, VkSampleCountFlagBits MSAAsamples) { _procVAL = &proc; _MSAAsamples = MSAAsamples; };
 
-		~renderPassManager() {
+		~RenderPassManager() {
 			destroy();
 		}
 	public:

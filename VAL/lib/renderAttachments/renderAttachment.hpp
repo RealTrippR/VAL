@@ -38,11 +38,15 @@ namespace val {
 
 		const RENDER_ATTACHMENT_OPERATION& getStoreOperation();
 
-		void setImgFormat(const VkFormat& format);
+		void setImgFormat(const VkFormat format);
 
-		void setInitialLayout(const VkImageLayout& l);
+		void setInitialLayout(const VkImageLayout l);
 
-		void setFinalLayout(const VkImageLayout& l);
+		void setFinalLayout(const VkImageLayout l);
+
+		void setInitialLayout(const IMAGE_LAYOUT l);
+
+		void setFinalLayout(const IMAGE_LAYOUT l);
 
 		const VkFormat& getImgFormat();
 

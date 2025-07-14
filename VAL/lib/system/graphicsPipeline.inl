@@ -27,7 +27,7 @@ namespace val {
 	}
 
 
-	inline void GraphicsPipeline::setRenderPassManager(renderPassManager* passMngr) {
+	inline void GraphicsPipeline::setRenderPassManager(RenderPassManager* passMngr) {
 		renderPass = passMngr;
 	}
 

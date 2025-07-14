@@ -5,22 +5,23 @@
 
 namespace val
 {
-	class buffer
+	/* never host_coherent */
+	class Buffer
 	{
 	public:
 
-		buffer() = default;
+		Buffer() = default;
 
 		// creates the buffer from the input values.
-		buffer(ValProc& proc, const uint32_t& size, const bufferSpace& space, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u)
+		Buffer(ValProc& proc, const uint32_t& size, const bufferSpace& space, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u)
 		{
 			create(proc, size, space, bufferUsage, frameCount);
 		}
-		~buffer() {
+		~Buffer() {
 			//destroy();
 		}
 
-		buffer(ValProc& proc, const buffer& other) {
+		Buffer(ValProc& proc, const Buffer& other) {
 			this->copyFrom(proc,other);
 		}
 
@@ -31,7 +32,7 @@ namespace val
 		void overwriteFromStagingBuffer(ValProc& proc, void* data, uint64_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
 		// overwrites a buffer at dstFrameIdx with from another buffer at srcFrameIdx
-		void overwriteFromBuffer(ValProc& proc, buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
+		void overwriteFromBuffer(ValProc& proc, Buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
 
 		void resize(ValProc& proc, uint32_t newSize);
 
@@ -51,13 +52,11 @@ namespace val
 		VkBufferUsageFlags getUsageFlags() const;
 
 	protected:
-		void copyFrom(ValProc& proc, const buffer& src);
+		void copyFrom(ValProc& proc, const Buffer& src);
 
 	protected:
 		VkBuffer _buffer;
 		VkDeviceMemory _memory;
-		void* _dataMapped;
-		bufferSpace _space{};
 		uint32_t _size = 0u;
 		VkBufferUsageFlags _usage = 0;
 	};

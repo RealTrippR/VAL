@@ -276,13 +276,13 @@ int main() {
 		{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
 		{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 	};
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(val::vertex3D), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	val::Buffer vertexBuffer(proc, vertices.size() * sizeof(val::vertex3D), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(val::vertex3D));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 
 	};
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	val::Buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 	proc.createDescriptorSets(&prepassPipeline);

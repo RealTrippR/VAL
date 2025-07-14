@@ -38,6 +38,10 @@ namespace val {
 
 	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer);
 
+	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer);
+
+	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, uint32_t setIndex, const VkCommandBuffer& commandBuffer);
+
 	inline void SET_VIEWPORT(const VkViewport& viewport, const VkCommandBuffer& commandBuffer);
 
 	inline void SET_SCISSOR(const VkRect2D& scissor, const VkCommandBuffer& commandBuffer);
@@ -66,10 +70,10 @@ namespace val {
 
 	inline void SET_INDEX_BUFFER(VkBuffer& buffer, const VkCommandBuffer& commandBuffer);
 
-	inline void DRAW_INSTANCED_INDEXED(val::buffer& vertexBuffer, val::buffer& indexBuffer, const uint32_t& instanceCount, const VkCommandBuffer& cmd,
+	inline void DRAW_INSTANCED_INDEXED(val::Buffer& vertexBuffer, val::Buffer& indexBuffer, const uint32_t& instanceCount, const VkCommandBuffer& cmd,
 		const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
 
-	inline void DRAW_INSTANCED(val::buffer& vertexBuffer, const uint32_t& instanceCount, const VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
+	inline void DRAW_INSTANCED(val::Buffer& vertexBuffer, const uint32_t& instanceCount, const VkCommandBuffer& cmd, const uint32_t& firstVertex = 0u, const uint32_t& firstInstance = 0u);
 
 	inline void DRAW_INDEXED(const uint32_t& indexCount, const VkCommandBuffer& cmd, const uint32_t& firstIndex = 0u, const uint32_t& firstVertex = 0u);
 

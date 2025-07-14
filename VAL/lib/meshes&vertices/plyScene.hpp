@@ -73,7 +73,7 @@ namespace val
         inline static double getDataFromPropertyOfElement(const struct cply::PlyElement* e, const struct cply::PlyProperty* prop, const cply::U64 dataLineIdx, cply::U8* success)
         {
             using namespace cply;
-            const U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffset;
+            const U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffsets[dataLineIdx];
             if (offset >= e->dataSize || dataLineIdx >= e->dataLineCount) {
                 if (success)
                     *success = 0;
@@ -91,7 +91,7 @@ namespace val
             const struct cply::PlyElement* e, const struct cply::PlyProperty* prop, const cply::U64 dataLineIdx, cply::U8* success)
         {
             using namespace cply;
-            U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffset;
+            U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffsets[dataLineIdx];
             if (offset >= e->dataSize) { // check for out of bounds read
                 if (success)
                     *success = 0;

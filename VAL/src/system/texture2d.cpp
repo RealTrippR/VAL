@@ -56,7 +56,7 @@ namespace val {
 		}
 	}
 
-	void Texture2D::createFromMemory(const void* memory, const size_t memorySize, const VkImageUsageFlagBits usages,
+	void Texture2D::createFromMemory(const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
 	{
 		destroy();

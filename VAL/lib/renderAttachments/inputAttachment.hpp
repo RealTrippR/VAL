@@ -5,11 +5,11 @@
 
 namespace val
 {
-	class inputAttachment : public renderAttachment 
+	class InputAttachment : public renderAttachment 
 	{
 	public:
-		inputAttachment() : renderAttachment() {}
-		inputAttachment(RENDER_ATTACHMENT_USAGE usage) : renderAttachment(usage) {}
+		InputAttachment() : renderAttachment() {}
+		InputAttachment(RENDER_ATTACHMENT_USAGE usage) : renderAttachment(usage) {}
 	public:
 		constexpr VkImageLayout getRefLayout() const override {
 			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

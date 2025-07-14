@@ -10,9 +10,5 @@ void main() {
     float u = attribs.x;
     float v = attribs.y;
 
-    // Interpolate texture coords, normals, colors, etc. here using u, v
-
-    //hitColor = vec3(u, v, 0.0);  // Just example usage
-
-    hitColor = vec3(1.0, 0.0, 0.0); // Flat red for hit
+    hitColor = vec3(1.0, 0.0, 0.0); // red
 }

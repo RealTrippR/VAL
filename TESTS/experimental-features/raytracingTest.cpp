@@ -61,13 +61,13 @@ void updateRayViewUBO(val::ValProc& proc, val::UBO_Handle& hdl, val::Window& win
 	ubo.resolution = { window.getWidth(), window.getHeight() };
 }
 
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
-	static colorAttachment colorAttach;
+	static ColorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(Clear);
 	colorAttach.setStoreOperation(Store);
-	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	colorAttach.setFinalLayout(IMAGE_LAYOUT::PresentSrc);
 
 	static Subpass subpass(renderPassMngr, Graphics);
 	subpass.bindAttachment(&colorAttach);
@@ -85,21 +85,16 @@ void setImgGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	// the color blend state affects how the output of the fragmennt shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
-	static colorBlendState blendState;
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
-
-uint32_t alignUp(uint32_t val, uint32_t alignment) {
-	return (val + alignment - 1) & ~(alignment - 1);
-}
-
 
 int main() 
 {
@@ -112,6 +107,7 @@ int main()
 		PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU,
 			DEVICE_FEATURES::raytracing | DEVICE_FEATURES::accelerationStructures
 			| DEVICE_FEATURES::deviceBufferAddressing);
+
 		deviceRequirements.deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 			VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
@@ -162,9 +158,12 @@ int main()
 		cubeAccelGeometry.setTriangleGeometryData(proc, VertexTxtr::getStride(), VertexTxtr::getPositionFormat(),
 			mesh.vertices.getVkBuffer(), mesh.indices.getVkBuffer(), mesh.indices.size());
 
+		AccelerationStructureInstance cubeInstance(cubeAccelGeometry);
+		cubeInstance.setFlags(VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR | VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR);
+
 		Queue rayQueue(proc, QUEUE_FLAGS::Graphics);
 		AccelerationStructure BLAS;
-		BLAS.setGeometries({ &cubeAccelGeometry });
+		BLAS.setInstances({ &cubeInstance });
 		BLAS.buildAsBottomLevel(proc, rayQueue, mesh.vertices.size(), mesh.indices.size());
 
 		AccelerationStructure TLAS;
@@ -239,7 +238,7 @@ int main()
 
 		setImgGraphicsPipelineInfo(imgRenderingPipeline);
 
-		val::renderPassManager renderPassMngr(proc);
+		val::RenderPassManager renderPassMngr(proc);
 		setRenderPass(renderPassMngr, imageFormat);
 		imgRenderingPipeline.setRenderPassManager(&renderPassMngr);
 
@@ -359,21 +358,17 @@ int main()
 
 
 
-
-
-
-
-
-
-
-
 			renderTarget.submit(proc, { window.getPresentQueue().getSemaphore() }, window.getPresentFence());
 			window.display(imageFormat, { graphicsQueue.getSemaphore() });
 
 			proc.nextFrame();
 		}
 
+		rayOutputImg.destroy(proc);
+
 		screenMesh.destroy(proc);
+
+		rayQueue.destroy();
 	}
 	
 	glfwTerminate();

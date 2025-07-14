@@ -68,11 +68,11 @@ void setGraphicsPipelineInfo1(val::GraphicsPipeline& pipeline)
 
 	// the color blend state affects how the output of the fragmennt shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
-	static colorBlendState blendState;
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
@@ -92,20 +92,20 @@ void setGraphicsPipelineInfo2(val::GraphicsPipeline& pipeline)
 
 	// the color blend state affects how the output of the fragmennt shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
-	static colorBlendState blendState;
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
 
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
-	static colorAttachment colorAttach;
+	static ColorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
 	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
@@ -116,9 +116,9 @@ void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
 }
 
 
-void setRenderPass2(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+void setRenderPass2(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
-	static colorAttachment colorAttach;
+	static ColorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
 	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
@@ -199,7 +199,7 @@ int main()
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	val::renderPassManager renderPass1(proc);
+	val::RenderPassManager renderPass1(proc);
 	setRenderPass(renderPass1, imageFormat);
 	pipeline1.setRenderPassManager(&renderPass1);
 
@@ -232,7 +232,7 @@ int main()
 	//////////////////////////////////////////////////////////////////
 
 
-	val::renderPassManager renderPass2(proc);
+	val::RenderPassManager renderPass2(proc);
 	setRenderPass2(renderPass2, imageFormat);
 	pipeline2.setRenderPassManager(&renderPass2);
 

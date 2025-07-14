@@ -75,23 +75,23 @@ namespace val {
 
 		void updateVertexBuffers(ValProc& proc);
 
-		void updateAndSetIndexBuffer(ValProc& proc, val::buffer& buffer, const uint32_t& indexCount);
+		void updateAndSetIndexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& indexCount);
 
 		void updateAndSetIndexBuffer(ValProc& proc, const VkBuffer& buffer, const uint32_t& indexCount);
 
 		void updateAndSetVertexBuffer(ValProc& proc, const VkBuffer& buffer, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBuffer(ValProc& proc, val::buffer& buffer, const uint32_t& vertexCount);
+		void updateAndSetVertexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& vertexCount);
 
 		void updateAndSetVertexBuffers(ValProc& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBuffers(ValProc& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount);
+		void updateAndSetVertexBuffers(ValProc& proc, const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, val::buffer& vertexBuffer, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount);
+		void updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, val::Buffer& vertexBuffer, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount);
 
 		void updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, const VkBuffer& vertexBuffer, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
 
-		void updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount, val::buffer& indexBuffer, const uint32_t& indexCount);
+		void updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount);
 		
 		void updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
 
@@ -116,7 +116,7 @@ namespace val {
 			_vertexBufferOffsets.resize(_vertexBuffers.size());
 		}
 
-		inline void setVertexBuffer(val::buffer& buffer, const uint32_t& vertexCount) {
+		inline void setVertexBuffer(val::Buffer& buffer, const uint32_t& vertexCount) {
 			_vertexBuffers = { buffer.getVkBuffer()};
 			_vertexCount = vertexCount;
 
@@ -132,7 +132,7 @@ namespace val {
 			_vertexBufferOffsets.resize(vertexBuffers.size());
 		}
 
-		inline void setVertexBuffers(const std::vector<val::buffer*>& vertexBuffers, const uint32_t& vertexCount) {
+		inline void setVertexBuffers(const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount) {
 			_vertexBuffers.resize(vertexBuffers.size());
 			for (uint_fast16_t i = 0; i < vertexBuffers.size(); ++i) {
 				_vertexBuffers[i] = vertexBuffers[i]->getVkBuffer();
@@ -148,7 +148,7 @@ namespace val {
 			return _vertexBuffers;
 		}
 
-		inline void setIndexBuffer(val::buffer& buffer, const uint32_t& indexCount) {
+		inline void setIndexBuffer(val::Buffer& buffer, const uint32_t& indexCount) {
 			_indexBuffer = buffer.getVkBuffer();
 			_indexCount = indexCount;
 		}

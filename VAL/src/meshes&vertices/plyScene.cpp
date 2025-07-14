@@ -22,7 +22,7 @@ namespace val
 	VAL_RETURN_CODE PlyScene::loadFromMemory(const void* memoryBegin, size_t memorySize)
 	{
 		using namespace cply;
-		const PlyResult r = PlyLoadFromMemory((const U8*)memoryBegin, memorySize, &_scene); if (r == PLY_SUCCESS)
+		const PlyResult r = PlyLoadFromMemory((const U8*)memoryBegin, memorySize, &_scene, NULL); if (r == PLY_SUCCESS)
 		{
 			return VAL_SUCCESS;
 		}
@@ -37,7 +37,7 @@ namespace val
 		
 
 #ifdef _WIN32
-		const PlyResult r = PlyLoadFromDiskW(filepath.native().c_str(), &_scene);
+		const PlyResult r = PlyLoadFromDiskW(filepath.native().c_str(), &_scene, NULL);
 #else
 		const PlyResult r = PlyLoadFromDisk(filepath.native().c_str(), &_scene);
 #endif

@@ -36,7 +36,7 @@ namespace val {
 		// first calculate the size per frame and init UBOS
 		for (uint32_t i = 0; i < uboCount; ++i) {
 			UBO_Handle* ubo = uboHandles[i];
-			ubo->_offset = sizePerFrame;
+			ubo->_offset = (uint32_t)sizePerFrame;
 			sizePerFrame += ubo->_size;
 
 			ubo->_arrSubset = this;
@@ -103,13 +103,13 @@ namespace val {
 				}
 			}
 			if (!validLocalReadOnly.empty()) {
-				localReadOnly.create(proc, 0x0, GPU_ONLY, (validLocalReadOnly.data()), validLocalReadOnly.size());
+				localReadOnly.create(proc, 0x0, GPU_ONLY, (validLocalReadOnly.data()), (uint32_t)validLocalReadOnly.size());
 			}
 			if (!validLocalDstTransferOnly.empty()) {
-				localDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, (validLocalDstTransferOnly.data()), validLocalDstTransferOnly.size());
+				localDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, (validLocalDstTransferOnly.data()), (uint32_t)validLocalDstTransferOnly.size());
 			}
 			if (!validLocalSrcTransferOnly.empty()) {
-				localSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, (validLocalSrcTransferOnly.data()), validLocalSrcTransferOnly.size());
+				localSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, (validLocalSrcTransferOnly.data()), (uint32_t)validLocalSrcTransferOnly.size());
 			}
 			if (!validLocalDstAndSrcTransfer.empty()) {
 				localDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, GPU_ONLY, (validLocalDstAndSrcTransfer.data()), validLocalDstAndSrcTransfer.size());
@@ -121,7 +121,7 @@ namespace val {
 			}
 			else {
 				if (!validLocalOther.empty()) {
-					localOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, GPU_ONLY, (validLocalOther.data()), validLocalOther.size());
+					localOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, GPU_ONLY, (validLocalOther.data()), (uint32_t)validLocalOther.size());
 				}
 			}
 		}
@@ -158,16 +158,16 @@ namespace val {
 				}
 			}
 			if (!validGlobalReadOnly.empty()) {
-				globalReadOnly.create(proc, 0x0, CPU_GPU, (validGlobalReadOnly.data()), validGlobalReadOnly.size());
+				globalReadOnly.create(proc, 0x0, CPU_GPU, (validGlobalReadOnly.data()), (uint32_t)validGlobalReadOnly.size());
 			}
 			if (!validGlobalDstTransferOnly.empty()) {
-				globalDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, (validGlobalDstTransferOnly.data()), validGlobalDstTransferOnly.size());
+				globalDstTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, (validGlobalDstTransferOnly.data()), (uint32_t)validGlobalDstTransferOnly.size());
 			}
 			if (!validGlobalSrcTransferOnly.empty()) {
-				globalSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, (validGlobalSrcTransferOnly.data()), validGlobalSrcTransferOnly.size());
+				globalSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, CPU_GPU, (validGlobalSrcTransferOnly.data()), (uint32_t)validGlobalSrcTransferOnly.size());
 			}
 			if (!validGlobalOther.empty()) {
-				globalDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CPU_GPU, (validGlobalDstAndSrcTransfer.data()), validGlobalDstAndSrcTransfer.size());
+				globalDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, CPU_GPU, (validGlobalDstAndSrcTransfer.data()), (uint32_t)validGlobalDstAndSrcTransfer.size());
 			}
 
 			// there is no reason to create the other array subset if it's not needed
@@ -175,7 +175,7 @@ namespace val {
 				|| optionalFlags == 0x0) {
 			}
 			else {
-				globalOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, CPU_GPU, (validGlobalOther.data()), validGlobalOther.size());
+				globalOther.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | optionalFlags, CPU_GPU, (validGlobalOther.data()), (uint32_t)validGlobalOther.size());
 			}
 
 		}

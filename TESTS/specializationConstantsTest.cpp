@@ -147,7 +147,7 @@ int main() {
 
 	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
 
-	val::renderPassManager renderPassManager(proc);
+	val::RenderPassManager renderPassManager(proc);
 	setRenderPass(renderPassManager, imageFormat);
 	pipeline.renderPass = &renderPassManager;
 
@@ -164,13 +164,13 @@ int main() {
 	};
 
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	val::Buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), val::CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
 	// buffer wrapper for index Buffer
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), val::CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	val::Buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), val::CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 

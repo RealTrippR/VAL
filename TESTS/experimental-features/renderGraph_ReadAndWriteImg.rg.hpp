@@ -41,6 +41,7 @@ READ(gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, Texture2D
 WRITE(VkFramebuffer frameBuffer),
 INPUT(GraphicsPipeline pipeline, Window& wind, Queue& graphicsQueue)
 ){
+	TRANSITION_IMAGE_LAYOUT(graphicsQueue, IMAGE_LAYOUT::ShaderReadOnly);
 	renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	BEGIN_RENDER_PASS(passContext, pipeline, frameBuffer, graphicsQueue, INLINE);

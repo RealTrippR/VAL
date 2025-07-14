@@ -511,7 +511,7 @@ namespace val {
 				else if (str[i] == '{') {
 					const char* cbra = getClosingBracket(str + i);
 					if (cbra) {
-						const uint32_t jmplen = cbra - (str + i);
+						const uint32_t jmplen = (uint32_t)(cbra - (str + i));
 						i += jmplen;
 						argclen += jmplen;
 					}
@@ -581,15 +581,24 @@ namespace val {
 
 			srcFileContents = (char*)realloc(srcFileContents, f_len + 1);
 
-			uint64_t i = 0u; // read file char by char
+			uint64_t i;
+
+			if (!srcFileContents) {
+				retCode = VAL_FAILURE;
+				goto memory_alloc_bail;
+			}
+
+			// read file char by char
+			i = 0u;
 			while ((srcFileContents[i] = fgetc(fptr)) != EOF) {
 				i++;
 			}
 
 			// null terminate and update length
 			srcFileContents[f_len] = '\0';
-			srcFileContentsLen = f_len;
+			srcFileContentsLen = (uint32_t)f_len;
 
+		memory_alloc_bail:
 			if (fclose(fptr) == EOF) {
 				dbg::printError("Failed to close render graph source file");
 				retCode = VAL_FAILURE;
@@ -777,7 +786,7 @@ namespace val {
 				}
 
 				// read arguments
-				readArgs(cur, &passInfo.readBlock, argsEndParenthesis - argsBeginParenthesis);
+				readArgs(cur, &passInfo.readBlock,(uint32_t)(argsEndParenthesis - argsBeginParenthesis));
 				
 				// set cur to closing ")"
 				cur = argsEndParenthesis;
@@ -801,7 +810,7 @@ namespace val {
 				}
 
 				// read arguments
-				readArgs(cur, &passInfo.writeBlock, argsEndParenthesis - argsBeginParenthesis);
+				readArgs(cur, &passInfo.writeBlock, (uint32_t)(argsEndParenthesis - argsBeginParenthesis));
 
 				// set cur to closing ")"
 				cur = argsEndParenthesis;
@@ -824,7 +833,7 @@ namespace val {
 				}
 
 				// read arguments
-				readArgs(cur, &passInfo.readWriteBlock, argsEndParenthesis - argsBeginParenthesis);
+				readArgs(cur, &passInfo.readWriteBlock, (uint32_t)(argsEndParenthesis - argsBeginParenthesis));
 
 				// set cur to closing ")"
 				cur = argsEndParenthesis;
@@ -844,7 +853,7 @@ namespace val {
 				}
 
 				// read arguments
-				readArgs(cur, &passInfo.inputBlock, argsEndParenthesis - argsBeginParenthesis);
+				readArgs(cur, &passInfo.inputBlock, (uint32_t)(argsEndParenthesis - argsBeginParenthesis));
 
 				// set cur to closing ")"
 				cur = argsEndParenthesis;
@@ -861,7 +870,7 @@ namespace val {
 			}
 
 			// set pass string length
-			*passStrLen = passEnd - passBegin;
+			*passStrLen = (uint32_t)(passEnd - passBegin);
 		}
 
 		const char* execBegin = findExecSrcBegin(passBegin);
@@ -881,7 +890,7 @@ namespace val {
 				if (cur >= passEnd) {
 					break;
 				}
-				uint32_t distToEnd = passEnd - cur;
+				uint32_t distToEnd = (uint32_t)(passEnd - cur);
 				const char* fixedBegin = findNextMatchAdditive(cur, FIXED_BEGIN_KEYWORD, distToEnd, true, discardMatchIfNoLeadingSpaceOrNewline);
 				if (!fixedBegin) {
 					break; // no more fixed passes
@@ -902,12 +911,15 @@ namespace val {
 				// read fixed arguments
 
 				ARG_BLOCK fixedArgs{};
-				readArgs(fixedArgBeginParen+1, &fixedArgs, fixedArgEndParen - fixedArgBeginParen - 2, ';');
+				readArgs(fixedArgBeginParen+1, &fixedArgs,(uint32_t)(fixedArgEndParen - fixedArgBeginParen - 2), ';');
 
 				// read fixed source
 				const char* fixedSrcBegin = fixedArgEndParen + 1;
-				if (*fixedSrcBegin == '\0');
-
+				if (*fixedSrcBegin == '\0') {
+					ARG_BLOCK_DESTROY(&fixedArgs);
+					break;
+				}
+					
 				char* fixedEnd = findNextMatch(cur, FIXED_END_KEYWORD, distToEnd);
 				if (!fixedEnd)
 				{
@@ -932,8 +944,8 @@ namespace val {
 					passInfo.fixedBlocks = tmpFixedBlocks;
 					lastFixedBlock = &(passInfo.fixedBlocks[passInfo.fixedBlockCount - 1]);
 
-					lastFixedBlock->srcOffset = fixedSrcBegin - execBeginBracket;
-					lastFixedBlock->srcLength = fixedSubroutineLength;
+					lastFixedBlock->srcOffset = (uint32_t)(fixedSrcBegin - execBeginBracket);
+					lastFixedBlock->srcLength = (uint32_t)(fixedSubroutineLength);
 				}
 				else {
 					passInfo.fixedBlockCount--;
@@ -1061,13 +1073,13 @@ namespace val {
 			const char* statementEnd = findNextMatch(cur, ";");
 			if (!statementEnd) { break; }
 
-			const uint32_t statementLen = statementEnd - statementBegin;
+			const uint32_t statementLen = (uint32_t)(statementEnd - statementBegin);
 			uint32_t expectedArgCount = 0u;
 			uint32_t expectedCmdArgIdx = 0u;
 			uint16_t f_table_f_idx = 0u;
 			char* fmatch = NULL;
 			// check if the current statment matches a function in the function table
-			for (size_t j = 0; j < ARR_COUNT(f_table) / 2; ++j) {
+			for (uint16_t j = 0; j < ARR_COUNT(f_table) / 2; ++j) {
 				const char* tfunc = f_table[j * 2 + 1];
 				fmatch = findNextMatchAdditive(cur, tfunc, statementLen + 1);
 				if (fmatch) {
@@ -1077,7 +1089,7 @@ namespace val {
 					const char* o_par = findNextMatch(f_table[j * 2], "(");
 					const char* c_par = getClosingParenthesis(o_par);
 					ARG_BLOCK f_args{};
-					readArgs(o_par + 1, &f_args, c_par - o_par);
+					readArgs(o_par + 1, &f_args, (uint32_t)(c_par - o_par));
 					expectedArgCount = f_args.argCount;
 					for (uint16_t k = 0; k < f_args.argCount; ++k) {
 						const char* arg = GET_ARG_FROM_ARG_BLOCK(&f_args, k);
@@ -1104,7 +1116,7 @@ namespace val {
 				// no closing parenthesis
 				return VAL_FAILURE;
 			}
-			readLen  = cpar - fmatch + 1;
+			readLen  = (uint32_t)(cpar - fmatch + 1);
 			// now if the statement matches ( found a render command )
 			readArgs(fmatch, &f_args, readLen);
 			for (uint16_t j = 0; j < f_args.argCount; ++j) {
@@ -1148,7 +1160,7 @@ namespace val {
 
 		if (passBeginPTR == NULL) return VAL_FAILURE;
 
-		uint32_t passBeginOffset = passBeginPTR - processedSrc.data();
+		uint32_t passBeginOffset = (uint32_t)(passBeginPTR - processedSrc.data());
 
 		// add command buffer just above pass_main
 		processedSrc.insert(passBeginOffset, ";\n");
@@ -1242,7 +1254,7 @@ namespace val {
 				break;
 			}
 
-			const uint32_t statementLen = statementEnd - statementBegin;
+			const uint32_t statementLen = (uint32_t)(statementEnd - statementBegin);
 			uint32_t expectedArgCount = 0u;
 			uint32_t expectedCmdArgIdx = 0u;
 			uint16_t f_table_f_idx = 0u;
@@ -1261,7 +1273,7 @@ namespace val {
 					const char* o_par = findNextMatch(f_table[j * 2], "(");
 					const char* c_par = getClosingParenthesis(o_par);
 					ARG_BLOCK f_args{};
-					readArgs(o_par+1, &f_args, c_par - o_par);
+					readArgs(o_par+1, &f_args, (uint32_t)(c_par - o_par));
 					expectedArgCount = f_args.argCount;
 
 					for (uint16_t k = 0; k < f_args.argCount; ++k) {
@@ -1310,7 +1322,7 @@ namespace val {
 				// insert source statement
 				processedSrc.append(statementBegin, statementEnd + 1);
 				// JUMP TO NEXT STATEMENT
-				i += statementEnd - statementBegin + 1;
+				i += (uint32_t)(statementEnd - statementBegin + 1);
 				// jump to the 1 past the end of the statement
 				cur += statementEnd - statementBegin + 1;
 				continue; 
@@ -1324,7 +1336,7 @@ namespace val {
 
 			// now if the statement matches ( found a render command )
 			ARG_BLOCK f_args {};
-			readArgs(fmatch, &f_args, cpar - fmatch);
+			readArgs(fmatch, &f_args, (uint32_t)(cpar - fmatch));
 			
 			processedSrc.append((char*)statementBegin, (char*)fmatch);
 
@@ -1346,7 +1358,7 @@ namespace val {
 
 
 			// JUMP TO NEXT STATEMENT
-			i += statementEnd - statementBegin + 1;
+			i += (uint32_t)(statementEnd - statementBegin + 1);
 			// jump to the 1 past the end of the statement
 			cur += statementEnd - statementBegin + 1;
 

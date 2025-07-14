@@ -145,8 +145,9 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)ExternalLibraries\Vulkan\Include;$(SolutionDir)ExternalLibraries\GLFW\include;$(SolutionDir)ExternalLibraries\glm;$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\tiny-optional-main</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <TreatSpecificWarningsAsErrors>4715;</TreatSpecificWarningsAsErrors>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <TreatSpecificWarningsAsErrors>4715; 4047;</TreatSpecificWarningsAsErrors>
+      <DisableSpecificWarnings>4297</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

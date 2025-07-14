@@ -5,7 +5,7 @@
 #include <VAL/lib/system/imageView.hpp>
 
 namespace val {
-	enum samplerType {
+	enum SAMPLER_TYPE {
 		combinedImage = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, // equivalent to VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER 
 		standalone = VK_DESCRIPTOR_TYPE_SAMPLER, // equivalent to VK_DESCRIPTOR_TYPE_SAMPLER 
 		immutable = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER //  // equivalent to combinedImage except it cannot be changed and is baked into the graphics pipeline
@@ -17,11 +17,11 @@ namespace val {
 		{ 
 			initDefaultCreateInfoValues();
 		};
-		Sampler(ValProc& proc, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) 
+		Sampler(ValProc& proc, SAMPLER_TYPE samplerType) : _proc(proc), _samplerType(samplerType) 
 		{
 			initDefaultCreateInfoValues(); 
 		};
-		Sampler(ValProc& proc, val::ImageView& imgView, samplerType samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) 
+		Sampler(ValProc& proc, val::ImageView& imgView, SAMPLER_TYPE samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) 
 		{
 			initDefaultCreateInfoValues();
 			bindImageView(imgView); 
@@ -69,7 +69,7 @@ namespace val {
 
 		ImageView* getImageView();
 	public:
-		void setSamplerType(const samplerType& type);
+		void setSamplerType(const SAMPLER_TYPE& type);
 
 		// An anisoLevel greater than 0 will enable anisotropic filtering, if it's equal to 0 it will be disabled.
 		void setMaxAnisotropy(const float& anisoLevel);
@@ -96,7 +96,7 @@ namespace val {
 		void setFromVkSamplerCreateInfo(const VkSamplerCreateInfo& createInfo);
 	public:
 
-		const samplerType& getSamplerType()const ;
+		const SAMPLER_TYPE& getSamplerType()const ;
 
 		const VkSampler& getVkSampler() const;
 
@@ -119,7 +119,7 @@ namespace val {
 		ImageView* _imgView;
 		// VkSampler reference is stored in here
 		VkDescriptorImageInfo _VKdescriptorInfo{.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
-		samplerType _samplerType = combinedImage;
+		SAMPLER_TYPE _samplerType = combinedImage;
 	};
 }
 

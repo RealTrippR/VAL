@@ -28,11 +28,13 @@ namespace val
 	class AccelerationStructure
 	{
 	public:
-		void setGeometries(const tiny_vector<AccelerationStructureGeometry*>& geometries);
+		void setInstances(const tiny_vector<AccelerationStructureInstance*>& instances);
 
-		const tiny_vector<AccelerationStructureGeometry*>& getGeometries() const;
+		const tiny_vector<AccelerationStructureInstance*>& getInstances() const;
 
-		tiny_vector<AccelerationStructureGeometry*>& getGeometries();
+		tiny_vector<AccelerationStructureInstance*>& getInstances();
+
+		tiny_vector<const AccelerationStructureGeometry*> getGeometries() const;
 
 		void setAccelerationStructureInstances(const tiny_vector<AccelerationStructureInstance*>& instances);
 
@@ -55,6 +57,7 @@ namespace val
 			descInfo->arrCount = 1u;
 			VkWriteDescriptorSetAccelerationStructureKHR* descWriteInfo = 
 				(VkWriteDescriptorSetAccelerationStructureKHR*)malloc(sizeof(VkWriteDescriptorSetAccelerationStructureKHR));
+
 			descWriteInfo->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 			descWriteInfo->pNext = VK_NULL_HANDLE;
 			descWriteInfo->accelerationStructureCount = 1u;
@@ -74,7 +77,6 @@ namespace val
 		}
 
 	public:
-		tiny_vector<AccelerationStructureGeometry*> _geometries;
 		tiny_vector<AccelerationStructureInstance*> _instances;
 
 

@@ -42,9 +42,9 @@ namespace val {
 
 		rasterizerState* getRasterizer() const;
 
-		void setColorBlendState(val::colorBlendState* colorState);
+		void setColorBlendState(val::ColorBlendState* colorState);
 
-		colorBlendState* getColorBlendState() const;
+		ColorBlendState* getColorBlendState() const;
 
 		void setDepthStencilState(val::depthStencilState* blendState);
 
@@ -74,7 +74,7 @@ namespace val {
 
 		inline VkPipeline& getVkPipeline(ValProc& proc);
 
-		inline void setRenderPassManager(renderPassManager* passMngr);
+		inline void setRenderPassManager(RenderPassManager* passMngr);
 
 		inline VkRenderPass& getVkRenderPass();
 
@@ -83,10 +83,10 @@ namespace val {
 	protected:
 
 	
-		renderPassManager* renderPass = NULL;
+		RenderPassManager* renderPass = NULL;
 
 		rasterizerState* _rasterizerState = NULL;
-		colorBlendState* _colorBlendState = NULL;
+		ColorBlendState* _colorBlendState = NULL;
 
 		depthStencilState* _depthStencilState = NULL;
 

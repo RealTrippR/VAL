@@ -36,11 +36,11 @@ namespace val
 		return _rasterizerState;
 	}
 
-	void GraphicsPipeline::setColorBlendState(val::colorBlendState* colorState) {
+	void GraphicsPipeline::setColorBlendState(val::ColorBlendState* colorState) {
 		_colorBlendState = colorState;
 	}
 
-	colorBlendState* GraphicsPipeline::getColorBlendState() const {
+	ColorBlendState* GraphicsPipeline::getColorBlendState() const {
 		return _colorBlendState;
 	}
 

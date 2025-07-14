@@ -2,22 +2,22 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void renderPassManager::destroy() {
+	void RenderPassManager::destroy() {
 		if (_VKrenderPass) {
 			vkDestroyRenderPass(_procVAL->_device, _VKrenderPass, VK_NULL_HANDLE);
 			_VKrenderPass = NULL;
 		}
 	}
 
-	void renderPassManager::bindSubpass(Subpass* sp) {
+	void RenderPassManager::bindSubpass(Subpass* sp) {
 		_subpasses.push_back(sp);
 	}
 
-	VkRenderPass& renderPassManager::getVkRenderPass() {
+	VkRenderPass& RenderPassManager::getVkRenderPass() {
 		return _VKrenderPass;
 	}
 
-	void renderPassManager::update() {
+	void RenderPassManager::update() {
 		_VkSubpasses.clear();
 
 		// create std::vector<VkSubpassDescription> _VkSubpasses;
@@ -31,8 +31,8 @@ namespace val {
 		{
 			VkAttachmentDescription& VKattachment = _VkAttachments[i];
 			renderAttachment* VALattachment = _attachments[i];
-			if (dynamic_cast<colorAttachment*>(VALattachment) != NULL
-				or dynamic_cast<depthAttachment*>(VALattachment) != NULL)
+			if (dynamic_cast<ColorAttachment*>(VALattachment) != NULL
+				|| dynamic_cast<DepthAttachment*>(VALattachment) != NULL)
 			{
 				VKattachment.samples = (VkSampleCountFlagBits)_MSAAsamples;
 			}
@@ -42,15 +42,15 @@ namespace val {
 	}
 
 
-	void renderPassManager::setMSAAsamples(VkSampleCountFlags MSAAsamples) {
+	void RenderPassManager::setMSAAsamples(VkSampleCountFlags MSAAsamples) {
 		_MSAAsamples = (VkSampleCountFlagBits)MSAAsamples;
 	}
 
-	VkSampleCountFlagBits renderPassManager::getMSAAsamples() {
+	VkSampleCountFlagBits RenderPassManager::getMSAAsamples() {
 		return _MSAAsamples;
 	}
 
-	const tiny_vector<VkSubpassDependency>& renderPassManager::createSubpassDependencies() {
+	const tiny_vector<VkSubpassDependency>& RenderPassManager::createSubpassDependencies() {
 		// subpasses must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
 
 		_VkSubpassDependencies.resize(_subpasses.size());
@@ -104,7 +104,7 @@ namespace val {
 		return _VkSubpassDependencies;
 	}
 
-	uint32_t renderPassManager::addAttachment(val::renderAttachment* attachment) {
+	uint32_t RenderPassManager::addAttachment(val::renderAttachment* attachment) {
 		// first check to make sure it hasn't been added yet
 		const auto& v = _attachments;
 		// Finding the index of val

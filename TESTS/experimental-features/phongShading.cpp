@@ -1,0 +1,296 @@
+#include <VAL/lib/system/VAL_PROC.hpp>
+#include <VAL/lib/system/window.hpp>
+
+#include <VAL/lib/meshes&vertices/mesh.hpp>
+#include <VAL/lib/meshes&vertices/vertexTxtr.hpp>
+#include <VAL/lib/meshes&vertices/vertexTxtr2D.hpp>
+
+// it is important that this comes last
+#define STB_IMAGE_IMPLEMENTATION
+#include <ExternalLibraries/stb_image.h>
+
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+const bool enableValidationLayers = true;
+
+#define VAL_ENABLE_EXPIREMENTAL /*required for render graph*/
+
+//#define VAL_RENDER_GRAPH_COMPILE_MODE
+#include <VAL/lib/renderGraph/renderGraph.hpp>
+#include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
+
+/************************************************/
+#include GRAPH_FILE(phongShading);
+/************************************************/
+
+
+
+#define FRAMES_IN_FLIGHT 2u
+
+
+
+const VkFormat IMG_FORMAT = VK_FORMAT_R8G8B8A8_SRGB;
+
+struct ViewMatrix {
+	alignas(16) glm::mat4 model;
+	alignas(16) glm::mat4 view;
+	alignas(16) glm::mat4 proj;
+};
+
+struct Light {
+	alignas(16) glm::vec3 position;
+	float _pad1;              // Padding to match std140
+	alignas(16) glm::vec3 color;
+	float intensity;          // Now properly aligned to 16-byte boundary
+};
+
+
+
+static float time_sec = 0u;
+
+void updateTime()
+{
+	static auto startTime = std::chrono::high_resolution_clock::now();
+	static std::chrono::steady_clock::time_point lastTime;
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	const auto dt = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime);
+	//printf("FPS: %f\n",1/dt.count());
+	time_sec = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	lastTime = currentTime;
+}
+
+void updateView(val::ValProc& proc, val::UBO_Handle& hdl)
+{
+	using namespace val;
+	const VkExtent2D& extent = proc._windowVAL->getSize();
+
+	/*Z IS UP*/
+	const float ARM_DIST = 2.5f;
+	ViewMatrix& ubo = *(ViewMatrix*)hdl.getData(proc);
+	ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	//ubo.model = glm::rotate(glm::mat4(1.0f), time_sec * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(glm::vec3(ARM_DIST), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+	ubo.proj[1][1] *= -1;
+}
+
+void updateLight(val::ValProc& proc, val::UBO_Handle& hdl)
+{
+	using namespace val;
+	using namespace glm;
+
+	/*Z IS UP*/
+	Light& light = *(Light*)hdl.getData(proc);
+	light.color = glm::vec3(1.0, 1.0, 1.0);
+	light.intensity = 2.f;
+	light.position = { sin(time_sec) * 1.2f, cos(time_sec) * 1.2f, 1.75f };
+}
+
+
+
+
+void setupGraphicsPipeline(val::ValProc& proc, val::GraphicsPipeline& pipeline)
+{
+	using namespace val;
+
+	// state infos
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE::BACK);
+	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
+	pipeline.setRasterizer(&rasterizer);
+
+	// the color blend state affects how the output of the fragmennt shader is 
+	// blended into the existing content of the the framebuffer.
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+
+	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
+	static ColorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+	pipeline.setColorBlendState(&blendState);
+
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
+}
+
+val::Subpass& setupRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat)
+{
+	using namespace val;
+	static ColorAttachment colorAttachment;
+	colorAttachment.setImgFormat(imgFormat);
+	colorAttachment.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttachment.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
+	colorAttachment.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
+	subpass.bindAttachment(&colorAttachment);
+	return subpass;
+}
+
+
+
+
+
+
+int main()
+{
+	using namespace val;
+
+
+	ValProc proc;
+
+	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+
+
+	// Configure and create window
+	WindowProperties windowConfig;
+	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
+	Window window(windowConfig, 800, 800, "Render Graph Test", proc);
+
+
+	// creates Vulkan logical and physical devices
+	// if a window is passed through, the windowSurface is also created
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
+
+
+	/*******************************************************************************************************************/
+
+	// create view matrix
+	UBO_Handle viewMatrix(sizeof(ViewMatrix));
+
+	UBO_Handle light(sizeof(Light));
+
+	// create texture samplerr
+	Sampler textureSampler(proc, SAMPLER_TYPE::combinedImage);
+
+	// create mesh and respective texture
+
+	FbxScene scene;
+	scene.loadFromDisk("res/cube.fbx");
+
+	Mesh<VertexTxtr, 1> mesh;
+	mesh.importFromScene(proc, scene, 0);
+
+	scene.destroy();
+
+
+	Texture2D texture(proc, IMAGE_LAYOUT::ColorAttachment, IMG_FORMAT);
+	texture.createFromDisk("res/get.png", VK_IMAGE_USAGE_SAMPLED_BIT, IMAGE_LAYOUT::ShaderReadOnly);
+
+	ImageView imgView(proc, texture, VK_IMAGE_ASPECT_COLOR_BIT);
+
+	Sampler sampler(proc);
+	sampler.bindImageView(imgView);
+	sampler.create();
+
+	/*******************************************************************************************************************/
+
+
+
+
+	// create descriptor sheet
+
+	DescriptorSheet dsheet({
+		{0, viewMatrix, SHADER_STAGE::Vertex},
+		{1, light, SHADER_STAGE::Fragment},
+		{2, sampler, SHADER_STAGE::Fragment}
+		}, FRAMES_IN_FLIGHT
+	);
+
+	// create shaders
+	Shader vertShader("shaders-compiled/phong.vert.spv", SHADER_STAGE::Vertex);
+	vertShader.setBindingDescription(VertexTxtr::getBindingDescription());
+	vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
+
+	Shader fragShader("shaders-compiled/phong.frag.spv", SHADER_STAGE::Fragment);
+
+	GraphicsPipeline pipeline;
+	pipeline.setDescriptorSheet(&dsheet);
+	pipeline.setShaders({ &vertShader, &fragShader });
+
+	setupGraphicsPipeline(proc, pipeline);
+
+
+	// create the RenderPass, which holds state information about elements of the grahics pipeline
+	val::RenderPassManager renderPassMngr(proc);
+	setupRenderPass(renderPassMngr, IMG_FORMAT);
+	pipeline.setRenderPassManager(&renderPassMngr);
+
+
+	/*******************************************************************************************************************/
+
+	// create ValProc (create pipelines, create descriptor layouts, allocate descriptor sets, and more)
+	proc.create(
+		window,
+		FRAMES_IN_FLIGHT,
+		IMG_FORMAT,
+		{ &pipeline }
+	);
+
+
+	/*******************************************************************************************************************/
+	// create the swap chain frame buffers
+	window.createSwapChainFrameBuffers(proc, pipeline.getVkRenderPass());
+
+	// populate descriptor sets
+	pipeline.allocateAndWriteDescriptorSets(proc);
+
+
+	/*******************************************************************************************************************/
+
+	// create render graph
+
+	RENDER_GRAPH renderGraph;
+	renderGraph.loadFromFile("experimental-features/phongShading.rg.hpp");
+	renderGraph.compile(proc.getFramesInFlight(), "experimental-features/", "experimental-features/renderGraphDiagrams");
+
+
+
+
+	PASS_CONTEXT passContext = {
+		proc,
+		window.getSizeAsRect2D(),
+		{ { 0.0f, 0.04f, 0.2f, 1.0f } }, /*clear values*/
+		{ pipeline }
+	};
+
+	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Compute);
+
+
+	while (!window.shouldClose())
+	{
+		window.pollEvents();
+
+		updateTime();
+		updateView(proc, viewMatrix);
+		updateLight(proc, light);
+
+		VkFramebuffer framebuffer = window.beginDraw(IMG_FORMAT);
+
+		/* * * * * * * * * * * * * * * * * */
+		
+		graphicsQueue.reset();
+		graphicsQueue.begin();
+
+		CALL_RENDER_PASS(PHONG, proc, passContext,
+			READ(mesh),
+			WRITE(framebuffer),
+			INPUT(pipeline, window, graphicsQueue)
+		);
+
+
+		graphicsQueue.end();
+
+		/* * * * * * * * * * * * * * * * * */
+
+		graphicsQueue.submit(window.getPresentQueue(), passContext.getWaitStages(), window.getPresentFence());
+
+		window.display(IMG_FORMAT, { graphicsQueue.getSemaphore() });
+
+		proc.nextFrame();
+	}
+
+
+
+	
+
+	glfwTerminate();
+}

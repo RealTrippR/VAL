@@ -34,7 +34,7 @@
     </ClCompile>
     <ClCompile Include="deferredRendering.cpp" />
     <ClCompile Include="shadingTest.cpp" />
-    <ClCompile Include="experimental-features\deferredRendering.cpp">
+    <ClCompile Include="experimental-features\phongShading.cpp">
       <Filter>experimental-features</Filter>
     </ClCompile>
     <ClCompile Include="basicLightingTest.cpp" />
@@ -55,6 +55,12 @@
       <Filter>experimental-features</Filter>
     </ClInclude>
     <ClInclude Include="experimental-features\deferred.rg.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\phongShading.rg.hpp">
+      <Filter>experimental-features</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\phongShading__processed.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
   </ItemGroup>
@@ -159,6 +165,12 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\basic.rmiss">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\phong.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\phong.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

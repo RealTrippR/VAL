@@ -5,11 +5,11 @@
 
 namespace val
 {
-	class depthAttachment : public renderAttachment
+	class DepthAttachment : public renderAttachment
 	{
 	public:
-		depthAttachment() : renderAttachment() {}
-		depthAttachment(RENDER_ATTACHMENT_USAGE usage) : renderAttachment(usage) {}
+		DepthAttachment() : renderAttachment() {}
+		DepthAttachment(RENDER_ATTACHMENT_USAGE usage) : renderAttachment(usage) {}
 	public:
 		constexpr VkImageLayout getRefLayout() const override {
 			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;

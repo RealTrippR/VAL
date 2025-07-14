@@ -45,8 +45,8 @@ namespace val {
 
 	class WindowProperties {
 	protected:
-		WN_BOOL_PROPERTY _boolSetMask{}; // the values to be set
-		WN_BOOL_PROPERTY _boolValueMask{};
+		WN_BOOL_PROPERTY _boolSetMask{}; // a mask which holds which values to be set
+		WN_BOOL_PROPERTY _boolValueMask{}; // the actual values
 	public:
 
 		inline void setProperty(WN_BOOL_PROPERTY property, bool value) {

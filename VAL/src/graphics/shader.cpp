@@ -91,8 +91,16 @@ namespace val {
 
 	void Shader::setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes)
 	{
-		_attributes.resize(attributes.size());
-		for (size_t i = 0; i < _attributes.size(); ++i)
+#ifndef NDBEUG
+		if (attributes.size() > _attributes.max_size())
+		{
+			dbg::printError("Shader::setVertexAttributes: The passed attributes would result in an integer overflow if copied.");
+			throw std::runtime_error("Shader::setVertexAttributes: The passed attributes would result in an integer overflow if copied.");
+		}
+#endif // !NDBEUG
+
+		_attributes.resize((uint32_t)attributes.size());
+		for (uint32_t i = 0; i < _attributes.size(); ++i)
 		{
 			_attributes[i] = attributes[i];
 		}

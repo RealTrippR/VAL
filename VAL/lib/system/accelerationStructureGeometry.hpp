@@ -63,7 +63,7 @@ namespace val
 	public:
 		VkStructureType   sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
 		const void* pNext = VK_NULL_HANDLE;
-		VkGeometryTypeKHR                         geometryType;
+		VkGeometryTypeKHR                         geometryType = VK_GEOMETRY_TYPE_MAX_ENUM_KHR;
 		VkAccelerationStructureGeometryDataKHR    geometry;
 		VkGeometryFlagsKHR                        flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 	};

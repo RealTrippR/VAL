@@ -22,14 +22,14 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
-	class colorBlendState
+	class ColorBlendState
 	{
 	public:
-		void bindBlendAttachment(val::colorBlendStateAttachment* attachment);
+		void bindBlendAttachment(val::ColorBlendStateAttachment* attachment);
 
 		void removeBlendAttachment(const uint32_t idx);
 
-		std::vector<colorBlendStateAttachment*> getBlendAttachments();
+		std::vector<ColorBlendStateAttachment*> getBlendAttachments();
 
 		void setBlendConstants(float r, float g, float b, float a);
 
@@ -51,7 +51,7 @@ namespace val
 			std::vector<VkPipelineColorBlendAttachmentState>* VKattachments);
 
 	public:
-		std::vector<colorBlendStateAttachment*> _attachments;
+		std::vector<ColorBlendStateAttachment*> _attachments;
 		float _blendConstantsColors[4] = { 0.f,0.f,0.f,0.f };
 		bool _logicOpEnabled;
 		VkLogicOp _logicOp;

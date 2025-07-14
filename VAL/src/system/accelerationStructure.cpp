@@ -19,22 +19,43 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/buffer.hpp>
 #include <VAL/lib/ext/roundToNextPowerOf2.hpp>
+#include <unordered_map>
 
 namespace val
 {
-	void AccelerationStructure::setGeometries(const tiny_vector<AccelerationStructureGeometry*>& geometries)
+
+	void AccelerationStructure::setInstances(const tiny_vector<AccelerationStructureInstance*>& instances)
 	{
-		_geometries = geometries;
+		_instances = instances;
 	}
 
-	const tiny_vector<AccelerationStructureGeometry*>& AccelerationStructure::getGeometries() const
+
+	const tiny_vector<AccelerationStructureInstance*>& AccelerationStructure::getInstances() const
 	{
-		return _geometries;
+		return _instances;
 	}
 
-	tiny_vector<AccelerationStructureGeometry*>& AccelerationStructure::getGeometries()
+	tiny_vector<AccelerationStructureInstance*>& AccelerationStructure::getInstances()
 	{
-		return _geometries;
+		return _instances;
+	}
+
+
+	tiny_vector<const AccelerationStructureGeometry*> AccelerationStructure::getGeometries() const
+	{
+		std::set<const AccelerationStructureGeometry*> geometries;
+		
+		for (AccelerationStructureInstance* inst : _instances) {
+			geometries.insert(inst->getGeometry());
+		}
+
+		tiny_vector<const AccelerationStructureGeometry*> v;
+
+		for (const AccelerationStructureGeometry* geom : geometries) {
+			v.push_back(geom);
+		}
+
+		return v;
 	}
 
 	void AccelerationStructure::setAccelerationStructureInstances(const tiny_vector<AccelerationStructureInstance*>& instances)
@@ -58,18 +79,30 @@ namespace val
 
 		PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR =
 			(PFN_vkCreateAccelerationStructureKHR)vkGetDeviceProcAddr(proc.getVkLogicalDevice(), "vkCreateAccelerationStructureKHR");
+		
+		tiny_vector<const AccelerationStructureGeometry*> geometries(_instances.size());
 
-		if (_geometries.size() == 0) {
-			dbg::printWarning("AccelerationStructure::buildAsBottomLevel: AccelerationStructure @ %p has no geometries, undefined behavior may occur.", this);
+		for (uint32_t i = 0; i < _instances.size(); ++i)
+		{
+			geometries[i] = _instances[i]->getGeometry();
+			if (geometries[i] == NULL) {
+				dbg::printError("AccelerationStructure::buildAsBottomLevel: Cannot build, instance #%lu has NULL geometry.", i);
+				return VAL_FAILURE;
+			}
+		}
+
+
+		if (_instances.size() == 0) {
+			dbg::printWarning("AccelerationStructure::buildAsBottomLevel: AccelerationStructure @ %p has no _instances, undefined behavior may occur.", this);
 		}
 
 
 		/*per the Vulkan 1.4.3 spec: */
 		/*pMaxPrimitiveCounts is a pointer to an array of pBuildInfo->geometryCount uint32_t values defining the number of primitives built into each geometry.*/
-		tiny_vector<uint32_t> primitiveCounts(_geometries.size());
-		tiny_vector<VkAccelerationStructureGeometryKHR> geometriesAsLinearMemory(_geometries.size());
+		tiny_vector<uint32_t> primitiveCounts(geometries.size());
+		tiny_vector<VkAccelerationStructureGeometryKHR> geometriesAsLinearMemory(geometries.size());
 
-		for (uint32_t i = 0; i < _geometries.size(); ++i)
+		for (uint32_t i = 0; i < geometries.size(); ++i)
 		{
 			if (indexCount>0) {
 				primitiveCounts[i] = indexCount / 3;
@@ -78,7 +111,7 @@ namespace val
 				primitiveCounts[i] = vertexCount / 3;
 			}
 			
-			geometriesAsLinearMemory[i] = *(VkAccelerationStructureGeometryKHR*)(_geometries[i]);
+			geometriesAsLinearMemory[i] = *(VkAccelerationStructureGeometryKHR*)(geometries[i]);
 
 			geometriesAsLinearMemory[i].geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 			geometriesAsLinearMemory[i].flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
@@ -235,7 +268,14 @@ namespace val
 
 
 
-		const uint32_t AS_instancesCount = 1;
+
+
+
+		tiny_vector<AccelerationStructureInstance*>& instancesVAL = BLAS.getInstances();
+		const uint32_t AS_instancesCount = instancesVAL.size();
+
+		tiny_vector<VkAccelerationStructureInstanceKHR> instancesVK(AS_instancesCount);
+
 
 		VkAccelerationStructureBuildGeometryInfoKHR instanceBuildInfo = {};
 
@@ -251,29 +291,41 @@ namespace val
 			};
 			const VkDeviceAddress BLAS_acstAddress = vkGetAccelerationStructureDeviceAddressKHR(proc.getVkLogicalDevice(), &BLAS_addrInfo);
 
+
+
+			for (uint32_t i = 0; i < instancesVK.size(); ++i)
+			{
+				VkAccelerationStructureInstanceKHR& instance = instancesVK[i];
+				instance = instancesVAL[i]->asVkAccelerationStructureInstanceKHR();
+
+				instance.accelerationStructureReference = BLAS_acstAddress;
+				instance.instanceCustomIndex = 0;
+				instance.mask = 0xFF;
+				instance.instanceShaderBindingTableRecordOffset = 0u;
+			}
 			// create acceleration structure instance(s)
 			//https://registry.khronos.org/vulkan/specs/latest/man/html/VkAccelerationStructureInstanceKHR.html
-			VkAccelerationStructureInstanceKHR AS_Instance{};
-			AS_Instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR | VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR;
-			AS_Instance.accelerationStructureReference = BLAS_acstAddress;
-			AS_Instance.instanceCustomIndex = 0;
-			AS_Instance.mask = 0xFF;
-			AS_Instance.instanceShaderBindingTableRecordOffset = 0;
-			/* The transform defines the transformation of an instance of bottom level geometry.
-			* it includes rotation, scale, shear, and position data/
-			| R11 R12 R13 X |
-			| R21 R22 R23 Y |
-			| R31 R32 R33 Z |
-			*/
-			const float X = 0, Y = 0, Z = 0;
-			AS_Instance.transform = {
-				1, 0, 0, X,
-				0, 1, 0, Y,
-				0, 0, 1, Z
-			};
+			//VkAccelerationStructureInstanceKHR AS_Instance{};
+			//AS_Instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR | VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR;
+			//AS_Instance.accelerationStructureReference = BLAS_acstAddress;
+			//AS_Instance.instanceCustomIndex = 0;
+			//AS_Instance.mask = 0xFF;
+			//AS_Instance.instanceShaderBindingTableRecordOffset = 0;
+			///* The transform defines the transformation of an instance of bottom level geometry.
+			//* it includes rotation, scale, shear, and position data/
+			//| R11 R12 R13 X |
+			//| R21 R22 R23 Y |
+			//| R31 R32 R33 Z |
+			//*/
+			//const float X = 0, Y = 0, Z = 0;
+			//AS_Instance.transform = {
+			//	1, 0, 0, X,
+			//	0, 1, 0, Y,
+			//	0, 0, 1, Z
+			//};
 
 
-			const uint32_t instanceBuffSize = sizeof(VkAccelerationStructureInstanceKHR);
+			const uint32_t instanceBuffSize = sizeof(VkAccelerationStructureInstanceKHR) * instancesVK.size();
 
 			proc.createBuffer(instanceBuffSize,
 				VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR
@@ -296,7 +348,7 @@ namespace val
 			vkMapMemory(proc._device, stagingBuffMem, 0, sizeof(VkAccelerationStructureInstanceKHR),
 				0x0, (void**)&mappedDataStagingBuff);
 
-			memcpy_s(mappedDataStagingBuff, instanceBuffSize, &AS_Instance, instanceBuffSize);
+			memcpy_s(mappedDataStagingBuff, instanceBuffSize, instancesVK.data(), instanceBuffSize);
 			proc.copyBuffer(stagingBuff, _instanceBuff, instanceBuffSize, 0, 0);
 
 			vkUnmapMemory(proc._device, stagingBuffMem);

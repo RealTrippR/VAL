@@ -165,24 +165,22 @@ namespace val
 
 	inline uint8_t Queue::getCommandBufferCount() const
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-		return _proc->getFramesInFlight();
+		return _cmdBuffAndSemaphoreBufferCount;
 	}
 
 	inline uint8_t Queue::getSemaphoreCount() const
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-		return _proc->getFramesInFlight();
+		return _cmdBuffAndSemaphoreBufferCount;
 	}
 
 	inline VkCommandBuffer& Queue::getCommandBuffer() const
 	{
 #ifndef NDEBUG
 		dbgValidateSelfUse();
+		if (_proc->getCurrentFrame() >= _cmdBuffAndSemaphoreBufferCount) {
+			dbg::printError("Queue::getCommandBuffer(): Implicitly gets the command buffer at the current frame, the but the command buffer count (%hhu) of Queue @ %p is less than the frames in flight (%hhu) of ValProc @ %p.", _cmdBuffAndSemaphoreBufferCount, this, _proc->getFramesInFlight(), _proc);
+			throw std::runtime_error("Queue::getCommandBuffer() : Implicitly gets the command buffer at the current frame, the but the command buffer count(% hhu) of Queue @ % p is less than the frames in flight(% hhu) of ValProc @ % p.");
+		}
 #endif // !NDEBUG
 		return _commandBuffers[_proc->getCurrentFrame()];
 	}

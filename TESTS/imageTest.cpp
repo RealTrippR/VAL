@@ -78,20 +78,20 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	// the color blend state affects how the output of the fragmennt shader is 
 	// blended into the existing content of the the framebuffer.
-	static colorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	pipeline.setSampleCount(VK_SAMPLE_COUNT_1_BIT);
 
-	static colorBlendState blendState;
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
 }
-void setRenderPass(val::renderPassManager& renderPassMngr, VkFormat imgFormat) {
+void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
-	static colorAttachment colorAttach;
+	static ColorAttachment colorAttach;
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
 	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
@@ -156,7 +156,7 @@ int main()
 
 
 
-	val::renderPassManager renderPassMngr(proc);
+	val::RenderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.renderPass = &renderPassMngr;
 
@@ -181,13 +181,13 @@ int main()
 	};
 
 	// buffer wrapper for vertex Buffer
-	val::buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	val::Buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
 
 
 	std::vector<uint32_t> indices = {
 		0, 1, 2, 2, 3, 0 };
-	val::buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	val::Buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
 
 

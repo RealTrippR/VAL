@@ -73,10 +73,15 @@ namespace val
 
 	void createValTexture2D_FromUFBX_Texture(ufbx_texture* textureFbx, val::Texture2D* texture)
 	{
+		if (textureFbx->content.size >= UINT32_MAX)
+		{
+			dbg::printWarning("createValTexture2D_FromUFBX_Texture: Failed to create texture, it's content size exceeds UINT32_MAX (~4GB)");
+			return;
+		}
 
 		if (textureFbx->content.size != 0)
 		{	// load texture from embedded data
-			texture->createFromMemory(textureFbx->content.data, textureFbx->content.size,
+			texture->createFromMemory(textureFbx->content.data, (uint32_t)textureFbx->content.size,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, texture->getImageLayout(),
 				bufferSpace::GPU_ONLY, 1u);
 			if (texture->getVkImage() != VK_NULL_HANDLE) {

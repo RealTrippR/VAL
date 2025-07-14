@@ -198,7 +198,7 @@ int main()
 
 	VkFormat depthFormat = val::findSupportedImageFormat(proc._physicalDevice, depthFormatReqs);
 
-	val::renderPassManager renderPassMngr(proc);
+	val::RenderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat, depthFormat);
 	pipeline.renderPass = &renderPassMngr;
 

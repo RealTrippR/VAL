@@ -15,6 +15,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+
+#ifndef VERTEX_TEXTURED_HPP
+#define VERTEX_TEXTURED_HPP
+
 #include <VAL/lib/meshes&vertices/vertexBase.hpp>
 #include <VAL/lib/meshes&vertices/vertexInputAttributeList.hpp>
 
@@ -33,8 +37,8 @@ namespace val
 		VertexTxtr(glm::vec3 _pos, glm::vec2 _texCoord, glm::vec3 _normal)
 		{
 			pos = _pos;
-			//texCoord = _texCoord;
-			//normal = _normal;
+			texCoord = _texCoord;
+			normal = _normal;
 		}
 
 		VertexTxtr& operator=(const VertexTxtr&) = default;
@@ -48,6 +52,18 @@ namespace val
 		glm::vec2 texCoord;
 
 	public:
+
+		inline void setPositionFromVec3(glm::vec3 v) { pos = v; }
+
+		inline void setNormalFromVec3(glm::vec3 v) { normal = v; }
+
+		inline void setColorFromVec4(glm::vec3 v) {}
+
+		inline glm::vec3 getPositionAsVec3() const
+		{
+			return pos;
+		}
+
 		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
 		{
 			this->pos = pos;
@@ -64,9 +80,9 @@ namespace val
 			if (r.size() > 0)
 				return r;
 			static const VertexInputAttributeList vertexAttributes = {
-				   VertexInputAttribute(0, (VERTEX_ATTRIBUTE_TYPE)getPositionFormat(), offsetof(VertexTxtr, pos))
-				   //VertexInputAttribute(1, vec2, offsetof(VertexTxtr, texCoord)),
-				   //VertexInputAttribute(2, vec3, offsetof(VertexTxtr, normal))
+				   VertexInputAttribute(0, (VERTEX_ATTRIBUTE_TYPE)getPositionFormat(), offsetof(VertexTxtr, pos)),
+				   VertexInputAttribute(1, vec2, offsetof(VertexTxtr, texCoord)),
+				   VertexInputAttribute(2, vec3, offsetof(VertexTxtr, normal))
 			};
 			r = vertexAttributes.toVkVertexInputAttributeDescription();
 			return r;
@@ -97,8 +113,11 @@ namespace val
 
 namespace std {
 	template<> struct hash<val::VertexTxtr> {
-		size_t operator()(val::VertexTxtr const& vertex) const {
+		inline size_t operator()(val::VertexTxtr const& vertex) const {
 			return (hash<glm::vec3>()(vertex.pos));
 		}
 	};
 }
+
+
+#endif

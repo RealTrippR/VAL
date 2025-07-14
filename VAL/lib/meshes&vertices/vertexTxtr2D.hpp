@@ -32,6 +32,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef VERTEX_TEXTURED_2D_HPP
+#define VERTEX_TEXTURED_2D_HPP
+
 #include <VAL/lib/meshes&vertices/vertexBase.hpp>
 #include <VAL/lib/meshes&vertices/vertexInputAttributeList.hpp>
 
@@ -64,6 +67,18 @@ namespace val
 		glm::vec2 pos;
 		glm::vec2 texCoord;
 	public:
+
+		inline void setPositionFromVec3(glm::vec3 v) { pos = v; }
+
+		inline void setNormalFromVec3(glm::vec3 v) {}
+
+		inline void setColorFromVec4(glm::vec3 v) {}
+
+		inline glm::vec3 getPositionAsVec3() const
+		{
+			return {pos.x,pos.y,0.f};
+		}
+
 		void loadFromAttributes(const glm::vec3& pos, const size_t index, const glm::vec4 color, const glm::vec3& normal, const tiny_vector<glm::vec2>& UVs)
 		{
 			this->pos.x = pos.x;
@@ -113,8 +128,10 @@ namespace val
 // A hash function is required for vertex deduplication
 namespace std {
 	template<> struct hash<val::VertexTxtr2D> {
-		size_t operator()(val::VertexTxtr2D const& vertex) const {
+		inline size_t operator()(val::VertexTxtr2D const& vertex) const {
 			return (hash<glm::vec2>()(vertex.pos));
 		}
 	};
 }
+
+#endif // !VERTEX_TEXTURED_2D_HPP
