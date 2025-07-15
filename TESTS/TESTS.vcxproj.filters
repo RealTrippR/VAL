@@ -22,52 +22,52 @@
     <ClCompile Include="forwardRendering.cpp" />
     <ClCompile Include="texelBufferTest.cpp" />
     <ClCompile Include="inlineUBOtest.cpp" />
-    <ClCompile Include="experimental-features\renderGraphTest.cpp">
-      <Filter>experimental-features</Filter>
-    </ClCompile>
     <ClCompile Include="experimental-features\renderGraph_WriteToAndReadImg.cpp">
       <Filter>experimental-features</Filter>
     </ClCompile>
     <ClCompile Include="VolumetricsTest.cpp" />
-    <ClCompile Include="experimental-features\raytracingTest.cpp">
-      <Filter>experimental-features</Filter>
-    </ClCompile>
     <ClCompile Include="deferredRendering.cpp" />
     <ClCompile Include="shadingTest.cpp" />
-    <ClCompile Include="experimental-features\phongShading.cpp">
-      <Filter>experimental-features</Filter>
-    </ClCompile>
     <ClCompile Include="basicLightingTest.cpp" />
+    <ClCompile Include="experimental-features\PhongShading\phongShading.cpp">
+      <Filter>experimental-features\PhongShading</Filter>
+    </ClCompile>
+    <ClCompile Include="experimental-features\raytracingTest.cpp">
+      <Filter>experimental-features\Raytracing</Filter>
+    </ClCompile>
+    <ClCompile Include="experimental-features\Synchro\synchroMain.cpp">
+      <Filter>experimental-features\Synchro</Filter>
+    </ClCompile>
+    <ClCompile Include="experimental-features\SimpleRG\renderGraphTest.cpp">
+      <Filter>experimental-features\SimpleRG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
     <ClInclude Include="polygonVertex.hpp" />
-    <ClInclude Include="experimental-features\renderGraph_Draft.hpp">
-      <Filter>experimental-features</Filter>
-    </ClInclude>
-    <ClInclude Include="experimental-features\renderGraph_Draft__processed.hpp">
-      <Filter>experimental-features</Filter>
-    </ClInclude>
     <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg.rg.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
     <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg__processed.hpp">
       <Filter>experimental-features</Filter>
     </ClInclude>
-    <ClInclude Include="experimental-features\deferred.rg.hpp">
-      <Filter>experimental-features</Filter>
+    <ClInclude Include="experimental-features\PhongShading\phongShading.rg.hpp">
+      <Filter>experimental-features\PhongShading</Filter>
     </ClInclude>
-    <ClInclude Include="experimental-features\phongShading.rg.hpp">
-      <Filter>experimental-features</Filter>
+    <ClInclude Include="experimental-features\PhongShading\phongShading__processed.hpp">
+      <Filter>experimental-features\PhongShading</Filter>
     </ClInclude>
-    <ClInclude Include="experimental-features\phongShading__processed.hpp">
-      <Filter>experimental-features</Filter>
+    <ClInclude Include="experimental-features\Deferred\deferred.rg.hpp">
+      <Filter>experimental-features\DeferredRendering</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\SimpleRG\renderGraph_Draft.hpp">
+      <Filter>experimental-features\SimpleRG</Filter>
+    </ClInclude>
+    <ClInclude Include="experimental-features\SimpleRG\renderGraph_Draft__processed.hpp">
+      <Filter>experimental-features\SimpleRG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="res">
-      <UniqueIdentifier>{18e5d848-cc15-4194-b562-d5dcbf0d2060}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shaders">
       <UniqueIdentifier>{238477f5-2776-47ac-89df-5dc40f93e896}</UniqueIdentifier>
     </Filter>
@@ -79,6 +79,24 @@
     </Filter>
     <Filter Include="experimental-features">
       <UniqueIdentifier>{5da3f189-593b-4200-9966-21486f953649}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features\PhongShading">
+      <UniqueIdentifier>{8a7bfb52-0522-4780-9e40-1b7951c70b0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features\SimpleRG">
+      <UniqueIdentifier>{909737a5-17a7-406b-9502-379052baa626}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features\Raytracing">
+      <UniqueIdentifier>{75fbae4f-f859-4d2f-9d09-43dff2d4977b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features\DeferredRendering">
+      <UniqueIdentifier>{9d0e84c5-7fe1-457d-a65c-591304bb3e41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features\Synchro">
+      <UniqueIdentifier>{18288ea9-8d7f-440a-b121-b08fb47c13ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features\res">
+      <UniqueIdentifier>{18e5d848-cc15-4194-b562-d5dcbf0d2060}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -173,10 +191,13 @@
     <None Include="shaders\phong.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="experimental-features\Synchro\syncro.rg">
+      <Filter>experimental-features\Synchro</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\viking_room.png">
-      <Filter>res</Filter>
+      <Filter>experimental-features\res</Filter>
     </Image>
   </ItemGroup>
 </Project>

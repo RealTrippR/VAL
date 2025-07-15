@@ -130,6 +130,11 @@ namespace val {
 		vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
 	}
 
+	inline void TRANSITION_IMAGE_LAYOUT(const ImageLayoutTransitionInfo& imgInfo, const IMAGE_LAYOUT layout, const VkCommandBuffer& commandBuffer)
+	{
+		
+	}
+
 	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, const VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset) {
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &buffer, &bufferOffset);
 	}

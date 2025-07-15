@@ -133,14 +133,13 @@ namespace val
 		{
 			if (_commandBuffers) {
 				dbg::recordVkObjectDestruction(_proc->getVkLogicalDevice(), _commandBuffers[0]);
-				VkCommandBuffer b =_commandBuffers[1];
-				vkFreeCommandBuffers(_proc->getVkLogicalDevice(), _proc->getCommandPool(), _proc->getFramesInFlight(), _commandBuffers);
+				vkFreeCommandBuffers(_proc->getVkLogicalDevice(), _proc->getCommandPool(), _cmdBuffAndSemaphoreBufferCount, _commandBuffers);
 
 				free(_commandBuffers);
 			}
 
 			if (_semaphores) {
-				for (uint8_t i = 0; i < _proc->getFramesInFlight(); ++i)
+				for (uint8_t i = 0; i < _cmdBuffAndSemaphoreBufferCount; ++i)
 				{
 					dbg::recordVkObjectDestruction(_proc->getVkLogicalDevice(), _semaphores[i]);
 					vkDestroySemaphore(_proc->getVkLogicalDevice(), _semaphores[i], NULL);
@@ -160,6 +159,7 @@ namespace val
 		other->_queueFlags = this->_queueFlags;
 		other->_proc = this->_proc;
 		other->_queueFamily = this->_queueFamily;
+		other->_cmdBuffAndSemaphoreBufferCount = _cmdBuffAndSemaphoreBufferCount;
 
 		other->create();
 	}

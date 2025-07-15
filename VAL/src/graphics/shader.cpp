@@ -125,4 +125,53 @@ namespace val {
 	{
 		return _bindings;
 	}
+
+	void Shader::addSpecializationConstant(uint16_t id, const void* value, uint16_t valueSize, uint16_t offset)
+	{
+#ifndef NDEBUG
+		if (offset >= valueSize) {
+			dbg::printWarning("Shader::addSpecializationConstant: For Shader @ %p the offset (%u) extends beyond the valueSize (%u).", this, offset, valueSize);
+		}
+#endif // !NDEBUG
+
+		VkSpecializationMapEntry& entry = specializationEntries.emplaceBack();
+		entry.constantID = id;
+		entry.offset = offset;
+		entry.size = valueSize;
+
+		
+
+		uint32_t dataSize = getSpecializationEntriesDataSize();
+		void* tmp = realloc(specializationData, dataSize);
+		
+		if (!tmp) {
+			dbg::printError("Shader::addSpecializationConstant: Failed to allocate data for specializationData");
+			specializationEntries.pop_back();
+		}
+		else {
+			specializationData = tmp;
+		}
+
+		memcpy(((uint8_t*)specializationData+dataSize)-valueSize, value, valueSize);
+
+		return;
+	}
+
+	uint32_t Shader::getSpecializationEntriesDataSize() const 
+	{
+		uint32_t totalSpecDataSize = 0u;
+		for (const auto& entry : specializationEntries) {
+			totalSpecDataSize += entry.size;
+		}
+		return totalSpecDataSize;
+	}
+
+	void Shader::discardSpecalizationConstants() {
+		specializationEntries.~tiny_vector();
+
+		if (specializationData) {
+			free(specializationData);
+			specializationData = NULL;
+		}
+	}
 }

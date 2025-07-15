@@ -21,9 +21,6 @@ namespace val
 			//destroy();
 		}
 
-		Buffer(ValProc& proc, const Buffer& other) {
-			this->copyFrom(proc,other);
-		}
 
 	public:
 		void create(ValProc& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u);
@@ -39,20 +36,13 @@ namespace val
 		void destroy(ValProc& proc);
 
 	public:
-		const bufferSpace& getBufferSpace() const;
-
 		const uint32_t& size() const;
 
 		VkBuffer& getVkBuffer();
 
 		const VkDeviceMemory& getDeviceMemory();
 
-		void* getDataMapped();
-
 		VkBufferUsageFlags getUsageFlags() const;
-
-	protected:
-		void copyFrom(ValProc& proc, const Buffer& src);
 
 	protected:
 		VkBuffer _buffer;

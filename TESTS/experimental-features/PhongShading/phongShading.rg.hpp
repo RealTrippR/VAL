@@ -1,4 +1,3 @@
-#include <VAL/lib/system/VAL_PROC.hpp>
 /********************************/
 /* Copyright Tripp Robins, 2025 */
 /********************************/
@@ -11,8 +10,13 @@
 using namespace val;
 
 /* A basic example rendergraph */
-void pass_mainPHONG(val::ValProc& valProc, val::PASS_CONTEXT& passContext, Mesh<VertexTxtr, 1>& mesh, VkFramebuffer framebuffer, GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue) {
+PASS_BEGIN(PHONG)
 
+READ(Mesh<VertexTxtr,1>& mesh),
+WRITE(VkFramebuffer framebuffer),
+//READ_WRITE(NULL) <- upon further research I believe that this is invalid
+INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
+){
 	//dbg::printWarning("TODO: Add validation to ensure that begin render pass has the correct INLINE/FIXED mode.");
 	BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, graphicsQueue, INLINE); // the INLINE/FIXED flag should be automatically set, this is bad code.
 
@@ -32,3 +36,5 @@ void pass_mainPHONG(val::ValProc& valProc, val::PASS_CONTEXT& passContext, Mesh<
 
 	END_RENDER_PASS(graphicsQueue);
 }
+
+PASS_END // PHONG END

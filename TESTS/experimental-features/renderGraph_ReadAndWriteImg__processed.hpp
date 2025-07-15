@@ -33,7 +33,7 @@ void pass_mainCOLOR(val::ValProc& valProc, val::PASS_CONTEXT& passContext, gpu_v
 }
 void pass_mainIMAGE(val::ValProc& valProc, val::PASS_CONTEXT& passContext, gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, Texture2D& renderTargImg, VkFramebuffer frameBuffer, GraphicsPipeline pipeline, Window& wind, Queue& graphicsQueue) {
 
-	renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	TRANSITION_IMAGE_LAYOUT(renderTargImg, IMAGE_LAYOUT::ShaderReadOnly, graphicsQueue);
 
 	BEGIN_RENDER_PASS(passContext, pipeline, frameBuffer, graphicsQueue, INLINE);
 

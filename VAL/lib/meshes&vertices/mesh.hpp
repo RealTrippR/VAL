@@ -162,7 +162,11 @@ namespace val
 					// Loop through the vertex indices of the face
 					for (size_t i = 0; i < triCount * 3; ++i)
 					{
-						const uint32_t cornerIndex = faceIndices[i];
+						if (i >= UINT32_MAX) {
+							return VAL_FAILURE;
+						}
+
+						const uint32_t cornerIndex = faceIndices[(uint32_t)i];
 						const uint32_t vertexIndex = mesh->vertex_indices[cornerIndex];
 
 						const ufbx_vec3& v = mesh->vertices[vertexIndex];

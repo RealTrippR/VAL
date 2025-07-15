@@ -24,14 +24,9 @@ namespace val
 {
 	void Buffer::create(ValProc& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage, uint16_t frameCount) {
 		_size = size;
-		_space = space;
 		_usage = bufferUsage;
 		
 		proc.createBuffer(size, bufferUsage, bufferSpaceToVkMemoryProperty(space), _buffer, _memory);
-		// create mapped data memory
-		if (CPU_GPU == space) {
-			vkMapMemory(proc._device, _memory, 0u, size, 0u, &_dataMapped);
-		}
 	}
 
 	// overwrites from a staging buffer for all frames in flight
@@ -70,18 +65,12 @@ namespace val
 			VkDeviceMemory tmpMem;
 
 			// create new buffer and copy the old one into it
-			proc.createBuffer(newSize, _usage, bufferSpaceToVkMemoryProperty(_space), tmpBuffer, tmpMem);
+			proc.createBuffer(newSize, _usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, tmpBuffer, tmpMem);
 			proc.copyBuffer(tmpBuffer, _buffer, 0u, 0u);
 
 			// destroy the old buffer
 			vkDestroyBuffer(proc._device, tmpBuffer, VK_NULL_HANDLE);
 			vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
-
-			// remap memory needed
-			if (CPU_GPU == _space) {
-				vkUnmapMemory(proc._device, _memory);
-				vkMapMemory(proc._device, tmpMem, 0u, _size, 0u, &_dataMapped);
-			}
 
 			_buffer = tmpBuffer;
 			_memory  = tmpMem;
@@ -100,9 +89,6 @@ namespace val
 		}
 	}
 
-	const bufferSpace& Buffer::getBufferSpace() const  {
-		return _space;
-	}
 
 	const uint32_t& Buffer::size() const {
 		return _size;
@@ -116,31 +102,8 @@ namespace val
 		return _memory;
 	}
 
-	void* Buffer::getDataMapped() {
-		return _dataMapped;
-	}
-
-
 	VkBufferUsageFlags Buffer::getUsageFlags() const
 	{
 		return _usage;
-	}
-	////////////////////////////////////////////////////////////////////////////
-	void Buffer::copyFrom(ValProc& proc, const Buffer& other) 
-	{
-		// cleanup old data.
-		this->destroy(proc);
-
-		_size = other._size;
-		_space = other._space;
-
-
-		
-		proc.createBuffer(other._size, other._usage, bufferSpaceToVkMemoryProperty(_space), _buffer, _memory);
-		// create mapped data memory
-		if (CPU_GPU == _space) {
-			vkMapMemory(proc._device, _memory, 0u, _size, 0u, &_dataMapped);
-		}
-		proc.copyBuffer(other._buffer, _buffer, _size);
 	}
 }

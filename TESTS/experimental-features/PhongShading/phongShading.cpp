@@ -24,6 +24,7 @@ const bool enableValidationLayers = true;
 
 
 
+const int BLINN = 1;
 #define FRAMES_IN_FLIGHT 2u
 
 
@@ -64,11 +65,11 @@ void updateView(val::ValProc& proc, val::UBO_Handle& hdl)
 	const VkExtent2D& extent = proc._windowVAL->getSize();
 
 	/*Z IS UP*/
-	const float ARM_DIST = 2.5f;
+	const float ARM_DISTANCE = 2.5f;
 	ViewMatrix& ubo = *(ViewMatrix*)hdl.getData(proc);
 	ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	//ubo.model = glm::rotate(glm::mat4(1.0f), time_sec * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(ARM_DIST), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(glm::vec3(ARM_DISTANCE), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 }
@@ -78,11 +79,12 @@ void updateLight(val::ValProc& proc, val::UBO_Handle& hdl)
 	using namespace val;
 	using namespace glm;
 
+	const float ARM_DISTANCE = 2.0;
 	/*Z IS UP*/
 	Light& light = *(Light*)hdl.getData(proc);
 	light.color = glm::vec3(1.0, 1.0, 1.0);
-	light.intensity = 2.f;
-	light.position = { sin(time_sec) * 1.2f, cos(time_sec) * 1.2f, 1.75f };
+	light.intensity = 1.f;
+	light.position = { sin(time_sec) * ARM_DISTANCE, cos(time_sec) * ARM_DISTANCE, 1.75f };
 }
 
 
@@ -201,6 +203,7 @@ int main()
 	vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
 
 	Shader fragShader("shaders-compiled/phong.frag.spv", SHADER_STAGE::Fragment);
+	fragShader.addSpecializationConstant(0, (void*)&BLINN, sizeof(BLINN));
 
 	GraphicsPipeline pipeline;
 	pipeline.setDescriptorSheet(&dsheet);
@@ -219,6 +222,7 @@ int main()
 
 	// create ValProc (create pipelines, create descriptor layouts, allocate descriptor sets, and more)
 	proc.create(
+		"pipeline_caches/phong.cache",
 		window,
 		FRAMES_IN_FLIGHT,
 		IMG_FORMAT,
@@ -239,7 +243,7 @@ int main()
 	// create render graph
 
 	RENDER_GRAPH renderGraph;
-	renderGraph.loadFromFile("experimental-features/phongShading.rg.hpp");
+	renderGraph.loadFromFile("experimental-features/PhongShading/phongShading.rg.hpp");
 	renderGraph.compile(proc.getFramesInFlight(), "experimental-features/", "experimental-features/renderGraphDiagrams");
 
 
@@ -252,7 +256,7 @@ int main()
 		{ pipeline }
 	};
 
-	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Compute);
+	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
 
 
 	while (!window.shouldClose())
@@ -288,7 +292,7 @@ int main()
 		proc.nextFrame();
 	}
 
-
+	mesh.destroy(proc);
 
 	
 

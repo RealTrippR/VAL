@@ -1,5 +1,7 @@
 #version 450
 
+layout (constant_id = 0) const int BLINN = 0;
+
 layout(location = 0) in vec3 fragNormal;
 layout(location = 1) in vec3 fragPos;
 layout(location = 2) in vec2 fragTexCoord;
@@ -24,17 +26,26 @@ void main()
     float diff = max(dot(norm, lightDir), 0.0);
 
     vec3 viewDir = normalize(fragViewPos - fragPos);
-    vec3 reflectDir = reflect(lightDir, norm);
 
+    float spec;
+
+    if(BLINN == 1)
+    {
+        vec3 halfwayDir = normalize(lightDir + viewDir);  
+        spec = pow(max(dot(fragNormal, halfwayDir), 0.0), 16.0);
+    }
+    else
+    {
+        vec3 reflectDir = reflect(lightDir, fragNormal);
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
+    }
 
     // Phong components
     float shininess = 2;
-    float specularStrength = 0.5;
+    float specularStrength = 0.7;
 
-    vec3 ambient = 0.1 * light.color;
-    //float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    vec3 specular = specularStrength  * light.color * shininess; //* dot(reflectDir,-viewDir);
-
+    vec3 ambient = 0.01 * light.color;
+    vec3 specular = specularStrength  * light.color * shininess * spec; //* dot(reflectDir,-viewDir);
 
     float dist = length(light.pos - fragPos);
     float attenuation = 1.0 / (dist * dist);  // inverse square law

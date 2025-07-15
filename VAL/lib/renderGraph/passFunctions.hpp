@@ -48,6 +48,7 @@ namespace val {
 
 	inline void SET_SCISSOR(const VkExtent2D& scissor, const VkCommandBuffer& commandBuffer);
 
+	inline void TRANSITION_IMAGE_LAYOUT(const ImageLayoutTransitionInfo& imgInfo, const IMAGE_LAYOUT layout, const VkCommandBuffer& commandBuffer);
 	//inline void setLineWidth();
 
 	//inline void setBlendConstants();

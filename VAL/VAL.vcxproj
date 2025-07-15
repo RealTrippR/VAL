@@ -281,6 +281,7 @@
     <ClInclude Include="lib\system\descType.hpp" />
     <ClInclude Include="lib\system\framebuffer.hpp" />
     <ClInclude Include="lib\system\graphicsPipeline.hpp" />
+    <ClInclude Include="lib\system\ImageLayoutTransitionInfo.hpp" />
     <ClInclude Include="lib\system\imageViewBindInfo.hpp" />
     <ClInclude Include="lib\system\multisamplerConfig.hpp" />
     <ClInclude Include="lib\system\physicalDeviceRequirements.hpp" />

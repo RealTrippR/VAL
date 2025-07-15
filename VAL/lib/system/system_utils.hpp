@@ -47,6 +47,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <filesystem>
 #include <math.h>
 
+#include <VAL/lib/system/ImageLayoutTransitionInfo.hpp>
 #include <VAL/lib/debugReporting/debugCallbacks.hpp>
 
 #include <VAL/lib/ext/tiny_vector.hpp>

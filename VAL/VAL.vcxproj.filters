@@ -440,6 +440,9 @@
     <ClInclude Include="lib\meshes&amp;vertices\plyScene.hpp">
       <Filter>lib\meshes&amp;vertices</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\ImageLayoutTransitionInfo.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">

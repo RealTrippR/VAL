@@ -156,6 +156,10 @@ public:
         back() = val;
     }
 
+    void pop_back() {
+        resize(_size - 1);
+    }
+
     template<typename... Args>
     t& emplace_back(Args&&... args) {
         growNoConstructor();

@@ -38,7 +38,7 @@ namespace val
 			return VAL_FAILURE;
 		}
 
-		shaderHandleStorage.resize(sbtSize);
+		shaderHandleStorage.resize((uint32_t)sbtSize);
 		vkGetRayTracingShaderGroupHandlesKHR(proc.getVkLogicalDevice(), proc._raytracingPipelines[0], 0, groupCount, sbtSize, shaderHandleStorage.data());
 
 		proc.createBuffer(sbtSize, VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
