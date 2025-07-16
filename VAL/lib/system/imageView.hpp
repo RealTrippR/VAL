@@ -13,18 +13,24 @@ namespace val {
 	public:
 		ImageView(ValProc& proc) : _proc(proc) {};
 		ImageView(ValProc& proc, VkImageLayout* layout) : _proc(proc) { _layout = layout; };
-		ImageView(ValProc& proc, ImageViewBindInfo bindInfo, const VkImageAspectFlags& aspectFlags, const VkDescriptorType type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc)
-		{
+		ImageView(ValProc& proc, ImageViewBindInfo bindInfo, const VkImageAspectFlags& aspectFlags, const VkDescriptorType type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc){
+			_type = type;
+			create(bindInfo, (IMAGE_ASPECT)aspectFlags);
+		}
+
+		ImageView(ValProc& proc, VkImage img,VkFormat format, const VkImageAspectFlags& aspectFlags, const VkDescriptorType type= VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc){
+			_type = type;
+			create(img,format, (IMAGE_ASPECT)aspectFlags);
+		}
+		ImageView(ValProc& proc, ImageViewBindInfo bindInfo, const IMAGE_ASPECT& aspectFlags, const VkDescriptorType type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc){
 			_type = type;
 			create(bindInfo, aspectFlags);
 		}
 
-		ImageView(ValProc& proc, VkImage img,VkFormat format, const VkImageAspectFlags& aspectFlags, const VkDescriptorType type= VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc)
-		{
+		ImageView(ValProc& proc, VkImage img, VkFormat format, const IMAGE_ASPECT& aspectFlags, const VkDescriptorType type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE) : _proc(proc){
 			_type = type;
-			create(img,format, aspectFlags);
+			create(img, format, aspectFlags);
 		}
-
 		~ImageView() {
 			destroy();
 		}
@@ -62,9 +68,9 @@ namespace val {
 		}
 	public:
 
-		void create(ImageViewBindInfo& bindInfo, const VkImageAspectFlags aspectFlags);
+		void create(ImageViewBindInfo& bindInfo, const IMAGE_ASPECT aspectFlags);
 
-		void create(VkImage img, VkFormat format, const VkImageAspectFlags& aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
+		void create(VkImage img, VkFormat format, const IMAGE_ASPECT& aspectFlags = IMAGE_ASPECT::Color);
 
 		void destroy();
 	public:

@@ -2,46 +2,25 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void ImageView::create(ImageViewBindInfo& bindInfo, const VkImageAspectFlags aspectFlags)
+	void ImageView::create(ImageViewBindInfo& bindInfo, const IMAGE_ASPECT aspectFlags)
 	{
 		_layout = bindInfo.layout;
-		_aspectFlags = aspectFlags;
+		_aspectFlags = (VkImageAspectFlags) aspectFlags;
 
 		if (_imgView != VK_NULL_HANDLE) {
 			destroy();
 		}
 
-		_proc.createImageView(bindInfo.image, bindInfo.format, aspectFlags, &_imgView);
+		_proc.createImageView(bindInfo.image, bindInfo.format, (VkImageAspectFlags)aspectFlags, &_imgView);
 	}
-	/*void ImageView::create(val::Image& img, const VkImageAspectFlags& aspectFlags)
-	{
-		_layout = &img._imgLayout;
-		if (_imgView != VK_NULL_HANDLE) {
-			destroy();
-		}
-		_aspectFlags = aspectFlags;
-		_proc.createImageView(img.getImage(), img.getFormat(), aspectFlags, &_imgView);
-	}
-
-
-	void ImageView::create(val::Texture2D& texture, const VkImageAspectFlags& aspectFlags)
-	{
-		_layout = &(texture._layout);
-
-		if (_imgView != VK_NULL_HANDLE) {
-			destroy();
-		}
-		_aspectFlags = aspectFlags;
-		_proc.createImageView(texture.getVkImage(), texture.getVkFormat(), aspectFlags, &_imgView);
-	}*/
-
-	void ImageView::create(VkImage img, VkFormat format, const VkImageAspectFlags& aspectFlags)
+	
+	void ImageView::create(VkImage img, VkFormat format, const IMAGE_ASPECT& aspectFlags)
 	{
 		if (_imgView != VK_NULL_HANDLE) {
 			destroy();
 		}
-		_aspectFlags = aspectFlags;
-		_proc.createImageView(img, format, aspectFlags, &_imgView);
+		_aspectFlags = (VkImageAspectFlags)aspectFlags;
+		_proc.createImageView(img, format, (VkImageAspectFlags)aspectFlags, &_imgView);
 	}
 
 	void ImageView::destroy()

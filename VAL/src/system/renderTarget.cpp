@@ -177,26 +177,26 @@ namespace val {
 	void renderTarget::updateAndSetVertexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& vertexCount) {
 		setVertexBuffer(buffer, vertexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
 	void renderTarget::updateAndSetVertexBuffers(ValProc& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
 	void renderTarget::updateAndSetVertexBuffers(ValProc& proc, const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount) {
 		setVertexBuffers(vertexBuffers, vertexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
 	void renderTarget::updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, val::Buffer& vertexBuffer, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount) {
 		setVertexBuffer(vertexBuffer, vertexCount);
 		setIndexBuffer(indexBuffer, indexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 		if (_indexCount > 0) {
 			vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		}

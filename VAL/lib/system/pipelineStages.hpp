@@ -6,7 +6,7 @@
 
 namespace val
 {
-	enum PIPELINE_STAGE : VkPipelineStageFlags
+	enum class PIPELINE_STAGE : VkPipelineStageFlags
 	{
 		TopOfPipe = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		DrawIndirect = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,

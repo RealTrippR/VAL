@@ -41,6 +41,9 @@
     <ClCompile Include="experimental-features\SimpleRG\renderGraphTest.cpp">
       <Filter>experimental-features\SimpleRG</Filter>
     </ClCompile>
+    <ClCompile Include="experimental-features\ShadowMapping\shadowMapping.cpp">
+      <Filter>experimental-features\ShadowMapping</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
@@ -97,6 +100,9 @@
     </Filter>
     <Filter Include="experimental-features\res">
       <UniqueIdentifier>{18e5d848-cc15-4194-b562-d5dcbf0d2060}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="experimental-features\ShadowMapping">
+      <UniqueIdentifier>{96c2b9b0-0034-40c5-9998-eeaa1f4988f6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +199,9 @@
     </None>
     <None Include="experimental-features\Synchro\syncro.rg">
       <Filter>experimental-features\Synchro</Filter>
+    </None>
+    <None Include="experimental-features\ShadowMapping\shadowMapping.rg">
+      <Filter>experimental-features\ShadowMapping</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

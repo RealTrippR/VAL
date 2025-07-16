@@ -15,10 +15,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_IMAGE_INFO_HPP
-#define VAL_IMAGE_INFO_HPP
-
-#include <vulkan/vulkan_core.h>
+#ifndef VAL_IMAGE_LAYOUT_TRANSITION_INFO_HPP
+#define VAL_IMAGE_LAYOUT_TRANSITION_INFO_HPP
 
 namespace val {
 	/*
@@ -26,9 +24,9 @@ namespace val {
 	*/
 	class ImageLayoutTransitionInfo {
 	public:
-		VkImageLayout imgLayout;
+		VkImageLayout* pImgLayout;
 		VkImage img;
 	};
 }
 
-#endif // !VAL_IMAGE_INFO_HPP
+#endif // !VAL_IMAGE_LAYOUT_TRANSITION_INFO_HPP

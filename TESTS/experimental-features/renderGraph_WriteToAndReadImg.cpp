@@ -83,7 +83,7 @@ void setGraphicsPipelineInfo1(val::GraphicsPipeline& pipeline)
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
 
 
@@ -107,7 +107,7 @@ void setGraphicsPipelineInfo2(val::GraphicsPipeline& pipeline)
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
 
 void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
@@ -139,11 +139,9 @@ int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-
 	using namespace val;
 	ValProc proc;
-	PhysicalDeviceRequirements deviceRequirements(val::DEVICE_TYPES::dedicated_GPU | val::DEVICE_TYPES::integrated_GPU);
-	
+	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU, DEVICE_FEATURES::anisotropicFiltering);
 
 	// Configure and create window
 	WindowProperties windowConfig;
@@ -179,18 +177,26 @@ int main()
 	UBO_Handle uboHdl1(sizeof(ViewMatrix));
 
 	// load and configure frag shader
-	Shader fragShaderImage("shaders-compiled/imageshaderfrag.spv", SHADER_STAGE::Fragment, "main");
+	Shader fragShaderImage("shaders-compiled/imageshader.frag.spv", SHADER_STAGE::Fragment, "main");
 
 	Sampler imgSampler(proc, val::combinedImage);
 	imgSampler.setMaxAnisotropy(8.f);
-	fragShaderImage.setImageSamplers({ { &imgSampler, 1 } });
 
 	// load and configure vert shader
-	Shader vertShader("shaders-compiled/shadervert.spv", SHADER_STAGE::Vertex, "main");
+	Shader vertShader("shaders-compiled/shader.vert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
-	vertShader._UBO_Handles = { {&uboHdl1,0} };
 
+
+
+	DescriptorSheet imgPipelineDescriptorSheet({
+		{0, uboHdl1, SHADER_STAGE::Vertex},
+		{1, imgSampler, SHADER_STAGE::Fragment, IMAGE_LAYOUT::ShaderReadOnly}},
+		FRAMES_IN_FLIGHT
+	);
+
+
+	imgPipeline.setDescriptorSheet(&imgPipelineDescriptorSheet);
 	imgPipeline.shaders = { &vertShader,&fragShaderImage };
 
 	setGraphicsPipelineInfo1(imgPipeline);
@@ -209,13 +215,22 @@ int main()
 
 	UBO_Handle uboHdl2(sizeof(ViewMatrix));
 
-	val::Shader vertShader2("shaders-compiled/shadervert.spv", SHADER_STAGE::Vertex, "main");
+	val::Shader vertShader2("shaders-compiled/shader.vert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader2.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader2.setBindingDescriptions({ res::vertex::getBindingDescription() });
 
-	vertShader2._UBO_Handles = { { &uboHdl2,0 } };
+	Shader fragShaderColor("shaders-compiled/colorshader.frag.spv", SHADER_STAGE::Fragment, "main");
 
-	Shader fragShaderColor("shaders-compiled/colorshaderfrag.spv", SHADER_STAGE::Fragment, "main");
+
+
+
+
+	DescriptorSheet colorPipelineDescriptorSheet({
+		{0,uboHdl2,SHADER_STAGE::Vertex} },
+		FRAMES_IN_FLIGHT
+		);
+
+	colorPipeline.setDescriptorSheet(&colorPipelineDescriptorSheet);
 	colorPipeline.shaders = { &vertShader2,&fragShaderColor };
 
 	setGraphicsPipelineInfo2(colorPipeline);
@@ -240,7 +255,7 @@ int main()
 	val::Texture2D renderTargetImg(proc, 800, 800, imageFormat,
 		VkImageUsageFlagBits(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-	val::ImageView renderTargImgView(proc, renderTargetImg, VK_IMAGE_ASPECT_COLOR_BIT);
+	val::ImageView renderTargImgView(proc, renderTargetImg, IMAGE_ASPECT::Color);
 
 
 
@@ -271,11 +286,13 @@ int main()
 	val::Framebuffer renderTargetFramebuffer(proc, 800, 800, colorPipeline.getVkRenderPass(), renderTargImgView);
 
 	////////////////////////////////////////////////////////////
+	// create image sampler
 	imgSampler.bindImageView(renderTargImgView);
+	imgSampler.create();
 
 	////////////////// CREATE DESCRIPTOR SETS //////////////////
-	proc.createDescriptorSets(&imgPipeline);
-	proc.createDescriptorSets(&colorPipeline);
+	imgPipeline.allocateAndWriteDescriptorSets(proc);
+	colorPipeline.allocateAndWriteDescriptorSets(proc);
 
 	///////////////////  CREATE RENDER GRAPH ///////////////////
 	RENDER_GRAPH renderGraph;
@@ -309,8 +326,8 @@ int main()
 	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Compute);
 
 
-	std::cout << "Color pass wait stages: " << val::to_string(colorPassContext.getWaitStages()) << "\n\n";
-	std::cout << "Image pass wait stages: " << val::to_string(imagePassContext.getWaitStages()) << "\n\n";
+	//std::cout << "Color pass wait stages: " << val::to_string(colorPassContext.getWaitStages()) << "\n\n";
+	//std::cout << "Image pass wait stages: " << val::to_string(imagePassContext.getWaitStages()) << "\n\n";
 
 	while (!window.shouldClose()) 
 	{
@@ -362,8 +379,6 @@ int main()
 	
 	glfwTerminate();
 
-
-	_CrtDumpMemoryLeaks();
 
 	return EXIT_SUCCESS;
 }

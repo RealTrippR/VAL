@@ -31,12 +31,16 @@ namespace val
 		uint32_t binding;
 		ObjectDescriptorInfo objInfo;
 		SHADER_STAGE shaderStages;
+		IMAGE_LAYOUT imgLayout = IMAGE_LAYOUT::MaxEnum; /*optional*/
 	};
+
 	class DescriptorSheet 
 	{
 	public:
 		DescriptorSheet() = default;
-		DescriptorSheet(std::initializer_list<DescriptorSheetElementBuilder> descBuilders, const uint16_t maxSetCount)
+		DescriptorSheet(
+			std::initializer_list<DescriptorSheetElementBuilder> descBuilders, 
+			const uint16_t maxSetCount)
 		{
 			using std::get;
 
@@ -46,6 +50,11 @@ namespace val
 				element._descriptorInfo.type = VK_DESCRIPTOR_TYPE_MAX_ENUM;
 				element._binding = descBuilder.binding;
 				element._descriptorInfo = descBuilder.objInfo;
+				if (descBuilder.imgLayout != IMAGE_LAYOUT::MaxEnum) {
+					for (auto& imgInfo : element._descriptorInfo.imageInfos) {
+						imgInfo.imageLayout = (VkImageLayout)descBuilder.imgLayout;
+					}
+				}
 				element._shaderStageFlags = (VkShaderStageFlags)descBuilder.shaderStages;
 				addSheetElement(element);
 			}

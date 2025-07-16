@@ -13,7 +13,14 @@ READ(gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices),
 WRITE(VkFramebuffer frameBuffer, Texture2D& renderTargImg),
 INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
 ){
-	renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	//renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	TRANSITION_IMAGE_LAYOUT(valProc, renderTargImg, 
+		IMAGE_LAYOUT::ColorAttachment,
+		IMAGE_ASPECT::Color,
+		PIPELINE_STAGE::TopOfPipe, PIPELINE_STAGE::ColorAttachmentOutput,
+		ACCESS_FLAGS::None, ACCESS_FLAGS::ColorAttachmentWrite, 
+		DEPENDENCY_FLAGS::None, graphicsQueue);
 
 	static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
 
@@ -21,7 +28,8 @@ INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
 	// the RG error handling must be improved to change this, also add error lines and reasons for failure
 	BEGIN_RENDER_PASS(passContext, pipeline, frameBuffer, graphicsQueue, INLINE);
 
-	SET_PIPELINE(pipeline, valProc, graphicsQueue);
+	SET_DESCRIPTOR_SET(valProc, pipeline, graphicsQueue);
+	SET_PIPELINE(valProc, pipeline, graphicsQueue);
 
 	SET_VERTEX_BUFFER(vertices, graphicsQueue);
 	SET_INDEX_BUFFER(indices, graphicsQueue);
@@ -41,14 +49,20 @@ READ(gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, Texture2D
 WRITE(VkFramebuffer frameBuffer),
 INPUT(GraphicsPipeline pipeline, Window& wind, Queue& graphicsQueue)
 ){
-	TRANSITION_IMAGE_LAYOUT(graphicsQueue, IMAGE_LAYOUT::ShaderReadOnly);
-	renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//renderTargImg.transitionLayout(graphicsQueue, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	TRANSITION_IMAGE_LAYOUT(valProc, renderTargImg,
+		IMAGE_LAYOUT::ShaderReadOnly,
+		IMAGE_ASPECT::Color,
+		PIPELINE_STAGE::TopOfPipe, PIPELINE_STAGE::FragmentShader,
+		ACCESS_FLAGS::None, ACCESS_FLAGS::ShaderRead,
+		DEPENDENCY_FLAGS::None, graphicsQueue);
 
 	BEGIN_RENDER_PASS(passContext, pipeline, frameBuffer, graphicsQueue, INLINE);
 
 	static VkViewport viewport{ 0,0, wind.getSize().width, wind.getSize().height, 0.f, 1.f };
 
-	SET_PIPELINE(pipeline, valProc, graphicsQueue);
+	SET_DESCRIPTOR_SET(valProc, pipeline, graphicsQueue);
+	SET_PIPELINE(valProc, pipeline, graphicsQueue);
 
 	SET_VERTEX_BUFFER(vertices, graphicsQueue);
 	SET_INDEX_BUFFER(indices, graphicsQueue);

@@ -36,11 +36,11 @@ namespace val {
 
 	inline void END_RENDER_PASS(const VkCommandBuffer& cmd);
 
-	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer);
+	inline void SET_PIPELINE(ValProc& proc, GraphicsPipeline& pipeline, const VkCommandBuffer& commandBuffer);
 
-	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer);
+	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, const VkCommandBuffer& commandBuffer);
 
-	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, uint32_t setIndex, const VkCommandBuffer& commandBuffer);
+	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, uint32_t setIndex, const VkCommandBuffer& commandBuffer);
 
 	inline void SET_VIEWPORT(const VkViewport& viewport, const VkCommandBuffer& commandBuffer);
 
@@ -48,7 +48,10 @@ namespace val {
 
 	inline void SET_SCISSOR(const VkExtent2D& scissor, const VkCommandBuffer& commandBuffer);
 
-	inline void TRANSITION_IMAGE_LAYOUT(const ImageLayoutTransitionInfo& imgInfo, const IMAGE_LAYOUT layout, const VkCommandBuffer& commandBuffer);
+	inline void TRANSITION_IMAGE_LAYOUT(VkDevice device, const ImageLayoutTransitionInfo imgInfo, 
+		const IMAGE_LAYOUT layout, const IMAGE_ASPECT aspectMask, const PIPELINE_STAGE srcStageMask,
+		const PIPELINE_STAGE dstStageMask, const ACCESS_FLAGS srcAccessMask, const ACCESS_FLAGS dstAccessMask,
+		const DEPENDENCY_FLAGS dependencyFlags, const VkCommandBuffer& commandBuffer);
 	//inline void setLineWidth();
 
 	//inline void setBlendConstants();

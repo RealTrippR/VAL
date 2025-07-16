@@ -76,6 +76,20 @@ namespace val {
 		{
 			return toImageViewBindInfo();
 		}
+
+		inline ImageLayoutTransitionInfo toImageLayoutTransitionInfo()
+		{
+			ImageLayoutTransitionInfo layoutInfo = {
+				.pImgLayout = &_layout,
+				.img = _img,
+			};
+			return layoutInfo;
+		}
+
+		operator ImageLayoutTransitionInfo() {
+			return toImageLayoutTransitionInfo();
+		}
+
 	public:
 		
 		inline void setValProc(ValProc* proc);

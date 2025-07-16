@@ -96,21 +96,21 @@ namespace val {
 		vkCmdEndRenderPass(cmd);
 	}
 
-	inline void SET_PIPELINE(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer) {
+	inline void SET_PIPELINE(ValProc& proc, GraphicsPipeline& pipeline, const VkCommandBuffer& commandBuffer) {
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		//VkCommandBuffer& commandBuffer = proc._graphicsQueue._commandBuffers[proc._currentFrame];
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getVkPipeline(proc));
 	}
 
-	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, const VkCommandBuffer& commandBuffer)
+	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, const VkCommandBuffer& commandBuffer)
 	{
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelineLayouts[pipelineIdx],
 			0, 1, &(pipeline.getDescriptorSheet()->getVkDescriptorSets()[proc.getCurrentFrame()]), 0, nullptr);
 	}
 
-	inline void SET_DESCRIPTOR_SET(GraphicsPipeline& pipeline, ValProc& proc, uint32_t setIndex, const VkCommandBuffer& commandBuffer)
+	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, uint32_t setIndex, const VkCommandBuffer& commandBuffer)
 	{
 		const auto& pipelineIdx = pipeline.pipelineIdx;
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelineLayouts[pipelineIdx],
@@ -130,9 +130,41 @@ namespace val {
 		vkCmdSetScissor(commandBuffer, 0, 1, &_scissor);
 	}
 
-	inline void TRANSITION_IMAGE_LAYOUT(const ImageLayoutTransitionInfo& imgInfo, const IMAGE_LAYOUT layout, const VkCommandBuffer& commandBuffer)
+
+	inline void TRANSITION_IMAGE_LAYOUT(VkDevice device, const ImageLayoutTransitionInfo imgInfo,
+		const IMAGE_LAYOUT layout, const IMAGE_ASPECT aspectMask, const PIPELINE_STAGE srcStageMask,
+		const PIPELINE_STAGE dstStageMask, const ACCESS_FLAGS srcAccessMask, const ACCESS_FLAGS dstAccessMask,
+		const DEPENDENCY_FLAGS dependencyFlags, const VkCommandBuffer& commandBuffer)
 	{
-		
+		const VkImageMemoryBarrier imgMemBarrier{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+			.pNext = VK_NULL_HANDLE,
+			.srcAccessMask = (VkAccessFlags)srcAccessMask,
+			.dstAccessMask = (VkAccessFlags)dstAccessMask,
+			.oldLayout = *imgInfo.pImgLayout,
+			.newLayout = (VkImageLayout)layout,
+			.srcQueueFamilyIndex = 0x0,
+			.dstQueueFamilyIndex = 0x0,
+			.image = imgInfo.img,
+			.subresourceRange = {
+				.aspectMask = (VkImageAspectFlags)aspectMask,
+				.baseMipLevel = 0x0,
+				.levelCount = VK_REMAINING_MIP_LEVELS,
+				.baseArrayLayer = 0x0,
+				.layerCount = VK_REMAINING_ARRAY_LAYERS,
+			}
+		};
+
+		vkCmdPipelineBarrier(
+			commandBuffer,
+			(VkPipelineStageFlags)srcStageMask,
+			(VkPipelineStageFlags)dstStageMask,
+			(VkDependencyFlags)dependencyFlags,
+			0, NULL, 0, NULL,
+			1, &imgMemBarrier
+		);
+
+		(*imgInfo.pImgLayout) = (VkImageLayout)layout;
 	}
 
 	inline void SET_VERTEX_BUFFER(VkBuffer& buffer, const VkCommandBuffer& commandBuffer, const VkDeviceSize& bufferOffset) {
