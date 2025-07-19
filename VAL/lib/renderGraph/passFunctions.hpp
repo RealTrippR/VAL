@@ -40,6 +40,8 @@ namespace val {
 
 	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, const VkCommandBuffer& commandBuffer);
 
+	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, VkDescriptorSet descriptorSet, const VkCommandBuffer& commandBuffer);
+
 	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, uint32_t setIndex, const VkCommandBuffer& commandBuffer);
 
 	inline void SET_VIEWPORT(const VkViewport& viewport, const VkCommandBuffer& commandBuffer);

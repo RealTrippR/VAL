@@ -201,13 +201,10 @@
     <ClCompile Include="experimental-features\PhongShading\phongShading.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="experimental-features\raytracingTest.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    <ClCompile Include="experimental-features\Raytracing\raytracingTest.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="experimental-features\ShadowMapping\shadowMapping.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="experimental-features\ShadowMapping\shadowMapping.cpp" />
     <ClCompile Include="experimental-features\SimpleRG\renderGraphTest.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -221,6 +218,7 @@
     </ClCompile>
     <ClCompile Include="experimental-features\renderGraph_WriteToAndReadImg.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="forwardRendering.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -349,7 +347,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="experimental-features\ShadowMapping\shadowMapping.rg" />
+    <None Include="experimental-features\ShadowMapping\shadowMapping.rg.hpp" />
     <None Include="experimental-features\Synchro\syncro.rg" />
     <None Include="README.MD">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -359,6 +357,10 @@
     <None Include="shaders\basic.rmiss" />
     <None Include="shaders\phong.frag" />
     <None Include="shaders\phong.vert" />
+    <None Include="shaders\shadow_mapping_light.frag" />
+    <None Include="shaders\shadow_mapping_light.vert" />
+    <None Include="shaders\shadow_mapping_main.frag" />
+    <None Include="shaders\shadow_mapping_main.vert" />
     <None Include="shaders\test.rahit" />
     <None Include="shaders\basicLightingTextured.frag" />
     <None Include="shaders\basicLightingTextured.vert" />

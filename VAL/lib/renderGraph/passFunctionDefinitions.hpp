@@ -110,6 +110,13 @@ namespace val {
 			0, 1, &(pipeline.getDescriptorSheet()->getVkDescriptorSets()[proc.getCurrentFrame()]), 0, nullptr);
 	}
 
+	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, VkDescriptorSet descriptorSet, const VkCommandBuffer& commandBuffer)
+	{
+		const auto& pipelineIdx = pipeline.pipelineIdx;
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, proc._graphicsPipelineLayouts[pipelineIdx],
+			0, 1, &descriptorSet, 0, nullptr);
+	}
+
 	inline void SET_DESCRIPTOR_SET(ValProc& proc, GraphicsPipeline& pipeline, uint32_t setIndex, const VkCommandBuffer& commandBuffer)
 	{
 		const auto& pipelineIdx = pipeline.pipelineIdx;

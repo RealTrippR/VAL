@@ -28,6 +28,10 @@ namespace val
 
 		void enableDepthTesting(bool enable);
 
+		void enableDepthWrite(bool enable);
+
+		bool getDepthWriteEnable();
+
 		void enableStencilTesting(bool enable);
 
 		void enableDepthBoundsTesting(bool enable);

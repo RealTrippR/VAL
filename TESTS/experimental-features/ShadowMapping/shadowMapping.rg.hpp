@@ -9,9 +9,36 @@
 
 using namespace val;
 
-/* A basic example rendergraph */
-PASS_BEGIN(PHONG),
+PASS_BEGIN(SHADOW),
 
+INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue),
+READ(Mesh<VertexTxtr, 1>& mesh),
+WRITE(VkFramebuffer framebuffer)
+){
+
+	BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, graphicsQueue, INLINE); // the INLINE/FIXED flag should be automatically set, this is bad code.
+
+	static VkViewport viewport{ 0,0, wind.getWidth(), wind.getHeight(), 0.f, 1.f };
+	SET_PIPELINE(valProc, pipeline, graphicsQueue);
+	SET_DESCRIPTOR_SET(valProc, pipeline, graphicsQueue);
+
+	SET_VERTEX_BUFFER(mesh.vertices, graphicsQueue);
+	SET_INDEX_BUFFER(mesh.indices, graphicsQueue);
+
+
+	SET_VIEWPORT(viewport, graphicsQueue);
+	SET_SCISSOR(wind.getSize(), graphicsQueue);
+
+
+	DRAW_INDEXED(mesh.indices.size(), graphicsQueue);
+
+	END_RENDER_PASS(graphicsQueue);
+}
+PASS_END // END SHADOW
+
+
+
+PASS_BEGIN(MAIN),
 READ(Mesh<VertexTxtr,1>& mesh),
 WRITE(VkFramebuffer framebuffer),
 //READ_WRITE(NULL) <- upon further research I believe that this is invalid
@@ -21,8 +48,8 @@ INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
 	BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, graphicsQueue, INLINE); // the INLINE/FIXED flag should be automatically set, this is bad code.
 
 	static VkViewport viewport{ 0,0, wind.getWidth(), wind.getHeight(), 0.f, 1.f};
-	SET_PIPELINE(pipeline, valProc, graphicsQueue);
-	SET_DESCRIPTOR_SET(pipeline, valProc, graphicsQueue);
+	SET_PIPELINE(valProc, pipeline, graphicsQueue);
+	SET_DESCRIPTOR_SET(valProc, pipeline, graphicsQueue);
 
 	SET_VERTEX_BUFFER(mesh.vertices, graphicsQueue);
 	SET_INDEX_BUFFER(mesh.indices, graphicsQueue);
@@ -37,4 +64,4 @@ INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
 	END_RENDER_PASS(graphicsQueue);
 }
 
-PASS_END // PHONG END
+PASS_END // MAIN END

@@ -106,7 +106,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline, const VkSampleCoun
 
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 
 	pipeline.setSampleCount(MSAAsamples); // required for multisampling
 }

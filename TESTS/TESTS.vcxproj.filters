@@ -32,9 +32,6 @@
     <ClCompile Include="experimental-features\PhongShading\phongShading.cpp">
       <Filter>experimental-features\PhongShading</Filter>
     </ClCompile>
-    <ClCompile Include="experimental-features\raytracingTest.cpp">
-      <Filter>experimental-features\Raytracing</Filter>
-    </ClCompile>
     <ClCompile Include="experimental-features\Synchro\synchroMain.cpp">
       <Filter>experimental-features\Synchro</Filter>
     </ClCompile>
@@ -43,6 +40,9 @@
     </ClCompile>
     <ClCompile Include="experimental-features\ShadowMapping\shadowMapping.cpp">
       <Filter>experimental-features\ShadowMapping</Filter>
+    </ClCompile>
+    <ClCompile Include="experimental-features\Raytracing\raytracingTest.cpp">
+      <Filter>experimental-features\Raytracing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -200,8 +200,20 @@
     <None Include="experimental-features\Synchro\syncro.rg">
       <Filter>experimental-features\Synchro</Filter>
     </None>
-    <None Include="experimental-features\ShadowMapping\shadowMapping.rg">
+    <None Include="experimental-features\ShadowMapping\shadowMapping.rg.hpp">
       <Filter>experimental-features\ShadowMapping</Filter>
+    </None>
+    <None Include="shaders\shadow_mapping_light.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shadow_mapping_light.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shadow_mapping_main.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shadow_mapping_main.vert">
+      <Filter>shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

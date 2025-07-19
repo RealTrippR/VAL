@@ -28,6 +28,18 @@ namespace val
 	public:
 		void update();
 
+		void setSrcDependency(const PIPELINE_STAGE stageMask, const ACCESS_FLAGS accessMask);
+
+		PIPELINE_STAGE getSrcDependencyPipelineStageMask();
+
+		ACCESS_FLAGS getSrcDependencyAccessMask();
+
+		void setDstDependency(const PIPELINE_STAGE destMask, const ACCESS_FLAGS accessMask);
+
+		PIPELINE_STAGE getDstDependencyPipelineStageMask();
+
+		ACCESS_FLAGS getDstDependencyAccessMask();
+
 	public:
 		void bindAttachment(renderAttachment* attachment);
 
@@ -35,14 +47,17 @@ namespace val
 
 	protected:
 		friend ValProc;
-		friend Subpass;
 		friend renderAttachment;
 		friend RenderPassManager;
 		/******************************************/
 		RenderPassManager* _rpMngr;
 		/******************************************/
 		VkSubpassDescription _subpassDesc{};
-		VkSubpassDependency _dependency{};
+		ACCESS_FLAGS _srcDependencyAccessMask;
+		PIPELINE_STAGE _srcDependencyStageMask;
+		ACCESS_FLAGS _dstDependencyAccessMask;
+		PIPELINE_STAGE _dstDependencyStageMask;
+
 		tiny_vector<VkAttachmentReference> _attachmentReferences;
 		/******************************************/
 		tiny_vector<VkAttachmentReference> _colorAttachments;

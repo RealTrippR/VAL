@@ -8,7 +8,7 @@
 
 using namespace val;
 
-PASS_BEGIN(COLOR)
+PASS_BEGIN(COLOR),
 READ(gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices),
 WRITE(VkFramebuffer frameBuffer, Texture2D& renderTargImg),
 INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
@@ -44,7 +44,7 @@ INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
 PASS_END
 
 
-PASS_BEGIN(IMAGE)
+PASS_BEGIN(IMAGE),
 READ(gpu_vector<res::vertex>& vertices, gpu_vector<uint32_t>& indices, Texture2D& renderTargImg),
 WRITE(VkFramebuffer frameBuffer),
 INPUT(GraphicsPipeline pipeline, Window& wind, Queue& graphicsQueue)

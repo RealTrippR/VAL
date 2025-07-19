@@ -41,7 +41,7 @@ struct Light {
 	alignas(16) glm::vec3 position;
 	float _pad1;              // Padding to match std140
 	alignas(16) glm::vec3 color;
-	float intensity;          // Now properly aligned to 16-byte boundary
+	float intensity;
 };
 
 

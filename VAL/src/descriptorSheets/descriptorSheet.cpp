@@ -127,6 +127,10 @@ namespace val
 			dbg::printError("DescriptorSheet::updateDescriptors: Failed to update DescriptorSheet @ %p: no descriptors to update, element count is 0.", this);
 			return;
 		}
+		for (uint32_t i = 0; i < _descriptorWrites.size(); ++i) {
+			auto& d = _descriptorWrites[i];
+			int j = 0;
+		}
 #endif
 		vkUpdateDescriptorSets(device, _descriptorWrites.size(), _descriptorWrites.data(), 0, 0);
 	}

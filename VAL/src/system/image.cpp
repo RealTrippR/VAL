@@ -20,7 +20,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
-	void Image::create(ValProc& proc)
+	void Image::create(ValProc& proc, const IMAGE_TILING tiling, const IMAGE_ASPECT aspect)
 	{
 #ifndef NDEBUG
 		if (_img != NULL) {
@@ -30,7 +30,7 @@ namespace val
 #endif // !NDEBUG
 
 		
-		proc.createImage(_width, _height, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, _img, _imgMemory, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
+		proc.createImage(_width, _height, _format, (VkImageTiling)tiling, _usages, GPU_ONLY, _img, _imgMemory, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout, (VkImageAspectFlags)aspect);
 		dbg::recordVkObjectCreation(proc, _img);
 		dbg::recordVkObjectCreation(proc, _imgMemory);
 	}

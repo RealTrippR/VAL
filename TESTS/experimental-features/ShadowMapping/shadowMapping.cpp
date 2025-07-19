@@ -14,19 +14,19 @@ const bool enableValidationLayers = true;
 
 #define VAL_ENABLE_EXPIREMENTAL /*required for render graph*/
 
-//#define VAL_RENDER_GRAPH_COMPILE_MODE
+#define VAL_RENDER_GRAPH_COMPILE_MODE
 #include <VAL/lib/renderGraph/renderGraph.hpp>
 #include <VAL/lib/renderGraph/passFunctionDefinitions.hpp>
 
 /************************************************/
-#include GRAPH_FILE(phongShading);
+#include GRAPH_FILE(shadowMapping);
 /************************************************/
 
 
 
 const int BLINN = 1;
 #define FRAMES_IN_FLIGHT 2u
-
+#define DEPTH_FORMAT VK_FORMAT_D32_SFLOAT
 
 
 const VkFormat IMG_FORMAT = VK_FORMAT_R8G8B8A8_SRGB;
@@ -35,13 +35,18 @@ struct ViewMatrix {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
+	alignas(16) glm::vec3 viewPos;
+};
+
+struct LightMatrix {
+	alignas(16) glm::mat4 proj;
 };
 
 struct Light {
 	alignas(16) glm::vec3 position;
 	float _pad1;              // Padding to match std140
 	alignas(16) glm::vec3 color;
-	float intensity;          // Now properly aligned to 16-byte boundary
+	float intensity;
 };
 
 
@@ -59,7 +64,12 @@ void updateTime()
 	lastTime = currentTime;
 }
 
-void updateView(val::ValProc& proc, val::UBO_Handle& hdl)
+void updateLightMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
+{
+
+}
+
+void updateViewMatrix(val::ValProc& proc, val::UBO_Handle& hdl)
 {
 	using namespace val;
 	const VkExtent2D& extent = proc._windowVAL->getSize();
@@ -88,9 +98,36 @@ void updateLight(val::ValProc& proc, val::UBO_Handle& hdl)
 }
 
 
+void setupLightingPipeline(val::ValProc& proc, val::GraphicsPipeline& pipeline)
+{
+	using namespace val;
+
+	// state info
+	static rasterizerState rasterizer;
+	rasterizer.setCullMode(CULL_MODE::BACK);
+	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
+	pipeline.setRasterizer(&rasterizer);
+
+	// the color blend state affects how the output of the fragment shader is 
+	// blended into the existing content of the the framebuffer.
+	static ColorBlendStateAttachment colorBlendAttachment(false/*Disable blending*/);
+	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
+
+	static depthStencilState depthState;
+	depthState.enableDepthTesting(true);
+	depthState.enableDepthWrite(true);
+	depthState.setCompareOp(VK_COMPARE_OP_LESS);
+	pipeline.setDepthStencilState(&depthState);
+
+	static ColorBlendState blendState;
+	blendState.bindBlendAttachment(&colorBlendAttachment);
+
+	pipeline.setColorBlendState(&blendState);
+}
 
 
-void setupGraphicsPipeline(val::ValProc& proc, val::GraphicsPipeline& pipeline)
+
+void setupMeshPipeline(val::ValProc& proc, val::GraphicsPipeline& pipeline)
 {
 	using namespace val;
 
@@ -110,24 +147,54 @@ void setupGraphicsPipeline(val::ValProc& proc, val::GraphicsPipeline& pipeline)
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
+	static depthStencilState depthState;
+	depthState.enableDepthTesting(true);
+	depthState.enableDepthWrite(true);
+	depthState.setCompareOp(VK_COMPARE_OP_LESS);
+	pipeline.setDepthStencilState(&depthState);
+
 	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
 
-val::Subpass& setupRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat)
+
+void setupRenderPassLight(val::RenderPassManager& renderPassMngr)
 {
 	using namespace val;
-	static ColorAttachment colorAttachment;
-	colorAttachment.setImgFormat(imgFormat);
-	colorAttachment.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
-	colorAttachment.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
-	colorAttachment.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+
+	static DepthAttachment depthAttachment;
+	depthAttachment.setImgFormat(DEPTH_FORMAT);
+	depthAttachment.setLoadOperation(Clear);
+	depthAttachment.setStoreOperation(Store);
+	depthAttachment.setFinalLayout(IMAGE_LAYOUT::DepthStencilAttachment);
 
 	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
-	subpass.bindAttachment(&colorAttachment);
-	return subpass;
+	subpass.bindAttachment(&depthAttachment);
+	subpass.setDstDependency(PIPELINE_STAGE::LateFragmentTests, ACCESS_FLAGS::ShaderRead);
 }
 
 
+void setupRenderPassMain(val::RenderPassManager& renderPassMngr)
+{
+	using namespace val;
+
+	static ColorAttachment colorAttachment;
+	colorAttachment.setImgFormat(IMG_FORMAT);
+	colorAttachment.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttachment.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
+	colorAttachment.setFinalLayout(IMAGE_LAYOUT::PresentSrc);
+
+
+	static DepthAttachment depthAttachment;
+	depthAttachment.setImgFormat(DEPTH_FORMAT);
+	depthAttachment.setLoadOperation(Clear);
+	depthAttachment.setStoreOperation(Store);
+	depthAttachment.setFinalLayout(IMAGE_LAYOUT::DepthStencilAttachment);
+
+	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
+	subpass.bindAttachment(&colorAttachment);
+	subpass.bindAttachment(&depthAttachment);
+}
 
 
 
@@ -158,10 +225,12 @@ int main()
 	// create view matrix
 	UBO_Handle viewMatrix(sizeof(ViewMatrix));
 
+	UBO_Handle lightMatrix(sizeof(LightMatrix));
+
 	UBO_Handle light(sizeof(Light));
 
 	// create texture samplerr
-	Sampler textureSampler(proc, SAMPLER_TYPE::combinedImage);
+	Sampler meshTextureSampler(proc, SAMPLER_TYPE::combinedImage);
 
 	// create mesh and respective texture
 
@@ -174,49 +243,107 @@ int main()
 	scene.destroy();
 
 
-	Texture2D texture(proc, IMAGE_LAYOUT::ColorAttachment, IMG_FORMAT);
-	texture.createFromDisk("res/get.png", VK_IMAGE_USAGE_SAMPLED_BIT, IMAGE_LAYOUT::ShaderReadOnly);
+	Texture2D meshTexture(proc, IMAGE_LAYOUT::ColorAttachment, IMG_FORMAT);
+	meshTexture.createFromDisk("res/get.png", VK_IMAGE_USAGE_SAMPLED_BIT, IMAGE_LAYOUT::ShaderReadOnly);
 
-	ImageView imgView(proc, texture, VK_IMAGE_ASPECT_COLOR_BIT);
+	ImageView meshTxtrView(proc, meshTexture, VK_IMAGE_ASPECT_COLOR_BIT);
 
-	Sampler sampler(proc);
-	sampler.bindImageView(imgView);
-	sampler.create();
+	Sampler meshTxtrSampler(proc);
+	meshTxtrSampler.bindImageView(meshTxtrView);
+	meshTxtrSampler.create();
 
 	/*******************************************************************************************************************/
 
 
+	// create the RenderPasses, which holds state information about elements of the grahics pipeline
+	val::RenderPassManager renderPassMain(proc);
+	setupRenderPassMain(renderPassMain);
+
+	val::RenderPassManager renderPassLight(proc);
+	setupRenderPassLight(renderPassLight);
 
 
-	// create descriptor sheet
+	//SubpassChain({
+	//	&subpassMain,/*-->*/&subpassLight
+	//	});
 
-	DescriptorSheet dsheet({
-		{0, viewMatrix, SHADER_STAGE::Vertex},
-		{1, light, SHADER_STAGE::Fragment},
-		{2, sampler, SHADER_STAGE::Fragment}
-		}, FRAMES_IN_FLIGHT
-	);
+	/*******************************************************************************************************************/
 
-	// create shaders
-	Shader vertShader("shaders-compiled/phong.vert.spv", SHADER_STAGE::Vertex);
-	vertShader.setBindingDescription(VertexTxtr::getBindingDescription());
-	vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
+	// create depth buffer
+	Image depthBufferImage(proc, window.getWidth(), window.getHeight(),
+		DEPTH_FORMAT, IMAGE_LAYOUT::DepthReadOnly,
+		IMAGE_USAGE::DepthStencilAttachment | IMAGE_USAGE::Sampled,
+		IMAGE_TILING::Optimal, IMAGE_ASPECT::Depth);
 
-	Shader fragShader("shaders-compiled/phong.frag.spv", SHADER_STAGE::Fragment);
-	fragShader.addSpecializationConstant(0, (void*)&BLINN, sizeof(BLINN));
+	ImageView depthBufferView(proc, depthBufferImage, IMAGE_ASPECT::Depth);
+	Sampler depthBufferSampler(proc, depthBufferView, SAMPLER_TYPE::combinedImage);
 
-	GraphicsPipeline pipeline;
-	pipeline.setDescriptorSheet(&dsheet);
-	pipeline.setShaders({ &vertShader, &fragShader });
+	/*******************************************************************************************************************/
 
-	setupGraphicsPipeline(proc, pipeline);
+	// LIGHTING PIPELINE BEGIN
+	GraphicsPipeline lightingPipeline;
+	{
+		// create descriptor sheet
+		static DescriptorSheet dsheet({
+			{ 0, lightMatrix, SHADER_STAGE::Vertex }},
+			FRAMES_IN_FLIGHT
+		);
+		// create shaders
+		static Shader vertShader("shaders-compiled/shadow_mapping_light.vert.spv", SHADER_STAGE::Vertex);
+		vertShader.setBindingDescription(VertexTxtr::getBindingDescription());
+		vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
+
+		static Shader fragShader("shaders-compiled/shadow_mapping_light.frag.spv", SHADER_STAGE::Fragment);
+
+		lightingPipeline.setDescriptorSheet(&dsheet);
+		lightingPipeline.setShaders({ &vertShader, &fragShader });
+
+		setupLightingPipeline(proc, lightingPipeline);
+
+		lightingPipeline.setRenderPassManager(&renderPassLight);
+	}
 
 
-	// create the RenderPass, which holds state information about elements of the grahics pipeline
-	val::RenderPassManager renderPassMngr(proc);
-	setupRenderPass(renderPassMngr, IMG_FORMAT);
-	pipeline.setRenderPassManager(&renderPassMngr);
 
+
+
+
+
+
+
+
+	// LIGHTING PIPELINE END
+
+	/*******************************************************************************************************************/
+
+	// MESH PIPELINE BEGIN
+	GraphicsPipeline meshPipeline;
+	{
+		// create descriptor sheet
+		static DescriptorSheet dsheet({
+			{0, depthBufferSampler, SHADER_STAGE::Fragment, IMAGE_LAYOUT::DepthReadOnly},
+			{1, viewMatrix, SHADER_STAGE::Vertex | SHADER_STAGE::Fragment},
+			{2, lightMatrix, SHADER_STAGE::Vertex | SHADER_STAGE::Fragment},
+			{3, light, SHADER_STAGE::Fragment}
+			}, FRAMES_IN_FLIGHT
+		);
+		// create shaders
+		static Shader vertShader("shaders-compiled/shadow_mapping_main.vert.spv", SHADER_STAGE::Vertex);
+		vertShader.setBindingDescription(VertexTxtr::getBindingDescription());
+		vertShader.setVertexAttributes(VertexTxtr::getInputAttributeDescriptions());
+
+		static Shader fragShader("shaders-compiled/shadow_mapping_main.frag.spv", SHADER_STAGE::Fragment);
+		//fragShader.addSpecializationConstant(0, (void*)&BLINN, sizeof(BLINN));
+
+		meshPipeline.setDescriptorSheet(&dsheet);
+		meshPipeline.setShaders({ &vertShader, &fragShader });
+
+		setupMeshPipeline(proc, meshPipeline);
+
+		meshPipeline.setRenderPassManager(&renderPassMain);
+	}
+
+	// END MESH PIPELINE
 
 	/*******************************************************************************************************************/
 
@@ -226,16 +353,21 @@ int main()
 		window,
 		FRAMES_IN_FLIGHT,
 		IMG_FORMAT,
-		{ &pipeline }
+		{ &lightingPipeline, &meshPipeline }
 	);
 
 
 	/*******************************************************************************************************************/
 	// create the swap chain frame buffers
-	window.createSwapChainFrameBuffers(proc, pipeline.getVkRenderPass());
+	VkImageView attachments[] = { depthBufferView };
+	window.createSwapChainFrameBuffers(proc, attachments, 1u, meshPipeline.getVkRenderPass());
+
 
 	// populate descriptor sets
-	pipeline.allocateAndWriteDescriptorSets(proc);
+	lightingPipeline.allocateAndWriteDescriptorSets(proc);
+
+	// populate descriptor sets
+	meshPipeline.allocateAndWriteDescriptorSets(proc);
 
 
 	/*******************************************************************************************************************/
@@ -246,14 +378,19 @@ int main()
 	renderGraph.loadFromFile("experimental-features/PhongShading/phongShading.rg.hpp");
 	renderGraph.compile(proc.getFramesInFlight(), "experimental-features/", "experimental-features/renderGraphDiagrams");
 
-
-
-
-	PASS_CONTEXT passContext = {
+	
+	PASS_CONTEXT lightPassContext = {
 		proc,
 		window.getSizeAsRect2D(),
 		{ { 0.0f, 0.04f, 0.2f, 1.0f } }, /*clear values*/
-		{ pipeline }
+		{ meshPipeline }
+	};
+
+	PASS_CONTEXT meshPassContext = {
+		proc,
+		window.getSizeAsRect2D(),
+		{ { 0.0f, 0.04f, 0.2f, 1.0f } }, /*clear values*/
+		{ lightingPipeline }
 	};
 
 	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
@@ -264,8 +401,9 @@ int main()
 		window.pollEvents();
 
 		updateTime();
-		updateView(proc, viewMatrix);
-		updateLight(proc, light);
+		updateViewMatrix(proc, viewMatrix);
+		updateLightMatrix(proc, lightMatrix);
+;		updateLight(proc, light);
 
 		VkFramebuffer framebuffer = window.beginDraw(IMG_FORMAT);
 
@@ -274,10 +412,17 @@ int main()
 		graphicsQueue.reset();
 		graphicsQueue.begin();
 
-		CALL_RENDER_PASS(PHONG, proc, passContext,
+
+		CALL_RENDER_PASS(SHADOW, proc, meshPassContext,
 			READ(mesh),
 			WRITE(framebuffer),
-			INPUT(pipeline, window, graphicsQueue)
+			INPUT(lightingPipeline, window, graphicsQueue)
+		);
+
+		CALL_RENDER_PASS(MAIN, proc, lightPassContext,
+			READ(mesh),
+			WRITE(framebuffer),
+			INPUT(meshPipeline, window, graphicsQueue)
 		);
 
 
@@ -285,7 +430,7 @@ int main()
 
 		/* * * * * * * * * * * * * * * * * */
 
-		graphicsQueue.submit(window.getPresentQueue(), passContext.getWaitStages(), window.getPresentFence());
+		graphicsQueue.submit(window.getPresentQueue(), meshPassContext.getWaitStages(), window.getPresentFence());
 
 		window.display(IMG_FORMAT, { graphicsQueue.getSemaphore() });
 

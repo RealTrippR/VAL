@@ -26,7 +26,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/renderTarget.hpp>
 #include <VAL/lib/renderGraph/passFunctions.hpp>
 
-#define PASS_BEGIN(NAME) void PASS_##NAME(val::ValProc& valProc, PASS_CONTEXT& passContext,
+#define PASS_BEGIN(NAME) void PASS_##NAME(val::ValProc& valProc, PASS_CONTEXT& passContext
 #define PASS_END
 
 #define FIXED_BEGIN(...) { __VA_ARGS__ 

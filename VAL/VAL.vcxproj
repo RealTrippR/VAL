@@ -261,6 +261,7 @@
     <ClInclude Include="lib\renderGraph\graphBranch.h" />
     <ClInclude Include="lib\renderGraph\graphEnums.hpp" />
     <ClInclude Include="lib\renderGraph\pass.hpp" />
+    <ClInclude Include="lib\renderGraph\passBuilder.hpp" />
     <ClInclude Include="lib\renderGraph\passContext.hpp" />
     <ClInclude Include="lib\renderGraph\passFunctionDefinitions.hpp" />
     <ClInclude Include="lib\renderGraph\passFunctions.hpp" />
@@ -268,6 +269,7 @@
     <ClInclude Include="lib\renderGraph\renderGraph.hpp" />
     <ClInclude Include="lib\renderGraph\renderGraphBlock.h" />
     <ClInclude Include="lib\renderGraph\renderGraphError.h" />
+    <ClInclude Include="lib\renderGraph\renderPass.hpp" />
     <ClInclude Include="lib\renderGraph\renderPassBeginType.hpp" />
     <ClInclude Include="lib\system\accelerationStructure.hpp" />
     <ClInclude Include="lib\system\accelerationStructureGeometry.hpp" />

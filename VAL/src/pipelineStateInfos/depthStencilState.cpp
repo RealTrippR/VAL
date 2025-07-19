@@ -6,6 +6,14 @@ namespace val
 		_VKdepthState.depthTestEnable = enable;
 	}
 
+	void depthStencilState::enableDepthWrite(bool enable) {
+		_VKdepthState.depthWriteEnable = enable;
+	}
+
+	bool depthStencilState::getDepthWriteEnable() {
+		return _VKdepthState.depthWriteEnable;
+	}
+
 	void depthStencilState::enableStencilTesting(bool enable) {
 		_VKdepthState.stencilTestEnable = enable;
 	}

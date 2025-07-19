@@ -18,6 +18,10 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/UBO_arr_manager.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
 
+inline VkDeviceSize alignUp(VkDeviceSize value, VkDeviceSize alignment) {
+	return (value + alignment - 1) & ~(alignment - 1);
+}
+
 namespace val {
 
 	/***************************************************/
@@ -30,14 +34,17 @@ namespace val {
 			return;
 		}
 
+		size_t minAlignment = proc.getMinUniformBufferOffsetAlignment();
 
 		size_t& sizePerFrame = _sizePerFrame;
 		sizePerFrame = 0u;
 		// first calculate the size per frame and init UBOS
 		for (uint32_t i = 0; i < uboCount; ++i) {
 			UBO_Handle* ubo = uboHandles[i];
-			ubo->_offset = (uint32_t)sizePerFrame;
+			
+			ubo->_offset = (uint32_t)alignUp(sizePerFrame, minAlignment);
 			sizePerFrame += ubo->_size;
+			sizePerFrame = (uint32_t)alignUp(sizePerFrame, minAlignment);
 
 			ubo->_arrSubset = this;
 		}

@@ -31,8 +31,12 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <unordered_map>
 #include <cstdarg>
 
+#include <VAL/lib/renderGraph/renderPass.hpp>
 #include <VAL/lib/renderGraph/pass.hpp>
 #include <VAL/lib/renderGraph/renderPassBeginType.hpp>
+
+#include <VAL/lib/renderGraph/passBuilder.hpp>
+#include <functional>
 
 #define __CONCAT2__(a, b) a##b
 #define __CONCAT__(a, b) __CONCAT2__(a, b)
@@ -74,7 +78,13 @@ namespace val {
 
 		VAL_RETURN_CODE createHTMLdiagram(fs::path filepath, PASS_INFO* passInfos, uint16_t passInfoCount);
 
+		/*void addPass(const char* passName, const PassBuilder& builder);
+
+		VAL_RETURN_CODE generateSubpasses();*/
+
 	private:
+		tiny_vector<std::pair<const char*, PassBuilder>> passes;
+
 		PASS_INFO* passInfos;
 		char* preprocessFileName = NULL;
 		char* srcFileContents = NULL;

@@ -1926,4 +1926,59 @@ namespace val {
 		return retCode;
 	}
 
+
+	//void RENDER_GRAPH::addPass(const char* passName, const PassBuilder& builder) {
+	//	passes.push_back({ passName, builder });
+	//}
+
+	/*
+	void getWRITE_StageMaskAndAccessMask(tiny_vector<ObjectDescriptorInfo>& objlist, VkPipelineStageFlags& stagemask, VkAccessFlags& accessMask)
+	{
+		for (const auto& obj : objlist) {
+			switch (obj.type) {
+			case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+				accessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+				stagemask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+				break;
+			case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+				accessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+				stagemask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+				break;
+			case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+				accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
+				break;
+			case VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR:
+				accessMask |= VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+				stagemask |= VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	VAL_RETURN_CODE RENDER_GRAPH::generateSubpasses() 
+	{
+		std::vector<VkSubpassDependency> dependencies;
+		for (uint32_t i = 0; i < passes.size(); ++i) {
+			const PassBuilder& pass = passes[i].second;
+			const auto& reads = pass.reads;
+			const auto& writes = pass.writes;
+			
+			VkSubpassDependency& dependency = dependencies.emplace_back();
+			if (i == 0)
+				dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+			else
+				dependency.srcSubpass = i - 1;
+
+			for (uint32_t j = 0; j < pass.writes.size(); ++j) {
+				{
+
+				}
+
+
+
+		}
+	}
+	*/
 }

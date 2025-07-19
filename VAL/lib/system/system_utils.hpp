@@ -108,7 +108,8 @@ namespace val {
 		DEF_ENUM_BITWISE_OPERATORS(DEPENDENCY_FLAGS);
 	#endif
 
-	enum class IMAGE_ASPECT {
+	enum class IMAGE_ASPECT 
+	{
 		None = VK_IMAGE_ASPECT_NONE,
 		Color = VK_IMAGE_ASPECT_COLOR_BIT,
 		Depth = VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -127,7 +128,8 @@ namespace val {
 	#define IMAGE_ASPECT_DEF_ENUM_BITWISE_OPERATORS
 		DEF_ENUM_BITWISE_OPERATORS(IMAGE_ASPECT);
 	#endif
-	enum class ACCESS_FLAGS {
+	enum class ACCESS_FLAGS 
+	{
 		None = VK_ACCESS_NONE,
 		IndirectCommandRead = VK_ACCESS_INDIRECT_COMMAND_READ_BIT,
 		IndexRead = VK_ACCESS_INDEX_READ_BIT,
@@ -162,8 +164,56 @@ namespace val {
 		DEF_ENUM_BITWISE_OPERATORS(ACCESS_FLAGS);
 	#endif
 
+	
+	enum class IMAGE_USAGE 
+	{
+		TransferSrc = VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+		TransferDst = VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+		Sampled = VK_IMAGE_USAGE_SAMPLED_BIT,
+		Storage = VK_IMAGE_USAGE_STORAGE_BIT,
+		ColorAttachment = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		DepthStencilAttachment = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+		TransientAttachment = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT,
+		InputAttachment = VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+		HostTransfer =VK_IMAGE_USAGE_HOST_TRANSFER_BIT,
+		VideoDecodeDst = VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR,
+		VideoDecodeSrc = VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR,
+		VideoDecodeDpb = VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR,
+		FragmentDensityMap = VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT,
+		FragmentShadingRate = VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR,
+		VideoEncodeDst = VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR,
+		VideoEncodeSrc = VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR,
+		VideoEncodeDpb = VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR,
+		AttachmentFeedbackLoop = VK_IMAGE_USAGE_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT,
+		InvocationMaskHuawei = VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI,
+		SampleWeightQCOM = VK_IMAGE_USAGE_SAMPLE_WEIGHT_BIT_QCOM,
+		SampleBlockMatchQCOM = VK_IMAGE_USAGE_SAMPLE_BLOCK_MATCH_BIT_QCOM,
+		QuantizationDeltaMap = VK_IMAGE_USAGE_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR,
+		VideoEncodeEmphasisMap = VK_IMAGE_USAGE_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR,
+		ShadingRateNV = VK_IMAGE_USAGE_SHADING_RATE_IMAGE_BIT_NV,
+		HostTransferEXT = VK_IMAGE_USAGE_HOST_TRANSFER_BIT_EXT,
+		MaxEnum = VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM
+	};
+	#ifndef IMAGE_USAGE_DEF_ENUM_BITWISE_OPERATORS
+	#define IMAGE_USAGE_DEF_ENUM_BITWISE_OPERATORS
+		DEF_ENUM_BITWISE_OPERATORS(IMAGE_USAGE);
+	#endif
 
-	enum class IMAGE_LAYOUT {
+	enum class IMAGE_TILING 
+	{
+		Optimal =					VK_IMAGE_TILING_OPTIMAL,
+		Linear =					VK_IMAGE_TILING_LINEAR,
+		DrmFormatModifier =			VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT,
+		MaxEnum =					VK_IMAGE_TILING_MAX_ENUM
+	};
+	#ifndef IMAGE_TILING_DEF_ENUM_BITWISE_OPERATORS
+	#define IMAGE_TILING_DEF_ENUM_BITWISE_OPERATORS
+		DEF_ENUM_BITWISE_OPERATORS(IMAGE_TILING);
+	#endif
+
+
+	enum class IMAGE_LAYOUT 
+	{
 		Undefined = VK_IMAGE_LAYOUT_UNDEFINED,
 		General = VK_IMAGE_LAYOUT_GENERAL,
 		ColorAttachment = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -317,6 +367,12 @@ namespace val {
 	uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 	VkMemoryPropertyFlags bufferSpaceToVkMemoryProperty(const bufferSpace& bufferSpace);
+
+	void transitionImageLayout(VkDevice Device, VkImage img, const IMAGE_LAYOUT oldLayout,
+		const IMAGE_LAYOUT newLayout, const IMAGE_ASPECT aspectMask, const PIPELINE_STAGE srcStageMask,
+		const PIPELINE_STAGE dstStageMask, const ACCESS_FLAGS srcAccessMask, const ACCESS_FLAGS dstAccessMask,
+		const DEPENDENCY_FLAGS dependencyFlags, const VkCommandBuffer& commandBuffer);
+
 }
 
 #endif // !VAl_SYSTEM_UTILS

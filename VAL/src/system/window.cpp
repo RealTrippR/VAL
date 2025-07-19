@@ -230,11 +230,12 @@ namespace val {
 			for (size_t i = 0; i < _swapChainImageCount; i++) {
 				//std::vector<VkImageView> attachmentsV = { _swapChainImageViews[i] };
 				std::vector<VkImageView> attachmentsV;
-				attachmentsV.resize(attachmentsV.size() + attachmentCount);
-				for (int i = 0; i < attachmentCount; ++i) {
-					attachmentsV[i] = Attachments[i];
-				}
 				attachmentsV.push_back(_swapChainImageViews[i]);
+				// add additional attachments
+				attachmentsV.resize(attachmentCount + attachmentsV.size());
+				for (uint16_t i = 0; i < attachmentCount; ++i) {
+					attachmentsV[i+1] = Attachments[i];
+				}
 
 				VkFramebufferCreateInfo framebufferInfo{};
 				framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;

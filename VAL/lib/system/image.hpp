@@ -27,14 +27,23 @@ namespace val
 	public:
 		Image() = default;
 
-		Image(ValProc& proc, uint16_t width, uint16_t height, VkFormat format, VkImageLayout imgLayout, VkImageUsageFlags usages)
+		Image(ValProc& proc, uint16_t width, uint16_t height, VkFormat format, VkImageLayout imgLayout, VkImageUsageFlags usages, VkImageTiling tiling, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT)
 		{
 			_width = width;
 			_height = height;
 			_format = format;
 			_layout = imgLayout;
 			_usages = usages;
-			create(proc);
+			create(proc, (IMAGE_TILING)tiling, (IMAGE_ASPECT)aspect);
+		}
+		Image(ValProc& proc, uint16_t width, uint16_t height, VkFormat format, IMAGE_LAYOUT imgLayout, IMAGE_USAGE usages, IMAGE_TILING tiling, IMAGE_ASPECT aspect = IMAGE_ASPECT::Color)
+		{
+			_width = width;
+			_height = height;
+			_format = format;
+			_layout = (VkImageLayout)imgLayout;
+			_usages = (VkImageUsageFlags)usages;
+			create(proc,tiling, aspect);
 		}
 
 		~Image()
@@ -67,7 +76,7 @@ namespace val
 		}
 		
 	public:
-		void create(ValProc& proc);
+		void create(ValProc& proc, const IMAGE_TILING tiling = IMAGE_TILING::Linear, const IMAGE_ASPECT = IMAGE_ASPECT::Color);
 
 		void resize(ValProc& proc, uint16_t newWidth, uint16_t newHeight);
 

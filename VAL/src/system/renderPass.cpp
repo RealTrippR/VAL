@@ -50,7 +50,7 @@ namespace val {
 		return _MSAAsamples;
 	}
 
-	const tiny_vector<VkSubpassDependency>& RenderPassManager::createSubpassDependencies() {
+	const std::vector<VkSubpassDependency>& RenderPassManager::createSubpassDependencies() {
 		// subpasses must be in a move-forward order (i.e. subpass #2 cannot write to subpass #1)
 
 		_VkSubpassDependencies.resize(_subpasses.size());
@@ -58,10 +58,14 @@ namespace val {
 		// https://www.reddit.com/r/vulkan/comments/s80reu/subpass_dependencies_what_are_those_and_why_do_i/
 
 		// set source access and stage masks
-		for (uint32_t i = 0; i < _subpasses.size(); ++i) {
+		for (uint32_t i = 0; i < _subpasses.size(); ++i) 
+		{
+			val::Subpass& subpass = *_subpasses[i];
+
+			//const tiny_vector<Subpass*>& dependencies = subpass.getDependencies();
+
 
 			VkSubpassDependency& subDependency = _VkSubpassDependencies[i];
-			val::Subpass& subpass = *_subpasses[i];
 
 			if (i < _subpasses.size() - 1) {
 				VkSubpassDependency* nextDepenency = &(_VkSubpassDependencies[i + 1]);
@@ -81,6 +85,7 @@ namespace val {
 			if (subpass._depthStencilAttachment.has_value()) {
 				subDependency.srcStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 				subDependency.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+				subDependency.dstStageMask |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 			}
 
 			subDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT; // This is probably the right one, idk for sure.

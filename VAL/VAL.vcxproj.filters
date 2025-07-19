@@ -443,6 +443,12 @@
     <ClInclude Include="lib\system\ImageLayoutTransitionInfo.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\renderGraph\renderPass.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\renderGraph\passBuilder.hpp">
+      <Filter>lib\renderGraph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">

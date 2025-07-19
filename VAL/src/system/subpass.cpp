@@ -126,6 +126,32 @@ namespace val
 		_subpassDesc.inputAttachmentCount = (uint32_t)_inputAttachments.size();
 	}
 
+	void Subpass::setSrcDependency(const PIPELINE_STAGE stageMask, const ACCESS_FLAGS accessMask) {
+		_srcDependencyStageMask = stageMask;
+		_srcDependencyAccessMask = accessMask;
+	}
+
+	PIPELINE_STAGE Subpass::getSrcDependencyPipelineStageMask() {
+		return _srcDependencyStageMask;
+	}
+
+	ACCESS_FLAGS Subpass::getSrcDependencyAccessMask() {
+		return _srcDependencyAccessMask;
+	}
+
+	void Subpass::setDstDependency(const PIPELINE_STAGE destMask, const ACCESS_FLAGS accessMask) {
+		_dstDependencyStageMask = destMask;
+		_dstDependencyAccessMask = accessMask;
+	}
+
+	PIPELINE_STAGE Subpass::getDstDependencyPipelineStageMask() {
+		return _dstDependencyStageMask;
+	}
+
+	ACCESS_FLAGS Subpass::getDstDependencyAccessMask() {
+		return _dstDependencyAccessMask;
+	}
+
 	void Subpass::bindAttachment(renderAttachment* attachment) {
 		// will not be added if it's already in the list
 		uint32_t idx = _rpMngr->addAttachment(attachment);

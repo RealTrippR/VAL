@@ -40,7 +40,7 @@ namespace val {
 
 		VkRenderPass& getVkRenderPass();
 
-		const tiny_vector<VkSubpassDependency>& createSubpassDependencies();
+		const std::vector<VkSubpassDependency>& createSubpassDependencies();
 
 		void update();
 
@@ -71,7 +71,7 @@ namespace val {
 
 		tiny_vector<VkAttachmentDescription> _VkAttachments;
 
-		tiny_vector<VkSubpassDependency> _VkSubpassDependencies;
+		std::vector<VkSubpassDependency> _VkSubpassDependencies;
 
 		VkRenderPass _VKrenderPass = VK_NULL_HANDLE;
 
