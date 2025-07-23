@@ -21,9 +21,10 @@ namespace val {
 		{
 			initDefaultCreateInfoValues(); 
 		};
-		Sampler(ValProc& proc, val::ImageView& imgView, SAMPLER_TYPE samplerType = combinedImage) : _proc(proc), _samplerType(samplerType) 
+		Sampler(ValProc& proc, val::ImageView& imgView, SAMPLER_TYPE samplerType = combinedImage, VkCompareOp compareop= VK_COMPARE_OP_NEVER) : _proc(proc), _samplerType(samplerType) 
 		{
 			initDefaultCreateInfoValues();
+			setCompareMode(compareop);
 			bindImageView(imgView); 
 		};
 
@@ -87,13 +88,17 @@ namespace val {
 		// W direction (depth)
 		void setAddressModeW(const VkSamplerAddressMode& addrMode);
 
-		void useNormalizedCoordinates(const bool& val);
+		void useUnnormalizedCoordinates(const bool& val);
 
 		void setCompareMode(VkCompareOp cmpOp/*Set to VK_COMPARE_OP_NEVER to disable*/);
 
 		void setMipLodBias(const float& mipLOD);
 
 		void setFromVkSamplerCreateInfo(const VkSamplerCreateInfo& createInfo);
+
+		void setBorderColor(const VkBorderColor color);
+
+		VkBorderColor getVkBorderColor() const;
 	public:
 
 		const SAMPLER_TYPE& getSamplerType()const ;

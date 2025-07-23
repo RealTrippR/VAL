@@ -128,10 +128,10 @@ namespace val
 		createInfo.addressModeW = addrMode;
 	}
 
-	void Sampler::useNormalizedCoordinates(const bool& val)
+	void Sampler::useUnnormalizedCoordinates(const bool& val)
 	{
 		VkSamplerCreateInfo& createInfo = createInfos[this];
-		createInfo.unnormalizedCoordinates = !val;
+		createInfo.unnormalizedCoordinates = val;
 
 	}
 
@@ -141,6 +141,10 @@ namespace val
 		switch (cmpOp)
 		{
 		case VK_COMPARE_OP_NEVER:
+			createInfo.compareEnable = VK_FALSE;
+			createInfo.compareOp = cmpOp;
+			break;
+		case VK_COMPARE_OP_MAX_ENUM:
 			createInfo.compareEnable = VK_FALSE;
 			createInfo.compareOp = cmpOp;
 			break;
@@ -161,6 +165,16 @@ namespace val
 	{
 		VkSamplerCreateInfo& createInfo__ = createInfos[this];
 		createInfo__ = createInfo;
+	}
+
+	void Sampler::setBorderColor(const VkBorderColor color) {
+		VkSamplerCreateInfo& createInfo = createInfos[this];
+		createInfo.borderColor = color;
+	}
+
+	VkBorderColor Sampler::getVkBorderColor() const{
+		const VkSamplerCreateInfo& createInfo = createInfos[(Sampler*)(this)];
+		return createInfo.borderColor;
 	}
 
 	std::optional<VkSamplerCreateInfo> Sampler::getCreateInfo() 

@@ -69,6 +69,9 @@
     <ClInclude Include="experimental-features\SimpleRG\renderGraph_Draft__processed.hpp">
       <Filter>experimental-features\SimpleRG</Filter>
     </ClInclude>
+    <ClInclude Include="experimental-features\ShadowMapping\shadowMapping__processed.hpp">
+      <Filter>experimental-features\ShadowMapping</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="shaders">

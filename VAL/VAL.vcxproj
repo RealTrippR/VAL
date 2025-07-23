@@ -439,6 +439,9 @@
   <ItemGroup>
     <None Include="lib\system\queue.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="lib\ext\tiny_vector.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

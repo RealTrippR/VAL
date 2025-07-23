@@ -1,3 +1,4 @@
+#include <VAL/lib/system/VAL_PROC.hpp>
 /********************************/
 /* Copyright Tripp Robins, 2025 */
 /********************************/
@@ -9,11 +10,8 @@
 
 using namespace val;
 
-PASS_BEGIN(SHADOW),
-READ(Mesh<VertexTxtr, 1>& mesh),
-WRITE(VkFramebuffer framebuffer),
-INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
-){
+void pass_mainSHADOW(val::ValProc& valProc, val::PASS_CONTEXT& passContext, Mesh<VertexTxtr, 1>& mesh, VkFramebuffer framebuffer, GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue) {
+
 
 	BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, graphicsQueue, INLINE); // the INLINE/FIXED flag should be automatically set, this is bad code.
 
@@ -33,16 +31,8 @@ INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
 
 	END_RENDER_PASS(graphicsQueue);
 }
-PASS_END // END SHADOW
+void pass_mainMAIN(val::ValProc& valProc, val::PASS_CONTEXT& passContext, Mesh<VertexTxtr, 1>& mesh, VkFramebuffer framebuffer, GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue) {
 
-
-
-PASS_BEGIN(MAIN),
-READ(Mesh<VertexTxtr,1>& mesh),
-WRITE(VkFramebuffer framebuffer),
-//READ_WRITE(NULL) <- upon further research I believe that this is invalid
-INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
-){
 	//dbg::printWarning("TODO: Add validation to ensure that begin render pass has the correct INLINE/FIXED mode.");
 	BEGIN_RENDER_PASS(passContext, pipeline, framebuffer, graphicsQueue, INLINE); // the INLINE/FIXED flag should be automatically set, this is bad code.
 
@@ -62,5 +52,3 @@ INPUT(GraphicsPipeline& pipeline, Window& wind, Queue& graphicsQueue)
 
 	END_RENDER_PASS(graphicsQueue);
 }
-
-PASS_END // MAIN END

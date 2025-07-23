@@ -51,6 +51,7 @@ namespace val
 				element._binding = descBuilder.binding;
 				element._descriptorInfo = descBuilder.objInfo;
 				if (descBuilder.imgLayout != IMAGE_LAYOUT::MaxEnum) {
+					element._overrideImgLayout = descBuilder.imgLayout;
 					for (auto& imgInfo : element._descriptorInfo.imageInfos) {
 						imgInfo.imageLayout = (VkImageLayout)descBuilder.imgLayout;
 					}

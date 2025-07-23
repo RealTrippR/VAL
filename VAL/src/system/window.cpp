@@ -200,6 +200,11 @@ namespace val {
 		createSwapChainFrameBuffers({}, 0u, renderPass, proc.getVkLogicalDevice());
 	}
 
+	void Window::createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass, tiny_vector<VkImageView> attachments)
+	{
+		createSwapChainFrameBuffers(attachments.data(), attachments.size(), renderPass, proc.getVkLogicalDevice());
+	}
+
 	void Window::createSwapChainFrameBuffers(ValProc& proc, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass)
 	{
 		createSwapChainFrameBuffers(Attachments, attachmentCount, renderPass, proc.getVkLogicalDevice());
@@ -230,8 +235,9 @@ namespace val {
 			for (size_t i = 0; i < _swapChainImageCount; i++) {
 				//std::vector<VkImageView> attachmentsV = { _swapChainImageViews[i] };
 				std::vector<VkImageView> attachmentsV;
-				attachmentsV.push_back(_swapChainImageViews[i]);
 				// add additional attachments
+				attachmentsV.push_back(_swapChainImageViews[i]);
+
 				attachmentsV.resize(attachmentCount + attachmentsV.size());
 				for (uint16_t i = 0; i < attachmentCount; ++i) {
 					attachmentsV[i+1] = Attachments[i];

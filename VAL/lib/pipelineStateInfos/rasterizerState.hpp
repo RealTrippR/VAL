@@ -33,6 +33,10 @@ namespace val {
 
 		const float getConstantDepthBias() const;
 
+		void setDepthBiasSlope(const float& slope);
+
+		const float getDepthBiasSlope() const;
+
 		void setEnableDepthBiasClamp(const bool& enabled);
 
 		const bool getEnableDepthBiasClamp() const;

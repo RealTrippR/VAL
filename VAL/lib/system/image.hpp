@@ -75,6 +75,20 @@ namespace val
 			return toImageViewBindInfo();
 		}
 		
+
+		inline ImageLayoutTransitionInfo toImageLayoutTransitionInfo()
+		{
+			ImageLayoutTransitionInfo layoutInfo = {
+				.pImgLayout = &_layout,
+				.img = _img,
+			};
+			return layoutInfo;
+		}
+
+		operator ImageLayoutTransitionInfo() {
+			return toImageLayoutTransitionInfo();
+		}
+
 	public:
 		void create(ValProc& proc, const IMAGE_TILING tiling = IMAGE_TILING::Linear, const IMAGE_ASPECT = IMAGE_ASPECT::Color);
 

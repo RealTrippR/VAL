@@ -174,7 +174,7 @@ namespace val
 						glm::vec3 vNormal = { 0,0,0 };
 						glm::vec4 vColor = { 1.f, 1.f, 1.f, 1.f };
 
-						glm::vec2 vTexCoord;
+						glm::vec2 vTexCoord = { 0,0 };
 						if (mesh->vertex_uv.exists) {
 							const uint32_t uv_index = mesh->vertex_uv.indices[cornerIndex];
 							ufbx_vec2 uv = mesh->vertex_uv.values[uv_index];

@@ -137,6 +137,8 @@ namespace val {
 	
 		void createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass);
 
+		void createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass, tiny_vector<VkImageView> attachments);
+
 		void createSwapChainFrameBuffers(ValProc& proc, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass);
 
 		void createSwapChainFrameBuffers(VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);

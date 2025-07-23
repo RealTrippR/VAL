@@ -111,14 +111,24 @@ namespace val
 				dbg::printWarning("DescriptorSheet::updateDescriptors: For DescriptorSheet @ %p, the updateDataCallback of element #%lu is NULL", this, i);
 				continue;
 			}
+
 			descriptorInfo.updateWithDataCallback();
-			int g = 0;
+			if (element._overrideImgLayout != IMAGE_LAYOUT::MaxEnum) {
+				for (auto& imgInfo : element._descriptorInfo.imageInfos) {
+					imgInfo.imageLayout = (VkImageLayout)element._overrideImgLayout;
+				}
+			}
 		}
 
 		_descriptorWrites.resize(_elements.size());
 		for (uint32_t i = 0; i < _elements.size(); ++i)
 		{
 			_descriptorWrites[i] = _elements[i].toVkWriteDescriptorSet(descriptorSet);
+			if (_descriptorWrites[i].descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+				if (_descriptorWrites[i].pImageInfo == NULL || _descriptorWrites[i].pImageInfo[0].sampler == NULL) {
+					dbg::printError("DescriptorSheet::updateAndWriteDescriptors: Descriptor #%u is of VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER but it's sampler is NULL.", i);
+				}
+			}
 		}
 
 #ifndef NDEBUG
@@ -126,10 +136,6 @@ namespace val
 		{	
 			dbg::printError("DescriptorSheet::updateDescriptors: Failed to update DescriptorSheet @ %p: no descriptors to update, element count is 0.", this);
 			return;
-		}
-		for (uint32_t i = 0; i < _descriptorWrites.size(); ++i) {
-			auto& d = _descriptorWrites[i];
-			int j = 0;
 		}
 #endif
 		vkUpdateDescriptorSets(device, _descriptorWrites.size(), _descriptorWrites.data(), 0, 0);
@@ -155,6 +161,17 @@ namespace val
 	void DescriptorSheet::addSheetElement(const DescriptorSheetElement& element)
 	{
 		_elements.push_back(element);
+
+#ifndef NDEBUG
+		for (const auto& e1 : _elements) {
+			for (const auto& e2 : _elements) {
+				if (&e1 != &e2 && e1.getBinding() == e2.getBinding()) {
+					dbg::printError("DescriptorSheet::addSheetElement: Two elements must not share the same binding index.");
+					throw std::logic_error("DescriptorSheet::addSheetElement: Two elements must not share the same binding index.");
+				}
+			}
+		}
+#endif // !NDEBUG
 	}
 
 	void DescriptorSheet::insertSheetElement(const uint32_t index, const DescriptorSheetElement& element)

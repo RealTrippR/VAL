@@ -330,6 +330,7 @@
     <ClInclude Include="experimental-features\renderGraph_ReadAndWriteImg__processed.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="experimental-features\ShadowMapping\shadowMapping__processed.hpp" />
     <ClInclude Include="experimental-features\SimpleRG\renderGraph_Draft.hpp" />
     <ClInclude Include="experimental-features\SimpleRG\renderGraph_Draft__processed.hpp" />
     <ClInclude Include="polygonVertex.hpp">

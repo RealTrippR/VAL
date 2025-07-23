@@ -288,6 +288,15 @@ namespace val {
 		}
 		return NULL;
 	}
+	
+
+	char* findNextMatchInRange(const char* cstr, const char* endRange, const char* targ, const bool ignoreCommented = true,
+		bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL,
+		bool (*ignoreCharacterConditional)(const char /*char*/, const uint32_t /*char index*/) = NULL)
+	{
+		const uint32_t limit = (endRange - cstr) + 1;
+		return findNextMatch(cstr, targ, ignoreCommented, limit, discardMatchConditional, ignoreCharacterConditional);
+	}
 
 	// indentical to findNextMatch, 
 	// except it will return a pointer to the character just after
@@ -302,6 +311,23 @@ namespace val {
 		}
 		return NULL;
 	}
+
+
+	// indentical to findNextMatch, 
+	// except it will return a pointer to the character just after
+	// the of the next occurance of the target string.
+	char* findNextMatchAdditiveInRange(const char* cstr, const char* endrange, const char* targ,  const bool ignoreCommented = true,
+		bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL,
+		bool (*ignoreCharacterConditional)(const char /*char*/, const uint32_t /*char index*/) = NULL)
+	{
+		const uint32_t limit = (endrange - cstr) + 1;
+		char* nextMatch = findNextMatch(cstr, targ, ignoreCommented, limit, discardMatchConditional, ignoreCharacterConditional);
+		if (nextMatch) {
+			return nextMatch + strlen(targ);
+		}
+		return NULL;
+	}
+
 
 	int64_t getClosingFigureOffset(const char* cstr, const char openingFig, const char closingFig, const bool ignoreCommented = true) {
 		uint32_t nestCount = 0u;
@@ -335,6 +361,39 @@ namespace val {
 		return -1;
 	}
 
+	int64_t getClosingFigureOffset(const char* cstr, const char* endRange, const char openingFig, const char closingFig, const bool ignoreCommented = true) {
+		uint32_t nestCount = 0u;
+		uint32_t i = 0;
+		uint32_t limit = (endRange - cstr) + 1;
+		COMMENT_TYPE comment = NONE;
+		while (true)
+		{
+			if (i == (limit - 1), cstr[i] == '\0') {
+				return -1;
+			}
+
+			if (ignoreCommented) {
+				handleComment(&comment, cstr + i);
+			}
+
+			if (comment == NONE) {
+				if (cstr[i] == openingFig) {
+					nestCount++;
+				}
+				else if (cstr[i] == closingFig)
+				{
+					nestCount--;
+					if (nestCount == 0) {
+						return i;
+					}
+				}
+			}
+
+			++i;
+		}
+		return -1;
+	}
+
 	// returns a pointer to the closing parenthesis. ')'
 	// The cstr must be a pointer to the beginning parethensis '('
 	// If it can't find a closing parenthesis, NULL will be returned
@@ -343,6 +402,21 @@ namespace val {
 			throw std::exception("The cstr of getClosingParenthesis must be a pointer to '('");
 		}
 		int64_t tmp = getClosingFigureOffset(cstr, '(', ')', ignoreComments);
+		if (tmp < 0) {
+			return NULL;
+		}
+		return cstr + tmp;
+	}
+
+
+	// returns a pointer to the closing parenthesis. ')'
+	// The cstr must be a pointer to the beginning parethensis '('
+	// If it can't find a closing parenthesis, NULL will be returned
+	const char* getClosingParenthesisInRange(const char* cstr, const char* rangeEnd, const bool ignoreComments = true) {
+		if (cstr[0] != '(') {
+			throw std::exception("The cstr of getClosingParenthesis must be a pointer to '('");
+		}
+		int64_t tmp = getClosingFigureOffset(cstr, rangeEnd, '(', ')', ignoreComments);
 		if (tmp < 0) {
 			return NULL;
 		}
@@ -627,7 +701,7 @@ namespace val {
 
 
 
-		char* errorMsg;
+		char* errorMsg=NULL;
 		string processed_src;
 		const VAL_RETURN_CODE preprocess_res = preprocess(&processed_src, &errorMsg, framesInFlight, HTMLdiagramFilepath);
 		if (preprocess_res == VAL_FAILURE) {
@@ -645,7 +719,12 @@ namespace val {
 			processedFileName = srcFilepathNO_EXT_NO_PARENT_DIRS;
 		}
 		else {
-			processedFileName = compileToDir.string() + "/" + srcFilepathNO_EXT_NO_PARENT_DIRS;
+			if (compileToDir.string().back() == '/') {
+				processedFileName = compileToDir.string() + srcFilepathNO_EXT_NO_PARENT_DIRS;
+			}
+			else {
+				processedFileName = compileToDir.string() + "/" + srcFilepathNO_EXT_NO_PARENT_DIRS;
+			}
 		}
 		processedFileName.append("__processed").append(".hpp");
 
@@ -771,15 +850,30 @@ namespace val {
 			cur = (char*)nameClosingBracket + 1;
 		}
 
+
+		KEYWORD passEnd = NULL;
+		// check for end
+		{
+			passEnd = findNextMatch(cur, PASS_END_KEYWORD, true, UINT32_MAX, discardMatchIfNoLeadingSpaceOrNewline, NULL);
+			if (passEnd == NULL) {
+				*error = (char*)"PASS_BEGIN is missing END_PASS";
+				return VAL_FAILURE;
+			}
+
+			// set pass string length
+			*passStrLen = (uint32_t)(passEnd - passBegin);
+		}
+
+
 		// get reads
 		{
 			// search for "READ("
-			KEYWORD readKeyword = findNextMatchAdditive(cur, READ_KEYWORD);
+			KEYWORD readKeyword = findNextMatchAdditiveInRange(cur,passEnd, READ_KEYWORD);
 			if (readKeyword) {
 				char* argsBeginParenthesis = (char*)readKeyword;
 				cur = argsBeginParenthesis + 1;
 				// search for closing ')'
-				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
+				char* argsEndParenthesis = (char*)getClosingParenthesisInRange(argsBeginParenthesis, passEnd);
 				if (argsEndParenthesis == NULL) {
 					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
@@ -798,12 +892,12 @@ namespace val {
 		// get writes
 		{
 			// search for "WRITE("
-			KEYWORD writeKeyword = findNextMatchAdditive(cur, WRITE_KEYWORD);
+			KEYWORD writeKeyword = findNextMatchAdditiveInRange(cur,passEnd, WRITE_KEYWORD);
 			if (writeKeyword) {
 				char* argsBeginParenthesis = (char*)writeKeyword;
 				cur = argsBeginParenthesis + 1;
 				// search for closing ')'
-				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
+				char* argsEndParenthesis = (char*)getClosingParenthesisInRange(argsBeginParenthesis, passEnd);
 				if (argsEndParenthesis == NULL) {
 					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
@@ -821,12 +915,12 @@ namespace val {
 		{
 			//extractPassData(&passInfo, READ_WRITE);
 			// search for "WRITE("
-			KEYWORD rwKeyword = findNextMatchAdditive(cur, READ_WRITE_KEYWORD);
+			KEYWORD rwKeyword = findNextMatchAdditiveInRange(cur,passEnd, READ_WRITE_KEYWORD);
 			if (rwKeyword) {
 				char* argsBeginParenthesis = (char*)rwKeyword;
 				cur = argsBeginParenthesis + 1;
 				// search for closing ')'
-				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
+				char* argsEndParenthesis = (char*)getClosingParenthesisInRange(argsBeginParenthesis, passEnd);
 				if (argsEndParenthesis == NULL) {
 					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
@@ -841,12 +935,12 @@ namespace val {
 		}
 		// get input
 		{
-			KEYWORD inputKeyword = findNextMatchAdditive(cur, INPUT_KEYWORD);
+			KEYWORD inputKeyword = findNextMatchAdditiveInRange(cur, passEnd, INPUT_KEYWORD);
 			if (inputKeyword) {
 				char* argsBeginParenthesis = (char*)inputKeyword;
 				cur = argsBeginParenthesis + 1;
 				// search for closing ')'
-				char* argsEndParenthesis = (char*)getClosingParenthesis(argsBeginParenthesis);
+				char* argsEndParenthesis = (char*)getClosingParenthesisInRange(argsBeginParenthesis, passEnd);
 				if (argsEndParenthesis == NULL) {
 					*error = (char*)"Closing ')' is missing";
 					return VAL_FAILURE;
@@ -858,19 +952,6 @@ namespace val {
 				// set cur to closing ")"
 				cur = argsEndParenthesis;
 			}
-		}
-
-		KEYWORD passEnd = NULL;
-		// check for end
-		{
-			passEnd = findNextMatch(cur, PASS_END_KEYWORD, true, UINT32_MAX, discardMatchIfNoLeadingSpaceOrNewline, NULL);
-			if (passEnd == NULL) {
-				*error = (char*)"PASS_BEGIN is missing END_PASS";
-				return VAL_FAILURE;
-			}
-
-			// set pass string length
-			*passStrLen = (uint32_t)(passEnd - passBegin);
 		}
 
 		const char* execBegin = findExecSrcBegin(passBegin);
@@ -891,17 +972,17 @@ namespace val {
 					break;
 				}
 				uint32_t distToEnd = (uint32_t)(passEnd - cur);
-				const char* fixedBegin = findNextMatchAdditive(cur, FIXED_BEGIN_KEYWORD, distToEnd, true, discardMatchIfNoLeadingSpaceOrNewline);
+				const char* fixedBegin = findNextMatchAdditiveInRange(cur, passEnd, FIXED_BEGIN_KEYWORD, true, discardMatchIfNoLeadingSpaceOrNewline);
 				if (!fixedBegin) {
 					break; // no more fixed passes
 				}
 
-				const char* fixedArgBeginParen = findNextMatch(fixedBegin, "(");
+				const char* fixedArgBeginParen = findNextMatchInRange(fixedBegin, passEnd, "(");
 				if (NULL == fixedArgBeginParen) {
 					*error = (char*)"Failed to parse fixed subroutine: missing '(' of arg-begin";
 					return VAL_FAILURE;
 				}
-				const char* fixedArgEndParen = getClosingParenthesis(fixedArgBeginParen);
+				const char* fixedArgEndParen = getClosingParenthesisInRange(fixedArgBeginParen, passEnd);
 				
 				if (NULL == fixedArgEndParen) {
 					*error = (char*)"'(' is missing respective ')'";
@@ -920,7 +1001,7 @@ namespace val {
 					break;
 				}
 					
-				char* fixedEnd = findNextMatch(cur, FIXED_END_KEYWORD, distToEnd);
+				char* fixedEnd = findNextMatchInRange(cur,passEnd, FIXED_END_KEYWORD, distToEnd);
 				if (!fixedEnd)
 				{
 					*error = (char*)"FIXED_BEGIN is missing FIXED_END";
@@ -1389,7 +1470,7 @@ namespace val {
 	{
 		char* src = srcFileContents;
 
-		if (!src || !processed_src_out || !(*errorMsg)) {
+		if (!src || !processed_src_out || !errorMsg) {
 			dbg::printError("Failed to preprocess file, invalid arguments!\n");
 			return VAL_FAILURE;
 		}

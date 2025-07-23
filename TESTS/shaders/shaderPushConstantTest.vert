@@ -17,6 +17,7 @@ layout(location = 2) in vec2 inTexCoord;
 
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
+layout(location = 3) out float fragLinearDepth;
 
 void main() {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition + pushConstant.offset, 1.0);

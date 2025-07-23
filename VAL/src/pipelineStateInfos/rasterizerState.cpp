@@ -18,6 +18,14 @@ namespace val
 		return _VKrasterizerState.depthBiasConstantFactor;
 	}
 
+	void rasterizerState::setDepthBiasSlope(const float& slope) {
+		_VKrasterizerState.depthBiasSlopeFactor = slope;
+	}
+
+	const float rasterizerState::getDepthBiasSlope() const {
+		return _VKrasterizerState.depthBiasConstantFactor;
+	}
+
 	void rasterizerState::setEnableDepthBiasClamp(const bool& enabled) {
 		_VKrasterizerState.depthClampEnable = enabled;
 	}

@@ -642,4 +642,9 @@
       <Filter>lib\system</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="lib\ext\tiny_vector.natvis">
+      <Filter>lib\ext</Filter>
+    </Natvis>
+  </ItemGroup>
 </Project>

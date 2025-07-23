@@ -27,6 +27,8 @@ The Vulkan Abstraction Library is missing the following key features:
 
 ----------------------------------------------------------------------------------------------------------------
 
+[ ] Add validation to ensure that the clear value count in a PASS_CONTEXT matches the framebuffer attachment count.
+
 [ ] Redesign the buffer class
 
 [✓] Disconnect descriptor sets from ValProc and place them in the DescriptorSheet class, 

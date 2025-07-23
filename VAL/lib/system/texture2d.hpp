@@ -121,11 +121,13 @@ namespace val {
 		void createFromMemory(const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
 
-		inline void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
+		inline void createFromDisk(std::filesystem::path srcpath, const IMAGE_USAGE usages,
 			const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION)
 		{
-			createFromDisk(srcpath, usages, (VkImageLayout)layout, memspace, mipLevels, maxWidth, maxHeight);
+			createFromDisk(srcpath, (VkImageUsageFlagBits)usages, (VkImageLayout)layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
+
+
 
 		void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION);

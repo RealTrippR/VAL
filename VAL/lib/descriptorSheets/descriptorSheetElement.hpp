@@ -58,6 +58,7 @@ namespace val
 		uint32_t _binding=0u;
 		VkShaderStageFlags _shaderStageFlags = 0x0;
 		ObjectDescriptorInfo _descriptorInfo;
+		IMAGE_LAYOUT _overrideImgLayout = IMAGE_LAYOUT::MaxEnum;
 	};
 }
 

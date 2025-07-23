@@ -161,7 +161,7 @@ namespace val {
 	{
 		uint32_t totalSpecDataSize = 0u;
 		for (const auto& entry : specializationEntries) {
-			totalSpecDataSize += entry.size;
+			totalSpecDataSize += (uint32_t)entry.size;
 		}
 		return totalSpecDataSize;
 	}

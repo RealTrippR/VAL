@@ -1,2 +1,5 @@
 #version 450
-void main() {}
+layout(location = 0) in float fragPosLightSpace;
+
+void main() {
+}
