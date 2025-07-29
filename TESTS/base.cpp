@@ -103,7 +103,7 @@ int main()
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
 
 
 
@@ -201,7 +201,9 @@ int main()
 		renderTarget.endPass(proc);
 
 		renderTarget.submit(proc, {window.getPresentQueue().getSemaphore()}, presentFence);
+		presentFence.wait(proc);
 		window.display(imageFormat, { graphicsQueue.getSemaphore() });
+		presentFence.reset(proc);
 
 		proc.nextFrame();
 	}

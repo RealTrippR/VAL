@@ -18,7 +18,7 @@
 
 namespace val {
 	class Shader; // forward declaration
-	class imageView; // forward declaration
+	class ImageView; // forward declaration
 
 	void pipelineCreateInfo_loadvkCmdPushDescriptorSetKHR(VkDevice device);
 

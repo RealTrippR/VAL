@@ -184,8 +184,6 @@ int main()
 		window1.pollEvents();
 		window2.pollEvents();
 
-		presentFence.reset(proc);
-
 		// Update view information, stored in a UBO
 		updateViewMatrix(proc, window1, viewUBO);
 
@@ -219,6 +217,7 @@ int main()
 		presentFence.wait(proc);
 		window1.display(IMG_FORMAT, { graphicsQueue.getSemaphore() });
 		window2.display(IMG_FORMAT, {});
+		presentFence.reset(proc);
 
 		proc.nextFrame();
 	}

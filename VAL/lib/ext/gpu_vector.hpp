@@ -31,18 +31,29 @@ namespace val {
 
 		gpu_vector() = default;
 
-		gpu_vector(const VkBufferUsageFlags& usage) 
+		gpu_vector(const VkBufferUsageFlags usage) 
 		{
 			_usage = usage;
 		}
 
-		gpu_vector(ValProc& proc, const VkBufferUsageFlags& usage) {
+		gpu_vector(const BUFFER_USAGE usage)
+		{
+			_usage = (VkBufferUsageFlags)usage;
+		}
+
+		gpu_vector(ValProc& proc, const VkBufferUsageFlags usage) {
 			_usage = usage;
 			init(proc, 0);
 		}
 
 
-		gpu_vector(ValProc& proc, const VkBufferUsageFlags& usage, size_t size, const T& val) {
+		gpu_vector(ValProc& proc, const BUFFER_USAGE usage) {
+			_usage = (VkBufferUsageFlags)usage;
+			init(proc, 0);
+		}
+
+
+		gpu_vector(ValProc& proc, const VkBufferUsageFlags usage, size_t size, const T& val) {
 			_usage = usage;
 			init(proc, size);
 
@@ -51,7 +62,16 @@ namespace val {
 			}
 		}
 
-		gpu_vector(ValProc& proc, const VkBufferUsageFlags& usage, std::initializer_list<T> list) {
+		gpu_vector(ValProc& proc, const BUFFER_USAGE usage, size_t size, const T& val) {
+			_usage = (VkBufferUsageFlags)usage;
+			init(proc, size);
+
+			for (size_t i = 0; i < size; ++i) {
+				_mappedMemory[i] = val;
+			}
+		}
+
+		gpu_vector(ValProc& proc, const VkBufferUsageFlags usage, std::initializer_list<T> list) {
 			_usage = usage;
 			init(proc, list.size());
 
@@ -62,7 +82,20 @@ namespace val {
 				T tmp = _mappedMemory[i-1];
 				const int a=0u;
 			}
-			
+		}
+
+		gpu_vector(ValProc& proc, const BUFFER_USAGE usage, std::initializer_list<T> list) {
+			_usage = (VkBufferUsageFlags)usage;
+			init(proc, list.size());
+
+
+			size_t i = 0;
+			for (const T& value : list) {
+				_mappedMemory[i++] = value;
+				T tmp = _mappedMemory[i - 1];
+				const int a = 0u;
+			}
+
 		}
 
 		

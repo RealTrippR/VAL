@@ -141,7 +141,7 @@ namespace val
 		vkUpdateDescriptorSets(device, _descriptorWrites.size(), _descriptorWrites.data(), 0, 0);
 	}
 
-	void DescriptorSheet::updateDescriptor(VkDevice device, const uint32_t index)
+	void DescriptorSheet::updateDescriptor(VkDevice device, const uint32_t descriptorIndex, const uint32_t setIndex)
 	{
 #ifndef NDEBUG
 		if (_descriptorWrites.data() == NULL || _descriptorWrites.size() == 0)
@@ -149,13 +149,16 @@ namespace val
 			dbg::printError("DescriptorSheet::updateDescriptors: Failed to update DescriptorSheet @ %p: no descriptors to update, element count is 0.", this);
 			return;
 		}
-		if (index >= _descriptorWrites.size())
+		if (descriptorIndex >= _descriptorWrites.size())
 		{
-			dbg::printError("DescriptorSheet::updateDescriptors: Failed to update DescriptorSheet @ %p: index of %lu is out of bounds.", this, index);
+			dbg::printError("DescriptorSheet::updateDescriptors: Failed to update DescriptorSheet @ %p: index of %lu is out of bounds.", this, descriptorIndex);
 			return;
 		}
 #endif // !NDEBUG
-		vkUpdateDescriptorSets(device, 1, _descriptorWrites.data() + index, 0, 0);
+
+		_elements[descriptorIndex]._descriptorInfo.updateDataCallback(&_elements[descriptorIndex]._descriptorInfo);
+		_descriptorWrites[descriptorIndex] = _elements[descriptorIndex].toVkWriteDescriptorSet(_descriptorSets[setIndex]);
+		vkUpdateDescriptorSets(device, 1, _descriptorWrites.data() + descriptorIndex, 0, 0);
 	}
 
 	bool DescriptorSheet::isInitialized() {

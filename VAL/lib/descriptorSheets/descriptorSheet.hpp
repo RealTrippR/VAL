@@ -71,7 +71,7 @@ namespace val
 
 		void updateAndWriteDescriptors(VkDevice device, VkDescriptorSet descriptorSet);
 
-		void updateDescriptor(VkDevice device, const uint32_t index);
+		void updateDescriptor(VkDevice device, const uint32_t descriptorIndex, const uint32_t setIndex);
 
 		bool isInitialized();
 

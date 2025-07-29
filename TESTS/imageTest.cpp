@@ -27,6 +27,7 @@ const bool enableValidationLayers = true;
 #include <VAL/lib/system/window.hpp>
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/graphics/shader.hpp>
+#include <VAL/lib/ext/gpu_vector.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -39,7 +40,7 @@ const bool enableValidationLayers = true;
 
 #include <Windows.h>
 
-struct uniformBufferObject {
+struct ViewMatrix {
 	alignas(16) glm::mat4 model;
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
@@ -50,16 +51,17 @@ const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
+const VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
 
-void updateUniformBuffer(val::ValProc& proc, val::UBO_Handle& hdl) {
+void updateViewMatrix(val::ValProc& proc, const val::Window& window, val::UBO_Handle& hdl) {
 	using namespace val;
-	VkExtent2D& extent = proc._windowVAL->_swapChainExtent;
+	VkExtent2D extent = window.getSize();
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-	static uniformBufferObject ubo{};
+	static ViewMatrix ubo{};
 	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
@@ -87,7 +89,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
 void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 	using namespace val;
@@ -102,142 +104,138 @@ void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 }
 
 int main()
-{	using namespace val;
+{
+	using namespace val;
 
 	ValProc proc;
 	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
-
+	deviceRequirements.addFeature(DEVICE_FEATURES::anisotropicFiltering);
 	// Configure and create window
 	WindowProperties windowConfig;
-	windowConfig.setProperty(val::WN_BOOL_PROPERTY::RESIZABLE, true);
+	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
 	Window window(windowConfig, 800, 800, "Image Test", proc);
 
 
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, &window);
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////// AFTER VAL_PROC INIT //////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 
-	val::UBO_Handle uboHdl(sizeof(uniformBufferObject));
+	UBO_Handle viewUBO(sizeof(ViewMatrix));
+
+	Sampler imgSampler(proc, val::combinedImage);
+	imgSampler.setMaxAnisotropy(8.f);
+	DescriptorSheet descSheet(
+		{
+			{0, viewUBO, SHADER_STAGE::Vertex},
+			{1, imgSampler, SHADER_STAGE::Fragment}
+		},
+		FRAMES_IN_FLIGHT
+	);
+
 	// load and configure vert shader
-	val::Shader vertShader("shaders-compiled/shader3Dimagevert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
+	val::Shader vertShader("shaders-compiled/image2D.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
-	vertShader._UBO_Handles = { {&uboHdl,0 } };
+
 
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
-	val::Shader fragShader("shaders-compiled/imageshaderfrag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
+	val::Shader fragShader("shaders-compiled/image2D.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT, "main");
 
-	val::Sampler imgSampler(proc, val::combinedImage);
-	imgSampler.setMaxAnisotropy(8.f);
-	fragShader.setImageSamplers({ { &imgSampler, 1 } });
 
 	// config grahics pipeline
 	GraphicsPipeline pipeline;
-	pipeline.shaders = { &fragShader, &vertShader };
-
+	pipeline.setShaders({ &fragShader, &vertShader });
 	setGraphicsPipelineInfo(pipeline);
-
-
-
-
-	// VAL uses image format requirements to pick the best image format
-	// see: https://docs.vulkan.org/spec/latest/chapters/formats.html
-	ImageFormatRequirements formatReqs;
-	formatReqs.acceptedFormats = { VK_FORMAT_R8G8B8A8_SRGB };
-	formatReqs.tiling = VK_IMAGE_TILING_OPTIMAL;
-	formatReqs.features = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-	formatReqs.acceptedColorSpaces = { VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-	VkFormat imageFormat = val::findSupportedImageFormat(proc._physicalDevice, formatReqs);
-
-
-
 	val::RenderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
-	pipeline.renderPass = &renderPassMngr;
+	pipeline.setRenderPassManager(&renderPassMngr);
+	pipeline.setDescriptorSheet(&descSheet);
+	proc.create(FRAMES_IN_FLIGHT, { &pipeline });
 
-	proc.create(window, FRAMES_IN_FLIGHT, imageFormat, { &pipeline });
-
-	window.createSwapChainFrameBuffers(window._swapChainExtent, {}, 0u, pipeline.getVkRenderPass(), proc._device);
-
-
-	val::Image img1(proc, "testImage.jpg", imageFormat);
-	val::imageView imgView1(proc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
-
-	val::Image img2(proc, "testImage2.png", imageFormat);
-	val::imageView imgView2(proc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
+	window.create(imageFormat, pipeline.getVkRenderPass());
 
 
+	Texture2D img1(proc, "testImage.jpg", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
+	img1.discardPixels(); // no reason to save the pixels
+	ImageView imgView1(proc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
 
-	const std::vector<res::vertex> vertices = {
+	Texture2D img2(proc, "testImage2.png", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
+	img2.discardPixels(); // no reason to save the pixels
+	ImageView imgView2(proc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
+
+
+
+	gpu_vector<res::vertex> vertices(proc, BUFFER_USAGE::Vertex, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	};
-
-	// buffer wrapper for vertex Buffer
-	val::Buffer vertexBuffer(proc, vertices.size() * sizeof(res::vertex), CPU_GPU, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	memcpy(vertexBuffer.getDataMapped(), (void*)vertices.data(), vertices.size() * sizeof(res::vertex));
+	});
 
 
-	std::vector<uint32_t> indices = {
-		0, 1, 2, 2, 3, 0 };
-	val::Buffer indexBuffer(proc, indices.size() * sizeof(uint32_t), CPU_GPU, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-	memcpy(indexBuffer.getDataMapped(), (void*)indices.data(), indices.size() * sizeof(uint32_t));
+	gpu_vector<uint32_t> indices(proc, BUFFER_USAGE::Index,
+		{ 0, 1, 2, 2, 3, 0 }
+	);
 
 
 	// if the img sampler is not standalone, it must be intitially binded with an image view
 	// before the descriptor sets are created
 	imgSampler.bindImageView(imgView1);
+	imgSampler.create(proc);
 
 	int timer = 0;
 	bool imgNum = 0;
 
-	VkClearValue clearValues[1];
-	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
-
-	// this needs to be called only after the frag shader's image view has been set
-	proc.createDescriptorSets(&pipeline);
+	pipeline.allocateAndWriteDescriptorSets(proc);
 
 	//////////////////////////////////////////////////////////////
-	val::renderTarget renderTarget;
-	renderTarget.setFormat(imageFormat);
-	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
-	renderTarget.setRenderArea(window.getSize());
-	renderTarget.setIndexBuffer(indexBuffer.getVkBuffer(), indices.size());
-	renderTarget.setVertexBuffers({ vertexBuffer.getVkBuffer() }, vertices.size());
 
+	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
+
+
+
+	// configure the render target, setting vertex buffers, scissors, area, etc
+	val::renderTarget renderTarget;
+	renderTarget.setQueue(graphicsQueue);
+	renderTarget.setFormat(imageFormat);
+	renderTarget.setRenderArea(window.getSize());
+	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
+	renderTarget.setIndexBuffer(indices, indices.size());
+	renderTarget.setVertexBuffer(vertices, vertices.size());
 	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window._swapChainExtent.width, window._swapChainExtent.height, 0.f, 1.f };
+	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
+
+	Fence presentFence;
+	presentFence.create(proc);
 
 	while (!window.shouldClose()) {
-		glfwPollEvents();
+		window.pollEvents();
 
-		auto& graphicsQueue = proc._graphicsQueue;
-		auto& presentQueue = window._presentQueue;
-		auto& currentFrame = proc._currentFrame;
-
-		VkCommandBuffer cmdBuffer = proc._graphicsQueue._commandBuffers[currentFrame];
 		// Update view information, stored in a UBO
-		updateUniformBuffer(proc, uboHdl);
+		updateViewMatrix(proc, window, viewUBO);
 
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.begin(proc);
 
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 		renderTarget.updateBuffers(proc);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window._swapChainExtent });
-		renderTarget.update(proc, pipeline, { viewport });
+		renderTarget.updatePipeline(proc, pipeline);
+		renderTarget.updateViewport(proc, viewport, 0);
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
+		renderTarget.updateDescriptorSet(proc, pipeline, descSheet, proc.getCurrentFrame());
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
-		renderTarget.submit(proc, { presentQueue._semaphores[currentFrame] }, presentQueue._fences[currentFrame]);
-		window.display(imageFormat, { graphicsQueue._semaphores[currentFrame] });
+		renderTarget.submit(proc, { window.getPresentQueue().getSemaphore() }, presentFence);
+		presentFence.wait(proc);
+		window.display(imageFormat, { graphicsQueue.getSemaphore() });
+		presentFence.reset(proc);
 
 		proc.nextFrame();
 
@@ -248,14 +246,22 @@ int main()
 			std::cout << "IMAGE SWAPPED!\n\n";
 			if (imgNum) {
 				imgSampler.bindImageView(imgView2);
-				fragShader.updateImageSampler(proc, pipeline, { imgSampler,1 });
+				for (uint8_t i = 0; i < proc.getFramesInFlight(); ++i) {
+					descSheet.updateDescriptor(proc, 1, i);
+				}
+				//fragShader.updateImageSampler(proc, pipeline, { imgSampler,1 });
 			}
 			else {
 				imgSampler.bindImageView(imgView1);
-				fragShader.updateImageSampler(proc, pipeline, { imgSampler,1 });
+				for (uint8_t i = 0; i < proc.getFramesInFlight(); ++i) {
+					descSheet.updateDescriptor(proc, 1, i);
+				}
+				//fragShader.updateImageSampler(proc, pipeline, { imgSampler,1 });
 			}
 		}
 	}
+
+	presentFence.destroy(proc);
 
 	glfwTerminate();
 

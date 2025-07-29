@@ -53,8 +53,21 @@ namespace val {
 			createFromDisk(srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
 
+		Texture2D(ValProc& proc, std::filesystem::path srcpath, const VkFormat format,
+			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u
+			, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION) : _proc(&proc)
+		{
+			createFromDisk(srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
+		}
+
 		Texture2D(ValProc& proc, const uint16_t width, const uint16_t height, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
+		{
+			create(width, height, format, usages, layout, memspace, mipLevels);
+		}
+
+		Texture2D(ValProc& proc, const uint16_t width, const uint16_t height, const VkFormat format,
+			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
 		{
 			create(width, height, format, usages, layout, memspace, mipLevels);
 		}
@@ -132,6 +145,12 @@ namespace val {
 		void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION);
 
+		inline void create(const uint16_t width, const uint16_t height, VkFormat format, const IMAGE_USAGE usages,
+			const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u)
+		{
+			create(width, height, format, VkImageUsageFlagBits(usages), VkImageLayout(layout), memspace, mipLevels);
+		}
+
 		void create(const uint16_t width, const uint16_t height, VkFormat format, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
 
@@ -151,7 +170,7 @@ namespace val {
 		ValProc* _proc;
 
 		VkImageLayout _layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		VkFormat _format = VK_FORMAT_UNDEFINED;
+		VkFormat _format = VK_FORMAT_R8G8B8A8_SRGB;
 
 		uint16_t _width = 0u;
 		uint16_t _height = 0u;

@@ -119,6 +119,6 @@ namespace val {
 			_VkAttachments.push_back(attachment->toVkAttachmentDescription());
 			return _attachments.size() - 1;
 		}
-		return std::distance(v.begin(), it);
+		return (uint32_t)std::distance(v.begin(), it);
 	}
 }

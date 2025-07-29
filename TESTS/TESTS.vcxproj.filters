@@ -219,6 +219,9 @@
     <None Include="shaders\shadow_mapping_main.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\imageshader.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\viking_room.png">
