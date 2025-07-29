@@ -73,6 +73,8 @@ namespace val
 
 		void updateDescriptor(VkDevice device, const uint32_t index);
 
+		bool isInitialized();
+
 	public:
 		void addSheetElement(const DescriptorSheetElement& element);
 

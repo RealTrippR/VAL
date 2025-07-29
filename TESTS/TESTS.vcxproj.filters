@@ -44,6 +44,7 @@
     <ClCompile Include="experimental-features\Raytracing\raytracingTest.cpp">
       <Filter>experimental-features\Raytracing</Filter>
     </ClCompile>
+    <ClCompile Include="multipleWindows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />

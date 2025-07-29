@@ -2,7 +2,12 @@
 
 layout (constant_id = 0) const float BIAS = 0;
 
-layout(set = 0, binding = 0) uniform sampler2D  shadowMap;
+const int BLINN = 1;
+const int PCF_ITERATIONS = 9;
+const int PCF_ITERATIONS_SQ = PCF_ITERATIONS*PCF_ITERATIONS;
+const float PCF_SCALE = 1.0;
+
+layout(set = 0, binding = 0) uniform sampler2DShadow shadowMap;
 
 layout(set = 0, binding = 1) uniform View_Matrix {
     mat4 model;
@@ -33,47 +38,41 @@ layout(location = 0) out vec4 outColor;
 
 float ShadowCalculation(vec4 lightSpacePos, vec3 lightDir)
 {
-    float shadow = 1.0;
+    /*
+    float shadow = 0.0;
     vec4 shadowCoords = lightSpacePos / lightSpacePos.w;
     if( texture( shadowMap, shadowCoords.xy ).r < shadowCoords.z - BIAS )
     {
-        shadow = 0.0;
+        shadow = 1.0;
     }
-    return shadow;
+    return shadow;*/
+
+    vec4 shadowCoords = lightSpacePos / lightSpacePos.w;
+
     /*
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(shadowMap, projCoords.xy).r; 
-    // get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-    // calculate bias (based on depth map resolution and slope)
-    vec3 normal = normalize(normal);
-    float bias = max(0.55 * (1.0 - dot(normal, lightDir)), 0.355);
-    bias = BIAS;
-    // check whether current frag pos is in shadow
-    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-    // PCF
+    // early return if no shadow
+    if( texture( shadowMap, shadowCoords.xy ).r > shadowCoords.z - BIAS ) {
+        return 0.0;
+    }
+    */
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for(int x = -1; x <= 1; ++x)
+    const int PCF_HALF = PCF_ITERATIONS/2;
+    const vec2 PFC_TEXEL_SIZE = (texelSize/PCF_HALF) * PCF_SCALE;
+    for(int x = -PCF_HALF; x <= PCF_HALF; ++x)
     {
-        for(int y = -1; y <= 1; ++y)
+        for(int y = -PCF_HALF; y <= PCF_HALF; ++y)
         {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+            /*
+            float pcfDepth = texture(shadowMap, shadowCoords.xy + vec2(x, y) * PFC_TEXEL_SIZE).r; 
+            shadow += shadowCoords.z - BIAS > pcfDepth ? 1.0 : 0.0;        
+            */
+            float shadowness = 1-texture(shadowMap, vec3(shadowCoords.xy + vec2(x,y)*PFC_TEXEL_SIZE, shadowCoords.z-BIAS));
+            shadow+=shadowness;
         }    
     }
-    shadow /= 9.0;
-    
-    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
-
-    shadow = (currentDepth-bias)>closestDepth  ? 1.0 : 0.0;
-    //return shadow;
-    return (currentDepth-bias)-closestDepth;*/
+    shadow /= PCF_ITERATIONS_SQ;
+    return shadow;
 }
 
 
@@ -87,8 +86,17 @@ void main() {
 
     vec3 viewDir = normalize(viewMatrix.viewPos - fragPos);
 
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
+    float spec;
+    if(BLINN == 1)
+    {
+        vec3 halfwayDir = normalize(lightDir + viewDir);  
+        spec = pow(max(dot(normal,halfwayDir), 0.0), 16.0);
+    }
+    else
+    {
+        vec3 reflectDir = reflect(lightDir, normal);
+        spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
+    }
   
     // Phong components
     float shininess = 4;
@@ -104,8 +112,7 @@ void main() {
 
     float shadow = ShadowCalculation(fragPosLightSpace,lightDir);
         // Final color with attenuation
-    vec3 finalColor = (((ambient + diffuse) * (1.0 - shadow)) + specular) * light.intensity * attenuation;
+    vec3 finalColor = (((ambient + diffuse + specular) * (1.0 - shadow))) * light.intensity * attenuation;
     //finalColor=1-vec3(shadow);
-    finalColor=vec3(shadow);
     outColor = vec4(vec3(finalColor), 1.0);
 }

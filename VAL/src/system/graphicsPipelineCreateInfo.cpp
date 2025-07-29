@@ -22,6 +22,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <stdio.h>
 
+std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkRect2D>> pipelineScissors;
+
+std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkViewport>> pipelineViewports;
 
 namespace val
 {
@@ -88,6 +91,62 @@ namespace val
 
 	VkPrimitiveTopology GraphicsPipeline::getTopology() const {
 		return _topology;
+	}
+
+
+
+	void GraphicsPipeline::setScissors(const tiny_vector<VkRect2D> scissors)
+	{
+		pipelineScissors[this] = scissors;
+	}
+
+	void GraphicsPipeline::setScissorCount(const uint32_t count) 
+	{
+		pipelineScissors[this].resize(count);
+	}
+
+
+	void GraphicsPipeline::setViewports(const tiny_vector<VkViewport> viewport)
+	{
+		pipelineViewports[this] = viewport;
+	}
+
+	void GraphicsPipeline::setViewportCount(const uint32_t count)
+	{
+		pipelineViewports[this].resize(count);
+	}
+
+	std::optional<tiny_vector<VkRect2D>> GraphicsPipeline::getScissors() const
+	{
+		if (pipelineScissors.count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineScissors[const_cast<GraphicsPipeline*>(this)];
+		}
+		return std::nullopt;
+	}
+
+	uint32_t GraphicsPipeline::getScissorCount() const
+	{
+		if (pipelineScissors.count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineScissors[const_cast<GraphicsPipeline*>(this)].size();
+		}
+		return 0;
+	}
+
+
+	std::optional<tiny_vector<VkViewport>> GraphicsPipeline::getViewports() const
+	{
+		if (pipelineViewports.count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineViewports[const_cast<GraphicsPipeline*>(this)];
+		}
+		return std::nullopt;
+	}
+
+	uint32_t GraphicsPipeline::getViewportCount() const
+	{
+		if (pipelineViewports.count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineViewports[const_cast<GraphicsPipeline*>(this)].size();
+		}
+		return 0;
 	}
 
 }

@@ -449,6 +449,9 @@
     <ClInclude Include="lib\renderGraph\passBuilder.hpp">
       <Filter>lib\renderGraph</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\Fence.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -639,6 +642,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\system\queue.inl">
+      <Filter>lib\system</Filter>
+    </None>
+    <None Include="lib\system\Fence.inl">
       <Filter>lib\system</Filter>
     </None>
   </ItemGroup>

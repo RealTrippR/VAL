@@ -79,6 +79,13 @@ namespace val {
 
 	public:
 
+		void create(const VkFormat swapchainFormat, VkRenderPass renderPass);
+
+		void create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments);
+
+		void create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount);
+
+
 		void configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace);
 
 		void display(const VkFormat& imgFormat, std::vector<VkSemaphore> waitOn);
@@ -96,8 +103,6 @@ namespace val {
 		void recreateSwapChain(const VkFormat swapchainFormat);
 
 		void updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn);
-
-		void waitForFences();
 
 		VkFramebuffer& getSwapchainFramebuffer(const VkFormat& imageFormat); // gets the swapchain framebuffer for rendering
 
@@ -119,8 +124,6 @@ namespace val {
 
 		inline VkSemaphore getPresentSemaphore(const uint8_t frameidx) const;
 
-		inline const VkFence& getPresentFence() const;
-
 		inline const Queue& getPresentQueue() const;
 
 		inline Queue& getPresentQueue();
@@ -133,17 +136,10 @@ namespace val {
 			glfwPollEvents();
 		}
 
-		void createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass);
-	
-		void createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass);
-
-		void createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass, tiny_vector<VkImageView> attachments);
-
-		void createSwapChainFrameBuffers(ValProc& proc, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass);
-
-		void createSwapChainFrameBuffers(VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
-
 	protected:
+		void createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass);
+
+		void createSwapChainFrameBuffers(const VkImageView* Attachments, const uint32_t attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
 		void createPresentQueue();
 
@@ -172,10 +168,10 @@ namespace val {
 		VkImageView* _swapChainImageViews = VK_NULL_HANDLE;
 		VkFramebuffer* _swapChainFramebuffers = VK_NULL_HANDLE;
 
-		VkFence _presentFence = VK_NULL_HANDLE;
+		//VkFence _presentFence = VK_NULL_HANDLE;
 
 		// this data is used to recreate the swap chain when it's out of date.
-		VkImageView* _swapChainAttachments = NULL;
+		const VkImageView* _swapChainAttachments = NULL;
 		VkRenderPass _swapChainRenderPass{};
 
 		VkColorSpaceKHR _colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;

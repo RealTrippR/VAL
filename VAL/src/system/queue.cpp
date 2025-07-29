@@ -222,6 +222,7 @@ namespace val
 				{
 					if (surface)
 					{
+						// https://www.reddit.com/r/vulkan/comments/z9lqmo/docs_a_bit_unclear/
 						vkGetPhysicalDeviceSurfaceSupportKHR(proc->getVkPhysicalDevice(), i, surface, &presentSupport);
 
 						if (presentSupport == false) {

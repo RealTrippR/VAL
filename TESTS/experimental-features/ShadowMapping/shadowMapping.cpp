@@ -28,11 +28,11 @@ const bool enableValidationLayers = true;
 
 
 
-const float DEPTH_BIAS = .001;
+const float DEPTH_BIAS = 0.001;
 #define FRAMES_IN_FLIGHT 2u
 #define DEPTH_FORMAT VK_FORMAT_D32_SFLOAT
 #define NEAR_PLANE 0.5f
-#define FAR_PLANE 15.0f
+#define FAR_PLANE 7.0f
 
 #define VIEW_DISTANCE 3.f
 
@@ -123,7 +123,7 @@ void updateLight(val::ValProc& proc, val::UBO_Handle& hdl)
 	/*Z IS UP*/
 	Light& light = *(Light*)hdl.getData(proc);
 	light.color = glm::vec3(1.0, 1.0, 1.0);
-	light.intensity = 3.f;
+	light.intensity = 15.f;
 	light.position = { sin(time_sec) * ARM_DISTANCE, cos(time_sec) * ARM_DISTANCE, Z_POS };
 }
 
@@ -136,9 +136,9 @@ void setupLightingPipeline(val::ValProc& proc, val::GraphicsPipeline& pipeline)
 	static rasterizerState rasterizer;
 	rasterizer.setCullMode(CULL_MODE::BACK);
 	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
-	//rasterizer.setEnableDepthBias(true);
-	//rasterizer.setConstantDepthBias(1.25f);
-	//rasterizer.setDepthBiasSlope(1.75f);
+	rasterizer.setEnableDepthBias(true);
+	rasterizer.setConstantDepthBias(0.0);
+	rasterizer.setDepthBiasSlope(1.05f);
 	pipeline.setRasterizer(&rasterizer);
 
 
@@ -162,9 +162,9 @@ void setupMeshPipeline(val::ValProc& proc, val::GraphicsPipeline& pipeline)
 	static rasterizerState rasterizer;
 	rasterizer.setCullMode(CULL_MODE::BACK);
 	rasterizer.setTopologyMode(TOPOLOGY_MODE::FILL);
-	//rasterizer.setEnableDepthBias(true);
-	//rasterizer.setConstantDepthBias(1.25f);
-	//rasterizer.setDepthBiasSlope(1.75f);
+	rasterizer.setEnableDepthBias(true);
+	//rasterizer.setConstantDepthBias(DEPTH_BIAS + 1.0);
+	//rasterizer.setDepthBiasSlope(1.25f);
 	pipeline.setRasterizer(&rasterizer);
 
 	// the color blend state affects how the output of the fragmennt shader is 
@@ -239,7 +239,7 @@ int main()
 	// Configure and create window
 	WindowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
-	Window window(windowConfig, 1200, 1200, "Render Graph Test", proc);
+	Window window(windowConfig, 1200, 1200, "Shadow Mapping Test", proc);
 
 
 	// creates Vulkan logical and physical devices
@@ -290,10 +290,6 @@ int main()
 	setupRenderPassLight(renderPassLight);
 
 
-	//SubpassChain({
-	//	&subpassMain,/*-->*/&subpassLight
-	//	});
-
 	/*******************************************************************************************************************/
 
 	// create depth buffer
@@ -304,7 +300,7 @@ int main()
 
 	ImageView lightDepthBufferView(proc, lightDepthBufferImage, IMAGE_ASPECT::Depth);
 	Sampler lightDepthBufferSampler(proc, lightDepthBufferView, SAMPLER_TYPE::combinedImage);
-	lightDepthBufferSampler.setCompareMode(VK_COMPARE_OP_NEVER); // Disable hardware compare mode
+	lightDepthBufferSampler.setCompareMode(VK_COMPARE_OP_LESS); // Disable hardware compare mode
 	lightDepthBufferSampler.setMipmapMode(VK_SAMPLER_MIPMAP_MODE_NEAREST); //  Depth maps don’t need mipmapping
 	lightDepthBufferSampler.setMagnificationFilter(VK_FILTER_NEAREST); // or VK_FILTER_LINEAR for soft edges
 	lightDepthBufferSampler.setMinificationFilter(VK_FILTER_NEAREST); // same as above
@@ -452,12 +448,6 @@ int main()
 		graphicsQueue.reset();
 		graphicsQueue.begin();
 
-
-		/*CALL_RENDER_PASS(SHADOW, proc, lightPassContext,
-			READ(mesh),
-			WRITE(shadowMapframebuffer),
-			INPUT(lightingPipeline, window, graphicsQueue)
-		);*/
 		CALL_RENDER_PASS(SHADOW, proc, lightPassContext,
 			READ(mesh),
 			WRITE(shadowMapframebuffer),

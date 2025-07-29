@@ -281,6 +281,7 @@
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\descType.hpp" />
+    <ClInclude Include="lib\system\Fence.hpp" />
     <ClInclude Include="lib\system\framebuffer.hpp" />
     <ClInclude Include="lib\system\graphicsPipeline.hpp" />
     <ClInclude Include="lib\system\ImageLayoutTransitionInfo.hpp" />
@@ -437,6 +438,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="lib\system\Fence.inl" />
     <None Include="lib\system\queue.inl" />
   </ItemGroup>
   <ItemGroup>

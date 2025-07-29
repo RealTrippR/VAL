@@ -11,6 +11,8 @@ const bool enableValidationLayers = true;
 
 #define FRAMES_IN_FLIGHT 2u
 
+#define IMG_FORMAT VK_FORMAT_R8G8B8A8_SRGB
+
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
 #include <VAL/lib/ext/gpu_vector.hpp>
@@ -30,12 +32,11 @@ struct ViewMatrix {
 	alignas(16) glm::mat4 proj;
 };
 
-const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-
-const VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 void updateViewMatrix(val::ValProc& proc, val::Window& window, val::UBO_Handle& hdl)
-{	using namespace val;
+{
+	using namespace val;
 	const VkExtent2D& extent = window.getSize();
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -51,7 +52,8 @@ void updateViewMatrix(val::ValProc& proc, val::Window& window, val::UBO_Handle& 
 }
 
 void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
-{	using namespace val;
+{
+	using namespace val;
 
 	// state infos
 	static rasterizerState rasterizer;
@@ -65,7 +67,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
-	static ColorBlendState blendState; 
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
@@ -92,20 +94,19 @@ int main()
 	using namespace val;
 
 	ValProc proc;
-	
-	PhysicalDeviceRequirements deviceRequirements (DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+
+	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 
 	// Configure and create window
 	WindowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
-	Window window(windowConfig, 800, 800, "Base Test", proc);
+	Window window1(windowConfig, 800, 800, "Multiple Window Test - Window #1", proc);
+	Window window2(windowConfig, 800, 800, "Multiple Window Test - Window #2", proc);
 
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
-	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics, &window);
-
-
+	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
 
 	val::UBO_Handle viewUBO(sizeof(ViewMatrix));
 
@@ -117,7 +118,7 @@ int main()
 	// load and configure vert shader
 	val::Shader vertShader("shaders-compiled/shader.vert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
-	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 
 	// load and configure frag shader
 	val::Shader fragShader("shaders-compiled/colorshader.frag.spv", SHADER_STAGE::Fragment, "main");
@@ -130,16 +131,13 @@ int main()
 	setGraphicsPipelineInfo(pipeline);
 
 	val::RenderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat);
+	setRenderPass(renderPassMngr, IMG_FORMAT);
 	pipeline.setRenderPassManager(&renderPassMngr);
 
-	proc.create(FRAMES_IN_FLIGHT, { &pipeline });
-	
+	proc.create(FRAMES_IN_FLIGHT, {&pipeline});
 
-
-	window.create(imageFormat, pipeline.getVkRenderPass());
-
-
+	window1.create(IMG_FORMAT, pipeline.getVkRenderPass());
+	window2.create(IMG_FORMAT, pipeline.getVkRenderPass());
 
 	val::gpu_vector<res::vertex> vertices(proc, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, {
 		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
@@ -170,48 +168,65 @@ int main()
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget;
 	renderTarget.setQueue(graphicsQueue);
-	renderTarget.setFormat(imageFormat);
-	renderTarget.setRenderArea(window.getSize());
+	renderTarget.setFormat(IMG_FORMAT);
+	renderTarget.setRenderArea(window1.getSize());
 	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
 	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
 	renderTarget.setIndexBuffer(indices, indices.size());
 	renderTarget.setVertexBuffer(vertices, vertices.size());
 	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
+	VkViewport viewport{ 0,0, window1.getSize().width, window1.getSize().height, 0.f, 1.f };
 
 	Fence presentFence;
 	presentFence.create(proc);
 
-	while (!window.shouldClose()) {
-		window.pollEvents();
+	while (!window1.shouldClose()) {
+		window1.pollEvents();
+		window2.pollEvents();
+
+		presentFence.reset(proc);
 
 		// Update view information, stored in a UBO
-		updateViewMatrix(proc, window, viewUBO);
+		updateViewMatrix(proc, window1, viewUBO);
 
-		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
+		VkFramebuffer framebuffer1 = window1.beginDraw(IMG_FORMAT);
+		VkFramebuffer framebuffer2 = window2.beginDraw(IMG_FORMAT);
+
 		renderTarget.begin(proc);
 
-		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer1);
 		renderTarget.updateBuffers(proc);
 		renderTarget.updatePipeline(proc, pipeline);
 		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize()});
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window1.getSize() });
 		renderTarget.updateDescriptorSet(proc, pipeline, descSheet, proc.getCurrentFrame());
 		renderTarget.render(proc);
 		renderTarget.endPass(proc);
 
-		renderTarget.submit(proc, {window.getPresentQueue().getSemaphore()}, presentFence);
-		window.display(imageFormat, { graphicsQueue.getSemaphore() });
+		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer2);
+		renderTarget.updateBuffers(proc);
+		renderTarget.updatePipeline(proc, pipeline);
+		renderTarget.updateViewport(proc, viewport, 0);
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window2.getSize() });
+		renderTarget.updateDescriptorSet(proc, pipeline, descSheet, proc.getCurrentFrame());
+		renderTarget.render(proc);
+		renderTarget.endPass(proc);
+
+		renderTarget.submit(proc,
+			{ window1.getPresentSemaphore(), window2.getPresentSemaphore()},
+			presentFence);
+
+		presentFence.wait(proc);
+		window1.display(IMG_FORMAT, { graphicsQueue.getSemaphore() });
+		window2.display(IMG_FORMAT, {});
 
 		proc.nextFrame();
 	}
-
-	presentFence.destroy(proc);
 
 	glfwTerminate();
 #ifndef NDEBUG
 	_CrtDumpMemoryLeaks();
 #endif // !NDEBUG
-
+	presentFence.destroy(proc);
 	return EXIT_SUCCESS;
 }

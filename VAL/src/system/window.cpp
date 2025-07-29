@@ -14,8 +14,35 @@ namespace val {
 		_colorSpace = colorSpace;
 	}
 
+	void Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass) 
+	{
+		createWindowSurface(_procVAL->_instance);
+		createPresentQueue();
+		createPresentFence(_procVAL->getVkLogicalDevice());
+		createSwapChain(swapchainFormat);
+		createSwapChainFrameBuffers(*_procVAL, renderPass);
+	}
+
+
+	void Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments)
+	{
+		createWindowSurface(_procVAL->_instance);
+		createPresentQueue();
+		createPresentFence(_procVAL->getVkLogicalDevice());
+		createSwapChain(swapchainFormat);
+		createSwapChainFrameBuffers(attachments.data(), attachments.size(), renderPass, _procVAL->getVkLogicalDevice());
+	}
+
+	void Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount)
+	{
+		createWindowSurface(_procVAL->_instance);
+		createPresentQueue();
+		createPresentFence(_procVAL->getVkLogicalDevice());
+		createSwapChain(swapchainFormat);
+		createSwapChainFrameBuffers(attachments, attachmentCount, renderPass, _procVAL->getVkLogicalDevice());
+	}
+
 	void Window::display(const VkFormat& imageFormat, std::vector<VkSemaphore> waitOn) {
-		vkWaitForFences(_procVAL->_device, 1, &_presentFence, VK_TRUE, UINT64_MAX);
 		updateSwapChain(imageFormat, waitOn);
 	}
 
@@ -37,13 +64,8 @@ namespace val {
 				vkDestroySurfaceKHR(_procVAL->_instance, _surface, NULL);
 			}
 
-			if (_presentFence)
-			{
-				vkDestroyFence(_procVAL->getVkLogicalDevice(), _presentFence, NULL);
-			}
 
 			_surface = NULL;
-			_presentFence = NULL;
 
 			_swapChainAttachmentCount = 0u;
 			_swapChainImageCount = 0u;
@@ -195,22 +217,8 @@ namespace val {
 		createSwapChainFrameBuffers({}, 0u, renderPass, device);
 	}
 
-	void Window::createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass)
-	{
-		createSwapChainFrameBuffers({}, 0u, renderPass, proc.getVkLogicalDevice());
-	}
 
-	void Window::createSwapChainFrameBuffers(ValProc& proc, VkRenderPass renderPass, tiny_vector<VkImageView> attachments)
-	{
-		createSwapChainFrameBuffers(attachments.data(), attachments.size(), renderPass, proc.getVkLogicalDevice());
-	}
-
-	void Window::createSwapChainFrameBuffers(ValProc& proc, VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass)
-	{
-		createSwapChainFrameBuffers(Attachments, attachmentCount, renderPass, proc.getVkLogicalDevice());
-	}
-
-	void Window::createSwapChainFrameBuffers(VkImageView* Attachments, const uint16_t& attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice)
+	void Window::createSwapChainFrameBuffers(const VkImageView* Attachments, const uint32_t attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice)
 	{
 		_swapChainAttachments = Attachments;
 		_swapChainAttachmentCount = attachmentCount;
@@ -287,10 +295,6 @@ namespace val {
 		}
 	}
 
-	void Window::waitForFences() {
-		vkWaitForFences(_procVAL->_device, 1, &_presentFence, VK_TRUE, UINT64_MAX);
-	}
-
 	VkFramebuffer& Window::getSwapchainFramebuffer(const VkFormat& imageFormat) {
 		//vkWaitForFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -311,15 +315,8 @@ namespace val {
 	}
 
 	// returns a swapchain frame buffer to use
-	VkFramebuffer& Window::beginDraw(const VkFormat& imageFormat) {
-#ifndef NDEBUG
-		if (_presentFence == NULL) {
-			dbg::printError("Cannot begin draw, Window @ %p is missing its present fence.", this);
-			throw std::runtime_error("Cannot begin draw, Window is missing its present fence.");
-		}
-#endif // !NDEBUG
-
-		vkResetFences(_procVAL->_device, 1, &_presentFence);
+	VkFramebuffer& Window::beginDraw(const VkFormat& imageFormat) 
+	{
 		VkFramebuffer& framebuffer = getSwapchainFramebuffer(imageFormat); // gets the swapchain framebuffer to be rendered to
 		return framebuffer;
 	}
@@ -336,14 +333,6 @@ namespace val {
 			.pNext = NULL,
 			.flags = VK_FENCE_CREATE_SIGNALED_BIT,
 		};
-
-		if (vkCreateFence(device, &createInfo, NULL, &_presentFence)!=VK_SUCCESS) 
-		{
-			dbg::printError("Failed to create present fence of Window @ %p", this);
-#ifndef NDEBUG
-			throw std::runtime_error("Failed to create present fence.");
-#endif // !NDEBUG
-		}
 	}
 
 	void Window::createWindowSurface(VkInstance instance) {

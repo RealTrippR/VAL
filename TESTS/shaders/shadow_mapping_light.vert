@@ -26,9 +26,6 @@ void main() {
     vec4 worldPos = viewMatrix.model * vec4(inPosition, 1.0);
     gl_Position = lightMatrix.space * worldPos;
 
-    fragPosLightSpace =  lightMatrix.space * vec4(inPosition, 1.0);
-
-
     // Calculate distance from light position to fragment world position
     //float dist = length(lightMatrix.lightPos - worldPos.xyz);
 

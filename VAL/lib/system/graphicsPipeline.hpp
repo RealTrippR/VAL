@@ -34,7 +34,7 @@ namespace val {
 
 	class GraphicsPipeline : public PipelineBase {
 	public:		
-		GraphicsPipeline() { _bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; }
+		GraphicsPipeline() { setScissorCount(1); setViewportCount(1); _bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; }
 	public:
 		inline VkPipelineBindPoint getBindPoint() const {return _bindPoint;}
 
@@ -63,6 +63,22 @@ namespace val {
 		void setTopology(const VkPrimitiveTopology& topolgy);
 
 		VkPrimitiveTopology getTopology() const;
+
+		void setScissors(const tiny_vector<VkRect2D> scissor);
+
+		void setScissorCount(const uint32_t count);
+
+		void setViewports(const tiny_vector<VkViewport> viewport);
+
+		void setViewportCount(const uint32_t count);
+
+		std::optional<tiny_vector<VkRect2D>> getScissors() const;
+
+		uint32_t getScissorCount() const;
+
+		std::optional<tiny_vector<VkViewport>> getViewports() const;
+
+		uint32_t getViewportCount() const;
 
 	
 	public: 
@@ -94,7 +110,6 @@ namespace val {
 		uint32_t subpassIndex = 0u;
 		VkPrimitiveTopology _topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		bool _sampleShadingEnabled = false;
-
 	};
 }
 

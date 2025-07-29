@@ -158,6 +158,13 @@ namespace val
 		vkUpdateDescriptorSets(device, 1, _descriptorWrites.data() + index, 0, 0);
 	}
 
+	bool DescriptorSheet::isInitialized() {
+		if (_descriptorSets.size() != _maxSetCount) {
+			return false;
+		}
+		return true;
+	}
+
 	void DescriptorSheet::addSheetElement(const DescriptorSheetElement& element)
 	{
 		_elements.push_back(element);

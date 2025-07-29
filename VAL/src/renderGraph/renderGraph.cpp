@@ -294,7 +294,7 @@ namespace val {
 		bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL,
 		bool (*ignoreCharacterConditional)(const char /*char*/, const uint32_t /*char index*/) = NULL)
 	{
-		const uint32_t limit = (endRange - cstr) + 1;
+		const uint32_t limit = (uint32_t)(endRange - cstr) + 1;
 		return findNextMatch(cstr, targ, ignoreCommented, limit, discardMatchConditional, ignoreCharacterConditional);
 	}
 
@@ -320,7 +320,7 @@ namespace val {
 		bool (*discardMatchConditional)(const char*, const char*, const char*) = NULL,
 		bool (*ignoreCharacterConditional)(const char /*char*/, const uint32_t /*char index*/) = NULL)
 	{
-		const uint32_t limit = (endrange - cstr) + 1;
+		const uint32_t limit = (uint32_t)(endrange - cstr) + 1;
 		char* nextMatch = findNextMatch(cstr, targ, ignoreCommented, limit, discardMatchConditional, ignoreCharacterConditional);
 		if (nextMatch) {
 			return nextMatch + strlen(targ);
@@ -364,7 +364,7 @@ namespace val {
 	int64_t getClosingFigureOffset(const char* cstr, const char* endRange, const char openingFig, const char closingFig, const bool ignoreCommented = true) {
 		uint32_t nestCount = 0u;
 		uint32_t i = 0;
-		uint32_t limit = (endRange - cstr) + 1;
+		uint32_t limit = (uint32_t)(endRange - cstr) + 1;
 		COMMENT_TYPE comment = NONE;
 		while (true)
 		{

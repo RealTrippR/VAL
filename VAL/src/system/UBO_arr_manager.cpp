@@ -119,7 +119,7 @@ namespace val {
 				localSrcTransferOnly.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT, GPU_ONLY, (validLocalSrcTransferOnly.data()), (uint32_t)validLocalSrcTransferOnly.size());
 			}
 			if (!validLocalDstAndSrcTransfer.empty()) {
-				localDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, GPU_ONLY, (validLocalDstAndSrcTransfer.data()), validLocalDstAndSrcTransfer.size());
+				localDstAndSrcTransfer.create(proc, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, GPU_ONLY, (validLocalDstAndSrcTransfer.data()), (uint32_t)validLocalDstAndSrcTransfer.size());
 			}
 
 			// there is no reason to create the other array subset if it's not needed

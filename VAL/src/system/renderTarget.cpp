@@ -63,7 +63,7 @@ namespace val {
 	void renderTarget::updateViewports(ValProc& proc, const std::vector<VkViewport>&viewports)
 	{
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdSetViewport(commandBuffer, 0, viewports.size(), viewports.data());
+		vkCmdSetViewport(commandBuffer, 0, (uint32_t)viewports.size(), viewports.data());
 	}
 
 	void renderTarget::updateViewports(ValProc& proc, const std::vector<VkViewport>& viewports, const uint16_t startIndex) {
@@ -83,12 +83,12 @@ namespace val {
 
 	void renderTarget::updateScissors(ValProc& proc, const std::vector<VkRect2D>& scissors) {
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdSetScissor(commandBuffer, 0, scissors.size(), scissors.data());
+		vkCmdSetScissor(commandBuffer, 0, (uint32_t)scissors.size(), scissors.data());
 	}
 
 	void renderTarget::updateScissors(ValProc& proc, const std::vector<VkRect2D>& scissors, const uint16_t startIndex) {
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdSetScissor(commandBuffer, startIndex, scissors.size(), scissors.data());
+		vkCmdSetScissor(commandBuffer, startIndex, (uint32_t)scissors.size(), scissors.data());
 	}
 
 
@@ -133,6 +133,13 @@ namespace val {
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(proc),
 			//0, 1, &proc._descriptorSets[pipelineIdx][proc._currentFrame], 0, nullptr);
 			0, 1, &(sheet.getVkDescriptorSets()[setIndex]), 0, VK_NULL_HANDLE);
+
+#ifndef NDEBUG
+		if (sheet.isInitialized() == false) {
+			dbg::printError("renderTarget::updateDescriptorSet: Attempted to use DescriptorSheet @ %p which has not yet been initialized.", sheet);
+		}
+#endif // !NDEBUG
+
 	}
 
 	
@@ -171,7 +178,7 @@ namespace val {
 	void renderTarget::updateAndSetVertexBuffer(ValProc& proc, const VkBuffer& buffer, const uint32_t& vertexCount) {
 		setVertexBuffer(buffer, vertexCount);
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
-		vkCmdBindVertexBuffers(commandBuffer, 0, _vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
+		vkCmdBindVertexBuffers(commandBuffer, 0, (uint32_t)_vertexBuffers.size(), _vertexBuffers.data(), _vertexBufferOffsets.data());
 	}
 
 	void renderTarget::updateAndSetVertexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& vertexCount) {

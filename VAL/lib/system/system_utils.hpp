@@ -318,7 +318,7 @@ namespace val {
 
 	bool checkValidationLayerSupport(std::vector<const char*>& validationLayers);
 
-	bool checkDeviceExtensionSupport(VkPhysicalDevice device, std::vector<const char*>& deviceExtensions);
+	bool checkDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions);
 
 	swapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
 
@@ -330,9 +330,9 @@ namespace val {
 
 	VkFormat findSupportedImageFormat(VkPhysicalDevice physicalDevice, ImageFormatRequirements& requirements);
 
-	VkPhysicalDevice findOptimalPhysicalDevice(ValProc& proc, PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface);
+	VkPhysicalDevice findOptimalPhysicalDevice(ValProc& proc, const PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface);
 
-	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance vkInstance, PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface, uint32_t* deviceCountOut=NULL);
+	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance vkInstance, const PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface, uint32_t* deviceCountOut=NULL);
 
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 

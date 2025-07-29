@@ -20,6 +20,8 @@ layout(location = 0) out vec3 fragPos;              // World-space position
 layout(location = 1) out vec3 normal;               // World-space normal
 layout(location = 2) out vec4 fragPosLightSpace;    // Light-space position
 
+
+// [-1,1] -> [0,1]
 const mat4 bias = mat4( 
   0.5, 0.0, 0.0, 0.0,
   0.0, 0.5, 0.0, 0.0,
