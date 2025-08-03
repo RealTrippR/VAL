@@ -119,9 +119,9 @@ int main()
 	window.setTitle("Image Test");
 	window.setIcon("testImage.jpg");
 	window.setWindowMode(WN_MODE::WindowedFullscreen);
-	Cursor cursor("testImage40x40.jpg", 0, 0);
+
+	Cursor cursor("testImage41x26.jpg", 0, 0);
 	window.setCursor(cursor);
-	//window.resize(800,800);
 
 
 	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
@@ -218,7 +218,7 @@ int main()
 	renderTarget.setQueue(graphicsQueue);
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setRenderArea(window.getSize());
-	renderTarget.setClearValues({ { 0.0f, 0.0f, 0.0f, 1.0f } });
+	renderTarget.setClearValues({ { 0.0f, 0.001f, 0.005f, 1.0f } });
 	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
 	renderTarget.setIndexBuffer(indices, indices.size());
 	renderTarget.setVertexBuffer(vertices, vertices.size());

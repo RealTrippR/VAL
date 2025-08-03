@@ -327,7 +327,6 @@ namespace val {
 		cleanupSwapChain();
 
 		createSwapChain(swapchainFormat);
-		createSwapChainImageViews(swapchainFormat);
 		createSwapChainFrameBuffers(_swapChainAttachments, _swapChainAttachmentCount, _swapChainRenderPass, _procVAL->_device);
 	}
 
@@ -466,6 +465,7 @@ namespace val {
 	void Window::createSwapChainImageViews(const VkFormat swapchainFormat) {
 		if (_swapChainImages == NULL) {
 			dbg::printWarning("Attempting to create the swapchain image views of Window @ %p but there are no swapchain images.", this);
+			return;
 		}
 
 		// allocate swap chain image views
