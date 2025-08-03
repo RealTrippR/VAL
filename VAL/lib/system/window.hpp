@@ -24,6 +24,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/queueManager.hpp>
 #include <VAL/lib/system/windowProperties.hpp>
+#include <VAL/lib/system/windowCursor.hpp>
 #include <vector> 
 #include <VAL/lib/ext/tiny_vector.hpp>
 
@@ -33,14 +34,17 @@ namespace val {
 
 	class Window {
 	public:
+
+		Window() = default;
+
 		Window(ValProc& valProc) 
-			: _presentQueue(NULL) 
+			: _presentQueue(NULL)
 		{
 			_procVAL = &valProc;
 		}
 
 		Window(GLFWwindow* windowHDL, ValProc& valProc, VkColorSpaceKHR colorSpace) 
-			: _presentQueue(_procVAL)
+			: _presentQueue(NULL)
 		{
 			if (!windowHDL) {
 				printf("VAL: ERROR: Cannot create window, the GLFWwindow* handle is NULL! Ensure that glfwInit was called before the window's creation.");
@@ -52,21 +56,10 @@ namespace val {
 			_colorSpace = colorSpace;
 		}
 
-		Window(WindowProperties& initProperties, const uint16_t width, const uint16_t height, const std::string& name, ValProc& valProc, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL)
-			: _presentQueue(_procVAL)
+		Window(ValProc& proc, WindowProperties& initProperties, const uint16_t width, const uint16_t height, const char* title, VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL)
+			: _presentQueue(NULL)
 		{
-			glfwInit(); // (it's safe to call init more than once. Refer to: https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init)
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
-			
-			initProperties.applyToGLFW();
-
-			_window = glfwCreateWindow(width, height, name.c_str(), monitor, NULL);
-			if (!_window) { printf("VAL: ERROR: Failed to initialize GLFW window, window is: %p \n", _window); }
-
-			_procVAL = &valProc;
-			_colorSpace = colorSpace;
-			_swapChainExtent = { .width = width, .height = height };
-			_swapChainAttachmentCount = 0u;
+			prep(proc, initProperties, width, height, title, colorSpace, monitor);
 		}
 
 		~Window() {
@@ -85,6 +78,20 @@ namespace val {
 
 		void create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount);
 
+		void prep(ValProc& proc, WindowProperties& initProperties, const uint16_t width, const uint16_t height, const char* title, const VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL);
+
+		void setTitle(const char* title);
+
+		const char* getTitle();
+
+		void resize(const uint16_t width, const uint16_t height);
+		// void setIconFromMemory(const void* mem, const uint32_t memSize);
+		// 
+		VAL_RETURN_CODE setIcon(const fs::path& filepath);
+
+		void setCursor(const Cursor& cursor);
+
+		void setWindowMode(const WN_MODE windowMode);
 
 		void configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace);
 
@@ -187,6 +194,8 @@ namespace val {
 		bool _ownsGLFWwindow = true;
 
 		bool _frameBufferResized = false;
+
+		WN_MODE _windowMode = WN_MODE::Windowed;
 	};
 }
 

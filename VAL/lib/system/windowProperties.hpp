@@ -38,6 +38,12 @@ namespace val {
 		MousePassthrough =		64
 	};
 
+	enum class WN_MODE : uint8_t {
+		Windowed,
+		BorderlessWindowed,
+		Fullscreen,
+		WindowedFullscreen
+	};
 	#ifndef WINDOW_BOOL_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS
 	#define WINDOW_BOOL_PROPERTIES_DEF_ENUM_BITWISE_OPERATORS
 		DEF_ENUM_BITWISE_OPERATORS(WN_BOOL_PROPERTY);

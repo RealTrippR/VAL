@@ -31,7 +31,12 @@ namespace val
 		DescriptorSheetElement(const uint32_t binding) {
 			_binding = binding;
 		}
-
+		DescriptorSheetElement(const uint32_t binding, ObjectDescriptorInfo objInfo, SHADER_STAGE stageflags, IMAGE_LAYOUT overrideImgLayout = IMAGE_LAYOUT::MaxEnum) {
+			_binding = binding;
+			_descriptorInfo = objInfo;
+			_shaderStageFlags = (VkShaderStageFlags)stageflags;
+			_overrideImgLayout = overrideImgLayout;
+		}
 	public:
 		VkDescriptorType getType() const; 
 

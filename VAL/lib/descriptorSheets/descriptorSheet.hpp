@@ -27,6 +27,12 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
+	static const ObjectDescriptorInfo DescriptorCombinedSampler =
+	{
+		.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+		.arrCount = 1
+	};
+
 	struct DescriptorSheetElementBuilder {
 		uint32_t binding;
 		ObjectDescriptorInfo objInfo;
@@ -65,6 +71,8 @@ namespace val
 		VAL_RETURN_CODE createDescriptorSetLayoutFromSheet(VkDevice device, VkDescriptorSetLayout* layout);
 
 		uint32_t getDescriptorPoolSizes(std::vector<VkDescriptorPoolSize>* descPoolSizes) const;
+
+		VAL_RETURN_CODE allocateSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool);
 
 		// allocates a VkDescriptorSet and populates it with the descriptor writes.
 		VAL_RETURN_CODE allocateAndWriteSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool);

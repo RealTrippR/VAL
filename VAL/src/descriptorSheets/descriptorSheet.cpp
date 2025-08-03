@@ -67,7 +67,7 @@ namespace val
 		return (uint32_t)poolSizesMap.size();
 	}
 
-	VAL_RETURN_CODE DescriptorSheet::allocateAndWriteSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool)
+	VAL_RETURN_CODE DescriptorSheet::allocateSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool)
 	{
 		if (sets == NULL) {
 			dbg::printError("DescriptorSheet::allocateAndWriteSets: DescriptorSheet @ %p: argument `sets` was NULL.", this);
@@ -85,13 +85,23 @@ namespace val
 			.descriptorSetCount = setCount,
 			.pSetLayouts = setLayouts
 		};
-	
+
 		if (vkAllocateDescriptorSets(device, &setAllocInfo, sets) != VK_SUCCESS)
 		{
 			dbg::printError("DescriptorSheet::allocateSetAndWriteSets: DescriptorSheet @ %p: failed to allocate descriptor sets, of which there are %lu.", this, setCount);
 			return VAL_FAILURE;
 		}
 
+		_descriptorWrites.resize(_elements.size());
+
+		return VAL_SUCCESS;
+	}
+	VAL_RETURN_CODE DescriptorSheet::allocateAndWriteSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool)
+	{
+		VAL_RETURN_CODE res = allocateSets(device, sets, setLayouts, setCount, pool);
+		if (res!=VAL_SUCCESS) {
+			return res;
+		}
 		for (uint32_t i = 0; i < setCount; ++i)
 		{
 			updateAndWriteDescriptors(device, sets[i]);

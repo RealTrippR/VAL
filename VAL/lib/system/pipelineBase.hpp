@@ -37,6 +37,10 @@ namespace val {
 
 		VkPipelineLayout getPipelineLayout(ValProc& proc) const;
 
+		VAL_RETURN_CODE allocateDescriptorSets(ValProc& proc);
+
+		void writeDescriptorSets(ValProc& proc);
+
 		VAL_RETURN_CODE allocateAndWriteDescriptorSets(ValProc& proc);
 
 		virtual const std::vector<VkShaderStageFlags> getShaderStages()const;

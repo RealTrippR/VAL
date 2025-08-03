@@ -91,6 +91,34 @@ namespace val {
 		return VK_NULL_HANDLE;
 	}
 
+	VAL_RETURN_CODE PipelineBase::allocateDescriptorSets(ValProc& proc)
+	{
+		if (!descriptorSheet) {
+			return VAL_FAILURE;
+		}
+		const uint32_t maxSetCount = descriptorSheet->getMaxSetCount();
+		descriptorSheet->getVkDescriptorSets().resize(maxSetCount);
+		tiny_vector<VkDescriptorSetLayout> setLayoutCopies(maxSetCount, getDescriptorSetLayout(proc));
+
+		return descriptorSheet->allocateSets(
+			proc.getVkLogicalDevice(),
+			descriptorSheet->getVkDescriptorSets().data(),
+			setLayoutCopies.data(),
+			maxSetCount,
+			proc.getVkDescriptorPool()
+		);
+	}
+
+	void PipelineBase::writeDescriptorSets(ValProc& proc)
+	{
+		for (uint8_t i = 0; i < descriptorSheet->getVkDescriptorSets().size(); ++i) {
+			descriptorSheet->updateAndWriteDescriptors(
+				proc.getVkLogicalDevice(),
+				descriptorSheet->getVkDescriptorSets().data()[i]
+			);
+		}
+	}
+
 	VAL_RETURN_CODE PipelineBase::allocateAndWriteDescriptorSets(ValProc& proc)
 	{
 		if (!descriptorSheet) {

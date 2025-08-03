@@ -25,7 +25,7 @@ namespace val
 #ifndef NDEBUG
 		if (_img != NULL) {
 			dbg::printWarning("Image::create: This function should never be called on an image (@ %p) that has already been created; it will result in a memory leak.", this);
-			throw std::bad_function_call();
+			throw std::runtime_error("BAD FUNCTION CALL");
 		}
 #endif // !NDEBUG
 

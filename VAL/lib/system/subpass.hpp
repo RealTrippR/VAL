@@ -7,7 +7,6 @@
 #include <VAL/lib/renderAttachments/depthAttachment.hpp>
 #include <VAL/lib/renderAttachments/inputAttachment.hpp>
 #include <VAL/lib/renderAttachments/resolveAttachment.hpp>
-#include <tiny/optional.h>
 
 namespace val
 {

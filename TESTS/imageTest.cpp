@@ -113,7 +113,15 @@ int main()
 	// Configure and create window
 	WindowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
-	Window window(windowConfig, 800, 800, "Image Test", proc);
+	//Window window(windowConfig, 800, 800, "Image Test", proc);
+	Window window;
+	window.prep(proc, windowConfig, 800, 800, "Image ____");
+	window.setTitle("Image Test");
+	window.setIcon("testImage.jpg");
+	window.setWindowMode(WN_MODE::WindowedFullscreen);
+	Cursor cursor("testImage40x40.jpg", 0, 0);
+	window.setCursor(cursor);
+	//window.resize(800,800);
 
 
 	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
@@ -130,7 +138,7 @@ int main()
 	DescriptorSheet descSheet(
 		{
 			{0, viewUBO, SHADER_STAGE::Vertex},
-			{1, imgSampler, SHADER_STAGE::Fragment}
+			{1, val::DescriptorCombinedSampler , SHADER_STAGE::Fragment}
 		},
 		FRAMES_IN_FLIGHT
 	);
@@ -157,6 +165,7 @@ int main()
 	pipeline.setDescriptorSheet(&descSheet);
 	proc.create(FRAMES_IN_FLIGHT, { &pipeline });
 
+	/*window.create should be called only after proc.create has been called*/
 	window.create(imageFormat, pipeline.getVkRenderPass());
 
 
@@ -175,7 +184,7 @@ int main()
 		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-	});
+		});
 
 
 	gpu_vector<uint32_t> indices(proc, BUFFER_USAGE::Index,
@@ -191,7 +200,12 @@ int main()
 	int timer = 0;
 	bool imgNum = 0;
 
-	pipeline.allocateAndWriteDescriptorSets(proc);
+
+	pipeline.allocateDescriptorSets(proc);
+
+	descSheet.setSheetElement(1, { 1,imgSampler, SHADER_STAGE::Vertex });
+
+	pipeline.writeDescriptorSets(proc);
 
 	//////////////////////////////////////////////////////////////
 
@@ -209,7 +223,6 @@ int main()
 	renderTarget.setIndexBuffer(indices, indices.size());
 	renderTarget.setVertexBuffer(vertices, vertices.size());
 	// config viewport, covers the entire size of the window
-	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
 
 	Fence presentFence;
 	presentFence.create(proc);
@@ -226,7 +239,7 @@ int main()
 		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 		renderTarget.updateBuffers(proc);
 		renderTarget.updatePipeline(proc, pipeline);
-		renderTarget.updateViewport(proc, viewport, 0);
+		renderTarget.updateViewport(proc, VkViewport{ 0, 0, (float)window.getSize().width, (float)window.getSize().height, 0.f, 1.f }, 0);
 		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
 		renderTarget.updateDescriptorSet(proc, pipeline, descSheet, proc.getCurrentFrame());
 		renderTarget.render(proc);
@@ -260,6 +273,14 @@ int main()
 			}
 		}
 	}
+
+	vertices.destroy(proc);
+
+	indices.destroy(proc);
+
+	imgView1.destroy();
+
+	imgView2.destroy();
 
 	presentFence.destroy(proc);
 

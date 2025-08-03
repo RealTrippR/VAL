@@ -42,6 +42,125 @@ namespace val {
 		createSwapChainFrameBuffers(attachments, attachmentCount, renderPass, _procVAL->getVkLogicalDevice());
 	}
 
+	void Window::prep(ValProc& proc, WindowProperties& initProperties, const uint16_t width, const uint16_t height, const char* title, const VkColorSpaceKHR colorSpace, GLFWmonitor* monitor)
+	{
+		_procVAL = &proc;
+
+		glfwInit(); // (it's safe to call init more than once. Refer to: https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init)
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
+
+		initProperties.applyToGLFW();
+
+		_window = glfwCreateWindow(width, height, title, monitor, NULL);
+		if (!_window) { printf("VAL: ERROR: Failed to initialize GLFW window, window is: %p \n", _window); }
+
+		_procVAL = &proc;
+		_colorSpace = colorSpace;
+		_swapChainExtent = { .width = width, .height = height };
+		_swapChainAttachmentCount = 0u;
+	}
+
+	void Window::setTitle(const char* title)
+	{
+		glfwSetWindowTitle(_window, title);
+	}
+
+	const char* Window::getTitle()
+	{
+		return glfwGetWindowTitle(_window);
+	}
+
+	void Window::resize(const uint16_t width, const uint16_t height)
+	{
+#ifndef NDEBUG
+		if (_windowMode == WN_MODE::Fullscreen || _windowMode == WN_MODE::WindowedFullscreen) {
+			dbg::printWarning("Window::resize: For Window @ %p:  resize should never be called on a Window which has a mode of WN_MODE::Fullscreen or WN_MODE::BorderlessWindowed.");
+		}
+#endif // !NDEBUG
+
+		glfwSetWindowSize(_window, width, height);
+	}
+
+	VAL_RETURN_CODE Window::setIcon(const fs::path& filepath)
+	{
+
+		GLFWimage images[1];
+		images[0].pixels = stbi_load(filepath.string().c_str(), &images[0].width, &images[0].height, 0, 4); // Load as RGBA
+		
+		if (images[0].pixels) {
+			glfwSetWindowIcon(_window, 1, images);
+			stbi_image_free(images[0].pixels);
+			return VAL_SUCCESS;
+		}
+		else {
+			return VAL_FAILURE;
+		}
+
+	}
+
+	void Window::setCursor(const Cursor& cursor)
+	{
+		glfwSetCursor(_window, cursor);
+	}
+
+	void Window::setWindowMode(const WN_MODE windowMode)
+	{
+		_windowMode = windowMode;
+
+		if (windowMode == WN_MODE::Fullscreen) {
+			glfwSetWindowAttrib(_window, GLFW_DECORATED, false);
+
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			glfwSetWindowMonitor(
+				_window, monitor,
+				0, 0,						 // x, y position (ignored for fullscreen)
+				mode->width, mode->height,	// width and height
+				GLFW_DONT_CARE				// `GLFW_DONT_CARE` to keep current refresh rate
+			);      
+		}
+		else if (windowMode == WN_MODE::WindowedFullscreen)
+		{
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			glfwSetWindowAttrib(_window, GLFW_DECORATED, true);
+
+			glfwSetWindowMonitor(
+				_window, NULL,
+				0, 0,				
+				mode->width, mode->height,
+				GLFW_DONT_CARE
+			);
+
+			glfwSetWindowSize(_window, mode->width, mode->height);
+
+			glfwMaximizeWindow(_window);
+
+			int width, height;
+
+			glfwGetWindowSize(_window, &width, &height);
+			_swapChainExtent = { .width = (uint32_t)width, .height = (uint32_t)height };
+			_frameBufferResized = true;
+		}
+		
+		else if (windowMode == WN_MODE::Windowed) {
+			glfwSetWindowAttrib(_window, GLFW_DECORATED, true);
+
+			int x=0, y=0;
+			glfwGetWindowPos(_window,&x,&y);
+			glfwSetWindowMonitor(_window, NULL,
+				x,y,
+				_swapChainExtent.width, _swapChainExtent.height,
+				0);
+		}
+		else if (windowMode == WN_MODE::BorderlessWindowed) {
+
+		}
+		return;
+	}
+
 	void Window::display(const VkFormat& imageFormat, std::vector<VkSemaphore> waitOn) {
 		updateSwapChain(imageFormat, waitOn);
 	}
@@ -286,8 +405,8 @@ namespace val {
 
 		VkResult result = vkQueuePresentKHR(_presentQueue.getVkQueue(), &presentInfo);
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _procVAL->_frameBufferResized) {
-			_procVAL->_frameBufferResized = false;
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _frameBufferResized) {
+			_frameBufferResized = false;
 			recreateSwapChain(imageFormat);
 		}
 		else if (result != VK_SUCCESS) {

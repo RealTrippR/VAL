@@ -205,6 +205,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\system\windowCursor.cpp" />
     <ClInclude Include="..\ExternalLibraries\cply\c_polygon.h" />
     <ClInclude Include="lib\classEnumBitOps.hpp" />
     <ClInclude Include="lib\C_compatibleBinding.h" />
@@ -386,6 +387,7 @@
     <ClCompile Include="src\system\image.cpp" />
     <ClCompile Include="src\system\subpass.cpp" />
     <ClCompile Include="src\system\system_utils.cpp" />
+    <ClInclude Include="lib\system\windowCursor.hpp" />
     <ClInclude Include="lib\system\windowProperties.hpp" />
     <ClInclude Include="lib\VALreturnCode.h" />
     <ClInclude Include="src\meshes&amp;vertices\meshPBR.cpp">
