@@ -28,11 +28,17 @@ namespace val
 	class PushDescriptorSheet
 	{
 	public:
+		PushDescriptorSheet() = default;
+
+		PushDescriptorSheet(const tiny_vector<PushDescriptorSheetElement>& elements) {
+			setElements(elements);
+		}
+	public:
 		VAL_RETURN_CODE create(VkDevice device);
 
 		void destroy(VkDevice device);
 
-		void setElements(tiny_vector<PushDescriptorSheetElement>& elements);
+		void setElements(const tiny_vector<PushDescriptorSheetElement>& elements);
 
 		const tiny_vector<PushDescriptorSheetElement>& getElements() const;
 

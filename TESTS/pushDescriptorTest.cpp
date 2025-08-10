@@ -144,10 +144,7 @@ int main()
 		FRAMES_IN_FLIGHT
 	);
 	PushDescriptorSheet descSheetP(
-		{
-			{0, {DESC_TYPE::SampledImage, 1u}, SHADER_STAGE::Vertex},
-		},
-		FRAMES_IN_FLIGHT
+		{{0, DESC_TYPE::SampledImage, 1, SHADER_STAGE::Vertex}}
 	);
 	
 	// load and configure vert shader
@@ -306,6 +303,8 @@ int main()
 	imgSampler.destroy(proc);
 
 	presentFence.destroy(proc);
+
+	descSheetP.destroy(proc);
 
 	glfwTerminate();
 

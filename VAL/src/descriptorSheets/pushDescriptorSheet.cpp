@@ -28,7 +28,7 @@ namespace val
 		vkDestroyDescriptorSetLayout(device, _layout, NULL);
 	}
 
-	void PushDescriptorSheet::setElements(tiny_vector<PushDescriptorSheetElement>& elements)
+	void PushDescriptorSheet::setElements(const tiny_vector<PushDescriptorSheetElement>& elements)
 	{
 		_elements = elements;
 	}
