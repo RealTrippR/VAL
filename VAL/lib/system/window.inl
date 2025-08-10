@@ -23,6 +23,10 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
+	inline uint8_t Window::getSwapchainImageCount() const {
+		return _swapChainImageCount;
+	}
+
 	inline uint32_t Window::getHeight() const {
 		return _swapChainExtent.height;
 	}

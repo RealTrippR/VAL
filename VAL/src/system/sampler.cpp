@@ -25,7 +25,7 @@ namespace val
 
 	std::unordered_map<Sampler*, VkSamplerCreateInfo> createInfos;
 
-	VAL_RETURN_CODE Sampler::create(bool keepCreateInfo)
+	VAL_RETURN_CODE Sampler::create(VkDevice device, bool keepCreateInfo)
 	{
 #ifndef NDEBUG
 		if (_imgView == NULL && _samplerType != SAMPLER_TYPE::standalone)
@@ -47,14 +47,14 @@ namespace val
 
 		VkSamplerCreateInfo& createInfo = createInfos[this];
 		
-		if (vkCreateSampler(_proc._device, &createInfo, nullptr, &sampler) != VK_SUCCESS) {
+		if (vkCreateSampler(device, &createInfo, nullptr, &sampler) != VK_SUCCESS) {
 			dbg::printError("Sampler::create: Failed to create VkSampler of Sampler %p", this);
 #ifndef NDEBUG
 			throw std::runtime_error("Failed to create VkSampler");
 #endif // !
 			return VAL_FAILURE;
 		}
-		dbg::recordVkObjectCreation(_proc._device, sampler);
+		dbg::recordVkObjectCreation(device, sampler);
 
 		if (keepCreateInfo == false) {
 			createInfos.erase(this);
@@ -62,11 +62,11 @@ namespace val
 		return VAL_SUCCESS;
 	}
 
-	void Sampler::destroy() {
+	void Sampler::destroy(VkDevice device) {
 		VkSampler& sampler = _VKdescriptorInfo.sampler;
 		if (sampler) {
-			vkDestroySampler(_proc._device, sampler, NULL);
-			dbg::recordVkObjectDestruction(_proc._device, sampler);
+			vkDestroySampler(device, sampler, NULL);
+			dbg::recordVkObjectDestruction(device, sampler);
 			sampler = NULL;
 		}
 	}

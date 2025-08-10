@@ -83,7 +83,7 @@ namespace val
 		{	// load texture from embedded data
 			texture->createFromMemory(textureFbx->content.data, (uint32_t)textureFbx->content.size,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, texture->getImageLayout(),
-				bufferSpace::GPU_ONLY, 1u);
+				BUFFER_SPACE::GPU_ONLY, 1u);
 			if (texture->getVkImage() != VK_NULL_HANDLE) {
 				return;
 			}
@@ -92,7 +92,7 @@ namespace val
 		//// it's stored on the disk / embed fail fallback (fbx textures can have both embedded data and an associated file)
 			texture->createFromDisk(textureFbx->absolute_filename.data,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, texture->getImageLayout(),
-				bufferSpace::GPU_ONLY, 1u,
+				BUFFER_SPACE::GPU_ONLY, 1u,
 				USE_SOURCE_DIMENSION, USE_SOURCE_DIMENSION);
 		}
 	}

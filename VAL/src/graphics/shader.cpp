@@ -75,15 +75,6 @@ namespace val {
 		_shaderStageFlags  = stageFlags;
 	}
 
-	void Shader::setPushConstant(pushConstantHandle* pushConstant) {
-		_pushConstant = pushConstant;
-		_pushConstant->_stageFlags |= _shaderStageFlags;
-	}
-
-	pushConstantHandle* Shader::getPushConstant() noexcept {
-		return _pushConstant;
-	}
-
 	void Shader::setVertexAttributes(const tiny_vector<VkVertexInputAttributeDescription>& attributes)
 	{
 		_attributes = attributes;

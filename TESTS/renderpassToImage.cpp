@@ -2,7 +2,6 @@
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
-
 #else
 const bool enableValidationLayers = true;
 #endif //!NDEBUG
@@ -76,7 +75,7 @@ void setGraphicsPipelineInfo1(val::GraphicsPipeline& pipeline)
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
 
 
@@ -100,7 +99,7 @@ void setGraphicsPipelineInfo2(val::GraphicsPipeline& pipeline)
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
-	pipeline.setDynamicStates({ DYNAMIC_STATE::SCISSOR, DYNAMIC_STATE::VIEWPORT });
+	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
 
 void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
@@ -109,7 +108,7 @@ void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
 	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
-	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	colorAttach.setFinalLayout(IMAGE_LAYOUT::PresentSrc);
 
 	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 	subpass.bindAttachment(&colorAttach);
@@ -122,7 +121,7 @@ void setRenderPass2(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) 
 	colorAttach.setImgFormat(imgFormat);
 	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
 	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
-	colorAttach.setFinalLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	colorAttach.setFinalLayout(IMAGE_LAYOUT::ColorAttachment);
 
 	static Subpass subpass(renderPassMngr, PIPELINE_TYPE::Graphics);
 	subpass.bindAttachment(&colorAttach);

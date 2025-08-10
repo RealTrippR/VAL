@@ -57,7 +57,7 @@ namespace val {
 	}
 
 	void Texture2D::createFromMemory(const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
-		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
+		const VkImageLayout layout, const BUFFER_SPACE memspace, const uint8_t mipLevels)
 	{
 		destroy();
 		_layout = layout;
@@ -85,7 +85,7 @@ namespace val {
 	}
 
 	void Texture2D::createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
-		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels, const uint16_t maxWidth, const uint16_t maxHeight)
+		const VkImageLayout layout, const BUFFER_SPACE memspace, const uint8_t mipLevels, const uint16_t maxWidth, const uint16_t maxHeight)
 	{
 		destroy();
 		_layout = layout;
@@ -129,7 +129,7 @@ namespace val {
 	}
 
 	void Texture2D::create(const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
-		const VkImageLayout layout, const bufferSpace memspace, const uint8_t mipLevels)
+		const VkImageLayout layout, const BUFFER_SPACE memspace, const uint8_t mipLevels)
 	{
 		destroy();
 #ifndef NDEBUG

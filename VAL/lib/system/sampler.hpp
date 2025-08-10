@@ -13,24 +13,22 @@ namespace val {
 
 	class Sampler {
 	public:
-		Sampler(ValProc& proc) : _proc(proc) 
+
+		Sampler()
 		{ 
 			initDefaultCreateInfoValues();
 		};
-		Sampler(ValProc& proc, SAMPLER_TYPE samplerType) : _proc(proc), _samplerType(samplerType) 
+
+		Sampler(SAMPLER_TYPE samplerType) : _samplerType(samplerType) 
 		{
 			initDefaultCreateInfoValues(); 
 		};
-		Sampler(ValProc& proc, val::ImageView& imgView, SAMPLER_TYPE samplerType = combinedImage, VkCompareOp compareop= VK_COMPARE_OP_NEVER) : _proc(proc), _samplerType(samplerType) 
+		Sampler(val::ImageView& imgView, SAMPLER_TYPE samplerType = combinedImage, VkCompareOp compareop = VK_COMPARE_OP_NEVER) : _samplerType(samplerType) 
 		{
 			initDefaultCreateInfoValues();
 			setCompareMode(compareop);
 			bindImageView(imgView); 
 		};
-
-		~Sampler() {
-			destroy();
-		}
 
 		inline VkDescriptorType getVkDescriptorType() {
 			return (VkDescriptorType)_samplerType;
@@ -52,18 +50,18 @@ namespace val {
 
 		operator const ObjectDescriptorInfo()
 		{
-			ObjectDescriptorInfo info {
-				.valObject = this ,
-				.updateDataCallback = toObjectDescriptorInfo
-			};
+			ObjectDescriptorInfo info;
+			info.valObject = this;
+			info.updateDataCallback = toObjectDescriptorInfo;
+			
 			toObjectDescriptorInfo(&info);
 			return info;
 		}
 
 	public:
-		VAL_RETURN_CODE create(bool keepCreateInfo = false);
+		VAL_RETURN_CODE create(VkDevice device, bool keepCreateInfo = false);
 
-		void destroy();
+		void destroy(VkDevice device);
 		//void recreate();
 	public:
 		void bindImageView(ImageView& imageView);
@@ -116,12 +114,9 @@ namespace val {
 
 	protected:
 		friend ValProc;
-		ValProc& _proc;
 
-		// sampler can be stored in VkDescriptorImageInfo
-		//VkSampler _sampler = VK_NULL_HANDLE;
-		//VkSamplerCreateInfo _samplerCreateInfo{};
 		ImageView* _imgView;
+
 		// VkSampler reference is stored in here
 		VkDescriptorImageInfo _VKdescriptorInfo{.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
 		SAMPLER_TYPE _samplerType = combinedImage;

@@ -22,19 +22,24 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
-	void Buffer::create(ValProc& proc, const uint32_t& size, const bufferSpace& space, VkBufferUsageFlags bufferUsage, uint16_t frameCount) {
+	void Buffer::create(ValProc& proc, const uint32_t size, BUFFER_SPACE space, VkBufferUsageFlags bufferUsage) {
 		_size = size;
 		_usage = bufferUsage;
 		
 		proc.createBuffer(size, bufferUsage, bufferSpaceToVkMemoryProperty(space), _buffer, _memory);
 	}
 
-	// overwrites from a staging buffer for all frames in flight
-	void Buffer::overwriteFromStagingBuffer(ValProc& proc, void* data, uint64_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset) 
+	void Buffer::createFromStagingBuffer(ValProc& proc, void* data, uint32_t dataSize, const BUFFER_SPACE space, const BUFFER_USAGE usages)
+	{
+		create(proc, dataSize, space, usages);
+		overwriteFromStagingBuffer(proc, data, dataSize, 0, 0);
+	}
+
+	void Buffer::overwriteFromStagingBuffer(ValProc& proc, void* data, uint32_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
 	{
 		// create staging buffer
 		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
+	;	VkDeviceMemory stagingBufferMemory;
 		proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 		void* stagingData;
 		vkMapMemory(proc._device, stagingBufferMemory, 0, dataSize, 0, &stagingData);
@@ -87,6 +92,7 @@ namespace val
 			vkDestroyBuffer(proc.getVkLogicalDevice(), _buffer, VK_NULL_HANDLE);
 			_buffer = VK_NULL_HANDLE;
 		}
+		_size = 0u;
 	}
 
 

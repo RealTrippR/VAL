@@ -64,7 +64,7 @@ namespace val
 		_finalLayout = (VkImageLayout)l;
 	}
 
-	const VkFormat& renderAttachment::getImgFormat() {
+	const VkFormat& renderAttachment::getImgFormat() const {
 		return _imgFormat;
 	}
 

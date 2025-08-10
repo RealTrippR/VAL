@@ -95,6 +95,8 @@ namespace val {
 		}
 
 		inline void applyToGLFW() {
+			glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);      // FORCE VISIBILITY
+
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::Resizable)) {
 				glfwWindowHint(GLFW_RESIZABLE,
 					bool(_boolValueMask & WN_BOOL_PROPERTY::Resizable));

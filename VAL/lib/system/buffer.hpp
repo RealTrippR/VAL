@@ -13,22 +13,25 @@ namespace val
 		Buffer() = default;
 
 		// creates the buffer from the input values.
-		Buffer(ValProc& proc, const uint32_t& size, const bufferSpace& space, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u)
+		Buffer(ValProc& proc, const uint32_t size, const BUFFER_SPACE space, const VkBufferUsageFlags bufferUsage)
 		{
-			create(proc, size, space, bufferUsage, frameCount);
-		}
-		~Buffer() {
-			//destroy();
+			create(proc, size, space, bufferUsage);
 		}
 
+		Buffer& operator=(const Buffer& other) = delete;
 
 	public:
-		void create(ValProc& proc, const uint32_t& size, const bufferSpace& usage, const VkBufferUsageFlags bufferUsage, uint16_t frameCount = 1u);
 
-		// overwrites from a staging buffer for all frames in flight
-		void overwriteFromStagingBuffer(ValProc& proc, void* data, uint64_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
+		inline void create(ValProc& proc, const uint32_t size, const BUFFER_SPACE space, const BUFFER_USAGE bufferUsage) {
+			create(proc, size, space, (VkBufferUsageFlags)bufferUsage);
+		}
 
-		// overwrites a buffer at dstFrameIdx with from another buffer at srcFrameIdx
+		void create(ValProc& proc, const uint32_t size, const BUFFER_SPACE space, const VkBufferUsageFlags bufferUsage);
+
+		void createFromStagingBuffer(ValProc& proc, void* data, uint32_t dataSize, const BUFFER_SPACE space, const BUFFER_USAGE usages);
+
+		void overwriteFromStagingBuffer(ValProc& proc, void* data, uint32_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
+
 		void overwriteFromBuffer(ValProc& proc, Buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
 
 		void resize(ValProc& proc, uint32_t newSize);
@@ -45,8 +48,8 @@ namespace val
 		VkBufferUsageFlags getUsageFlags() const;
 
 	protected:
-		VkBuffer _buffer;
-		VkDeviceMemory _memory;
+		VkBuffer _buffer = NULL;
+		VkDeviceMemory _memory = NULL;
 		uint32_t _size = 0u;
 		VkBufferUsageFlags _usage = 0;
 	};

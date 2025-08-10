@@ -263,7 +263,7 @@ namespace val {
 		DEF_ENUM_BITWISE_OPERATORS(IMAGE_LAYOUT);
 	#endif
 
-	enum bufferSpace : uint8_t {
+	enum BUFFER_SPACE : uint8_t {
 		GPU_ONLY = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		CPU_GPU = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
 	};
@@ -344,18 +344,18 @@ namespace val {
 	VkImage createTextureImage16BitFromDisk(ValProc* proc, fs::path imgFilepath, VkFormat* autoFormatOut, stbi_us** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
-		const bufferSpace& buffSpace = GPU_ONLY);
+		const BUFFER_SPACE& buffSpace = GPU_ONLY);
 
 
 	VkImage createTextureImage8BitFromMemory(ValProc* proc, const void* memory, const uint32_t memSize, stbi_uc** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
-		const bufferSpace& buffSpace = GPU_ONLY);
+		const BUFFER_SPACE& buffSpace = GPU_ONLY);
 
 	VkImage createTextureImage8BitFromDisk(ValProc* proc, fs::path imgFilepath, stbi_uc** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
-		const bufferSpace& buffSpace = GPU_ONLY);
+		const BUFFER_SPACE& buffSpace = GPU_ONLY);
 	
 
 
@@ -366,7 +366,7 @@ namespace val {
 
 	uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-	VkMemoryPropertyFlags bufferSpaceToVkMemoryProperty(const bufferSpace& bufferSpace);
+	VkMemoryPropertyFlags bufferSpaceToVkMemoryProperty(const BUFFER_SPACE& bufferSpace);
 
 	void transitionImageLayout(VkDevice Device, VkImage img, const IMAGE_LAYOUT oldLayout,
 		const IMAGE_LAYOUT newLayout, const IMAGE_ASPECT aspectMask, const PIPELINE_STAGE srcStageMask,

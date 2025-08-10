@@ -29,16 +29,16 @@ namespace val {
 	class UBO_Handle; // forward declaration
 
 	struct uboArraySubset {
-		void create(ValProc& proc, VkBufferUsageFlags additionalUsages, bufferSpace space, UBO_Handle** uboHandles, uint32_t uboCount);
+		void create(ValProc& proc, VkBufferUsageFlags additionalUsages, BUFFER_SPACE space, UBO_Handle** uboHandles, uint32_t uboCount);
 		void destroy(ValProc& proc);
 		void* getMappedDataOfFrame(const uint8_t& frameIdx);
 
 		size_t _sizePerFrame = 0; // in bytes
 		// data is laid out in a 2d array packed into a fixed, 1d array like so:
 		// [frameIndex][uboIndex]
-		VkDeviceMemory _vkMem;
-		VkBuffer _vkBuff;
-		void* _dataMapped;
+		VkDeviceMemory _vkMem{};
+		VkBuffer _vkBuff{};
+		void* _dataMapped{};
 	};
 
 	struct uboArray {

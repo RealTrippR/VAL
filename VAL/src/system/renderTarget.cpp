@@ -274,7 +274,7 @@ namespace val {
 
 	}
 
-	void renderTarget::beginPass(ValProc& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer)
+	void renderTarget::beginPass(ValProc& proc, VkRenderPass renderPass, VkFramebuffer& frameBuffer)
 	{
 		VkCommandBuffer& commandBuffer = _queue->getCommandBuffer();
 

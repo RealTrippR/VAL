@@ -19,6 +19,10 @@ namespace val
 		operator VkFence() {
 			return _fence;
 		}
+
+		operator const VkFence&() const {
+			return _fence;
+		}
 	private:
 		VkFence _fence;
 	};

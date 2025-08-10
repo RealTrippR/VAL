@@ -21,25 +21,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/pipelineBase.hpp>
 
 namespace val {
-	void pushConstantHandle::update(ValProc& proc, void* data, const PipelineBase& pipeline, const Shader& shdr, VkCommandBuffer& cmdBuffer) {
-#ifndef NDEBUG
-		if (_size % 4 != 0) {
-			printf("VAL: WARNING: Push constant at memory address %p has a size that is not a multiple of 4! It's size is: %d", this, _size);
-		}
 
-#endif // !NDEBUG
-
-		vkCmdPushConstants(
-			cmdBuffer,
-			proc._graphicsPipelineLayouts[pipeline.pipelineIdx],
-			shdr._shaderStageFlags,
-			_offset,
-			_size,
-			data
-		);
-	}
-
-	void pushConstantHandle::update(ValProc& proc, void* data, const PipelineBase& pipeline, VkCommandBuffer& cmdBuffer) {
+	void pushConstantHandle::update(ValProc& proc, void* data, const PipelineBase& pipeline, VkCommandBuffer cmdBuffer) {
 		vkCmdPushConstants(
 			cmdBuffer,
 			proc._graphicsPipelineLayouts[pipeline.pipelineIdx],
@@ -50,8 +33,36 @@ namespace val {
 		);
 	}
 
+	void pushConstantHandle::update(ValProc& proc, void* data, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer) {
+		vkCmdPushConstants(
+			cmdBuffer,
+			pipelineLayout,
+			_stageFlags,
+			_offset,
+			_size,
+			data
+		);
+	}
+
+
+	uint32_t roundUp(uint32_t size, uint32_t multiple)
+	{
+		const uint32_t u = (size + multiple - 1) / multiple;
+		return u * multiple;
+	}
+
+	void pushConstantHandle::setSize(uint32_t size)
+	{
+		_size = size;
+	}
+
+	uint32_t pushConstantHandle::getSize() const
+	{
+		return _size;
+	}
 
 	VkPushConstantRange pushConstantHandle::toVkPushConstantRange() {
+		_size = roundUp(_size, 4);
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = _stageFlags;  // Used in the vertex shader
 		pushConstantRange.offset = _offset;

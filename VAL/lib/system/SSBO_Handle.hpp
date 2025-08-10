@@ -13,7 +13,7 @@ namespace val {
 		SSBO_Handle(uint64_t sizeOfSSBO) : SSBO_Handle() {
 			_size = sizeOfSSBO;
 		}
-		SSBO_Handle(uint64_t sizeOfSSBO, bufferSpace usage) : SSBO_Handle() {
+		SSBO_Handle(uint64_t sizeOfSSBO, BUFFER_SPACE usage) : SSBO_Handle() {
 			_size = sizeOfSSBO;
 			_usage = usage;
 		}
@@ -42,7 +42,7 @@ namespace val {
 
 		// IF GPU ONLY: DOES NOT NEED TO BE MAPPED TO MEMORY
 		// IF GPU-CPU: MUST BE MAPPED TO MEMORY
-		bufferSpace _usage = CPU_GPU;
+		BUFFER_SPACE _usage = CPU_GPU;
 
 		VkShaderStageFlags _stageFlags = VK_SHADER_STAGE_ALL;
 	};

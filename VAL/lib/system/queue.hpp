@@ -94,11 +94,11 @@ namespace val
 
 		inline void submit(Queue& waitUpon, const VkPipelineStageFlags& waitStages, const VkFence& fence);
 
-		inline void submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount, const VkShaderStageFlags* waitStages /*1 for every semaphore*/);
+		inline void submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount, const VkPipelineStageFlags* waitStages /*1 for every semaphore*/);
 
-		inline void submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount, const VkShaderStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence);
+		inline void submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount, const VkPipelineStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence);
 
-		inline void submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount, const VkShaderStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence, uint8_t frameIdx, bool signal);
+		inline void submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount, const VkPipelineStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence, uint8_t frameIdx, bool signal);
 
 	public:
 		inline uint8_t getCommandBufferCount() const;

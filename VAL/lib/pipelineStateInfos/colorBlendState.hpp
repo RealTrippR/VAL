@@ -53,8 +53,8 @@ namespace val
 	public:
 		std::vector<ColorBlendStateAttachment*> _attachments;
 		float _blendConstantsColors[4] = { 0.f,0.f,0.f,0.f };
-		bool _logicOpEnabled;
-		VkLogicOp _logicOp;
+		bool _logicOpEnabled=false;
+		VkLogicOp _logicOp=VK_LOGIC_OP_OR;
 	};
 }
 

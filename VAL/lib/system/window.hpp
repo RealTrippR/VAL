@@ -72,11 +72,11 @@ namespace val {
 
 	public:
 
-		void create(const VkFormat swapchainFormat, VkRenderPass renderPass);
+		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkRenderPass renderPass);
 
-		void create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments);
+		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments);
 
-		void create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount);
+		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount);
 
 		void prep(ValProc& proc, WindowProperties& initProperties, const uint16_t width, const uint16_t height, const char* title, const VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL);
 
@@ -105,15 +105,21 @@ namespace val {
 		/// @brief 
 		void cleanupSwapChain();
 
-		void createSwapChain(const VkFormat swapchainFormat);
+		VAL_RETURN_CODE createSwapChain(const VkFormat swapchainFormat);
 
 		void recreateSwapChain(const VkFormat swapchainFormat);
 
 		void updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn);
 
+		VkImageView getSwapchainImageView() const;
+
+		VkImage getSwapchainImage() const;
+
 		VkFramebuffer& getSwapchainFramebuffer(const VkFormat& imageFormat); // gets the swapchain framebuffer for rendering
 
 		VkFramebuffer& beginDraw(const VkFormat& imageFormat);
+
+		inline uint8_t getSwapchainImageCount() const;
 
 		inline uint32_t getHeight() const;
 
@@ -144,9 +150,9 @@ namespace val {
 		}
 
 	protected:
-		void createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass);
+		VAL_RETURN_CODE createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass);
 
-		void createSwapChainFrameBuffers(const VkImageView* Attachments, const uint32_t attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
+		VAL_RETURN_CODE createSwapChainFrameBuffers(const VkImageView* Attachments, const uint32_t attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
 		void createPresentQueue();
 

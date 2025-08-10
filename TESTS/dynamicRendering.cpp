@@ -30,12 +30,13 @@ struct ViewMatrix {
 	alignas(16) glm::mat4 proj;
 };
 
-const std::vector<const char*> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 const VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
 
 void updateViewMatrix(val::ValProc& proc, val::Window& window, val::UBO_Handle& hdl)
-{	using namespace val;
+{
+	using namespace val;
 	const VkExtent2D& extent = window.getSize();
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -51,7 +52,8 @@ void updateViewMatrix(val::ValProc& proc, val::Window& window, val::UBO_Handle& 
 }
 
 void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
-{	using namespace val;
+{
+	using namespace val;
 
 	// state infos
 	static rasterizerState rasterizer;
@@ -65,23 +67,11 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 	colorBlendAttachment.setColorWriteMask(VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT);
 
 	/* A graphics pipeline can have as many color blend attachments as there are color attachments in the subpass it's associated with; no more, no less.*/
-	static ColorBlendState blendState; 
+	static ColorBlendState blendState;
 	blendState.bindBlendAttachment(&colorBlendAttachment);
 	pipeline.setColorBlendState(&blendState);
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
-}
-
-void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) {
-	using namespace val;
-	static ColorAttachment colorAttach;
-	colorAttach.setImgFormat(imgFormat);
-	colorAttach.setLoadOperation(Clear);
-	colorAttach.setStoreOperation(Store);
-	colorAttach.setFinalLayout(IMAGE_LAYOUT::PresentSrc);
-
-	static Subpass subpass(renderPassMngr, Graphics);
-	subpass.bindAttachment(&colorAttach);
 }
 
 int main()
@@ -92,8 +82,9 @@ int main()
 	using namespace val;
 
 	ValProc proc;
-	
-	PhysicalDeviceRequirements deviceRequirements (DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+
+	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
+	deviceRequirements.addFeature(DEVICE_FEATURES::dynamicRendering);
 
 	// creates Vulkan logical and physical devices
 	// if a window is passed through, the windowSurface is also created
@@ -122,7 +113,7 @@ int main()
 	// load and configure vert shader
 	val::Shader vertShader("shaders-compiled/shader.vert.spv", SHADER_STAGE::Vertex, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
-	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription()});
+	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 
 	// load and configure frag shader
 	val::Shader fragShader("shaders-compiled/colorshader.frag.spv", SHADER_STAGE::Fragment, "main");
@@ -134,12 +125,21 @@ int main()
 	pipeline.setShaders({ &vertShader,&fragShader });
 	setGraphicsPipelineInfo(pipeline);
 
-	val::RenderPassManager renderPassMngr(proc);
-	setRenderPass(renderPassMngr, imageFormat);
-	pipeline.setRenderPassManager(&renderPassMngr);
+	
+	static val::ColorAttachment colorAttach;
+	colorAttach.setImgFormat(imageFormat);
+	colorAttach.setLoadOperation(RENDER_ATTACHMENT_OPERATION::Clear);
+	colorAttach.setStoreOperation(RENDER_ATTACHMENT_OPERATION::Store);
+	colorAttach.setFinalLayout(IMAGE_LAYOUT::PresentSrc);
+
+	val::DynamicRenderingState renderingState;
+	renderingState.setColorAttachments({ &colorAttach });
+
+
+	pipeline.setDynamicRenderingState(&renderingState);
 
 	proc.create(FRAMES_IN_FLIGHT, { &pipeline });
-	
+
 
 
 	window.create(imageFormat, pipeline.getVkRenderPass());
@@ -196,16 +196,18 @@ int main()
 		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
 		renderTarget.begin(proc);
 
-		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
+		//renderTarget.beginRendering(proc, renderingState);
+		//renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
 		renderTarget.updateBuffers(proc);
 		renderTarget.updatePipeline(proc, pipeline);
 		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize()});
+		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize() });
 		renderTarget.updateDescriptorSet(proc, pipeline, descSheet, proc.getCurrentFrame());
 		renderTarget.render(proc);
-		renderTarget.endPass(proc);
+		//renderTarget.endPass(proc);
+		//renderTarget.endRendering(proc);
 
-		renderTarget.submit(proc, {window.getPresentQueue().getSemaphore()}, presentFence);
+		renderTarget.submit(proc, { window.getPresentQueue().getSemaphore() }, presentFence);
 		presentFence.wait(proc);
 		window.display(imageFormat, { graphicsQueue.getSemaphore() });
 		presentFence.reset(proc);

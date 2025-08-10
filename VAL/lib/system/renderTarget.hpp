@@ -101,7 +101,7 @@ namespace val {
 
 		void begin(ValProc& proc);
 
-		void beginPass(ValProc& proc, VkRenderPass& renderPass, VkFramebuffer& frameBuffer);
+		void beginPass(ValProc& proc, VkRenderPass renderPass, VkFramebuffer& frameBuffer);
 
 		void endPass(ValProc& proc);
 

@@ -455,6 +455,15 @@
     <ClInclude Include="lib\system\windowCursor.hpp">
       <Filter>lib\system</Filter>
     </ClInclude>
+    <ClInclude Include="lib\system\dynamicRenderingState.hpp">
+      <Filter>lib\system</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\descriptorSheets\pushDescriptorSheet.hpp">
+      <Filter>lib\descriptorSheet</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\descriptorSheets\pushDescriptorSheetElement.hpp">
+      <Filter>lib\descriptorSheet</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\system\VAL_PROC.cpp">
@@ -526,7 +535,7 @@
     <ClCompile Include="src\pipelineStateInfos\rasterizerState.cpp">
       <Filter>src\pipelineStateInfos</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp">
+    <ClCompile Include="src\system\graphicsPipeline.cpp">
       <Filter>src\system</Filter>
     </ClCompile>
     <ClCompile Include="src\pipelineStateInfos\colorBlendStateAttachment.cpp">
@@ -639,6 +648,9 @@
     </ClCompile>
     <ClCompile Include="src\system\windowCursor.cpp">
       <Filter>src\system</Filter>
+    </ClCompile>
+    <ClCompile Include="src\descriptorSheets\pushDescriptorSheet.cpp">
+      <Filter>src\descriptorSheets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -73,13 +73,13 @@ namespace val {
 		return _layout;
 	}
 
-	inline bufferSpace Texture2D::getBufferSpace() const
+	inline BUFFER_SPACE Texture2D::getBufferSpace() const
 	{
 		if (_pixels) {
-			return bufferSpace::CPU_GPU;
+			return BUFFER_SPACE::CPU_GPU;
 		}
 		else {
-			return bufferSpace::GPU_ONLY;
+			return BUFFER_SPACE::GPU_ONLY;
 		}
 	}
 

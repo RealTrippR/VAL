@@ -22,12 +22,22 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <stdio.h>
 
-std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkRect2D>> pipelineScissors;
 
-std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkViewport>> pipelineViewports;
 
 namespace val
 {
+	inline std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkRect2D>>& pipelineScissors()
+	{
+		static std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkRect2D>> map;
+		return map;
+	}
+
+	inline std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkViewport>>& pipelineViewports()
+	{
+		static std::unordered_map<val::GraphicsPipeline*, tiny_vector<VkViewport>> map;
+		return map;
+	}
+
 
 	void GraphicsPipeline::setRasterizer(val::rasterizerState* rasterizer)
 	{
@@ -97,37 +107,38 @@ namespace val
 
 	void GraphicsPipeline::setScissors(const tiny_vector<VkRect2D> scissors)
 	{
-		pipelineScissors[this] = scissors;
+		pipelineScissors()[this];
+		pipelineScissors()[this] = scissors;
 	}
 
 	void GraphicsPipeline::setScissorCount(const uint32_t count) 
 	{
-		pipelineScissors[this].resize(count);
+		pipelineScissors()[this].resize(count);
 	}
 
 
 	void GraphicsPipeline::setViewports(const tiny_vector<VkViewport> viewport)
 	{
-		pipelineViewports[this] = viewport;
+		pipelineViewports()[this] = viewport;
 	}
 
 	void GraphicsPipeline::setViewportCount(const uint32_t count)
 	{
-		pipelineViewports[this].resize(count);
+		pipelineViewports()[this].resize(count);
 	}
 
 	std::optional<tiny_vector<VkRect2D>> GraphicsPipeline::getScissors() const
 	{
-		if (pipelineScissors.count(const_cast<GraphicsPipeline*>(this)) > 0) {
-			return pipelineScissors[const_cast<GraphicsPipeline*>(this)];
+		if (pipelineScissors().count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineScissors()[const_cast<GraphicsPipeline*>(this)];
 		}
 		return std::nullopt;
 	}
 
 	uint32_t GraphicsPipeline::getScissorCount() const
 	{
-		if (pipelineScissors.count(const_cast<GraphicsPipeline*>(this)) > 0) {
-			return pipelineScissors[const_cast<GraphicsPipeline*>(this)].size();
+		if (pipelineScissors().count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineScissors()[const_cast<GraphicsPipeline*>(this)].size();
 		}
 		return 0;
 	}
@@ -135,16 +146,16 @@ namespace val
 
 	std::optional<tiny_vector<VkViewport>> GraphicsPipeline::getViewports() const
 	{
-		if (pipelineViewports.count(const_cast<GraphicsPipeline*>(this)) > 0) {
-			return pipelineViewports[const_cast<GraphicsPipeline*>(this)];
+		if (pipelineViewports().count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineViewports()[const_cast<GraphicsPipeline*>(this)];
 		}
 		return std::nullopt;
 	}
 
 	uint32_t GraphicsPipeline::getViewportCount() const
 	{
-		if (pipelineViewports.count(const_cast<GraphicsPipeline*>(this)) > 0) {
-			return pipelineViewports[const_cast<GraphicsPipeline*>(this)].size();
+		if (pipelineViewports().count(const_cast<GraphicsPipeline*>(this)) > 0) {
+			return pipelineViewports()[const_cast<GraphicsPipeline*>(this)].size();
 		}
 		return 0;
 	}

@@ -38,25 +38,6 @@ namespace val {
 		return UBO_Handles;
 	}
 
-	std::vector<pushConstantHandle*> PipelineBase::getUniquePushConstants() const {
-		std::vector<pushConstantHandle*> PC_Handles;
-		for (Shader* shdr : shaders) {
-			if (shdr->_pushConstant != NULL) {
-
-				pushConstantHandle* PC_Hdl = shdr->_pushConstant;
-
-				PC_Hdl->_stageFlags |= shdr->getStageFlags();
-
-				// if the handle is not already in the list of unique handles, add it to the list
-				if (std::find(PC_Handles.begin(), PC_Handles.end(), PC_Hdl) == PC_Handles.end()) {
-					PC_Handles.push_back(PC_Hdl);
-				}
-
-			}
-		}
-		return PC_Handles;
-	}
-
 	std::vector<SSBO_Handle*> PipelineBase::getUniqueSSBOs() const {
 		if (descriptorSheet==NULL){
 			return {};
@@ -77,6 +58,16 @@ namespace val {
 
 	tiny_vector<VkDescriptorSet>& PipelineBase::getDescriptorSets() const {
 		return descriptorSheet->getVkDescriptorSets();
+	}
+
+	void PipelineBase::setPushConstants(const tiny_vector<pushConstantHandle*>& constants)
+	{
+		_pushConstants = constants;
+	}
+
+	const tiny_vector<pushConstantHandle*>& PipelineBase::getPushConstants() const
+	{
+		return _pushConstants;
 	}
 
 	VkPipelineLayout PipelineBase::getPipelineLayout(ValProc& proc) const
@@ -443,6 +434,16 @@ namespace val {
 	DescriptorSheet* PipelineBase::getDescriptorSheet() const
 	{
 		return descriptorSheet;
+	}
+
+	void PipelineBase::setPushDescriptorSheet(PushDescriptorSheet* descSheet)
+	{
+		pushDescriptorSheet = descSheet;
+	}
+
+	PushDescriptorSheet* PipelineBase::getPushDescriptorSheet() const
+	{
+		return pushDescriptorSheet;
 	}
 
 	void PipelineBase::setShaders(const tiny_vector<Shader*>& shaders)

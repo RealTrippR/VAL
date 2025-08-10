@@ -342,7 +342,7 @@ namespace val
 			char* mappedDataStagingBuff;
 			proc.createBuffer(sizeof(VkAccelerationStructureInstanceKHR),
 				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				bufferSpaceToVkMemoryProperty(bufferSpace::CPU_GPU),
+				bufferSpaceToVkMemoryProperty(BUFFER_SPACE::CPU_GPU),
 				stagingBuff, stagingBuffMem);
 
 			vkMapMemory(proc._device, stagingBuffMem, 0, sizeof(VkAccelerationStructureInstanceKHR),

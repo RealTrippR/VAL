@@ -99,7 +99,7 @@ namespace val
 	}
 
 	inline void Queue::submit(const VkSemaphore* waitSemaphores, const  uint8_t waitSemaphoreCount,
-		const VkShaderStageFlags* waitStages /*1 for every semaphore*/)
+		const VkPipelineStageFlags* waitStages /*1 for every semaphore*/)
 	{
 #ifndef NDEBUG
 		dbgValidateSelfUse();
@@ -119,7 +119,7 @@ namespace val
 	}
 
 	inline void Queue::submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
-		const VkShaderStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence)
+		const VkPipelineStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence)
 	{
 #ifndef NDEBUG
 		dbgValidateSelfUse();
@@ -139,7 +139,7 @@ namespace val
 	}
 
 	inline void Queue::submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
-		const VkShaderStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence, uint8_t frameIdx, bool signal)
+		const VkPipelineStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence, uint8_t frameIdx, bool signal)
 	{
 #ifndef NDEBUG
 		dbgValidateSelfUse();

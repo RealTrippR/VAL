@@ -57,7 +57,10 @@ namespace val {
 		cubeMaps = 1 << 5,
 		deviceBufferAddressing = 1 << 6,
 		accelerationStructures = 1 << 7,
-		robustBufferAccessing = 1 << 8
+		robustBufferAccessing = 1 << 8,
+		dynamicRendering = 1 << 9,
+		fillModeNonSolid = 1 << 10,
+		wideLines = 1 << 11
 	};
 
 #ifndef DEVICE_FEATURE_FLAGS_DEF_ENUM_BITWISE_OPERATORS

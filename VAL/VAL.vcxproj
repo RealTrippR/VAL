@@ -194,6 +194,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <TreatSpecificWarningsAsErrors>4715;</TreatSpecificWarningsAsErrors>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -203,8 +205,13 @@
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\GLFW\lib-vc2022</AdditionalLibraryDirectories>
     </Link>
+    <Lib>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)ExternalLibraries\Vulkan\Lib;$(SolutionDir)ExternalLibraries\GLFW\lib-vc2022</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\descriptorSheets\pushDescriptorSheet.cpp" />
     <ClCompile Include="src\system\windowCursor.cpp" />
     <ClInclude Include="..\ExternalLibraries\cply\c_polygon.h" />
     <ClInclude Include="lib\classEnumBitOps.hpp" />
@@ -217,6 +224,8 @@
     <ClInclude Include="lib\descriptorSheets\descriptorSheet.hpp" />
     <ClInclude Include="lib\descriptorSheets\descriptorSheetElement.hpp" />
     <ClInclude Include="lib\descriptorSheets\objectDescriptorInfo.h" />
+    <ClInclude Include="lib\descriptorSheets\pushDescriptorSheet.hpp" />
+    <ClInclude Include="lib\descriptorSheets\pushDescriptorSheetElement.hpp" />
     <ClInclude Include="lib\ext\ansiColorCodes.h" />
     <ClInclude Include="lib\ext\gpu_vector.hpp" />
     <ClInclude Include="lib\ext\hashmap.h" />
@@ -282,6 +291,7 @@
     <ClInclude Include="lib\system\depthBuffer.hpp" />
     <ClInclude Include="lib\system\descriptorBinding.hpp" />
     <ClInclude Include="lib\system\descType.hpp" />
+    <ClInclude Include="lib\system\dynamicRenderingState.hpp" />
     <ClInclude Include="lib\system\Fence.hpp" />
     <ClInclude Include="lib\system\framebuffer.hpp" />
     <ClInclude Include="lib\system\graphicsPipeline.hpp" />
@@ -368,7 +378,7 @@
     <ClCompile Include="src\system\computeTarget.cpp" />
     <ClCompile Include="src\system\depthBuffer.cpp" />
     <ClCompile Include="src\system\frameBuffer.cpp" />
-    <ClCompile Include="src\system\graphicsPipelineCreateInfo.cpp" />
+    <ClCompile Include="src\system\graphicsPipeline.cpp" />
     <ClCompile Include="src\system\imageView.cpp" />
     <ClCompile Include="src\system\multisamplerManager.cpp" />
     <ClCompile Include="src\system\physicalDeviceRequirements.cpp" />

@@ -9,50 +9,70 @@ namespace val {
 		return _window;
 	}
 
-	void Window::configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace) {
+	void Window::configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace) 
+	{
 		_window = windowHDL;
 		_colorSpace = colorSpace;
 	}
 
-	void Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass) 
+	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass)
 	{
 		createWindowSurface(_procVAL->_instance);
 		createPresentQueue();
 		createPresentFence(_procVAL->getVkLogicalDevice());
-		createSwapChain(swapchainFormat);
-		createSwapChainFrameBuffers(*_procVAL, renderPass);
+		if (createSwapChain(swapchainFormat) != VAL_SUCCESS)
+			return VAL_FAILURE;
+		if (createSwapChainFrameBuffers(*_procVAL, renderPass) != VAL_SUCCESS)
+			return VAL_FAILURE;
+		return VAL_SUCCESS;
 	}
 
-
-	void Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments)
+	
+	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments)
 	{
 		createWindowSurface(_procVAL->_instance);
 		createPresentQueue();
 		createPresentFence(_procVAL->getVkLogicalDevice());
-		createSwapChain(swapchainFormat);
-		createSwapChainFrameBuffers(attachments.data(), attachments.size(), renderPass, _procVAL->getVkLogicalDevice());
+		if (createSwapChain(swapchainFormat) != VAL_SUCCESS)
+			return VAL_FAILURE;
+		if (createSwapChainFrameBuffers(attachments.data(), attachments.size(), renderPass, _procVAL->getVkLogicalDevice()) != VAL_SUCCESS)
+			return VAL_FAILURE;
+		return VAL_SUCCESS;
 	}
 
-	void Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount)
+	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount)
 	{
 		createWindowSurface(_procVAL->_instance);
 		createPresentQueue();
 		createPresentFence(_procVAL->getVkLogicalDevice());
-		createSwapChain(swapchainFormat);
-		createSwapChainFrameBuffers(attachments, attachmentCount, renderPass, _procVAL->getVkLogicalDevice());
+		if (createSwapChain(swapchainFormat) != VK_SUCCESS)
+			return VAL_FAILURE;
+		if (createSwapChainFrameBuffers(attachments, attachmentCount, renderPass, _procVAL->getVkLogicalDevice()) != VAL_SUCCESS)
+			return VAL_FAILURE;
+		return VAL_SUCCESS;
 	}
 
 	void Window::prep(ValProc& proc, WindowProperties& initProperties, const uint16_t width, const uint16_t height, const char* title, const VkColorSpaceKHR colorSpace, GLFWmonitor* monitor)
 	{
+#ifndef NDEBUG
+		if (proc._instance == NULL) {
+			dbg::printWarning("Window::prep: for Window @ %p: Calling Window.prep before the VkInstance of the given proc has been created may result in undefined behavior.", this);
+		}
+#endif // !NDEBUG
+
 		_procVAL = &proc;
 
 		glfwInit(); // (it's safe to call init more than once. Refer to: https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init)
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // by saying NO_API we tell GLFW to not use OpenGL
 
 		initProperties.applyToGLFW();
 
 		_window = glfwCreateWindow(width, height, title, monitor, NULL);
-		if (!_window) { printf("VAL: ERROR: Failed to initialize GLFW window, window is: %p \n", _window); }
+		glfwPollEvents();
+		glfwWaitEvents();
+
+		if (!_window) {
+			dbg::printWarning("Window::prep: For Window @ %p: glfwCreateWindow failed.", this);
+		}
 
 		_procVAL = &proc;
 		_colorSpace = colorSpace;
@@ -78,6 +98,9 @@ namespace val {
 		}
 #endif // !NDEBUG
 
+		if (!_window)
+			return;
+		
 		glfwSetWindowSize(_window, width, height);
 	}
 
@@ -227,12 +250,13 @@ namespace val {
 	}
 
 
-	void Window::createSwapChain(const VkFormat swapchainFormat)
+	VAL_RETURN_CODE Window::createSwapChain(const VkFormat swapchainFormat)
 	{
 #ifndef NDEBUG
 		if (_swapChain != VK_NULL_HANDLE)
 		{
 			dbg::printWarning("createSwapChain was called on window %h that already has an initialized swapchain, calling this function more than once may lead to undefined behavior or program crashes.", this);
+			return VAL_FAILURE;
 		}
 #endif // !NDEBUG
 
@@ -303,12 +327,15 @@ namespace val {
 		if (res != VK_SUCCESS)
 		{
 			dbg::printError("Failed to query swapChainImageCount of Window %p. VkResult as a U32: ", this, (uint32_t)res);
+			return VAL_FAILURE;
 		}
 
 		_swapChainImageCount = swapChainImageCount;
 		_swapChainExtent = extent;
 
 		createSwapChainImageViews(swapchainFormat);
+
+		return VAL_SUCCESS;
 	}
 
 
@@ -330,18 +357,25 @@ namespace val {
 		createSwapChainFrameBuffers(_swapChainAttachments, _swapChainAttachmentCount, _swapChainRenderPass, _procVAL->_device);
 	}
 
-	void Window::createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass)
+	VAL_RETURN_CODE Window::createSwapChainFrameBuffers(VkDevice device, VkRenderPass renderPass)
 	{
-		createSwapChainFrameBuffers({}, 0u, renderPass, device);
+		return createSwapChainFrameBuffers({}, 0u, renderPass, device);
 	}
 
 
-	void Window::createSwapChainFrameBuffers(const VkImageView* Attachments, const uint32_t attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice)
+	VAL_RETURN_CODE Window::createSwapChainFrameBuffers(const VkImageView* Attachments, const uint32_t attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice)
 	{
 		_swapChainAttachments = Attachments;
 		_swapChainAttachmentCount = attachmentCount;
 		_swapChainRenderPass = renderPass;
 
+#ifndef NDEBUG
+		if (renderPass == VK_NULL_HANDLE) {
+			dbg::printError("Window::createSwapChainFrameBuffers: For Window @ %p, renderPass is NULL.");
+		}
+#endif // !NDEBUG
+
+		
 
 		if (_swapChainImageCount > 0) {
 			// allocate swap chain image views
@@ -352,7 +386,7 @@ namespace val {
 					_swapChainFramebuffers = NULL;
 				}
 				dbg::printError("Failed to allocate frambuffers of Window @ %p: out of system memory.", this);
-				return;
+				return VAL_FAILURE;
 			}
 			else {
 				_swapChainFramebuffers = tmp;
@@ -379,10 +413,14 @@ namespace val {
 				framebufferInfo.layers = 1;
 
 				if (vkCreateFramebuffer(logicalDevice, &framebufferInfo, nullptr, &_swapChainFramebuffers[i]) != VK_SUCCESS) {
-					throw std::runtime_error("FAILED TO CREATE FRAME BUFFER!");
+					if (renderPass == VK_NULL_HANDLE) {
+						dbg::printError("Window::createSwapChainFrameBuffers: For Window @ %p: Failed to create frame buffer %u",i);
+						return VAL_FAILURE;
+					}
 				}
 			}
 		}
+		return VAL_SUCCESS;
 	}
 
 	void Window::updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn) {
@@ -411,6 +449,16 @@ namespace val {
 		else if (result != VK_SUCCESS) {
 			dbg::printError("Window::updateSwapChain::Failed to update swapchain of Window @ %p: result is %lu", this, result);
 		}
+	}
+
+	VkImageView Window::getSwapchainImageView() const
+	{
+		return _swapChainImageViews[_currentSwapChainImageIndex];
+	}
+
+	VkImage Window::getSwapchainImage() const
+	{
+		return _swapChainImages[_currentSwapChainImageIndex];
 	}
 
 	VkFramebuffer& Window::getSwapchainFramebuffer(const VkFormat& imageFormat) {

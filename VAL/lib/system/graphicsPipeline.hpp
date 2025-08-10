@@ -21,6 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/system/pipelineBase.hpp>
 #include <VAL/lib/system/renderPass.hpp>
+#include <VAL/lib/system/dynamicRenderingState.hpp>
 #include <VAL/lib/system/system_utils.hpp>
 
 #include <VAL/lib/pipelineStateInfos/stateInfos.hpp>
@@ -92,7 +93,11 @@ namespace val {
 
 		inline void setRenderPassManager(RenderPassManager* passMngr);
 
-		inline VkRenderPass& getVkRenderPass();
+		inline void setDynamicRenderingState(DynamicRenderingState* renderState);
+
+		inline DynamicRenderingState* getDynamicRenderingState() const;
+
+		inline VkRenderPass getVkRenderPass();
 
 	protected:
 		friend ValProc;
@@ -100,6 +105,7 @@ namespace val {
 
 	
 		RenderPassManager* renderPass = NULL;
+		DynamicRenderingState* _dynamicRenderingState = NULL;
 
 		rasterizerState* _rasterizerState = NULL;
 		ColorBlendState* _colorBlendState = NULL;

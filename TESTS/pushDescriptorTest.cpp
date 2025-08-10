@@ -70,7 +70,8 @@ void updateViewMatrix(val::ValProc& proc, const val::Window& window, val::UBO_Ha
 	hdl.update(proc, &ubo);
 }
 void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
-{	using namespace val;
+{
+	using namespace val;
 
 	// state infos
 	static rasterizerState rasterizer;
@@ -91,7 +92,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
-void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) 
+void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat)
 {
 	using namespace val;
 	static ColorAttachment colorAttach;
@@ -138,17 +139,23 @@ int main()
 	DescriptorSheet descSheet(
 		{
 			{0, viewUBO, SHADER_STAGE::Vertex},
-			{1, {DESC_TYPE::CombinedSampler, 1}, SHADER_STAGE::Fragment}
+			{1, {DESC_TYPE::CombinedSampler, 1u}, SHADER_STAGE::Fragment}
 		},
 		FRAMES_IN_FLIGHT
 	);
-
+	PushDescriptorSheet descSheetP(
+		{
+			{0, {DESC_TYPE::SampledImage, 1u}, SHADER_STAGE::Vertex},
+		},
+		FRAMES_IN_FLIGHT
+	);
+	
 	// load and configure vert shader
 	val::Shader vertShader("shaders-compiled/image2D.vert.spv", VK_SHADER_STAGE_VERTEX_BIT, "main");
 	vertShader.setVertexAttributes(res::vertex::getAttributeDescriptions());
 	vertShader.setBindingDescriptions({ res::vertex::getBindingDescription() });
 
-
+	
 
 	// load and configure frag shader
 	// CONSIDER STORING IMAGE INFO INSIDE THE SHADER CLASS
@@ -159,11 +166,12 @@ int main()
 	GraphicsPipeline pipeline;
 	pipeline.setShaders({ &fragShader, &vertShader });
 	setGraphicsPipelineInfo(pipeline);
+
 	val::RenderPassManager renderPassMngr(proc);
 	setRenderPass(renderPassMngr, imageFormat);
 	pipeline.setRenderPassManager(&renderPassMngr);
 	pipeline.setDescriptorSheet(&descSheet);
-
+	pipeline.setPushDescriptorSheet(&descSheetP);
 
 
 	pushConstantHandle pushConstantTest(sizeof(bool), SHADER_STAGE::Fragment);

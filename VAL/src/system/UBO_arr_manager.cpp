@@ -27,7 +27,7 @@ namespace val {
 	/***************************************************/
 	/* UBO ARRAY SUBSET */
 
-	void uboArraySubset::create(ValProc& proc, VkBufferUsageFlags additionalUsages, bufferSpace space,
+	void uboArraySubset::create(ValProc& proc, VkBufferUsageFlags additionalUsages, BUFFER_SPACE space,
 		UBO_Handle** uboHandles, uint32_t uboCount)
 	{
 		if (uboCount == 0u) {

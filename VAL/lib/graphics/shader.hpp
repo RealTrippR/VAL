@@ -91,11 +91,6 @@ namespace val {
 
 		VkShaderStageFlags getStageFlags() noexcept;
 
-
-		void setPushConstant(pushConstantHandle* pushConstant);
-
-		pushConstantHandle* getPushConstant() noexcept;
-
 		void setVertexAttributes(const tiny_vector<VkVertexInputAttributeDescription>& attributes);
 
 		void setVertexAttributes(const std::vector<VkVertexInputAttributeDescription>& attributes);
@@ -122,14 +117,13 @@ namespace val {
 
 		//tiny_vector<VkDescriptorSetLayoutBinding> _pushDescriptorLayoutBindings;
 
-		pushConstantHandle* _pushConstant = NULL;
 		VkShaderStageFlags _shaderStageFlags;
 
 		tiny_vector<VkVertexInputAttributeDescription> _attributes;
 		tiny_vector<VkVertexInputBindingDescription> _bindings;
 
 
-		tiny_vector<VkSpecializationMapEntry> specializationEntries;
+		tiny_vector<VkSpecializationMapEntry> specializationEntries = {};
 		void* specializationData = NULL;
 	};
 }

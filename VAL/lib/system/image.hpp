@@ -51,7 +51,7 @@ namespace val
 #ifndef NDEBUG
 			if (_img != NULL) {
 				dbg::printError("Image::~Image: Image @ %p was not properly destroyed.", this);
-				throw std::runtime_error("Image::~Image");
+				//throw std::runtime_error("Image::~Image");
 			}
 #endif // !NDEBUG
 		}

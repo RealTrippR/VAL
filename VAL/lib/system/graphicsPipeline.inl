@@ -31,7 +31,19 @@ namespace val {
 		renderPass = passMngr;
 	}
 
-	inline VkRenderPass& GraphicsPipeline::getVkRenderPass() {
+
+	inline void GraphicsPipeline::setDynamicRenderingState(DynamicRenderingState* renderState) {
+		_dynamicRenderingState = renderState;
+	}
+
+	inline DynamicRenderingState* GraphicsPipeline::getDynamicRenderingState() const {
+		return _dynamicRenderingState;
+	}
+
+	inline VkRenderPass GraphicsPipeline::getVkRenderPass() {
+		if (!renderPass) {
+			return NULL;
+		}
 		return renderPass->getVkRenderPass();
 	}
 }

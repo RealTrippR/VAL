@@ -15,45 +15,33 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef VAL_OBJECT_DESCRIPTOR_INFO_H
-#define VAL_OBJECT_DESCRIPTOR_INFO_H
+#ifndef VAL_PUSH_DESCRIPTOR_SHEET_HPP
+#define VAL_PUSH_DESCRIPTOR_SHEET_HPP
 
 #include <vulkan/vulkan_core.h>
-#include <optional>
+#include <VAL/lib/VALreturnCode.h>
 #include <VAL/lib/ext/tiny_vector.hpp>
-#include <VAL/lib/system/descType.hpp>
+#include <VAL/lib/descriptorSheets/pushDescriptorSheetElement.hpp>
 
 namespace val
 {
-	struct ObjectDescriptorInfo
+	class PushDescriptorSheet
 	{
-		ObjectDescriptorInfo() = default;
-		ObjectDescriptorInfo(DESC_TYPE type, uint32_t arrc) {
-			this->type = (VkDescriptorType)type;
-			arrCount = arrc;
-		}
+	public:
+		VAL_RETURN_CODE create(VkDevice device);
 
-		void* valObject = NULL; // object which the objectDescriptorInfo was created from
-		tiny_vector<VkDescriptorImageInfo> imageInfos;
-		tiny_vector<VkDescriptorBufferInfo> bufferInfos;
-		tiny_vector<VkBufferView> texelBufferViews;
-		VkDescriptorType type = VK_DESCRIPTOR_TYPE_MAX_ENUM;
-		uint32_t arrCount = 1u;
-		void(*updateDataCallback)(ObjectDescriptorInfo*)=NULL;
-		void* pNext = NULL; // used by VK_ACCELERATION_STRUCTURE
+		void destroy(VkDevice device);
 
+		void setElements(tiny_vector<PushDescriptorSheetElement>& elements);
 
-		inline void updateWithDataCallback()
-		{
-			if (!updateDataCallback)
-			{
-				dbg::printError("ObjectDescriptorInfo::updateWithDataCallback: updateDataCallback of ObjectDescriptorInfo @ %p is NULL.", this);
-			}
-			else {
-				updateDataCallback(this);
-			}
-		}
+		const tiny_vector<PushDescriptorSheetElement>& getElements() const;
+
+		inline VkDescriptorSetLayout getVkDescriptorLayout() const { return _layout; }
+
+	protected:
+		VkDescriptorSetLayout _layout;
+		tiny_vector<PushDescriptorSheetElement> _elements;
 	};
 }
 
-#endif // !VAL_OBJECT_DESCRIPTOR_INFO_H
+#endif // !VAL_PUSH_DESCRIPTOR_SHEET_HPP

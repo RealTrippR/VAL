@@ -26,19 +26,29 @@ namespace val {
 	class Shader; // forward declaration
 	struct pushConstantHandle {
 		pushConstantHandle() = default;
-		pushConstantHandle(const uint16_t size, const uint16_t offset = 0)
+		pushConstantHandle(const uint16_t size, SHADER_STAGE stageFlags, const uint16_t offset = 0)
 		{
-			_size = size;
+			/*align to 4 byte size*/
+			const uint32_t multiple = 4;
+			const uint32_t s = (size + multiple - 1) / multiple;
+			_size = s * multiple;
+
+			_stageFlags = (VkShaderStageFlags)stageFlags;
 			_offset = offset;
 			_procMemoryOffset = 0;
 		}
-
-		void update(ValProc& proc, void* data, const PipelineBase& pipeline, const Shader& shdr, VkCommandBuffer& cmdBuffer);
 		
-		void update(ValProc& proc, void* data, const PipelineBase& pipeline, VkCommandBuffer& cmdBuffer);
+		void update(ValProc& proc, void* data, const PipelineBase& pipeline, VkCommandBuffer cmdBuffer);
+
+		void update(ValProc& proc, void* data, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer);
+
+		void setSize(uint32_t size);
+		
+		uint32_t getSize() const;
 
 		VkPushConstantRange toVkPushConstantRange();
 	public:
+
 		uint16_t _size;
 		uint16_t _offset;
 

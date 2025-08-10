@@ -68,10 +68,9 @@ namespace val
 
 		operator const ObjectDescriptorInfo()
 		{
-			ObjectDescriptorInfo info{
-				.valObject = this ,
-				.updateDataCallback = toObjectDescriptorInfo
-			};
+			ObjectDescriptorInfo info;
+			info.valObject = this;
+			info.updateDataCallback = toObjectDescriptorInfo;
 			toObjectDescriptorInfo(&info);
 			return info;
 		}

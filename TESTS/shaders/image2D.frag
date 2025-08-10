@@ -9,6 +9,15 @@ layout(location = 3) in vec3 normal;
 
 layout(location = 0) out vec4 outColor;
 
+layout( push_constant ) uniform constants
+{
+	bool addRed;
+} pushContants;
+
 void main() {
-    outColor = texture(texSampler, texCoord);
+	if (pushContants.addRed==true) {
+		outColor = texture(texSampler, texCoord) + vec4(.5,0,0,0);
+	} else {
+		outColor = texture(texSampler, texCoord);
+	}
 }

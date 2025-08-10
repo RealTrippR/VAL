@@ -30,9 +30,20 @@ namespace val
 		PFN_vkCmdDebugMarkerBeginEXT beginMarker;
 		PFN_vkCmdDebugMarkerEndEXT endMarker;
 	};
+	
+	struct LifetimeCheck {
+		bool alive;
+		LifetimeCheck() {
+			alive = true;
+		}
+		~LifetimeCheck() {
+			alive = false;
+		}
+	};
+	static LifetimeCheck checker; /*fixes out of order destructor issues in static libs*/
 
-	std::set<void*> objBreakOnCreateList;
-	std::set<void*> objBreakOnDestroyList;
+	static std::set<void*> objBreakOnCreateList = {};
+	static std::set<void*> objBreakOnDestroyList = {};
 
 	struct dbgInfoForDevice {
 		std::set<void*> allocatedObjects;
@@ -40,7 +51,7 @@ namespace val
 		struct debugFunctions functions;
 	};
 
-	std::unordered_map<VkDevice, dbgInfoForDevice> dbgInfoPerDeviceMap;
+	static std::unordered_map<VkDevice, dbgInfoForDevice> dbgInfoPerDeviceMap;
 
 
 	namespace dbg
@@ -80,9 +91,14 @@ namespace val
 
 		VAL_RETURN_CODE initDbgUtilsForDevice(VkDevice device)
 		{
-			if (loadDbgUtilFunctions(device) != VAL_SUCCESS) 
-			{
-				dbg::printError("InitDbgUtils failed: failed to load DbgUtil functions.");
+			if (checker.alive) {
+				if (loadDbgUtilFunctions(device) != VAL_SUCCESS)
+				{
+					dbg::printError("InitDbgUtils failed: failed to load DbgUtil functions.");
+					return VAL_FAILURE;
+				}
+			}
+			else {
 				return VAL_FAILURE;
 			}
 			return VAL_SUCCESS;
@@ -90,16 +106,21 @@ namespace val
 
 		VAL_RETURN_CODE deinitDbgUtilsForDevice(VkDevice device)
 		{
-			dbgInfoPerDeviceMap.erase(device);
+			if (checker.alive) {
+				dbgInfoPerDeviceMap.erase(device); 
+			}
 			return VAL_SUCCESS;
 		}
 
 
 		void recordVkObjectCreation(VkDevice device, void* obj)
 		{
-			if (obj == NULL) {
+			if (obj == NULL || !checker.alive) {
 				return; // not a valid obj
 			}
+			if (objBreakOnCreateList.size() == 0)
+				return;
+
 			auto break_it_found = objBreakOnCreateList.find(obj);
 			if (break_it_found != objBreakOnCreateList.end()) {
 				dbg::printNote("Breaking on object at 0x%p", obj);
@@ -110,9 +131,12 @@ namespace val
 
 		void recordVkObjectDestruction(VkDevice device, void* obj)
 		{
-			if (obj == NULL) {
+			if (obj == NULL || !checker.alive) {
 				return; // not a valid obj
 			}
+			if (objBreakOnDestroyList.size() == 0)
+				return;
+
 			auto break_it_found = objBreakOnDestroyList.find(obj);
 			if (break_it_found != objBreakOnDestroyList.end()) {
 				dbg::printNote("Breaking on object at void*: %p", obj);

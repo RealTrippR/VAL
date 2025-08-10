@@ -41,33 +41,33 @@ namespace val {
 		Texture2D(ValProc& proc, const IMAGE_LAYOUT layout, const VkFormat format) : _proc(&proc), _layout((VkImageLayout)layout), _format(format) {};
 
 		Texture2D(ValProc& proc, void* memory, uint32_t memorySize, const VkFormat format,
-			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
+			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
 		{
 			createFromMemory(memory, memorySize, usages, layout, memspace, mipLevels);
 		}
 
 		Texture2D(ValProc& proc, std::filesystem::path srcpath, const VkFormat format,
-			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u
+			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u
 			, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION) : _proc(&proc)
 		{
 			createFromDisk(srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
 
 		Texture2D(ValProc& proc, std::filesystem::path srcpath, const VkFormat format,
-			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u
+			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u
 			, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION) : _proc(&proc)
 		{
 			createFromDisk(srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
 
 		Texture2D(ValProc& proc, const uint16_t width, const uint16_t height, const VkFormat format,
-			const VkImageUsageFlagBits usages, const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
+			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
 		{
 			create(width, height, format, usages, layout, memspace, mipLevels);
 		}
 
 		Texture2D(ValProc& proc, const uint16_t width, const uint16_t height, const VkFormat format,
-			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
+			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
 		{
 			create(width, height, format, usages, layout, memspace, mipLevels);
 		}
@@ -121,7 +121,7 @@ namespace val {
 
 		inline VkImageLayout getImageLayout() const;
 
-		inline bufferSpace getBufferSpace() const;
+		inline BUFFER_SPACE getBufferSpace() const;
 
 		inline VkDeviceMemory getDeviceMemory();
 
@@ -132,10 +132,10 @@ namespace val {
 		inline void transitionLayout(VkCommandBuffer cmd_buff, VkImageLayout newLayout);
 
 		void createFromMemory(const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
-			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
+			const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
 
 		inline void createFromDisk(std::filesystem::path srcpath, const IMAGE_USAGE usages,
-			const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION)
+			const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION)
 		{
 			createFromDisk(srcpath, (VkImageUsageFlagBits)usages, (VkImageLayout)layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
@@ -143,16 +143,16 @@ namespace val {
 
 
 		void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
-			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION);
+			const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION);
 
 		inline void create(const uint16_t width, const uint16_t height, VkFormat format, const IMAGE_USAGE usages,
-			const IMAGE_LAYOUT layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u)
+			const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u)
 		{
 			create(width, height, format, VkImageUsageFlagBits(usages), VkImageLayout(layout), memspace, mipLevels);
 		}
 
 		void create(const uint16_t width, const uint16_t height, VkFormat format, const VkImageUsageFlagBits usages,
-			const VkImageLayout layout, const bufferSpace memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
+			const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
 
 		void destroy();
 

@@ -48,7 +48,7 @@ namespace val {
 
 		void setFinalLayout(const IMAGE_LAYOUT l);
 
-		const VkFormat& getImgFormat();
+		const VkFormat& getImgFormat() const ;
 
 		const bool& unused();
 

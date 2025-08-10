@@ -28,9 +28,9 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace val {
 	class UBO_Handle {
 	public:
-		UBO_Handle(uint16_t sizeOfUBO, bufferSpace space = CPU_GPU) : _size(sizeOfUBO), _space(space) {};
+		UBO_Handle(uint16_t sizeOfUBO, BUFFER_SPACE space = CPU_GPU) : _size(sizeOfUBO), _space(space) {};
 
-		UBO_Handle(uint16_t sizeOfUBO, bufferSpace space, VkBufferUsageFlags additionalUsageFlags) : _size(sizeOfUBO), _space(space), _additionalUsageFlags(additionalUsageFlags){};
+		UBO_Handle(uint16_t sizeOfUBO, BUFFER_SPACE space, VkBufferUsageFlags additionalUsageFlags) : _size(sizeOfUBO), _space(space), _additionalUsageFlags(additionalUsageFlags){};
 
 	public:
 
@@ -49,10 +49,9 @@ namespace val {
 
 		operator const ObjectDescriptorInfo()
 		{
-			ObjectDescriptorInfo info { 
-				.valObject = this ,
-				.updateDataCallback = toObjectDescriptorInfo
-			};
+			ObjectDescriptorInfo info;
+			info.valObject = this;
+			info.updateDataCallback = toObjectDescriptorInfo;
 			toObjectDescriptorInfo(&info);
 			return info;
 		}
@@ -85,7 +84,7 @@ namespace val {
 
 		// IF GPU ONLY: DOES NOT NEED TO BE MAPPED TO MEMORY
 		// IF GPU-CPU: MUST BE MAPPED TO MEMORY
-		const bufferSpace _space;
+		const BUFFER_SPACE _space;
 
 		VkShaderStageFlags stageFlags = VK_SHADER_STAGE_ALL;
 	};

@@ -45,6 +45,8 @@
       <Filter>experimental-features\Raytracing</Filter>
     </ClCompile>
     <ClCompile Include="multipleWindows.cpp" />
+    <ClCompile Include="dynamicRendering.cpp" />
+    <ClCompile Include="pushDescriptorTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />
