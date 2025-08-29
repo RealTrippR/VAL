@@ -86,7 +86,7 @@ namespace val
 
 			// create new buffer and copy the old one into it
 			proc.createBuffer(newSize, _usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, tmpBuffer, tmpMem);
-			proc.copyBuffer(tmpBuffer, _buffer, _size);
+			proc.copyBuffer(_buffer, tmpBuffer, _size);
 			// destroy the old buffer
 			vkDestroyBuffer(proc._device, _buffer, VK_NULL_HANDLE);
 			vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
