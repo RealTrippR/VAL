@@ -22,12 +22,15 @@ namespace val {
 		Sampler(SAMPLER_TYPE samplerType) : _samplerType(samplerType) 
 		{
 			initDefaultCreateInfoValues(); 
+			setSamplerType(samplerType);
 		};
+
 		Sampler(val::ImageView& imgView, SAMPLER_TYPE samplerType = combinedImage, VkCompareOp compareop = VK_COMPARE_OP_NEVER) : _samplerType(samplerType) 
 		{
 			initDefaultCreateInfoValues();
 			setCompareMode(compareop);
 			bindImageView(imgView); 
+			setSamplerType(samplerType);
 		};
 
 		inline VkDescriptorType getVkDescriptorType() {

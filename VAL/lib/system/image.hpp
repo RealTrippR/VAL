@@ -90,7 +90,11 @@ namespace val
 		}
 
 	public:
-		void create(ValProc& proc, const IMAGE_TILING tiling = IMAGE_TILING::Linear, const IMAGE_ASPECT = IMAGE_ASPECT::Color);
+		VAL_RETURN_CODE create(ValProc& proc, const IMAGE_TILING tiling = IMAGE_TILING::Linear, const IMAGE_ASPECT = IMAGE_ASPECT::Color);
+
+		VAL_RETURN_CODE overwriteFromPixels(ValProc& proc, const uint8_t* pixels, uint16_t width, uint16_t height, uint8_t channelCount, int32_t dstOffsetX = 0u, int32_t dstOffsetY = 0u);
+
+		VAL_RETURN_CODE overwriteFromImage(ValProc& proc, const VkImage srcImg, const VkFormat srcFormat, VkImageLayout srcLayout, uint16_t width, uint16_t height, uint8_t channelCount, int32_t dstOffsetX = 0u, int32_t dstOffsetY = 0u, int32_t srcOffsetX = 0u, int32_t srcOffsetY = 0u);
 
 		void resize(ValProc& proc, uint16_t newWidth, uint16_t newHeight);
 
@@ -117,6 +121,14 @@ namespace val
 		inline uint8_t getMipmapLevel() const { return _mipMapLevel; };
 
 		void setMipmapLevel(ValProc& proc, const uint8_t mipmaplevel);
+
+		void setFormat(ValProc&, VkFormat);
+
+		VkFormat getFormat() const;
+
+		VAL_RETURN_CODE setLayout(ValProc&, VkImageLayout, VkCommandBuffer buffer = VK_NULL_HANDLE);
+
+		VkImageLayout getLayout() const;
 
 	private:
 		VkImage _img = NULL;

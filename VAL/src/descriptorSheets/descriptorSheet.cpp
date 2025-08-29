@@ -17,6 +17,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <VAL/lib/descriptorSheets/descriptorSheet.hpp>
 #include <VAL/lib/system/system_utils.hpp>
+#include <VAL/lib/system/VAL_PROC.hpp>
 #include <unordered_map>
 
 namespace val
@@ -48,6 +49,15 @@ namespace val
 		return VAL_SUCCESS;
 	}
 
+	void DescriptorSheet::destroy(VkDevice device)
+	{
+		if (_setLayout) {
+			vkDestroyDescriptorSetLayout(device, _setLayout, NULL);
+			_setLayout = NULL;
+		}
+	}
+
+
 	uint32_t DescriptorSheet::getDescriptorPoolSizes(std::vector<VkDescriptorPoolSize>* descPoolSizes) const
 	{
 		std::unordered_map<VkDescriptorType, uint32_t> poolSizesMap;
@@ -67,28 +77,35 @@ namespace val
 		return (uint32_t)poolSizesMap.size();
 	}
 
-	VAL_RETURN_CODE DescriptorSheet::allocateSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool)
+	VAL_RETURN_CODE DescriptorSheet::allocateSets(ValProc& proc)
 	{
-		if (sets == NULL) {
-			dbg::printError("DescriptorSheet::allocateAndWriteSets: DescriptorSheet @ %p: argument `sets` was NULL.", this);
+		return allocateSets(proc, proc.getVkDescriptorPool());
+	}
+
+	VAL_RETURN_CODE DescriptorSheet::allocateSets(VkDevice device, VkDescriptorPool pool)
+	{
+		if (pool == NULL) {
+			dbg::printError("DescriptorSheet::allocateSets: VkDescriptorPool `pool` is NULL. `pool` must be a pointer to a valid VkDescriptorPool.");
 			return VAL_FAILURE;
 		}
-		if (setLayouts == NULL) {
-			dbg::printError("DescriptorSheet::allocateAndWriteSets: DescriptorSheet @ %p: argument `setLayouts` was NULL.", this);
-			return VAL_FAILURE;
-		}
+
+		_descriptorSets.resize(getSetCount());
+
+		_descriptorSets.resize(getSetCount());
+		tiny_vector< VkDescriptorSetLayout> setLayouts(getSetCount(), _setLayout);
+
 		const VkDescriptorSetAllocateInfo setAllocInfo =
 		{
 			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
 			.pNext = VK_NULL_HANDLE,
 			.descriptorPool = pool,
-			.descriptorSetCount = setCount,
-			.pSetLayouts = setLayouts
+			.descriptorSetCount = getSetCount(),
+			.pSetLayouts = setLayouts.data()
 		};
 
-		if (vkAllocateDescriptorSets(device, &setAllocInfo, sets) != VK_SUCCESS)
+		if (vkAllocateDescriptorSets(device, &setAllocInfo, _descriptorSets.data()) != VK_SUCCESS)
 		{
-			dbg::printError("DescriptorSheet::allocateSetAndWriteSets: DescriptorSheet @ %p: failed to allocate descriptor sets, of which there are %lu.", this, setCount);
+			dbg::printError("DescriptorSheet::allocateSetAndWriteSets: DescriptorSheet @ %p: failed to allocate descriptor sets, of which there are %lu.", this, getSetCount());
 			return VAL_FAILURE;
 		}
 
@@ -96,22 +113,29 @@ namespace val
 
 		return VAL_SUCCESS;
 	}
-	VAL_RETURN_CODE DescriptorSheet::allocateAndWriteSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool)
+
+
+
+	VAL_RETURN_CODE DescriptorSheet::allocateAndWriteSets(ValProc& proc)
 	{
-		VAL_RETURN_CODE res = allocateSets(device, sets, setLayouts, setCount, pool);
+		return allocateAndWriteSets(proc, proc.getVkDescriptorPool());
+	}
+
+	VAL_RETURN_CODE DescriptorSheet::allocateAndWriteSets(VkDevice device, VkDescriptorPool pool)
+	{
+		VAL_RETURN_CODE res = allocateSets(device, pool);
 		if (res!=VAL_SUCCESS) {
 			return res;
 		}
-		for (uint32_t i = 0; i < setCount; ++i)
-		{
-			updateAndWriteDescriptors(device, sets[i]);
-		}
+		updateAndWriteSets(device);
 
 		return VAL_SUCCESS;
 	}
 
-	void DescriptorSheet::updateAndWriteDescriptors(VkDevice device, VkDescriptorSet descriptorSet)
+	void DescriptorSheet::updateAndWriteSet(VkDevice device, const uint32_t setIndex)
 	{
+		const VkDescriptorSet set = _descriptorSets[setIndex];
+
 		// update data with callbacks
 		for (uint32_t i = 0; i < _elements.size(); ++i)
 		{
@@ -133,7 +157,7 @@ namespace val
 		_descriptorWrites.resize(_elements.size());
 		for (uint32_t i = 0; i < _elements.size(); ++i)
 		{
-			_descriptorWrites[i] = _elements[i].toVkWriteDescriptorSet(descriptorSet);
+			_descriptorWrites[i] = _elements[i].toVkWriteDescriptorSet(set);
 			if (_descriptorWrites[i].descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
 				if (_descriptorWrites[i].pImageInfo == NULL || _descriptorWrites[i].pImageInfo[0].sampler == NULL) {
 					dbg::printError("DescriptorSheet::updateAndWriteDescriptors: Descriptor #%u is of VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER but it's sampler is NULL.", i);
@@ -141,14 +165,14 @@ namespace val
 			}
 		}
 
-#ifndef NDEBUG
-		if (_descriptorWrites.data() == NULL || _descriptorWrites.size() == 0)
-		{	
-			dbg::printError("DescriptorSheet::updateDescriptors: Failed to update DescriptorSheet @ %p: no descriptors to update, element count is 0.", this);
-			return;
-		}
-#endif
 		vkUpdateDescriptorSets(device, _descriptorWrites.size(), _descriptorWrites.data(), 0, 0);
+	}
+
+	void DescriptorSheet::updateAndWriteSets(VkDevice device)
+	{
+		for (uint16_t i = 0; i < _maxSetCount; ++i) {
+			updateAndWriteSet(device, i);
+		}
 	}
 
 	void DescriptorSheet::updateDescriptor(VkDevice device, const uint32_t descriptorIndex, const uint32_t setIndex)

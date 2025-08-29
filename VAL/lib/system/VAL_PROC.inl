@@ -44,7 +44,5 @@ namespace val {
 	{
 		return _descriptorPool;
 	}
-
-
 }
 #endif // !VAL_PROC_INLINE

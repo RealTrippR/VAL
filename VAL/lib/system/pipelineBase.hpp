@@ -40,14 +40,7 @@ namespace val {
 
 		VkPipelineLayout getPipelineLayout(ValProc& proc) const;
 
-		VAL_RETURN_CODE allocateDescriptorSets(ValProc& proc);
-
-		void writeDescriptorSets(ValProc& proc);
-
-		VAL_RETURN_CODE allocateAndWriteDescriptorSets(ValProc& proc);
-
 		virtual const std::vector<VkShaderStageFlags> getShaderStages()const;
-
 
 		// returns UINT32MAX if not found, otherwise returns the index as a uint32_t
 		int32_t getShaderIndexOfShaderInPipeline(Shader* shdr);
@@ -65,8 +58,6 @@ namespace val {
 		void setShaders(const tiny_vector<Shader*>& shaders);
 
 		tiny_vector<Shader*> getShaders() const;
-
-		VkDescriptorSetLayout getDescriptorSetLayout(ValProc& proc) const;
 
 		void setDynamicStates(const tiny_vector<DYNAMIC_STATE>& dynamicStates);
 

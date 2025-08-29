@@ -113,12 +113,12 @@ int main()
 	PhysicalDeviceRequirements deviceRequirements(DEVICE_TYPES::dedicated_GPU | DEVICE_TYPES::integrated_GPU);
 	deviceRequirements.addFeature(DEVICE_FEATURES::anisotropicFiltering);
 
-
 	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
 
 	// Configure and create window
 	WindowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
+
 	Window window;
 	window.prep(proc, windowConfig, 800, 800, "Image ____");
 	window.setTitle("Image Test");
@@ -189,6 +189,7 @@ int main()
 
 	Texture2D img2(proc, "testImage2.png", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
 	img2.discardPixels(); // no reason to save the pixels
+
 	ImageView imgView2(proc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
 
 
@@ -215,11 +216,12 @@ int main()
 	bool imgNum = 0;
 
 
-	pipeline.allocateDescriptorSets(proc);
+	descSheet.allocateSets(proc);
 
 	descSheet.setSheetElement(1, { 1,imgSampler, SHADER_STAGE::Vertex });
 
-	pipeline.writeDescriptorSets(proc);
+	descSheet.updateAndWriteSets(proc);
+	//pipeline.writeDescriptorSets(proc);
 
 	//////////////////////////////////////////////////////////////
 
@@ -303,6 +305,8 @@ int main()
 	imgSampler.destroy(proc);
 
 	presentFence.destroy(proc);
+
+	descSheet.destroy(proc);
 
 	descSheetP.destroy(proc);
 

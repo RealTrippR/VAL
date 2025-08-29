@@ -62,22 +62,35 @@ namespace val
 			_maxSetCount = maxSetCount;
 		}
 	public:
-		VAL_RETURN_CODE createDescriptorSetLayoutFromSheet(VkDevice device, VkDescriptorSetLayout* layout);
+		void destroy(VkDevice);
+
+		inline VAL_RETURN_CODE createLayout(VkDevice device) 
+		{
+			return createDescriptorSetLayoutFromSheet(device, &_setLayout);
+		}
 
 		uint32_t getDescriptorPoolSizes(std::vector<VkDescriptorPoolSize>* descPoolSizes) const;
 
-		VAL_RETURN_CODE allocateSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool);
+		VAL_RETURN_CODE allocateSets(ValProc& proc);
+
+		VAL_RETURN_CODE allocateSets(VkDevice device, VkDescriptorPool pool);
 
 		// allocates a VkDescriptorSet and populates it with the descriptor writes.
-		VAL_RETURN_CODE allocateAndWriteSets(VkDevice device, VkDescriptorSet* sets, VkDescriptorSetLayout* setLayouts, uint32_t setCount, VkDescriptorPool pool);
+		VAL_RETURN_CODE allocateAndWriteSets(ValProc& proc);
 
-		void updateAndWriteDescriptors(VkDevice device, VkDescriptorSet descriptorSet);
+		// allocates a VkDescriptorSet and populates it with the descriptor writes.
+		VAL_RETURN_CODE allocateAndWriteSets(VkDevice device, VkDescriptorPool pool);
+
+		void updateAndWriteSet(VkDevice device, const uint32_t setIndex);
+
+		void updateAndWriteSets(VkDevice device);
 
 		void updateDescriptor(VkDevice device, const uint32_t descriptorIndex, const uint32_t setIndex);
 
 		bool isInitialized();
 
 	public:
+
 		void addSheetElement(const DescriptorSheetElement& element);
 
 		void insertSheetElement(const uint32_t index, const DescriptorSheetElement& element);
@@ -96,17 +109,23 @@ namespace val
 		{
 			_descriptorSets = descriptorSets;
 		}
-		inline const uint16_t& getMaxSetCount() const {
+		inline const uint16_t& getSetCount() const {
 			return _maxSetCount;
 		}
-		inline void setMaxSetCount(uint16_t setCount) {
+		inline void setSetCount(uint16_t setCount) {
 			_maxSetCount = setCount;
 		}
+		inline VkDescriptorSetLayout getVkDescriptorSetLayout() {
+			return _setLayout;
+		}
+	private:
+		VAL_RETURN_CODE createDescriptorSetLayoutFromSheet(VkDevice device, VkDescriptorSetLayout* layout);
 	private:
 		uint16_t _maxSetCount = 1u;
 		tiny_vector<VkDescriptorSet> _descriptorSets;
 		tiny_vector<VkWriteDescriptorSet> _descriptorWrites;
 		tiny_vector<DescriptorSheetElement> _elements;
+		VkDescriptorSetLayout _setLayout = nullptr;
 	};
 }
 

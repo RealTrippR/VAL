@@ -31,6 +31,13 @@ namespace val {
 		renderPass = passMngr;
 	}
 
+	inline RenderPassManager* GraphicsPipeline::getRenderPassManager() {
+		return renderPass;
+	}
+
+	inline const RenderPassManager* GraphicsPipeline::getRenderPassManager() const {
+		return renderPass;
+	}
 
 	inline void GraphicsPipeline::setDynamicRenderingState(DynamicRenderingState* renderState) {
 		_dynamicRenderingState = renderState;

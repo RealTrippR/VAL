@@ -75,6 +75,16 @@ namespace val
 		return _sampleCountMSAA;
 	}
 
+	void GraphicsPipeline::setPrimitiveRestartEnabled(const bool restartEnabled)
+	{
+		_primitiveRestartEnable = restartEnabled;
+	}
+
+	bool GraphicsPipeline::getPrimitiveRestartEnabled() const
+	{
+		return _primitiveRestartEnable;
+	}
+
 	void GraphicsPipeline::setSampleShadingEnabled(const bool& enabled) 
 	{
 		_sampleShadingEnabled = enabled;

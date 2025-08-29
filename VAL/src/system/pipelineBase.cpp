@@ -82,55 +82,6 @@ namespace val {
 		return VK_NULL_HANDLE;
 	}
 
-	VAL_RETURN_CODE PipelineBase::allocateDescriptorSets(ValProc& proc)
-	{
-		if (!descriptorSheet) {
-			return VAL_FAILURE;
-		}
-		const uint32_t maxSetCount = descriptorSheet->getMaxSetCount();
-		descriptorSheet->getVkDescriptorSets().resize(maxSetCount);
-		tiny_vector<VkDescriptorSetLayout> setLayoutCopies(maxSetCount, getDescriptorSetLayout(proc));
-
-		return descriptorSheet->allocateSets(
-			proc.getVkLogicalDevice(),
-			descriptorSheet->getVkDescriptorSets().data(),
-			setLayoutCopies.data(),
-			maxSetCount,
-			proc.getVkDescriptorPool()
-		);
-	}
-
-	void PipelineBase::writeDescriptorSets(ValProc& proc)
-	{
-		for (uint8_t i = 0; i < descriptorSheet->getVkDescriptorSets().size(); ++i) {
-			descriptorSheet->updateAndWriteDescriptors(
-				proc.getVkLogicalDevice(),
-				descriptorSheet->getVkDescriptorSets().data()[i]
-			);
-		}
-	}
-
-	VAL_RETURN_CODE PipelineBase::allocateAndWriteDescriptorSets(ValProc& proc)
-	{
-		if (!descriptorSheet) {
-			return VAL_FAILURE;
-		}
-		
-		const uint32_t maxSetCount = descriptorSheet->getMaxSetCount();
-		descriptorSheet->getVkDescriptorSets().resize(maxSetCount);
-		tiny_vector<VkDescriptorSetLayout> setLayoutCopies(maxSetCount, getDescriptorSetLayout(proc));
-		
-		const VAL_RETURN_CODE allocAndWriteRes = descriptorSheet->allocateAndWriteSets(
-			proc.getVkLogicalDevice(), 
-			descriptorSheet->getVkDescriptorSets().data(),
-			setLayoutCopies.data(),
-			maxSetCount, 
-			proc.getVkDescriptorPool()
-		);
-
-		return allocAndWriteRes;
-	}
-
 	const std::vector<VkShaderStageFlags> PipelineBase::getShaderStages() const {
 		std::vector<VkShaderStageFlags> stages;
 		for (auto shdr : shaders) {
@@ -179,19 +130,6 @@ namespace val {
 	tiny_vector<Shader*> PipelineBase::getShaders() const
 	{
 		return shaders;
-	}
-
-	VkDescriptorSetLayout PipelineBase::getDescriptorSetLayout(ValProc& proc) const
-	{
-#ifndef NDEBUG
-		if (descriptorsIdx >= proc._descriptorSetLayouts.size())
-		{
-			dbg::printError("pipelineCreateInfo::getDescriptorSetLayout: Invalid descriptorsIdx in pipelineCreateInfo @ %p, it exceeds proc._descriptorSetLayouts.size().",this);
-			return VK_NULL_HANDLE;
-		}
-#endif // !NDEBUG
-
-		return proc._descriptorSetLayouts[descriptorsIdx];
 	}
 
 	void PipelineBase::setDynamicStates(const tiny_vector<DYNAMIC_STATE>& dynamicStates)

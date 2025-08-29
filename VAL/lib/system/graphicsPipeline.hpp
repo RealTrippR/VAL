@@ -55,6 +55,10 @@ namespace val {
 
 		const VkSampleCountFlags& getSampleCount() const;
 
+		void setPrimitiveRestartEnabled(const bool);
+
+		bool getPrimitiveRestartEnabled() const;
+
 		void setSampleShadingEnabled(const bool& enabled);
 
 		const bool& getSampleShadingEnabled() const;
@@ -84,14 +88,13 @@ namespace val {
 	
 	public: 
 
-		//void pushDescriptor_UNIFORM_BUFFER_DYNAMIC(VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, );
-		//void pushDescriptor_STORAGE_BUFFER_DYNAMIC(VkCommandBuffer cmdBuffer, const uint16_t bindingIdx);
-		//void pushDescriptor_INPUT_ATTACHMENT(VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const );
-		//void pushDescriptor_MUTABLE_EXT(VAL_PROC& proc, VkCommandBuffer cmdBuffer, const uint16_t bindingIdx, const DESC_TYPE type, VkWriteDescriptorSet& write);
-
 		inline VkPipeline& getVkPipeline(ValProc& proc);
 
 		inline void setRenderPassManager(RenderPassManager* passMngr);
+
+		inline RenderPassManager* getRenderPassManager();
+
+		inline const RenderPassManager* getRenderPassManager() const;
 
 		inline void setDynamicRenderingState(DynamicRenderingState* renderState);
 
@@ -116,6 +119,7 @@ namespace val {
 		uint32_t subpassIndex = 0u;
 		VkPrimitiveTopology _topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		bool _sampleShadingEnabled = false;
+		bool _primitiveRestartEnable = false;
 	};
 }
 

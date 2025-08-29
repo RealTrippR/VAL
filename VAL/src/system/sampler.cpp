@@ -23,10 +23,37 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace val 
 {
 
-	std::unordered_map<Sampler*, VkSamplerCreateInfo> createInfos;
+	std::unordered_map<Sampler*, VkSamplerCreateInfo>* createInfos;
+	
+	struct tmp_struct {
+		tmp_struct() {
+			createInfos = new std::unordered_map<Sampler*, VkSamplerCreateInfo>;
+		}
+		~tmp_struct() {
+			valid = false;
+			delete createInfos;
+		}
+
+		bool valid = false;
+	};
+
+	tmp_struct& getTmp() {
+		static tmp_struct instance;
+		return instance;
+	}
+
+	void checkCreateInfoValidity() {
+		auto& tmp = getTmp();
+		if (!tmp.valid) {
+			createInfos = new std::unordered_map<Sampler*, VkSamplerCreateInfo>;
+			tmp.valid = true;
+		}
+	}
 
 	VAL_RETURN_CODE Sampler::create(VkDevice device, bool keepCreateInfo)
 	{
+		checkCreateInfoValidity();
+
 #ifndef NDEBUG
 		if (_imgView == NULL && _samplerType != SAMPLER_TYPE::standalone)
 		{
@@ -45,7 +72,7 @@ namespace val
 		}
 #endif // !NDEBUG
 
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		
 		if (vkCreateSampler(device, &createInfo, nullptr, &sampler) != VK_SUCCESS) {
 			dbg::printError("Sampler::create: Failed to create VkSampler of Sampler %p", this);
@@ -57,7 +84,7 @@ namespace val
 		dbg::recordVkObjectCreation(device, sampler);
 
 		if (keepCreateInfo == false) {
-			createInfos.erase(this);
+			(*createInfos).erase(this);
 		}
 		return VAL_SUCCESS;
 	}
@@ -80,7 +107,7 @@ namespace val
 	// An anisoLevel greater than 0 will enable anisotropic filtering, if it's equal to 0 it will be disabled.
 	void Sampler::setMaxAnisotropy(const float& anisoLevel)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		if (anisoLevel > 0) {
 			createInfo.anisotropyEnable = VK_TRUE;
 			createInfo.maxAnisotropy = anisoLevel;
@@ -93,51 +120,51 @@ namespace val
 
 	void Sampler::setMagnificationFilter(const VkFilter& filterType)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.magFilter = filterType;
 	}
 
 	void Sampler::setMinificationFilter(const VkFilter& filterType)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.minFilter = filterType;
 	}
 
 	void Sampler::setMipmapMode(VkSamplerMipmapMode mipMapMode)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.mipmapMode = mipMapMode;
 	}
 
 	// U direction (horizontal)
 	void Sampler::setAddressModeU(const VkSamplerAddressMode& addrMode)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.addressModeU = addrMode;
 	}
 	// V direction (vertical)
 	void Sampler::setAddressModeV(const VkSamplerAddressMode& addrMode)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.addressModeV = addrMode;
 	}
 	// W direction (depth)
 	void Sampler::setAddressModeW(const VkSamplerAddressMode& addrMode)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.addressModeW = addrMode;
 	}
 
 	void Sampler::useUnnormalizedCoordinates(const bool& val)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.unnormalizedCoordinates = val;
 
 	}
 
 	void Sampler::setCompareMode(VkCompareOp cmpOp/*Set to VK_COMPARE_OP_NEVER to disable*/)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		switch (cmpOp)
 		{
 		case VK_COMPARE_OP_NEVER:
@@ -157,38 +184,41 @@ namespace val
 
 	void Sampler::setMipLodBias(const float& mipLOD)
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.mipLodBias = mipLOD;
 	}
 
 	void Sampler::setFromVkSamplerCreateInfo(const VkSamplerCreateInfo& createInfo)
 	{
-		VkSamplerCreateInfo& createInfo__ = createInfos[this];
+		VkSamplerCreateInfo& createInfo__ = (*createInfos)[this];
 		createInfo__ = createInfo;
 	}
 
 	void Sampler::setBorderColor(const VkBorderColor color) {
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.borderColor = color;
 	}
 
 	VkBorderColor Sampler::getVkBorderColor() const{
-		const VkSamplerCreateInfo& createInfo = createInfos[(Sampler*)(this)];
+		const VkSamplerCreateInfo& createInfo = (*createInfos)[(Sampler*)(this)];
 		return createInfo.borderColor;
 	}
 
 	std::optional<VkSamplerCreateInfo> Sampler::getCreateInfo() 
 	{
-		if (createInfos.count(this) == 0) {
+		if ((*createInfos).count(this) == 0) {
 			return std::nullopt;
 		}
-		return { createInfos[this] };
+		return { (*createInfos)[this] };
 	}
 
 	void Sampler::initDefaultCreateInfoValues()
 	{
-		VkSamplerCreateInfo& createInfo = createInfos[this];
+		checkCreateInfoValidity();
+
+		VkSamplerCreateInfo& createInfo = (*createInfos)[this];
 		createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		createInfo.pNext = NULL;
 		createInfo.anisotropyEnable = VK_FALSE;  // Enable anisotropic filtering
 		createInfo.maxAnisotropy = 0.0f;
 		createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
