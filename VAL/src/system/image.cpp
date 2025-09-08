@@ -57,6 +57,11 @@ namespace val
 
 		void* data;
 		vkMapMemory(proc, stagingBufferMemory, 0, imgSize, 0, &data);
+		if (!data) {
+			vkFreeMemory(proc, stagingBufferMemory, nullptr);
+			vkDestroyBuffer(proc, stagingBuffer, nullptr);
+			return VAL_FAILURE;
+		}
 		memcpy(data, pixels, imgSize);
 		vkUnmapMemory(proc, stagingBufferMemory);
 
@@ -92,7 +97,7 @@ namespace val
 
 		proc.createImage(newWidth, newHeight, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem,_mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
 
-		proc.copyImage(_img, tmpImg, _format, _format, _layout, _layout, _width, _height);
+		proc.copyImage(_img, tmpImg, _format, _format, _layout, _layout, std::min(_width, newWidth), std::min(_height, newHeight));
 		
 		_width = newWidth;
 		_height = newHeight;

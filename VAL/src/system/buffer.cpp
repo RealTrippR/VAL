@@ -37,8 +37,8 @@ namespace val
 
 	void Buffer::overwriteFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
 	{
-		if (_size < dataSize) {
-			resize(proc,dataSize);
+		if (_size < dataSize + dstOffset) {
+			resize(proc,dataSize + dstOffset);
 		}
 #ifndef NDEBUG
 		__VAL_DEBUG_ValidateBufferCopy(_size, dataSize, srcOffset, dstOffset);
