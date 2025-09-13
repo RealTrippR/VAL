@@ -95,7 +95,9 @@ namespace val {
 
 		void configure(GLFWwindow* windowHDL, VkColorSpaceKHR colorSpace);
 
-		void display(const VkFormat& imgFormat, std::vector<VkSemaphore> waitOn);
+		void display(const VkFormat imgFormat, VkSemaphore waitSemaphore);
+
+		void display(const VkFormat imgFormat, VkSemaphore* waitSemaphores, uint32_t waitSemCount);
 
 		void destroy(); // same as cleanup()
 
@@ -109,15 +111,13 @@ namespace val {
 
 		void recreateSwapChain(const VkFormat swapchainFormat);
 
-		void updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn);
+		void updateSwapChain(const VkFormat& imageFormat, VkSemaphore* waitSemaphores, uint32_t waitSemaphoreCount);
 
 		VkImageView getSwapchainImageView() const;
 
 		VkImage getSwapchainImage() const;
 
-		VkFramebuffer& getSwapchainFramebuffer(const VkFormat& imageFormat); // gets the swapchain framebuffer for rendering
-
-		VkFramebuffer& beginDraw(const VkFormat& imageFormat);
+		VkFramebuffer& getSwapchainFramebuffer(const VkFormat& imageFormat, VkSemaphore imgAvailableSemaphore); // gets the swapchain framebuffer for rendering
 
 		inline uint8_t getSwapchainImageCount() const;
 
@@ -132,10 +132,6 @@ namespace val {
 		inline bool shouldClose() const;
 
 		inline const VkColorSpaceKHR getColorSpace() const;
-
-		inline VkSemaphore getPresentSemaphore() const;
-
-		inline VkSemaphore getPresentSemaphore(const uint8_t frameidx) const;
 
 		inline const Queue& getPresentQueue() const;
 
@@ -164,6 +160,8 @@ namespace val {
 
 	protected:
 		friend ValProc;
+
+		//tiny_vector<VkSemaphore> semaphores;
 
 		ValProc* _procVAL = NULL;
 

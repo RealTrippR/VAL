@@ -12,15 +12,6 @@ namespace val
 		destroy();
 		_queueFlags = flags;
 		_proc = &proc;
-		_cmdBuffAndSemaphoreBufferCount = proc.getFramesInFlight();
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-
-		if (proc.getFramesInFlight() == 0){
-			dbg::printError("Frame count is %d, cannot create Queue @ %p.", proc.getFramesInFlight(), this);
-			throw std::runtime_error("Frame count is 0, cannot create Queue.");
-		}
-#endif // !NDEBUG
 		create();
 	}
 
@@ -29,7 +20,6 @@ namespace val
 		destroy();
 		_queueFlags = flags;
 		_proc = &proc;
-		_cmdBuffAndSemaphoreBufferCount = cmdBuffAndSemaphoreCount;
 		create();
 	}
 
@@ -55,70 +45,6 @@ namespace val
 		}
 
 		vkGetDeviceQueue(_proc->getVkLogicalDevice(), qfam, 0, &_vkQueue);
-
-		// alloc command buffers, create fences, etc
-		const uint8_t cmdBufferAndSemaphoreCount = _cmdBuffAndSemaphoreBufferCount;
-		VkCommandBufferAllocateInfo allocInfo;
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = _proc->getCommandPool();
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = cmdBufferAndSemaphoreCount;
-		allocInfo.pNext = NULL;
-
-		_commandBuffers = (VkCommandBuffer*)malloc(sizeof(VkCommandBuffer) * cmdBufferAndSemaphoreCount);
-#ifndef NDEBUG
-		if (_commandBuffers == NULL) {
-			dbg::printError("Failed to allocate command buffer pointers for Queue @ %p", this);
-			return;
-		}
-
-		memset(_commandBuffers, 0, sizeof(VkCommandBuffer) * cmdBufferAndSemaphoreCount);
-#endif
-		VkResult vkresCMD = vkAllocateCommandBuffers(_proc->getVkLogicalDevice(), &allocInfo, _commandBuffers);
-		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _commandBuffers[0]);
-
-#ifndef NDEBUG
-		if (vkresCMD != VK_SUCCESS) {
-			dbg::printError("Failed to allocate command buffers for Queue @ %h. VkResult: %u", this, vkresCMD);
-			return;
-		}
-#endif // !NDEBUG
-		_semaphores = (VkSemaphore*)malloc(sizeof(VkSemaphore) * cmdBufferAndSemaphoreCount);
-		if (_semaphores == NULL)
-		{
-			dbg::printError("Failed to allocate semaphore pointers for Queue @ %p.", this);
-			return;
-		}
-		VkSemaphoreCreateInfo semaphoreCreateInfo;
-		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-		semaphoreCreateInfo.pNext = NULL;
-		semaphoreCreateInfo.flags = 0x0;
-
-		for (uint8_t i = 0; i < cmdBufferAndSemaphoreCount; ++i)
-		{
-			VkSemaphore* semaphoreToSet = &_semaphores[i];
-			VkResult vkresSEM = vkCreateSemaphore(_proc->getVkLogicalDevice(), &semaphoreCreateInfo, NULL, semaphoreToSet);
-			dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), *semaphoreToSet);
-#ifndef NDEBUG
-			if (vkresSEM != VK_SUCCESS) {
-				dbg::printError("Failed to create semaphore #%d for Queue @ %p", i, this);
-				return;
-			}
-#endif // !NDEBUG
-		}
-	}
-
-	void Queue::setCmdBuffAndSemaphoreCountFromProc(ValProc& proc)
-	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-
-		if (proc.getFramesInFlight() == 0) {
-			dbg::printError("Frame count is %d, cannot create Queue @ %p.", proc.getFramesInFlight(), this);
-			throw std::runtime_error("Frame count is 0, cannot create Queue.");
-		}
-#endif // !NDEBUG
-		_cmdBuffAndSemaphoreBufferCount = proc.getFramesInFlight();
 	}
 
 	void Queue::destroy()
@@ -129,26 +55,6 @@ namespace val
 			vkQueueWaitIdle(_vkQueue);
 			_vkQueue = NULL;
 		}
-		if (_proc) 
-		{
-			if (_commandBuffers) {
-				dbg::recordVkObjectDestruction(_proc->getVkLogicalDevice(), _commandBuffers[0]);
-				vkFreeCommandBuffers(_proc->getVkLogicalDevice(), _proc->getCommandPool(), _cmdBuffAndSemaphoreBufferCount, _commandBuffers);
-
-				free(_commandBuffers);
-			}
-
-			if (_semaphores) {
-				for (uint8_t i = 0; i < _cmdBuffAndSemaphoreBufferCount; ++i)
-				{
-					dbg::recordVkObjectDestruction(_proc->getVkLogicalDevice(), _semaphores[i]);
-					vkDestroySemaphore(_proc->getVkLogicalDevice(), _semaphores[i], NULL);
-				}
-				free(_semaphores);
-			}
-		}
-		_commandBuffers = VK_NULL_HANDLE;
-		_semaphores = VK_NULL_HANDLE;
 	}
 
 	void Queue::copyToOther(Queue* other) const
@@ -159,8 +65,6 @@ namespace val
 		other->_queueFlags = this->_queueFlags;
 		other->_proc = this->_proc;
 		other->_queueFamily = this->_queueFamily;
-		other->_cmdBuffAndSemaphoreBufferCount = _cmdBuffAndSemaphoreBufferCount;
-
 		other->create();
 	}
 

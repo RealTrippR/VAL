@@ -2,17 +2,15 @@
 #include <VAL/lib/system/VAL_PROC.hpp>
 
 namespace val {
-	void computeTarget::compute(Queue& computeQueue, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ)
+	void computeTarget::compute(Queue& computeQueue, VkCommandBuffer cmdBuffer, const uint32_t& groupCountX, const uint32_t& groupCountY, const uint32_t& groupCountZ)
 	{
-		vkCmdDispatch(computeQueue.getCommandBuffer(), groupCountX, groupCountY, groupCountZ);
+		vkCmdDispatch(cmdBuffer, groupCountX, groupCountY, groupCountZ);
 	}
 
-	void computeTarget::update(Queue& computeQueue, computePipelineCreateInfo& computePipeline)
+	void computeTarget::update(Queue& computeQueue, VkCommandBuffer cmdBuffer, computePipelineCreateInfo& computePipeline)
 	{
 		ValProc& proc = *computeQueue.getValProc();
 		const auto& currentFrame = proc.getCurrentFrame();
-		VkCommandBuffer& cmdBuffer = computeQueue.getCommandBuffer();
-
 		// bind pipeline and respective descriptor sets
 		vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, proc._computePipelines[computePipeline.pipelineIdx]);
 	}
@@ -35,29 +33,22 @@ namespace val {
 		//queue
 	}
 
-	void computeTarget::submit(Queue& computeQueue, std::vector<VkSemaphore> waitSemaphores, VkFence fence /*DEFAULT=VK_NULL_HANDLE*/)
+	void computeTarget::submit(Queue& computeQueue, VkPipelineStageFlags* waitStages, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount,
+		uint32_t commandBufferCount, VkSemaphore* waitSemaphores, uint32_t waitSemaphoreCount,
+		VkSemaphore* signalSemaphores, uint32_t signalSemaphoreCount, VkFence fence)
 	{
-		if (vkEndCommandBuffer(computeQueue.getCommandBuffer()) != VK_SUCCESS) {
-			throw std::runtime_error("failed to record compute command buffer!");
-		}
-
 		ValProc& proc = *computeQueue.getValProc();
 		
-		// SUBMIT
-		VkPipelineStageFlags* waitStages = (VkPipelineStageFlags*)calloc(waitSemaphores.size(), sizeof(VkPipelineStageFlags));
-		for (size_t i = 0; i < waitSemaphores.size(); ++i) {
-			waitStages[i] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-		}
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = (uint32_t)waitSemaphores.size();
-		submitInfo.pWaitSemaphores = waitSemaphores.data();
+		submitInfo.waitSemaphoreCount = waitSemaphoreCount;
+		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &computeQueue.getCommandBuffer();
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &computeQueue.getSemaphore();
+		submitInfo.commandBufferCount = cmdBufferCount;
+		submitInfo.pCommandBuffers = cmdBuffers;
+		submitInfo.signalSemaphoreCount = signalSemaphoreCount;
+		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		if (vkQueueSubmit(computeQueue, 1, &submitInfo, fence) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit compute command buffer!");

@@ -47,21 +47,6 @@ namespace val {
 		return glfwWindowShouldClose(_window);
 	}
 
-	inline VkSemaphore Window::getPresentSemaphore() const {
-#ifndef NDEBUG
-		if (_presentQueue.getCommandBufferCount() < _procVAL->getFramesInFlight()) {
-			dbg::printError("Semaphore count of present queue for Window @ %p should equal the framesInFlight of it's ValProc. Hint: Ensure that the window is created after proc.create() has been called.", this);
-			throw std::runtime_error("Semaphore count of present queue for a Window should equal the framesInFlight of it's ValProc. Hint: Ensure that the window is created after proc.create() has been called.");
-		}
-#endif // !NDEBUG
-
-		return _presentQueue.getSemaphore(_procVAL->getCurrentFrame());
-	}
-
-	inline VkSemaphore Window::getPresentSemaphore(const uint8_t frameidx) const {
-		return _presentQueue.getSemaphore(frameidx);
-	}
-
 	inline const VkColorSpaceKHR Window::getColorSpace() const {
 		return _colorSpace;
 	}

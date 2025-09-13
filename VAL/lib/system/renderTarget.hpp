@@ -1,15 +1,15 @@
-/*
-Copyright © 2025 Tripp Robins
+ï»¿/*
+Copyright ï¿½ 2025 Tripp Robins
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the “Software”), to deal in the Software
+software and associated documentation files (the ï¿½Softwareï¿½), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE SOFTWARE IS PROVIDED ï¿½AS ISï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -27,85 +27,80 @@ namespace val {
 	class GraphicsPipeline; // forward declaration
 	class renderTarget {
 	public:
-		renderTarget() = default;
-		renderTarget(renderTarget& other) = delete; // I do need to implement this functions eventually
+		renderTarget(ValProc& vproc) : _proc(vproc) {};
+		renderTarget(renderTarget& other) = delete; // I do need to implement these functions eventually
 		renderTarget(renderTarget&& other) = delete;
 
 	public:
-		void render(ValProc& proc, const uint32_t& instanceCount = 1u);
+		void render(const uint32_t& instanceCount = 1u);
 
-		void rebindDescriptorSet(ValProc& proc, const GraphicsPipeline& pipeline);
+		void rebindDescriptorSet(const GraphicsPipeline& pipeline);
 
-		void updatePipeline(ValProc& proc, const GraphicsPipeline& pipeline);
+		void updatePipeline(const GraphicsPipeline& pipeline);
 
-		void updateViewport(ValProc& proc, const VkViewport& viewport);
+		void updateViewport(const VkViewport& viewport);
 
-		void updateViewport(ValProc& proc, const VkViewport& viewport, const uint16_t index);
+		void updateViewport(const VkViewport& viewport, const uint16_t index);
 
-		void updateViewports(ValProc& proc, const std::vector<VkViewport>& viewports);
+		void updateViewports(const std::vector<VkViewport>& viewports);
 
-		void updateViewports(ValProc& proc, const std::vector<VkViewport>& viewports, const uint16_t startIndex);
+		void updateViewports(const std::vector<VkViewport>& viewports, const uint16_t startIndex);
 
-		void updateScissor(ValProc& proc, const VkRect2D& scissor);
+		void updateScissor(const VkRect2D& scissor);
 
-		void updateScissor(ValProc& proc, const VkRect2D& scissor, const uint16_t index);
+		void updateScissor(const VkRect2D& scissor, const uint16_t index);
 
-		void updateScissors(ValProc& proc, const std::vector<VkRect2D>& scissors);
+		void updateScissors(const std::vector<VkRect2D>& scissors);
 
-		void updateScissors(ValProc& proc, const std::vector<VkRect2D>& scissors, const uint16_t startIndex);
+		void updateScissors(const std::vector<VkRect2D>& scissors, const uint16_t startIndex);
 
-		void updateLinewidth(ValProc& proc, const float width);
+		void updateLinewidth(const float width);
 
-		void updateBlendConstants(ValProc& proc, const std::array<float, 4>& depthConstants);
+		void updateBlendConstants(const std::array<float, 4>& depthConstants);
 
-		void updateTopologyMode(ValProc& proc, const TOPOLOGY_MODE topologyMode);
+		void updateTopologyMode(const TOPOLOGY_MODE topologyMode);
 
-		void updateCullMode(ValProc&, const CULL_MODE cullMode);
+		void updateCullMode(const CULL_MODE cullMode);
 
-		void updateDepthBias(ValProc& proc, const float depthBiasConstant, const float depthBiasClamp, const float depthBiasSlopeFactor);
+		void updateDepthBias(const float depthBiasConstant, const float depthBiasClamp, const float depthBiasSlopeFactor);
 
-		void updateBuffers(ValProc& proc);
+		void updateBuffers();
 
+		void setCommandBuffers(VkCommandBuffer* cmdBuffers);
 		/************************************************************************************************************/
 		/* BUFFER MANIPULATION */
 
-		void updateDescriptorSet(ValProc& proc, GraphicsPipeline& pipeline, DescriptorSheet& sheet, const uint32_t setIndex);
+		void updateDescriptorSet(GraphicsPipeline& pipeline, DescriptorSheet& sheet, const uint32_t setIndex);
 
-		void updateIndexBuffer(ValProc& proc);
+		void updateIndexBuffer();
 
-		void updateVertexBuffers(ValProc& proc);
+		void updateVertexBuffers();
 
-		void updateAndSetIndexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& indexCount);
+		void updateAndSetIndexBuffer(val::Buffer& buffer, const uint32_t& indexCount);
 
-		void updateAndSetIndexBuffer(ValProc& proc, const VkBuffer& buffer, const uint32_t& indexCount);
+		void updateAndSetIndexBuffer(const VkBuffer& buffer, const uint32_t& indexCount);
 
-		void updateAndSetVertexBuffer(ValProc& proc, const VkBuffer& buffer, const uint32_t& vertexCount);
+		void updateAndSetVertexBuffer(const VkBuffer& buffer, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBuffer(ValProc& proc, val::Buffer& buffer, const uint32_t& vertexCount);
+		void updateAndSetVertexBuffer(val::Buffer& buffer, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBuffers(ValProc& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount);
+		void updateAndSetVertexBuffers(const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBuffers(ValProc& proc, const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount);
+		void updateAndSetVertexBuffers(const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount);
 
-		void updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, val::Buffer& vertexBuffer, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount);
+		void updateAndSetVertexBufferAndIndexBuffer(val::Buffer& vertexBuffer, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount);
 
-		void updateAndSetVertexBufferAndIndexBuffer(ValProc& proc, const VkBuffer& vertexBuffer, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
+		void updateAndSetVertexBufferAndIndexBuffer(const VkBuffer& vertexBuffer, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
 
-		void updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount);
-		
-		void updateAndSetVertexBuffersAndIndexBuffer(ValProc& proc, const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
+		void updateAndSetVertexBuffersAndIndexBuffer(const std::vector<val::Buffer*>& vertexBuffers, const uint32_t& vertexCount, val::Buffer& indexBuffer, const uint32_t& indexCount);
+
+		void updateAndSetVertexBuffersAndIndexBuffer(const std::vector<VkBuffer>& vertexBuffers, const uint32_t& vertexCount, const VkBuffer& indexBuffer, const uint32_t& indexCount);
 
 		/************************************************************************************************************/
 
-		void update(ValProc& proc, const GraphicsPipeline& pipeline, const std::vector<VkViewport>& viewports);
+		void beginPass(VkRenderPass renderPass, VkFramebuffer& frameBuffer);
 
-		void begin(ValProc& proc);
-
-		void beginPass(ValProc& proc, VkRenderPass renderPass, VkFramebuffer& frameBuffer);
-
-		void endPass(ValProc& proc);
-
-		void submit(ValProc& proc, std::vector<VkSemaphore> waitSemaphores, VkFence fence = VK_NULL_HANDLE);
+		void endPass();
 
 	public:
 		inline void setVertexBuffer(const VkBuffer& buffer, const uint32_t& vertexCount) {
@@ -117,7 +112,7 @@ namespace val {
 		}
 
 		inline void setVertexBuffer(val::Buffer& buffer, const uint32_t& vertexCount) {
-			_vertexBuffers = { buffer.getVkBuffer()};
+			_vertexBuffers = { buffer.getVkBuffer() };
 			_vertexCount = vertexCount;
 
 
@@ -157,7 +152,7 @@ namespace val {
 			_indexBuffer = indexBuffer;
 			_indexCount = indexCount;
 		}
-		
+
 		inline const VkBuffer& getIndexBuffer() const {
 			return _indexBuffer;
 		}
@@ -219,27 +214,28 @@ namespace val {
 
 		inline const std::vector<VkClearValue>& getClearValues() {
 			return _clearValues;
-		} 
+		}
 
-		inline void setQueue(Queue& queue) 
+		inline void setQueue(Queue& queue)
 		{
 			_queue = &queue;
 		}
 
 	protected:
 		Queue* _queue;
-
+		ValProc& _proc;
 		VkRenderPass _renderPass = VK_NULL_HANDLE;
-		
+
 		std::vector<VkClearValue> _clearValues;
 
+		VkCommandBuffer* _commandBuffers;
 		VkFormat _imgFormat;
 		std::vector<VkBuffer> _vertexBuffers;
 		std::vector<VkDeviceSize> _vertexBufferOffsets;
 		uint32_t _vertexCount = 0;
 		VkBuffer _indexBuffer;
 		uint32_t _indexCount = 0;
-		VkRenderPassBeginInfo _renderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO, NULL, VK_NULL_HANDLE, VK_NULL_HANDLE, {0u,0u}, 0u, VK_NULL_HANDLE};
+		VkRenderPassBeginInfo _renderPassBeginInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO, NULL, VK_NULL_HANDLE, VK_NULL_HANDLE, {0u,0u}, 0u, VK_NULL_HANDLE };
 	};
 }
 #endif // !VAL_RENDER_TARGET_HPP

@@ -21,6 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/renderGraph/passContext.hpp>
 #include <VAL/lib/renderGraph/renderPassBeginType.hpp>
+#include <VAL/lib/system/buffer.hpp>
 
 namespace val {
 

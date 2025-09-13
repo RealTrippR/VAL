@@ -25,19 +25,16 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val 
 {
-	inline void Queue::reset()
+	inline void Queue::reset(VkCommandBuffer* commandBuffers, uint8_t commandBufferCount)
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-		vkResetCommandBuffer(_commandBuffers[_proc->getCurrentFrame()], 0x0);
+		for (uint8_t i = 0; i < commandBufferCount; ++i)
+		{
+			vkResetCommandBuffer(commandBuffers[i], 0x0);
+		}
 	}
 	
-	inline void Queue::begin()
+	inline void Queue::begin(VkCommandBuffer* commandBuffers, uint8_t commandBufferCount)
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
 		const VkCommandBufferBeginInfo beginInfo =
 		{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -45,174 +42,99 @@ namespace val
 			.flags = 0x0,
 			.pInheritanceInfo = VK_NULL_HANDLE
 		};
-
-		vkBeginCommandBuffer(getCommandBuffer(), &beginInfo);
+		for (uint8_t i = 0; i < commandBufferCount; ++i)
+		{
+			vkBeginCommandBuffer(commandBuffers[i], &beginInfo);
+		}
 	}
 
 
-	inline void Queue::end() 
+	inline void Queue::end(VkCommandBuffer* commandBuffers, uint8_t commandBufferCount)
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-
-		vkEndCommandBuffer(getCommandBuffer());
+		for (uint8_t i = 0; i < commandBufferCount; ++i)
+		{
+			vkEndCommandBuffer(commandBuffers[i]);
+		}
 	}
 
 
-	inline void Queue::submit(Queue& waitUpon, const VkPipelineStageFlags& waitStages)
+	inline void Queue::submit(
+		const VkCommandBuffer* commandBuffers, uint8_t commandBufferCount,
+		const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
+		const PIPELINE_STAGE* waitStages /*1 for every semaphore*/)
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
 		VkSubmitInfo submitInfo;
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pNext = VK_NULL_HANDLE;
-		submitInfo.pCommandBuffers = &_commandBuffers[_proc->getFramesInFlight()];
-		submitInfo.commandBufferCount = 1u;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &_semaphores[_proc->getCurrentFrame()];
-		submitInfo.pWaitDstStageMask = &waitStages;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &waitUpon._semaphores[_proc->getCurrentFrame()];
-
+		submitInfo.pCommandBuffers = commandBuffers;
+		submitInfo.commandBufferCount = commandBufferCount;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = NULL;
+		submitInfo.pWaitDstStageMask = (VkPipelineStageFlags*)waitStages;
+		submitInfo.waitSemaphoreCount = waitSemaphoreCount;
+		submitInfo.pWaitSemaphores = waitSemaphores;
 		vkQueueSubmit(_vkQueue, 1, &submitInfo, NULL);
 	}
 
-	inline void Queue::submit(Queue& waitUpon, const VkPipelineStageFlags& waitStages, const VkFence& fence)
-	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-		VkSubmitInfo submitInfo; 
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pNext = VK_NULL_HANDLE;
-		submitInfo.pCommandBuffers = &(getCommandBuffer());
-		submitInfo.commandBufferCount = 1u;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &_semaphores[_proc->getCurrentFrame()];
-		submitInfo.pWaitDstStageMask = &waitStages;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &waitUpon._semaphores[_proc->getCurrentFrame()];
 
-		vkQueueSubmit(_vkQueue, 1, &submitInfo, fence);
-	}
-
-	inline void Queue::submit(const VkSemaphore* waitSemaphores, const  uint8_t waitSemaphoreCount,
-		const VkPipelineStageFlags* waitStages /*1 for every semaphore*/)
+	inline void Queue::submit(
+		const VkCommandBuffer cmdBuffer,
+		const VkSemaphore waitSemaphore,
+		const VkSemaphore signalSemaphore,
+		const PIPELINE_STAGE* waitStages, /*1 for every wait semaphore*/
+		VkFence fence
+	)
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
 		VkSubmitInfo submitInfo;
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pNext = VK_NULL_HANDLE;
-		submitInfo.pCommandBuffers = &(getCommandBuffer());
-		submitInfo.commandBufferCount = 1u;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &_semaphores[_proc->getCurrentFrame()];
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.waitSemaphoreCount = waitSemaphoreCount;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-
-		vkQueueSubmit(_vkQueue, 1, &submitInfo, NULL);
-	}
-
-	inline void Queue::submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
-		const VkPipelineStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence)
-	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-		VkSubmitInfo submitInfo;
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pNext = VK_NULL_HANDLE;
-		submitInfo.pCommandBuffers = &_commandBuffers[_proc->getCurrentFrame()];
-		submitInfo.commandBufferCount = 1u;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &_semaphores[_proc->getCurrentFrame()];
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.waitSemaphoreCount = waitSemaphoreCount;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-
+		submitInfo.pCommandBuffers = &cmdBuffer;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.signalSemaphoreCount = (signalSemaphore) ? 1 : 0;
+		submitInfo.pSignalSemaphores = &signalSemaphore;
+		submitInfo.pWaitDstStageMask = (VkPipelineStageFlags*)waitStages;
+		submitInfo.waitSemaphoreCount = (waitSemaphore) ? 1 : 0;
+		submitInfo.pWaitSemaphores = &waitSemaphore;
 		vkQueueSubmit(_vkQueue, 1, &submitInfo, fence);
 	}
 
-	inline void Queue::submit(const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
-		const VkPipelineStageFlags* waitStages /*1 for every semaphore*/, const VkFence& fence, uint8_t frameIdx, bool signal)
+	inline void Queue::submit(
+		const VkCommandBuffer* commandBuffers, uint8_t commandBufferCount,
+		const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
+		const PIPELINE_STAGE* waitStages /*1 for every wait semaphore*/, VkFence fence)
 	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
 		VkSubmitInfo submitInfo;
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pNext = VK_NULL_HANDLE;
-		submitInfo.pCommandBuffers = &_commandBuffers[frameIdx];
-		submitInfo.commandBufferCount = 1u;
-		if (signal) {
-			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = &_semaphores[frameIdx];
-		}
-		else {
-			submitInfo.signalSemaphoreCount = 0u;
-		}
-		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.pCommandBuffers = commandBuffers;
+		submitInfo.commandBufferCount = commandBufferCount;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = NULL;
+		submitInfo.pWaitDstStageMask = (VkPipelineStageFlags*)waitStages;
 		submitInfo.waitSemaphoreCount = waitSemaphoreCount;
 		submitInfo.pWaitSemaphores = waitSemaphores;
-
 		vkQueueSubmit(_vkQueue, 1, &submitInfo, fence);
 	}
 
-	inline uint8_t Queue::getCommandBufferCount() const
+
+	inline void Queue::submit(
+		const VkCommandBuffer* commandBuffers, uint8_t commandBufferCount,
+		const VkSemaphore* signalSemaphores, const uint8_t signalSemaphoreCount,
+		const VkSemaphore* waitSemaphores, const uint8_t waitSemaphoreCount,
+		const PIPELINE_STAGE* waitStages /*1 for every semaphore*/,
+		VkFence fence)
 	{
-		return _cmdBuffAndSemaphoreBufferCount;
-	}
-
-	inline uint8_t Queue::getSemaphoreCount() const
-	{
-		return _cmdBuffAndSemaphoreBufferCount;
-	}
-
-	inline VkCommandBuffer& Queue::getCommandBuffer() const
-	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-		if (_proc->getCurrentFrame() >= _cmdBuffAndSemaphoreBufferCount) {
-			dbg::printError("Queue::getCommandBuffer(): Implicitly gets the command buffer at the current frame, the but the command buffer count (%hhu) of Queue @ %p is less than the frames in flight (%hhu) of ValProc @ %p.", _cmdBuffAndSemaphoreBufferCount, this, _proc->getFramesInFlight(), _proc);
-			throw std::runtime_error("Queue::getCommandBuffer() : Implicitly gets the command buffer at the current frame, the but the command buffer count(% hhu) of Queue @ % p is less than the frames in flight(% hhu) of ValProc @ % p.");
-		}
-#endif // !NDEBUG
-		return _commandBuffers[_proc->getCurrentFrame()];
-	}
-
-	inline VkCommandBuffer& Queue::getCommandBuffer(const uint8_t frameIdx) const
-	{		
-		return _commandBuffers[frameIdx];
-	}
-
-	inline VkSemaphore& Queue::getSemaphore() const
-	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-
-		return _semaphores[_proc->getCurrentFrame()];
-	}
-
-	inline VkSemaphore& Queue::getSemaphore(const uint8_t frameIdx) const
-	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-		return _semaphores[frameIdx];
-	}
-
-	inline QUEUE_FLAGS Queue::getQueueFlags() const
-	{
-#ifndef NDEBUG
-		dbgValidateSelfUse();
-#endif // !NDEBUG
-		return _queueFlags;
+		VkSubmitInfo submitInfo;
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.pNext = VK_NULL_HANDLE;
+		submitInfo.pCommandBuffers = commandBuffers;
+		submitInfo.commandBufferCount = commandBufferCount;
+		submitInfo.signalSemaphoreCount = signalSemaphoreCount;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+		submitInfo.pWaitDstStageMask = (VkPipelineStageFlags*)waitStages;
+		submitInfo.waitSemaphoreCount = waitSemaphoreCount;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		vkQueueSubmit(_vkQueue, 1, &submitInfo, fence);
 	}
 
 	inline uint8_t Queue::getQueueFamily() const
@@ -231,6 +153,16 @@ namespace val
 	inline ValProc* Queue::getValProc() const
 	{
 		return _proc;
+	}
+
+	inline VAL_RETURN_CODE Queue::waitIdle() const
+	{
+		return VAL_RETURN_CODE(vkQueueWaitIdle(_vkQueue) == VK_SUCCESS);
+	}
+
+	inline QUEUE_FLAGS Queue::getQueueFlags() const
+	{
+		return _queueFlags;
 	}
 }
 

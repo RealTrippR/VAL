@@ -23,7 +23,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/renderGraph/passContext.hpp>
 #include <VAL/lib/system/window.hpp>
 #include <VAL/lib/renderGraph/renderGraphBlock.h>
-#include <VAL/lib/system/renderTarget.hpp>
 #include <VAL/lib/renderGraph/passFunctions.hpp>
 
 #define PASS_BEGIN(NAME) void PASS_##NAME(val::ValProc& valProc, PASS_CONTEXT& passContext

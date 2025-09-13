@@ -22,21 +22,31 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val
 {
-	void Buffer::create(ValProc& proc, const uint32_t size, VkBufferUsageFlags bufferUsage) {
+	VAL_RETURN_CODE Buffer::create(ValProc& proc, const uint32_t size, VkBufferUsageFlags bufferUsage) {
 		_size = size;
 		_usage = bufferUsage;
 		
 		proc.createBuffer(size, bufferUsage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _buffer, _memory);
+		if (!_buffer) {
+			return VAL_FAILURE;
+		}
+		return VAL_SUCCESS;
 	}
 
-	void Buffer::createFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, const BUFFER_USAGE usages)
+	VAL_RETURN_CODE Buffer::createFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, const BUFFER_USAGE usages)
 	{
-		create(proc, dataSize, usages);
+		if (create(proc, dataSize, usages) != VAL_SUCCESS) {
+			return VAL_FAILURE;
+		}
 		overwriteFromStagingBuffer(proc, data, dataSize, 0, 0);
+		return VAL_SUCCESS;
 	}
 
-	void Buffer::overwriteFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
+	VAL_RETURN_CODE Buffer::overwriteFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, VkDeviceSize srcOffset, VkDeviceSize dstOffset)
 	{
+		if ((uint64_t)dataSize + dstOffset > UINT32_MAX) {
+			return VAL_FAILURE;
+		}
 		if (_size < dataSize + dstOffset) {
 			resize(proc,dataSize + dstOffset);
 		}
@@ -46,8 +56,11 @@ namespace val
 
 		// create staging buffer
 		VkBuffer stagingBuffer;
-	;	VkDeviceMemory stagingBufferMemory;
-		proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+		VkDeviceMemory stagingBufferMemory;
+		if (proc.createBuffer(dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory) != VAL_SUCCESS) {
+			return VAL_FAILURE;
+		}
+
 		void* stagingData;
 		vkMapMemory(proc._device, stagingBufferMemory, 0, dataSize, 0, &stagingData);
 		memcpy(stagingData, data, (size_t)dataSize);
@@ -58,6 +71,8 @@ namespace val
 		// cleanup staging buffer
 		vkDestroyBuffer(proc._device, stagingBuffer, VK_NULL_HANDLE);
 		vkFreeMemory(proc._device, stagingBufferMemory, VK_NULL_HANDLE);
+
+		return VAL_SUCCESS;
 	}
 
 
@@ -65,7 +80,7 @@ namespace val
 	void Buffer::overwriteFromBuffer(ValProc& proc, Buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset) 
 	{
 		if (_size < srcBufferRange) {
-			resize(proc, srcBufferRange);
+			resize(proc, (uint32_t)srcBufferRange);
 		}
 #ifndef NDEBUG
 		__VAL_DEBUG_ValidateBufferCopy(_size, srcBufferRange, srcOffset, dstOffset);

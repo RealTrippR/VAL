@@ -68,7 +68,7 @@ namespace val
 		return _instances;
 	}
 
-	VAL_RETURN_CODE AccelerationStructure::buildAsBottomLevel(ValProc& proc, Queue& rayqueue, uint32_t vertexCount, uint32_t indexCount)
+	VAL_RETURN_CODE AccelerationStructure::buildAsBottomLevel(ValProc& proc, Queue& rayqueue, uint32_t vertexCount, uint32_t indexCount, VkCommandBuffer cmdBuffer)
 	{
 		const VkBuildAccelerationStructureFlagsKHR ACCEL_BUILD_FLAGS = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 		const VkAccelerationStructureTypeKHR ACCEL_STRUCT_TYPE = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
@@ -215,26 +215,20 @@ namespace val
 		};
 
 
-		vkCreateFence(proc, &fenceCreateInfo, NULL, &fence);
+		//vkCreateFence(proc, &fenceCreateInfo, NULL, &fence);
 
 		const VkShaderStageFlags stageFlags = VK_SHADER_STAGE_ALL;
 
-
-		rayqueue.begin();
-	
 		vkCmdBuildAccelerationStructuresKHR(
-			rayqueue.getCommandBuffer(0u),
+			cmdBuffer,
 			infoCount,
 			&buildInfo,
 			buildRanges);
-		rayqueue.end();
-
-		rayqueue.submit(NULL, 0, &stageFlags, fence, 0, false);
 
 		// wait for acceleration structure to build (silent errors may occur otherwise)
-		vkWaitForFences(proc, 1, &fence, VK_TRUE, UINT64_MAX);
+		//vkWaitForFences(proc, 1, &fence, VK_TRUE, UINT64_MAX);
 
-		vkDestroyFence(proc, fence, NULL);
+		//vkDestroyFence(proc, fence, NULL);
 
 		// destroy build ranges
 		for (uint32_t i = 0; i < infoCount; ++i)
@@ -249,7 +243,7 @@ namespace val
 		return VAL_SUCCESS;
 	}
 
-	VAL_RETURN_CODE AccelerationStructure::buildAsTopLevel(ValProc& proc, AccelerationStructure& BLAS, Queue& rayqueue)
+	VAL_RETURN_CODE AccelerationStructure::buildAsTopLevel(ValProc& proc, AccelerationStructure& BLAS, Queue& rayqueue, VkCommandBuffer cmdBuffer)
 	{
 		const VkBuildAccelerationStructureFlagsKHR ACCEL_BUILD_FLAGS = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 		const VkAccelerationStructureTypeKHR ACCEL_STRUCT_TYPE = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
@@ -427,36 +421,30 @@ namespace val
 
 		const VkAccelerationStructureBuildRangeInfoKHR* pRanges = &buildRange;
 
-		VkFence fence;
+		/*VkFence fence;
 		VkFenceCreateInfo fenceCreateInfo =
 		{
 			.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
 			.pNext = NULL,
 			.flags = 0x0
-		};
+		};*/
 
 
-		vkCreateFence(proc, &fenceCreateInfo, NULL, &fence);
+		//vkCreateFence(proc, &fenceCreateInfo, NULL, &fence);
 
 		const VkShaderStageFlags stageFlags = VK_SHADER_STAGE_ALL;
 
-		rayqueue.begin();
-
 		vkCmdBuildAccelerationStructuresKHR(
-			rayqueue.getCommandBuffer(0u),
+			cmdBuffer,
 			1,
 			&instanceBuildInfo,
 			&pRanges);
 
-		rayqueue.end();
-
 	
-		rayqueue.submit(NULL, 0, &stageFlags, fence, 0, false);
-
 		// wait for acceleration structure to build (silent errors may occur otherwise)
-		vkWaitForFences(proc, 1, &fence, VK_TRUE, UINT64_MAX);
+		//vkWaitForFences(proc, 1, &fence, VK_TRUE, UINT64_MAX);
 
-		vkDestroyFence(proc, fence, NULL);
+		//vkDestroyFence(proc, fence, NULL);
 
 		return VAL_SUCCESS;
 	}

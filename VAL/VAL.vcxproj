@@ -212,6 +212,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\descriptorSheets\pushDescriptorSheet.cpp" />
+    <ClCompile Include="src\system\renderTarget.cpp" />
     <ClCompile Include="src\system\windowCursor.cpp" />
     <ClInclude Include="..\ExternalLibraries\cply\c_polygon.h" />
     <ClInclude Include="lib\classEnumBitOps.hpp" />
@@ -309,12 +310,12 @@
     <ClInclude Include="lib\system\rayTracingGroup.hpp" />
     <ClInclude Include="lib\system\raytracingPipeline.hpp" />
     <ClInclude Include="lib\system\renderPass.hpp" />
+    <ClInclude Include="lib\system\renderTarget.hpp" />
     <ClInclude Include="lib\system\sampler.hpp" />
     <ClInclude Include="lib\system\imageView.hpp" />
     <ClInclude Include="lib\system\pipelineBase.hpp" />
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
     <ClInclude Include="lib\system\queueManager.hpp" />
-    <ClInclude Include="lib\system\renderTarget.hpp" />
     <ClInclude Include="lib\system\shaderBindingTable.hpp" />
     <ClInclude Include="lib\system\shaderStageEnum.hpp" />
     <ClInclude Include="lib\system\specializationConstant.hpp" />
@@ -390,7 +391,6 @@
     <ClCompile Include="src\system\raygroup.cpp" />
     <ClCompile Include="src\system\raytracingPipeline.cpp" />
     <ClCompile Include="src\system\renderPass.cpp" />
-    <ClCompile Include="src\system\renderTarget.cpp" />
     <ClCompile Include="src\system\sampler.cpp" />
     <ClCompile Include="src\system\shaderBindingTable.cpp" />
     <ClCompile Include="src\system\SSBO_Handle.cpp" />

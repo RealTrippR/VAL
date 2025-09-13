@@ -13,6 +13,7 @@ const bool enableValidationLayers = true;
 
 #include <VAL/lib/system/VAL_PROC.hpp>
 #include <VAL/lib/system/window.hpp>
+#include <VAL/lib/system/renderTarget.hpp>
 #include <VAL/lib/ext/gpu_vector.hpp>
 
 #define GLFW_INCLUDE_VULKAN
@@ -107,7 +108,7 @@ int main()
 	window.prep(proc, windowConfig, 800, 800, "Image ____");
 	window.setTitle("Image Test");
 	window.setIcon("testImage.jpg");
-	window.setWindowMode(WN_MODE::WindowedFullscreen);
+	window.setWindowMode(WN_MODE::Windowed);
 
 	Cursor cursor("testImage41x26.jpg", 0, 0);
 	window.setCursor(cursor);
@@ -160,20 +161,19 @@ int main()
 
 	//////////////////////////////////////////////////////////////
 	// create descriptor sets
-	pipeline.allocateAndWriteDescriptorSets(proc);
+	descSheet.allocateAndWriteSets(proc);
 	//////////////////////////////////////////////////////////////
-
-
-
-
-
 
 	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
 
+	tiny_vector<VkCommandBuffer> cmdBuffers(proc.getFramesInFlight());
+	allocateCommandBuffers(proc, cmdBuffers.data(), cmdBuffers.size());
 
+	tiny_vector<VkCommandBuffer> winCmdBuffers(proc.getFramesInFlight());
+	allocateCommandBuffers(proc, winCmdBuffers.data(), winCmdBuffers.size());
 
 	// configure the render target, setting vertex buffers, scissors, area, etc
-	val::renderTarget renderTarget;
+	val::renderTarget renderTarget(proc);
 	renderTarget.setQueue(graphicsQueue);
 	renderTarget.setFormat(imageFormat);
 	renderTarget.setRenderArea(window.getSize());
@@ -181,11 +181,20 @@ int main()
 	// Note that simply setting the index and vertex buffers does not update them in current command buffer, they have to be binded using rt.updateBuffers() or rt.update()
 	renderTarget.setIndexBuffer(indices, indices.size());
 	renderTarget.setVertexBuffer(vertices, vertices.size());
+	renderTarget.setCommandBuffers(cmdBuffers.data());
 	// config viewport, covers the entire size of the window
 	VkViewport viewport{ 0,0, window.getSize().width, window.getSize().height, 0.f, 1.f };
 
 	Fence presentFence;
 	presentFence.create(proc);
+
+
+	tiny_vector<VkSemaphore> graphicsSemaphores(proc.getFramesInFlight());
+	createSemaphores(proc, graphicsSemaphores.data(), graphicsSemaphores.size());
+	tiny_vector<VkSemaphore> imgSemaphores(proc.getFramesInFlight());
+	createSemaphores(proc, imgSemaphores.data(), imgSemaphores.size());
+
+	PIPELINE_STAGE waitStages = PIPELINE_STAGE::ColorAttachmentOutput;
 
 	while (!window.shouldClose()) {
 		window.pollEvents();
@@ -193,21 +202,26 @@ int main()
 		// Update view information, stored in a UBO
 		updateViewMatrix(proc, window, viewUBO);
 
-		VkFramebuffer framebuffer = window.beginDraw(imageFormat);
-		renderTarget.begin(proc);
+		uint8_t fidx = proc.getCurrentFrame();
+		VkFramebuffer framebuffer = window.getSwapchainFramebuffer(imageFormat, imgSemaphores[fidx]);
+		resetCommandBuffer(cmdBuffers[fidx]);
+		beginCommandBuffer(cmdBuffers[fidx]);
 
-		renderTarget.beginPass(proc, pipeline.getVkRenderPass(), framebuffer);
-		renderTarget.updateBuffers(proc);
-		renderTarget.updatePipeline(proc, pipeline);
-		renderTarget.updateViewport(proc, viewport, 0);
-		renderTarget.updateScissor(proc, VkRect2D{ {0,0}, window.getSize()});
-		renderTarget.updateDescriptorSet(proc, pipeline, descSheet, proc.getCurrentFrame());
-		renderTarget.render(proc);
-		renderTarget.endPass(proc);
+		renderTarget.beginPass(pipeline.getVkRenderPass(), framebuffer);
+		renderTarget.updateBuffers();
+		renderTarget.updatePipeline(pipeline);
+		renderTarget.updateViewport(viewport, 0);
+		renderTarget.updateScissor(VkRect2D{ {0,0}, window.getSize()});
+		renderTarget.updateDescriptorSet(pipeline, descSheet, proc.getCurrentFrame());
+		renderTarget.render();
+		renderTarget.endPass();
 
-		renderTarget.submit(proc, {window.getPresentQueue().getSemaphore()}, presentFence);
+		endCommandBuffer(cmdBuffers[fidx]);
+
+		graphicsQueue.submit(cmdBuffers[fidx], imgSemaphores[fidx], graphicsSemaphores[fidx], &waitStages, presentFence);
+
 		presentFence.wait(proc);
-		window.display(imageFormat, { graphicsQueue.getSemaphore() });
+		window.display(imageFormat, graphicsSemaphores[fidx]);
 		presentFence.reset(proc);
 
 		proc.nextFrame();
@@ -217,6 +231,14 @@ int main()
 
 	vertices.destroy(proc);
 	indices.destroy(proc);
+
+	graphicsQueue.waitIdle();
+	destroySemaphores(proc, graphicsSemaphores.data(), graphicsSemaphores.size());
+	destroySemaphores(proc, imgSemaphores.data(), imgSemaphores.size());
+	freeCommandBuffers(proc, cmdBuffers.data(), cmdBuffers.size());
+	freeCommandBuffers(proc, winCmdBuffers.data(), winCmdBuffers.size());
+
+	descSheet.destroy(proc);
 
 	glfwTerminate();
 #ifndef NDEBUG

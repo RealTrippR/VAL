@@ -24,6 +24,8 @@ namespace val {
 			return VAL_FAILURE;
 		if (createSwapChainFrameBuffers(*_procVAL, renderPass) != VAL_SUCCESS)
 			return VAL_FAILURE;
+
+		setWindowMode(_windowMode); // Refresh window mode
 		return VAL_SUCCESS;
 	}
 
@@ -37,6 +39,8 @@ namespace val {
 			return VAL_FAILURE;
 		if (createSwapChainFrameBuffers(attachments.data(), attachments.size(), renderPass, _procVAL->getVkLogicalDevice()) != VAL_SUCCESS)
 			return VAL_FAILURE;
+
+		setWindowMode(_windowMode); // Refresh window mode
 		return VAL_SUCCESS;
 	}
 
@@ -49,6 +53,8 @@ namespace val {
 			return VAL_FAILURE;
 		if (createSwapChainFrameBuffers(attachments, attachmentCount, renderPass, _procVAL->getVkLogicalDevice()) != VAL_SUCCESS)
 			return VAL_FAILURE;
+
+		setWindowMode(_windowMode); // Refresh window mode
 		return VAL_SUCCESS;
 	}
 
@@ -130,6 +136,13 @@ namespace val {
 	{
 		_windowMode = windowMode;
 
+		if (_window==nullptr) {
+			return;
+		}
+
+		// EVERYTHING BELOW THIS LINE WILL DEREFERENCE _window
+		// ==================================================================
+
 		if (windowMode == WN_MODE::Fullscreen) {
 			glfwSetWindowAttrib(_window, GLFW_DECORATED, false);
 
@@ -179,13 +192,25 @@ namespace val {
 				0);
 		}
 		else if (windowMode == WN_MODE::BorderlessWindowed) {
+			glfwSetWindowAttrib(_window, GLFW_DECORATED, false); // GLFW_DECORATED is like a border flag
 
+			int x = 0, y = 0;
+			glfwGetWindowPos(_window, &x, &y);
+			glfwSetWindowMonitor(_window, NULL,
+				x, y,
+				_swapChainExtent.width, _swapChainExtent.height,
+				0);
 		}
 		return;
 	}
 
-	void Window::display(const VkFormat& imageFormat, std::vector<VkSemaphore> waitOn) {
-		updateSwapChain(imageFormat, waitOn);
+	void Window::display(const VkFormat imgFormat, VkSemaphore waitSemaphore)
+	{
+		updateSwapChain(imgFormat, &waitSemaphore,1);
+	}
+
+	void Window::display(const VkFormat imageFormat, VkSemaphore* waitSemaphores, uint32_t waitSemaphoreCount) {
+		updateSwapChain(imageFormat, waitSemaphores, waitSemaphoreCount);
 	}
 
 	void Window::destroy() {
@@ -423,16 +448,16 @@ namespace val {
 		return VAL_SUCCESS;
 	}
 
-	void Window::updateSwapChain(const VkFormat& imageFormat, std::vector<VkSemaphore>& waitOn) {
+	void Window::updateSwapChain(const VkFormat& imageFormat, VkSemaphore* waitSemaphores, uint32_t semaphoreCount) {
 
 		const auto& currentFrame = _procVAL->_currentFrame;
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
-		// wait on the signalSemaphores to signaled
-		presentInfo.waitSemaphoreCount = (uint32_t)waitOn.size();
-		presentInfo.pWaitSemaphores = waitOn.data();
+		// semaphores to be waited on
+		presentInfo.waitSemaphoreCount = semaphoreCount;
+		presentInfo.pWaitSemaphores = waitSemaphores;
 
 		VkSwapchainKHR swapChains[] = { _swapChain };
 		presentInfo.swapchainCount = 1;
@@ -461,12 +486,12 @@ namespace val {
 		return _swapChainImages[_currentSwapChainImageIndex];
 	}
 
-	VkFramebuffer& Window::getSwapchainFramebuffer(const VkFormat& imageFormat) {
+	VkFramebuffer& Window::getSwapchainFramebuffer(const VkFormat& imageFormat, VkSemaphore sem) {
 		//vkWaitForFences(_procVAL->_device, 1, &_presentQueue._fences[_procVAL->_currentFrame], VK_TRUE, UINT64_MAX);
 
 		//uint32_t imageIndex;
 		VkResult result = vkAcquireNextImageKHR(_procVAL->_device, _swapChain, UINT64_MAX,
-			_presentQueue.getSemaphore(_procVAL->_currentFrame), VK_NULL_HANDLE, &_currentSwapChainImageIndex);
+			sem, VK_NULL_HANDLE, &_currentSwapChainImageIndex);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			vkDeviceWaitIdle(_procVAL->_device);
@@ -479,18 +504,6 @@ namespace val {
 
 		return _swapChainFramebuffers[_currentSwapChainImageIndex];
 	}
-
-	// returns a swapchain frame buffer to use
-	VkFramebuffer& Window::beginDraw(const VkFormat& imageFormat) 
-	{
-		VkFramebuffer& framebuffer = getSwapchainFramebuffer(imageFormat); // gets the swapchain framebuffer to be rendered to
-		return framebuffer;
-	}
-
-
-
-
-
 
 	void Window::createPresentFence(VkDevice device)
 	{

@@ -325,6 +325,26 @@ namespace val {
 	//bool isDeviceSuitable(VkPhysicalDevice device, std::vector<const char*>& deviceExtensions, VkSurfaceKHR surface);
 
 	//VkSurfaceFormatKHR findSurfaceImageFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	VAL_RETURN_CODE allocateCommandBuffers(ValProc& proc, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+	VAL_RETURN_CODE freeCommandBuffers(ValProc& proc, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount);
+
+	VAL_RETURN_CODE createSemaphores(ValProc& proc, VkSemaphore* semaphores, uint32_t semaphoreCount);
+	
+	VAL_RETURN_CODE resetCommandBuffers(VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount);
+
+	VAL_RETURN_CODE resetCommandBuffer(VkCommandBuffer cmdBuffer);
+
+	VAL_RETURN_CODE beginCommandBuffer(VkCommandBuffer cmdBuffer, VkCommandBufferUsageFlags usageFlags = 0x0);
+
+	VAL_RETURN_CODE beginCommandBuffers(VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount, VkCommandBufferUsageFlags usageFlags = 0x0);
+
+	VAL_RETURN_CODE endCommandBuffer(VkCommandBuffer cmdBuffer);
+
+	VAL_RETURN_CODE endCommandBuffers(VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount);
+
+
+	VAL_RETURN_CODE destroySemaphores(ValProc& proc, VkSemaphore* semaphores, uint32_t semaphoreCount);
 
 	VkFormat findSupportedImageFormat(ValProc& proc, ImageFormatRequirements& requirements);
 

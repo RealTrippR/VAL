@@ -22,15 +22,15 @@ namespace val
 
 	public:
 
-		inline void create(ValProc& proc, const uint32_t size, const BUFFER_USAGE bufferUsage) {
-			create(proc, size, (VkBufferUsageFlags)bufferUsage);
+		inline VAL_RETURN_CODE create(ValProc& proc, const uint32_t size, const BUFFER_USAGE bufferUsage) {
+			return create(proc, size, (VkBufferUsageFlags)bufferUsage);
 		}
 
-		void create(ValProc& proc, const uint32_t size, const VkBufferUsageFlags bufferUsage);
+		VAL_RETURN_CODE create(ValProc& proc, const uint32_t size, const VkBufferUsageFlags bufferUsage);
 
-		void createFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, const BUFFER_USAGE usages);
+		VAL_RETURN_CODE createFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, const BUFFER_USAGE usages);
 
-		void overwriteFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
+		VAL_RETURN_CODE overwriteFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
 		void overwriteFromBuffer(ValProc& proc, Buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
 
