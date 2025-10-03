@@ -361,18 +361,18 @@ namespace val {
 	VkImageView createImageView(VkDevice device, VkImage image, const VkFormat& format, const uint32_t& mipLevels = 1U);
 
 
-	VkImage createTextureImage16BitFromDisk(ValProc* proc, fs::path imgFilepath, VkFormat* autoFormatOut, stbi_us** pixelsOut,
+	VkImage createTextureImage16BitFromDisk(ValProc* proc, VkQueue q, fs::path imgFilepath, VkFormat* autoFormatOut, stbi_us** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
 		const BUFFER_SPACE& buffSpace = GPU_ONLY);
 
 
-	VkImage createTextureImage8BitFromMemory(ValProc* proc, const void* memory, const uint32_t memSize, stbi_uc** pixelsOut,
+	VkImage createTextureImage8BitFromMemory(ValProc* proc, VkQueue q, const void* memory, const uint32_t memSize, stbi_uc** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
 		const BUFFER_SPACE& buffSpace = GPU_ONLY);
 
-	VkImage createTextureImage8BitFromDisk(ValProc* proc, fs::path imgFilepath, stbi_uc** pixelsOut,
+	VkImage createTextureImage8BitFromDisk(ValProc* proc, VkQueue q, fs::path imgFilepath, stbi_uc** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
 		const BUFFER_SPACE& buffSpace = GPU_ONLY);

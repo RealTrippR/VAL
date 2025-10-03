@@ -68,12 +68,12 @@ namespace val
 		return _instances;
 	}
 
-	VAL_RETURN_CODE AccelerationStructure::buildAsBottomLevel(ValProc& proc, Queue& rayqueue, uint32_t vertexCount, uint32_t indexCount, VkCommandBuffer cmdBuffer)
+	VAL_RETURN_CODE AccelerationStructure::buildAsBottomLevel(Queue& rayqueue, uint32_t vertexCount, uint32_t indexCount, VkCommandBuffer cmdBuffer)
 	{
 		const VkBuildAccelerationStructureFlagsKHR ACCEL_BUILD_FLAGS = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 		const VkAccelerationStructureTypeKHR ACCEL_STRUCT_TYPE = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
 
-
+		auto& proc = *rayqueue.getValProc();
 		PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR = 
 			(PFN_vkCmdBuildAccelerationStructuresKHR)vkGetDeviceProcAddr(proc.getVkLogicalDevice(), "vkCmdBuildAccelerationStructuresKHR");
 
@@ -243,10 +243,12 @@ namespace val
 		return VAL_SUCCESS;
 	}
 
-	VAL_RETURN_CODE AccelerationStructure::buildAsTopLevel(ValProc& proc, AccelerationStructure& BLAS, Queue& rayqueue, VkCommandBuffer cmdBuffer)
+	VAL_RETURN_CODE AccelerationStructure::buildAsTopLevel(Queue& q, AccelerationStructure& BLAS, Queue& rayqueue, VkCommandBuffer cmdBuffer)
 	{
 		const VkBuildAccelerationStructureFlagsKHR ACCEL_BUILD_FLAGS = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 		const VkAccelerationStructureTypeKHR ACCEL_STRUCT_TYPE = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+
+		auto& proc = *rayqueue.getValProc();
 
 		PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR =
 			(PFN_vkGetAccelerationStructureBuildSizesKHR)vkGetDeviceProcAddr(proc.getVkLogicalDevice(), "vkGetAccelerationStructureBuildSizesKHR");
@@ -343,7 +345,7 @@ namespace val
 				0x0, (void**)&mappedDataStagingBuff);
 
 			memcpy_s(mappedDataStagingBuff, instanceBuffSize, instancesVK.data(), instanceBuffSize);
-			proc.copyBuffer(stagingBuff, _instanceBuff, instanceBuffSize, 0, 0);
+			proc.copyBuffer(q, stagingBuff, _instanceBuff, instanceBuffSize, 0, 0);
 
 			vkUnmapMemory(proc._device, stagingBuffMem);
 			vkFreeMemory(proc._device, stagingBuffMem, NULL);

@@ -53,13 +53,13 @@ namespace val
 
 		VAL_RETURN_CODE loadFromMemory(const void* memory, const size_t memByteLen);
 
-		VAL_RETURN_CODE importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const FBX_MATERIAL_PROPERTY texProperty);
+		VAL_RETURN_CODE importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const FBX_MATERIAL_PROPERTY texProperty);
 
-		VAL_RETURN_CODE importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const char* texProperty);
+		VAL_RETURN_CODE importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const char* texProperty);
 
-		VAL_RETURN_CODE importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, std::vector<const char*> texPropertyMatchList);
+		VAL_RETURN_CODE importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, std::vector<const char*> texPropertyMatchList);
 
-		VAL_RETURN_CODE importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const uint32_t textureIndex);
+		VAL_RETURN_CODE importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const uint32_t textureIndex);
 
 		ufbx_scene* getUfbxScene() const;
 	

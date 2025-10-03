@@ -8,15 +8,15 @@ namespace val {
 	{
 	public:
 		DepthBuffer() = default;
-		DepthBuffer(ValProc& proc, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT) {
-			create(proc, extent, depthFormat, imgViewCount, mipLevels, msaaSamples);
+		DepthBuffer(Queue& queue, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT) {
+			create(queue, extent, depthFormat, imgViewCount, mipLevels, msaaSamples);
 		}
 
-		DepthBuffer(ValProc& proc, uint32_t height, uint32_t width, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT) {
-			create(proc, {height,width}, depthFormat, imgViewCount, mipLevels, msaaSamples);
+		DepthBuffer(Queue& queue, uint32_t height, uint32_t width, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT) {
+			create(queue, {height,width}, depthFormat, imgViewCount, mipLevels, msaaSamples);
 		}
 	public:
-		void create(ValProc& proc, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT);
+		void create(Queue& queue, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount = 1u, uint8_t mipLevels = 1u, VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT);
 
 		void destroy(ValProc& proc);
 	public:

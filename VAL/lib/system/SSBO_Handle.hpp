@@ -20,7 +20,7 @@ namespace val {
 	public:
 		void update(ValProc& proc, void* data);
 
-		void updateFromTempStagingBuffer(ValProc& proc, void* data);
+		void updateFromTempStagingBuffer(Queue& q, void* data);
 
 		//void resize(VAL_PROC& proc, size_t size);
 

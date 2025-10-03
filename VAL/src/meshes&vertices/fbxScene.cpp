@@ -71,7 +71,7 @@ namespace val
 		}
 	}
 
-	void createValTexture2D_FromUFBX_Texture(ufbx_texture* textureFbx, val::Texture2D* texture)
+	void createValTexture2D_FromUFBX_Texture(Queue &q, ufbx_texture* textureFbx, val::Texture2D* texture)
 	{
 		if (textureFbx->content.size >= UINT32_MAX)
 		{
@@ -81,7 +81,7 @@ namespace val
 
 		if (textureFbx->content.size != 0)
 		{	// load texture from embedded data
-			texture->createFromMemory(textureFbx->content.data, (uint32_t)textureFbx->content.size,
+			texture->createFromMemory(q,textureFbx->content.data, (uint32_t)textureFbx->content.size,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, texture->getImageLayout(),
 				BUFFER_SPACE::GPU_ONLY, 1u);
 			if (texture->getVkImage() != VK_NULL_HANDLE) {
@@ -90,7 +90,7 @@ namespace val
 		}
 		if (textureFbx->has_file) { 
 		//// it's stored on the disk / embed fail fallback (fbx textures can have both embedded data and an associated file)
-			texture->createFromDisk(textureFbx->absolute_filename.data,
+			texture->createFromDisk(q,textureFbx->absolute_filename.data,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, texture->getImageLayout(),
 				BUFFER_SPACE::GPU_ONLY, 1u,
 				USE_SOURCE_DIMENSION, USE_SOURCE_DIMENSION);
@@ -150,19 +150,19 @@ namespace val
 		return VAL_SUCCESS;
 	}
 
-	VAL_RETURN_CODE FbxScene::importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const FBX_MATERIAL_PROPERTY texProperty)
+	VAL_RETURN_CODE FbxScene::importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const FBX_MATERIAL_PROPERTY texProperty)
 	{
 		const std::vector<const char*> texPropertyAsStringList = FBX_MATERIAL_PROPERTY_toStringList(texProperty);
 
-		return importTexture2D(texture, proc, meshIndex, materialIndex, texPropertyAsStringList);
+		return importTexture2D(q, texture, proc, meshIndex, materialIndex, texPropertyAsStringList);
 	}
 	
-	VAL_RETURN_CODE FbxScene::importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const char* texProperty)
+	VAL_RETURN_CODE FbxScene::importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const char* texProperty)
 	{
-		return importTexture2D(texture, proc, meshIndex, materialIndex, std::vector<const char*> { texProperty });
+		return importTexture2D(q, texture, proc, meshIndex, materialIndex, std::vector<const char*> { texProperty });
 	}
 
-	VAL_RETURN_CODE FbxScene::importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, std::vector<const char*> texPropertyMatchList)
+	VAL_RETURN_CODE FbxScene::importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, std::vector<const char*> texPropertyMatchList)
 	{
 		ufbx_scene* scene = _scene;
 
@@ -207,7 +207,7 @@ namespace val
 						const char* curTexProp = texPropertyMatchList[mti];
 						if (streql(curTexProp, matTextureFbx->material_prop.data))
 						{
-							createValTexture2D_FromUFBX_Texture(textureFbx, texture);
+							createValTexture2D_FromUFBX_Texture(q, textureFbx, texture);
 						}
 					}
 				}
@@ -244,7 +244,7 @@ namespace val
 		return VAL_SUCCESS;
 	}
 
-	VAL_RETURN_CODE FbxScene::importTexture2D(Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const uint32_t textureIndex)
+	VAL_RETURN_CODE FbxScene::importTexture2D(Queue& q, Texture2D* texture, ValProc& proc, const uint32_t meshIndex, const uint32_t materialIndex, const uint32_t textureIndex)
 	{
 		ufbx_scene* scene = _scene;
 
@@ -269,7 +269,7 @@ namespace val
 
 				if (textureFbx->type == UFBX_TEXTURE_FILE)
 				{
-					createValTexture2D_FromUFBX_Texture(textureFbx, texture);
+					createValTexture2D_FromUFBX_Texture(q, textureFbx, texture);
 				}
 			}
 		}

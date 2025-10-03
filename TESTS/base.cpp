@@ -108,7 +108,7 @@ int main()
 	window.prep(proc, windowConfig, 800, 800, "Image ____");
 	window.setTitle("Image Test");
 	window.setIcon("testImage.jpg");
-	window.setWindowMode(WN_MODE::Windowed);
+	window.setWindowMode(WN_MODE::Fullscreen);
 
 	Cursor cursor("testImage41x26.jpg", 0, 0);
 	window.setCursor(cursor);
@@ -172,6 +172,11 @@ int main()
 	tiny_vector<VkCommandBuffer> winCmdBuffers(proc.getFramesInFlight());
 	allocateCommandBuffers(proc, winCmdBuffers.data(), winCmdBuffers.size());
 
+	tiny_vector<VkSemaphore> graphicsSemaphores(proc.getFramesInFlight());
+	createSemaphores(proc, graphicsSemaphores.data(), graphicsSemaphores.size());
+	tiny_vector<VkSemaphore> imgSemaphores(proc.getFramesInFlight());
+	createSemaphores(proc, imgSemaphores.data(), imgSemaphores.size());
+
 	// configure the render target, setting vertex buffers, scissors, area, etc
 	val::renderTarget renderTarget(proc);
 	renderTarget.setQueue(graphicsQueue);
@@ -189,10 +194,7 @@ int main()
 	presentFence.create(proc);
 
 
-	tiny_vector<VkSemaphore> graphicsSemaphores(proc.getFramesInFlight());
-	createSemaphores(proc, graphicsSemaphores.data(), graphicsSemaphores.size());
-	tiny_vector<VkSemaphore> imgSemaphores(proc.getFramesInFlight());
-	createSemaphores(proc, imgSemaphores.data(), imgSemaphores.size());
+
 
 	PIPELINE_STAGE waitStages = PIPELINE_STAGE::ColorAttachmentOutput;
 

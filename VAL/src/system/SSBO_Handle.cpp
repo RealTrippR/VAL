@@ -25,9 +25,12 @@ namespace val {
 		return buffers;
 	}
 
-	void SSBO_Handle::updateFromTempStagingBuffer(ValProc& proc, void* data) {
+	void SSBO_Handle::updateFromTempStagingBuffer(Queue& q, void* data) {
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
+
+		auto& proc = *q.getValProc();
+
 		proc.createBuffer(_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			stagingBuffer, stagingBufferMemory);
@@ -42,7 +45,7 @@ namespace val {
 
 		// Copy data from staging buffer to all storage buffers for each frame
 		for (size_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; i++) {
-			proc.copyBuffer(stagingBuffer, getBuffers(proc)[i], _size);
+			proc.copyBuffer(q, stagingBuffer, getBuffers(proc)[i], _size);
 		}
 
 		vkDestroyBuffer(proc._device, stagingBuffer, nullptr);

@@ -35,17 +35,17 @@ namespace val {
 
 
 
-	void Texture2D::destroy()
+	void Texture2D::destroy(ValProc& proc)
 	{
 		if (_imgMemory) {
-			vkFreeMemory(_proc->_device, _imgMemory, VK_NULL_HANDLE);
-			dbg::recordVkObjectDestruction(_proc->_device,_imgMemory);
+			vkFreeMemory(proc._device, _imgMemory, VK_NULL_HANDLE);
+			dbg::recordVkObjectDestruction(proc._device,_imgMemory);
 
 			_imgMemory = VK_NULL_HANDLE;
 		}
 		if (_img) {
-			vkDestroyImage(_proc->_device, _img, VK_NULL_HANDLE);
-			dbg::recordVkObjectDestruction(_proc->_device, _img);
+			vkDestroyImage(proc._device, _img, VK_NULL_HANDLE);
+			dbg::recordVkObjectDestruction(proc._device, _img);
 
 			_img = VK_NULL_HANDLE;
 		}
@@ -56,10 +56,11 @@ namespace val {
 		}
 	}
 
-	void Texture2D::createFromMemory(const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
+	void Texture2D::createFromMemory(Queue& q, const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const BUFFER_SPACE memspace, const uint8_t mipLevels)
 	{
-		destroy();
+		auto* _proc = q.getValProc();
+		destroy(*_proc);
 		_layout = layout;
 #ifndef NDEBUG
 		if (mipLevels == 0u) {
@@ -73,7 +74,7 @@ namespace val {
 
 		int widthtmp;
 		int heightmp;
-		_img = createTextureImage8BitFromMemory(_proc, memory, memorySize, &_pixels, &_imgMemory, _layout, _format,
+		_img = createTextureImage8BitFromMemory(_proc,q, memory, memorySize, &_pixels, &_imgMemory, _layout, _format,
 			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
@@ -84,10 +85,11 @@ namespace val {
 		isValidFormatForTexture2D(_format);
 	}
 
-	void Texture2D::createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
+	void Texture2D::createFromDisk(Queue& q, std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const BUFFER_SPACE memspace, const uint8_t mipLevels, const uint16_t maxWidth, const uint16_t maxHeight)
 	{
-		destroy();
+		auto* _proc = q.getValProc();
+		destroy(*_proc);
 		_layout = layout;
 #ifndef NDEBUG
 		if (mipLevels == 0u) {
@@ -100,7 +102,7 @@ namespace val {
 		int widthtmp;
 		int heightmp;
 
-		_img = createTextureImage8BitFromDisk(_proc, srcpath.string().c_str(), &_pixels, &_imgMemory, _layout, _format, usages, mipLevels,
+		_img = createTextureImage8BitFromDisk(_proc,q, srcpath.string().c_str(), &_pixels, &_imgMemory, _layout, _format, usages, mipLevels,
 			&widthtmp, &heightmp, &_channels, memspace);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
@@ -121,17 +123,18 @@ namespace val {
 		}
 
 		if (mipLevels > 0) {
-			generateMipmaps(mipLevels);
+			generateMipmaps(q, mipLevels);
 		}
 
 		isValidFormatForTexture2D(_format);
 
 	}
 
-	void Texture2D::create(const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
+	void Texture2D::create(Queue& q, const uint16_t width, const uint16_t height, const VkFormat format, const VkImageUsageFlagBits usages,
 		const VkImageLayout layout, const BUFFER_SPACE memspace, const uint8_t mipLevels)
 	{
-		destroy();
+		auto* _proc = q.getValProc();
+		destroy(*_proc);
 #ifndef NDEBUG
 		if (format == TEXTURE_FORMAT_AUTO) {
 			dbg::printError("Texture2D::create: TEXTURE_FORMAT_AUTO is not allowed here - format cannot be automatically deduced without external information, such as that loaded from a file.");
@@ -153,7 +156,7 @@ namespace val {
 		_height = height;
 		_format = format;
 		_mipLevels = mipLevels;
-		_proc->createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
+		_proc->createImage(q, width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
 
@@ -164,9 +167,10 @@ namespace val {
 
 	/* PRIVATE: */
 
-	void Texture2D::generateMipmaps(const uint8_t mipLevels)
+	void Texture2D::generateMipmaps(Queue& q, const uint8_t mipLevels)
 	{
 #ifndef NDEBUG
+		auto* _proc = q.getValProc();
 		// Check if image format supports linear blitting
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties(_proc->_physicalDevice, _format, &formatProperties);
@@ -183,7 +187,7 @@ namespace val {
 		VkCommandBuffer commandBuffer = _proc->beginSingleTimeCommands();
 
 		if (_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-			_proc->transitionImageLayout(_img, _format, _layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandBuffer, mipLevels);
+			_proc->transitionImageLayout(q, _img, _format, _layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandBuffer, mipLevels);
 		}
 
 		VkImageMemoryBarrier barrier{};
@@ -259,7 +263,7 @@ namespace val {
 			0, nullptr,
 			1, &barrier);
 
-		_proc->endSingleTimeCommands(commandBuffer);
+		_proc->endSingleTimeCommands(commandBuffer, q);
 
 	/*	if (_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
 			_proc->transitionImageLayout(_img, _format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _layout, commandBuffer, mipLevels);

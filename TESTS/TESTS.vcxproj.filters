@@ -47,6 +47,7 @@
     <ClCompile Include="multipleWindows.cpp" />
     <ClCompile Include="dynamicRendering.cpp" />
     <ClCompile Include="pushDescriptorTest.cpp" />
+    <ClCompile Include="videoTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vertex.hpp" />

@@ -28,13 +28,13 @@ namespace val
 
 		VAL_RETURN_CODE create(ValProc& proc, const uint32_t size, const VkBufferUsageFlags bufferUsage);
 
-		VAL_RETURN_CODE createFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, const BUFFER_USAGE usages);
+		VAL_RETURN_CODE createFromStagingBuffer(Queue& q, const void* data, uint32_t dataSize, const BUFFER_USAGE usages);
 
-		VAL_RETURN_CODE overwriteFromStagingBuffer(ValProc& proc, const void* data, uint32_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
+		VAL_RETURN_CODE overwriteFromStagingBuffer(Queue& q, const void* data, uint32_t dataSize, VkDeviceSize srcOffset = 0U, VkDeviceSize dstOffset = 0U);
 
-		void overwriteFromBuffer(ValProc& proc, Buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
+		void overwriteFromBuffer(Queue& q, Buffer& srcBuffer, VkDeviceSize srcBufferRange, VkDeviceSize srcOffset, VkDeviceSize dstOffset);
 
-		void resize(ValProc& proc, uint32_t newSize);
+		void resize(Queue& q, uint32_t newSize);
 
 		void destroy(ValProc& proc);
 
@@ -47,7 +47,7 @@ namespace val
 
 		VkBufferUsageFlags getUsageFlags() const;
 
-		VAL_RETURN_CODE setUsages(ValProc& proc, BUFFER_USAGE usages);
+		VAL_RETURN_CODE setUsages(Queue& q, BUFFER_USAGE usages);
 
 	protected:
 		VkBuffer _buffer = NULL;

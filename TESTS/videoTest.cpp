@@ -71,7 +71,8 @@ void updateViewMatrix(val::ValProc& proc, const val::Window& window, val::UBO_Ha
 	hdl.update(proc, &ubo);
 }
 void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
-{	using namespace val;
+{
+	using namespace val;
 
 	// state infos
 	static rasterizerState rasterizer;
@@ -92,7 +93,7 @@ void setGraphicsPipelineInfo(val::GraphicsPipeline& pipeline)
 
 	pipeline.setDynamicStates({ DYNAMIC_STATE::Scissor, DYNAMIC_STATE::Viewport });
 }
-void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat) 
+void setRenderPass(val::RenderPassManager& renderPassMngr, VkFormat imgFormat)
 {
 	using namespace val;
 	static ColorAttachment colorAttach;

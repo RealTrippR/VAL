@@ -27,23 +27,23 @@ namespace val
 	public:
 		Image() = default;
 
-		Image(ValProc& proc, uint16_t width, uint16_t height, VkFormat format, VkImageLayout imgLayout, VkImageUsageFlags usages, VkImageTiling tiling, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT)
+		Image(Queue& q, uint16_t width, uint16_t height, VkFormat format, VkImageLayout imgLayout, VkImageUsageFlags usages, VkImageTiling tiling, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT)
 		{
 			_width = width;
 			_height = height;
 			_format = format;
 			_layout = imgLayout;
 			_usages = usages;
-			create(proc, (IMAGE_TILING)tiling, (IMAGE_ASPECT)aspect);
+			create(q, (IMAGE_TILING)tiling, (IMAGE_ASPECT)aspect);
 		}
-		Image(ValProc& proc, uint16_t width, uint16_t height, VkFormat format, IMAGE_LAYOUT imgLayout, IMAGE_USAGE usages, IMAGE_TILING tiling, IMAGE_ASPECT aspect = IMAGE_ASPECT::Color)
+		Image(Queue& q, uint16_t width, uint16_t height, VkFormat format, IMAGE_LAYOUT imgLayout, IMAGE_USAGE usages, IMAGE_TILING tiling, IMAGE_ASPECT aspect = IMAGE_ASPECT::Color)
 		{
 			_width = width;
 			_height = height;
 			_format = format;
 			_layout = (VkImageLayout)imgLayout;
 			_usages = (VkImageUsageFlags)usages;
-			create(proc,tiling, aspect);
+			create(q,tiling, aspect);
 		}
 
 		~Image()
@@ -90,17 +90,17 @@ namespace val
 		}
 
 	public:
-		VAL_RETURN_CODE create(ValProc& proc, const IMAGE_TILING tiling = IMAGE_TILING::Linear, const IMAGE_ASPECT = IMAGE_ASPECT::Color);
+		VAL_RETURN_CODE create(Queue& q, const IMAGE_TILING tiling = IMAGE_TILING::Linear, const IMAGE_ASPECT = IMAGE_ASPECT::Color);
 
-		VAL_RETURN_CODE overwriteFromPixels(ValProc& proc, const uint8_t* pixels, uint16_t width, uint16_t height, uint8_t channelCount, int32_t dstOffsetX = 0u, int32_t dstOffsetY = 0u);
+		VAL_RETURN_CODE overwriteFromPixels(Queue& q, const uint8_t* pixels, uint16_t width, uint16_t height, uint8_t channelCount, int32_t dstOffsetX = 0u, int32_t dstOffsetY = 0u);
 
-		VAL_RETURN_CODE overwriteFromImage(ValProc& proc, const VkImage srcImg, const VkFormat srcFormat, VkImageLayout srcLayout, uint16_t width, uint16_t height, uint8_t channelCount, int32_t dstOffsetX = 0u, int32_t dstOffsetY = 0u, int32_t srcOffsetX = 0u, int32_t srcOffsetY = 0u);
+		VAL_RETURN_CODE overwriteFromImage(Queue& q, const VkImage srcImg, const VkFormat srcFormat, VkImageLayout srcLayout, uint16_t width, uint16_t height, uint8_t channelCount, int32_t dstOffsetX = 0u, int32_t dstOffsetY = 0u, int32_t srcOffsetX = 0u, int32_t srcOffsetY = 0u);
 
-		void resize(ValProc& proc, uint16_t newWidth, uint16_t newHeight);
+		void resize(Queue& q, uint16_t newWidth, uint16_t newHeight);
 
 		void destroy(ValProc& proc);
 
-		void copyToOther(ValProc& proc, Image* other);
+		void copyToOther(Queue& q, Image* other);
 
 		inline VkImage getVkImage() const { return _img; };
 
@@ -108,25 +108,25 @@ namespace val
 
 		inline uint16_t getWidth() const { return _width; };
 
-		void setWidth(ValProc& proc, const uint16_t width);
+		void setWidth(Queue& q, const uint16_t width);
 
 		inline uint16_t getHeight() const { return _height; };
 
-		void setHeight(ValProc& proc, const uint16_t height);
+		void setHeight(Queue& q, const uint16_t height);
 
 		inline VkImageUsageFlags getUsages() const { return _usages; };
 
-		void setUsages(ValProc& proc, VkImageUsageFlags usages);
+		void setUsages(Queue& q, VkImageUsageFlags usages);
 
 		inline uint8_t getMipmapLevel() const { return _mipMapLevel; };
 
-		void setMipmapLevel(ValProc& proc, const uint8_t mipmaplevel);
+		void setMipmapLevel(Queue& q, const uint8_t mipmaplevel);
 
-		void setFormat(ValProc&, VkFormat);
+		void setFormat(Queue& q, VkFormat);
 
 		VkFormat getFormat() const;
 
-		VAL_RETURN_CODE setLayout(ValProc&, VkImageLayout, VkCommandBuffer buffer = VK_NULL_HANDLE);
+		VAL_RETURN_CODE setLayout(Queue& q, VkImageLayout, VkCommandBuffer buffer = VK_NULL_HANDLE);
 
 		VkImageLayout getLayout() const;
 

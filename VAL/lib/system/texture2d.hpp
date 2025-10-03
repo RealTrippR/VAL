@@ -17,6 +17,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #include <stdint.h>
 #include <VAL/lib/system/system_utils.hpp>
+#include <VAL/lib/system/queue.hpp>
 
 #ifndef VAL_TEXTURE_2D_HPP
 #define VAL_TEXTURE_2D_HPP
@@ -29,51 +30,45 @@ namespace val {
 	public:
 
 		Texture2D() = default;
-
-		Texture2D(ValProc& proc) : _proc(&proc) {};
 		
-		Texture2D(ValProc& proc, const VkImageLayout layout) : _proc(&proc), _layout(layout) {};
+		Texture2D(const VkImageLayout layout) : _layout(layout) {};
 
-		Texture2D(ValProc& proc, const IMAGE_LAYOUT layout) : _proc(&proc), _layout((VkImageLayout)layout) {};
+		Texture2D(const IMAGE_LAYOUT layout) : _layout((VkImageLayout)layout) {};
 
-		Texture2D(ValProc& proc, const VkImageLayout layout, const VkFormat format) : _proc(&proc), _layout(layout), _format(format) {};
+		Texture2D(const VkImageLayout layout, const VkFormat format) : _layout(layout), _format(format) {};
 
-		Texture2D(ValProc& proc, const IMAGE_LAYOUT layout, const VkFormat format) : _proc(&proc), _layout((VkImageLayout)layout), _format(format) {};
+		Texture2D(const IMAGE_LAYOUT layout, const VkFormat format) : _layout((VkImageLayout)layout), _format(format) {};
 
-		Texture2D(ValProc& proc, void* memory, uint32_t memorySize, const VkFormat format,
-			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
+		Texture2D(Queue& q, void* memory, uint32_t memorySize, const VkFormat format,
+			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u)
 		{
-			createFromMemory(memory, memorySize, usages, layout, memspace, mipLevels);
+			createFromMemory(q, memory, memorySize, usages, layout, memspace, mipLevels);
 		}
 
-		Texture2D(ValProc& proc, std::filesystem::path srcpath, const VkFormat format,
+		Texture2D(Queue& q, std::filesystem::path srcpath, const VkFormat format,
 			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u
-			, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION) : _proc(&proc)
+			, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION)
 		{
-			createFromDisk(srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
+			createFromDisk(q, srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
 
-		Texture2D(ValProc& proc, std::filesystem::path srcpath, const VkFormat format,
+		Texture2D(Queue& q, std::filesystem::path srcpath, const VkFormat format,
 			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u
-			, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION) : _proc(&proc)
+			, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION)
 		{
-			createFromDisk(srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
+			createFromDisk(q, srcpath, usages, layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
 
-		Texture2D(ValProc& proc, const uint16_t width, const uint16_t height, const VkFormat format,
-			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
+		Texture2D(Queue& q, const uint16_t width, const uint16_t height, const VkFormat format,
+			const VkImageUsageFlagBits usages, const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u)
 		{
-			create(width, height, format, usages, layout, memspace, mipLevels);
+			create(q, width, height, format, usages, layout, memspace, mipLevels);
 		}
 
-		Texture2D(ValProc& proc, const uint16_t width, const uint16_t height, const VkFormat format,
-			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u) : _proc(&proc)
+		Texture2D(Queue& q, const uint16_t width, const uint16_t height, const VkFormat format,
+			const IMAGE_USAGE usages, const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u)
 		{
-			create(width, height, format, usages, layout, memspace, mipLevels);
-		}
-
-		~Texture2D() {
-			destroy();
+			create(q, width, height, format, usages, layout, memspace, mipLevels);
 		}
 
 		inline ImageViewBindInfo toImageViewBindInfo()
@@ -104,11 +99,6 @@ namespace val {
 		}
 
 	public:
-		
-		inline void setValProc(ValProc* proc);
-
-		inline ValProc* getValProc();
-
 		inline void discardPixels();
 
 		inline stbi_uc* getPixels() const;
@@ -129,36 +119,36 @@ namespace val {
 
 	public:
 
-		inline void transitionLayout(VkCommandBuffer cmd_buff, VkImageLayout newLayout);
+		inline void transitionLayout(Queue& q, VkCommandBuffer cmd_buff, VkImageLayout newLayout);
 
-		void createFromMemory(const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
+		void createFromMemory(Queue& q, const void* memory, const uint32_t memorySize, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
 
-		inline void createFromDisk(std::filesystem::path srcpath, const IMAGE_USAGE usages,
+		inline void createFromDisk(Queue& q, std::filesystem::path srcpath, const IMAGE_USAGE usages,
 			const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION)
 		{
-			createFromDisk(srcpath, (VkImageUsageFlagBits)usages, (VkImageLayout)layout, memspace, mipLevels, maxWidth, maxHeight);
+			createFromDisk(q, srcpath, (VkImageUsageFlagBits)usages, (VkImageLayout)layout, memspace, mipLevels, maxWidth, maxHeight);
 		}
 
 
 
-		void createFromDisk(std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
+		void createFromDisk(Queue& q, std::filesystem::path srcpath, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u, const uint16_t maxWidth = USE_SOURCE_DIMENSION, const uint16_t maxHeight = USE_SOURCE_DIMENSION);
 
-		inline void create(const uint16_t width, const uint16_t height, VkFormat format, const IMAGE_USAGE usages,
+		inline void create(Queue& q, const uint16_t width, const uint16_t height, VkFormat format, const IMAGE_USAGE usages,
 			const IMAGE_LAYOUT layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u)
 		{
-			create(width, height, format, VkImageUsageFlagBits(usages), VkImageLayout(layout), memspace, mipLevels);
+			create(q, width, height, format, VkImageUsageFlagBits(usages), VkImageLayout(layout), memspace, mipLevels);
 		}
 
-		void create(const uint16_t width, const uint16_t height, VkFormat format, const VkImageUsageFlagBits usages,
+		void create(Queue& q, const uint16_t width, const uint16_t height, VkFormat format, const VkImageUsageFlagBits usages,
 			const VkImageLayout layout, const BUFFER_SPACE memspace = GPU_ONLY, const uint8_t mipLevels = 1u);
 
-		void destroy();
+		void destroy(ValProc& proc);
 
 	protected:
 
-		void generateMipmaps(const uint8_t mipLevels);
+		void generateMipmaps(Queue& q, const uint8_t mipLevels);
 
 	protected:
 
@@ -167,7 +157,6 @@ namespace val {
 		stbi_uc* _pixels = NULL;
 		VkImage _img = VK_NULL_HANDLE;
 		VkDeviceMemory _imgMemory = VK_NULL_HANDLE;
-		ValProc* _proc;
 
 		VkImageLayout _layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		VkFormat _format = VK_FORMAT_R8G8B8A8_SRGB;

@@ -22,24 +22,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 namespace val {
 
-	/* PUBLIC: */
-
-	inline void Texture2D::setValProc(ValProc* proc)
-	{
-#ifndef NDEBUG
-		if (_proc) {
-			dbg::printError("Texture2D::setValProc: Texture2D @ %p: The ValProc of a Texture2D cannot be set more than once.", this);
-			throw std::runtime_error("Texture2D::setValProc: The ValProc of a Texture2D cannot be set more than once.");
-		}
-#endif // !NDEBUG
-
-		_proc = proc;
-	}
-
-	inline ValProc* Texture2D::getValProc()
-	{
-		return _proc;
-	}
 
 	inline void Texture2D::discardPixels()
 	{
@@ -93,9 +75,10 @@ namespace val {
 		return _img;
 	}
 
-	inline void Texture2D::transitionLayout(VkCommandBuffer cmd_buff, VkImageLayout newLayout)
+	inline void Texture2D::transitionLayout(Queue& q, VkCommandBuffer cmd_buff, VkImageLayout newLayout)
 	{
-		_proc->transitionImageLayout(_img, _format, _layout, newLayout, cmd_buff, _mipLevels);
+		auto* _proc = q.getValProc();
+		_proc->transitionImageLayout(q,_img, _format, _layout, newLayout, cmd_buff, _mipLevels);
 		_layout = newLayout;
 	}
 }
