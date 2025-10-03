@@ -95,6 +95,7 @@ namespace val {
 		std::optional<uint32_t> deviceID;
 		std::optional<uint32_t> vendorID;
 		std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+		uint8_t maxQueueCount = 1;
 	};
 }
 

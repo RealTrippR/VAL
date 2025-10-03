@@ -7,30 +7,23 @@ namespace val
 	// uint16: queue family, bool: supports present
 	static std::map<QUEUE_FLAGS, std::pair<uint16_t, bool>> queueFlagsToFamilyIndicesCache;
 
-	void Queue::create(ValProc& proc, const QUEUE_FLAGS flags)
+	VAL_RETURN_CODE Queue::create(ValProc& proc, const QUEUE_FLAGS flags, uint16_t idxInFamily)
 	{
 		destroy();
 		_queueFlags = flags;
 		_proc = &proc;
-		create();
+		indexInFamily = idxInFamily;
+		return create();
 	}
 
-	void Queue::create(ValProc& proc, const uint8_t cmdBuffAndSemaphoreCount, const QUEUE_FLAGS flags)
-	{
-		destroy();
-		_queueFlags = flags;
-		_proc = &proc;
-		create();
-	}
-
-
-	void Queue::create()
+	VAL_RETURN_CODE Queue::create()
 	{
 		
 		if (_proc == NULL || _proc->getVkLogicalDevice() == NULL) 
 		{
 			dbg::printError("Cannot create Queue @ %p, the ValProc it's associated with is uninitialized", this);
-			throw std::runtime_error("Cannot create Queue, the ValProc it's associated with is uninitialized");
+			//throw std::runtime_error("Cannot create Queue, the ValProc it's associated with is uninitialized");
+			return VAL_FAILURE;
 		}
 
 
@@ -42,9 +35,14 @@ namespace val
 			dbg::printError("Failed create Queue @ %p with flags as U32 %u because the queue family could not be found.", this, _queueFlags);
 			throw std::runtime_error("Invalid queue flags, cannot create Queue.");
 #endif // !NDEBUG
+			return VAL_FAILURE;
 		}
 
-		vkGetDeviceQueue(_proc->getVkLogicalDevice(), qfam, 0, &_vkQueue);
+		vkGetDeviceQueue(_proc->getVkLogicalDevice(), qfam, indexInFamily, &_vkQueue);
+		if (!_vkQueue) {
+			return VAL_FAILURE;
+		}
+		return VAL_SUCCESS;
 	}
 
 	void Queue::destroy()

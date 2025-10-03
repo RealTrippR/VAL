@@ -116,6 +116,9 @@ int main()
 
 	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
 
+	Queue omniQueue;
+	omniQueue.create(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Transfer);
+
 	// Configure and create window
 	WindowProperties windowConfig;
 	windowConfig.setProperty(WN_BOOL_PROPERTY::Resizable, true);
@@ -179,11 +182,11 @@ int main()
 	window.create(imageFormat, pipeline.getVkRenderPass());
 
 
-	Texture2D img1(proc, "testImage.jpg", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
+	Texture2D img1(omniQueue, "testImage.jpg", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
 	img1.discardPixels(); // no reason to save the pixels
 	ImageView imgView1(proc, img1, VK_IMAGE_ASPECT_COLOR_BIT);
 
-	Texture2D img2(proc, "testImage2.png", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
+	Texture2D img2(omniQueue, "testImage2.png", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
 	img2.discardPixels(); // no reason to save the pixels
 	ImageView imgView2(proc, img2, VK_IMAGE_ASPECT_COLOR_BIT);
 

@@ -118,15 +118,15 @@ namespace val
 		
 		inline VkQueue getVkQueue() const;
 
+		inline VkCommandPool getCmdPool() const;
+
 		inline ValProc* getValProc() const;
 
 		inline VAL_RETURN_CODE waitIdle() const;
 
 		static uint8_t findQueueFamilyOfQueueFlags(QUEUE_FLAGS flag, ValProc* proc, VkSurfaceKHR surface/*optional*/, bool* success/*optional*/);
 
-		void create(ValProc& proc, const QUEUE_FLAGS flags);
-
-		void create(ValProc& proc, const uint8_t semaphoreCount, const QUEUE_FLAGS flags);
+		VAL_RETURN_CODE create(ValProc& proc, const QUEUE_FLAGS flags, uint16_t idxInFamily=0);
 
 		// release allocated objects
 		void destroy();
@@ -134,7 +134,7 @@ namespace val
 		friend Window;
 		friend ValProc;
 
-		void create();
+		VAL_RETURN_CODE create();
 
 		void copyToOther(Queue* other) const;
 
@@ -148,9 +148,9 @@ namespace val
 	private:
 		VkQueue _vkQueue = NULL;
 		ValProc* _proc = NULL;
-
+		VkCommandPool _cmdPool;
 		QUEUE_FLAGS _queueFlags = QUEUE_FLAGS::Graphics;
-
+		uint16_t indexInFamily=0;
 		uint8_t _queueFamily = 0;
 		//uint8_t _cmdBuffAndSemaphoreBufferCount = 0u;
 		//uint8_t _commandBuffersPerFrame = 1;

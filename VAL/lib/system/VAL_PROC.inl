@@ -35,11 +35,6 @@ namespace val {
 		return _MAX_FRAMES_IN_FLIGHT;
 	}
 
-	inline VkCommandPool ValProc::getCommandPool() const 
-	{
-		return _commandPool;
-	}
-
 	inline VkDescriptorPool ValProc::getVkDescriptorPool() const
 	{
 		return _descriptorPool;

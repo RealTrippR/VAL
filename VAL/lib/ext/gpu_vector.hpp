@@ -163,36 +163,37 @@ namespace val {
 			return _buffer;
 		}
 
-		inline void push_back(ValProc& proc, const T& obj)
+		inline void push_back(Queue& q, const T& obj)
 		{
-			resize(proc, size() + 1);
+			resize(q, size() + 1);
 			data()[size() - 1] = obj;
 			T& t = back();
 			int i = 0;
 		}
 
-		inline void push_back(ValProc& proc, const T& obj, VkCommandBuffer cmdBuff)
+		inline void push_back(Queue& q, const T& obj, VkCommandBuffer cmdBuff)
 		{
-			resize(proc, size() + 1, cmdBuff);
+			resize(q, size() + 1, cmdBuff);
 			data()[size() - 1] = obj;
 		}
 
-		inline void pop_back(ValProc& proc) 
+		inline void pop_back(Queue& q) 
 		{
 			if (size() > 0) {
-				resize(proc, size() - 1);
+				resize(q, size() - 1);
 			}
 		}
 
-		inline void pop_back(ValProc& proc, VkCommandBuffer cmdBuff)
+		inline void pop_back(Queue& q, VkCommandBuffer cmdBuff)
 		{
 			if (size() > 0) {
-				resize(proc, size() - 1, cmdBuff);
+				resize(q, size() - 1, cmdBuff);
 			}
 		}
 
-		inline void resize(ValProc& proc, const size_t& newSize) 
+		inline void resize(Queue& q, const size_t& newSize) 
 		{
+			auto& proc = *q.getValProc();
 			if (_size == newSize) { return; }
 			if (this->size() == 0) { init(proc, newSize); return; }
 
@@ -225,7 +226,7 @@ namespace val {
 
 			if (newMemory)
 			{ // check if alloc succeeded
-				proc.copyBuffer(_buffer, newBuffer, _size * sizeof(T), 0u, 0u);
+				proc.copyBuffer(q, _buffer, newBuffer, _size * sizeof(T), 0u, 0u);
 
 				_memory = newMemory;
 				_buffer = newBuffer;
@@ -311,16 +312,14 @@ namespace val {
 			}
 		}
 		// copies  data from this into other
-
-		inline void copy(ValProc& proc, gpu_vector<T, size_t>& dst, VkCommandBuffer cmdBuff) {
-
+		inline void copy(Queue& q, gpu_vector<T, size_t>& dst, VkCommandBuffer cmdBuff) {
 #ifndef NDEBUG
 			if (dst._buffer == NULL) {
 				throw std::runtime_error("gpu_vector::copy: `dst` is an invalid/uninitialized gpu_vector.");
 			}
 #endif
 			if (dst._size < _size) {
-				dst.resize(proc, _size);
+				dst.resize(q, _size);
 			}
 
 			VkBufferCopy copyRegion;

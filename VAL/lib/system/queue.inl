@@ -150,6 +150,11 @@ namespace val
 		return _vkQueue;
 	}
 
+	inline VkCommandPool Queue::getCmdPool() const
+	{
+		return _cmdPool;
+	}
+
 	inline ValProc* Queue::getValProc() const
 	{
 		return _proc;

@@ -315,7 +315,6 @@
     <ClInclude Include="lib\system\imageView.hpp" />
     <ClInclude Include="lib\system\pipelineBase.hpp" />
     <ClInclude Include="lib\system\pushConstantHandle.hpp" />
-    <ClInclude Include="lib\system\queueManager.hpp" />
     <ClInclude Include="lib\system\shaderBindingTable.hpp" />
     <ClInclude Include="lib\system\shaderStageEnum.hpp" />
     <ClInclude Include="lib\system\specializationConstant.hpp" />
@@ -387,7 +386,6 @@
     <ClCompile Include="src\system\pushConstantHandle.cpp" />
     <ClCompile Include="src\system\pushDescriptor.cpp" />
     <ClCompile Include="src\system\queue.cpp" />
-    <ClCompile Include="src\system\queueManager.cpp" />
     <ClCompile Include="src\system\raygroup.cpp" />
     <ClCompile Include="src\system\raytracingPipeline.cpp" />
     <ClCompile Include="src\system\renderPass.cpp" />
@@ -421,11 +419,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\system\graphicsPipeline.inl">
-      <FileType>Document</FileType>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="lib\system\queueManager.inl">
       <FileType>Document</FileType>
     </ClInclude>
   </ItemGroup>
