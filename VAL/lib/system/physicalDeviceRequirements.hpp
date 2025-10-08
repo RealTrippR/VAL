@@ -1,15 +1,15 @@
-/*
-Copyright © 2025 Tripp Robins
+ï»¿/*
+Copyright ï¿½ 2025 Tripp Robins
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the “Software”), to deal in the Software
+software and associated documentation files (the ï¿½Softwareï¿½), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE SOFTWARE IS PROVIDED ï¿½AS ISï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -29,7 +29,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <VAL/lib/classEnumBitOps.hpp>
 
 namespace val {
-	
+
 	enum class DEVICE_TYPES : uint8_t
 	{
 		DEVICE_TYPE_UNDEFINED = 0,
@@ -40,12 +40,12 @@ namespace val {
 	};
 
 #ifndef DEVICE_TYPE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
-	#define DEVICE_TYPE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+#define DEVICE_TYPE_FLAGS_DEF_ENUM_BITWISE_OPERATORS
 	DEF_ENUM_BITWISE_OPERATORS(DEVICE_TYPES);
 #endif
-	
+
 	std::vector<VkPhysicalDeviceType> DEVICE_TYPE_FLAGS_TO_VkPhysicalDeviceType(const DEVICE_TYPES flag);
-	
+
 	enum class DEVICE_FEATURES : uint16_t
 	{
 		undefined = 0,
@@ -82,11 +82,12 @@ namespace val {
 		PhysicalDeviceRequirements() = default;
 		PhysicalDeviceRequirements(DEVICE_TYPES deviceTypes_) : deviceTypes(deviceTypes_) {};
 		PhysicalDeviceRequirements(DEVICE_TYPES deviceTypes_, DEVICE_FEATURES deviceFeatures_) :
-			deviceTypes(deviceTypes_), deviceFeatures(deviceFeatures_) {};
-			//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
+			deviceTypes(deviceTypes_), deviceFeatures(deviceFeatures_) {
+		};
+		//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-//
 		inline void addExtension(const char* ext) { deviceExtensions.push_back(ext); }
 		inline void addFeature(DEVICE_FEATURES feature) { deviceFeatures |= feature; }
-		inline void removeFeature(DEVICE_FEATURES feature) { deviceFeatures &= (DEVICE_FEATURES)(~feature);}
+		inline void removeFeature(DEVICE_FEATURES feature) { deviceFeatures &= (DEVICE_FEATURES)(~feature); }
 
 	public:
 		DEVICE_TYPES deviceTypes = (DEVICE_TYPES::integrated_GPU | DEVICE_TYPES::dedicated_GPU);

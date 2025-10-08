@@ -7,19 +7,20 @@ namespace val
 	// uint16: queue family, bool: supports present
 	static std::map<QUEUE_FLAGS, std::pair<uint16_t, bool>> queueFlagsToFamilyIndicesCache;
 
-	VAL_RETURN_CODE Queue::create(ValProc& proc, const QUEUE_FLAGS flags, uint16_t idxInFamily)
+	VAL_RETURN_CODE Queue::create(ValProc& proc, VkCommandPool  cmdPool, const QUEUE_FLAGS flags, uint16_t idxInFamily)
 	{
 		destroy();
 		_queueFlags = flags;
 		_proc = &proc;
 		indexInFamily = idxInFamily;
+		_cmdPool = cmdPool;
 		return create();
 	}
 
 	VAL_RETURN_CODE Queue::create()
 	{
-		
-		if (_proc == NULL || _proc->getVkLogicalDevice() == NULL) 
+
+		if (_proc == NULL || _proc->getVkLogicalDevice() == NULL)
 		{
 			dbg::printError("Cannot create Queue @ %p, the ValProc it's associated with is uninitialized", this);
 			//throw std::runtime_error("Cannot create Queue, the ValProc it's associated with is uninitialized");
@@ -47,7 +48,7 @@ namespace val
 
 	void Queue::destroy()
 	{
-		if (_vkQueue) 
+		if (_vkQueue)
 		{
 			// wait until queue is finished (we can't destroy semaphores that are currently in use)
 			vkQueueWaitIdle(_vkQueue);
@@ -75,8 +76,8 @@ namespace val
 	}
 #endif // !NDEBUG
 
-	
-	bool Queue::findQueueFamily(uint8_t* queueFamilyOut,VkSurfaceKHR surface)
+
+	bool Queue::findQueueFamily(uint8_t* queueFamilyOut, VkSurfaceKHR surface)
 	{
 #ifndef NDEBUG
 		dbgValidateSelfUse();
@@ -103,7 +104,7 @@ namespace val
 	{
 		uint8_t queueFamily = 0xFF;
 		// first check if the queue family matching queue flags has been cached
-		if (queueFlagsToFamilyIndicesCache.count(queueFlags) == 0 
+		if (queueFlagsToFamilyIndicesCache.count(queueFlags) == 0
 			|| (surface && queueFlagsToFamilyIndicesCache[queueFlags].second == false)) /*check present support*/
 		{
 			uint32_t queueFamilyCount = 0;
@@ -119,7 +120,7 @@ namespace val
 				// find present queue support
 				VkBool32 presentSupport = false;
 
-			
+
 				if (queueProperties.queueFlags & VkQueueFlags(queueFlags))
 				{
 					if (surface)

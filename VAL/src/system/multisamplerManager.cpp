@@ -4,7 +4,7 @@
 namespace val
 {
 	void MultisamplerConfig::create(Queue&q, const VkFormat& imgFormat, const uint32_t& width, const uint32_t& height, const VkImageAspectFlagBits& flagBits, const BUFFER_SPACE& space, const uint8_t& mipMapLevel) {
-		_procVAL->createImage(q, width, height, imgFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		_procVAL->createImage(q, q.getCmdPool(), width, height, imgFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 			bufferSpaceToVkMemoryProperty(space), _colorImage, _colorImageMemory, mipMapLevel, _sampleCount);
 		_procVAL->createImageView(_colorImage, imgFormat, VK_IMAGE_ASPECT_COLOR_BIT, &_colorImageView, mipMapLevel);
 	}
@@ -13,7 +13,7 @@ namespace val
 		
 		setSampleCount(MSAA_samples);
 
-		_procVAL->createImage(q, width, height, imgFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		_procVAL->createImage(q, q.getCmdPool(), width, height, imgFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 			bufferSpaceToVkMemoryProperty(space), _colorImage, _colorImageMemory, mipMapLevel, _sampleCount);
 		_procVAL->createImageView(_colorImage, imgFormat, VK_IMAGE_ASPECT_COLOR_BIT, &_colorImageView, mipMapLevel);
 	}

@@ -32,7 +32,7 @@ namespace val
 			return VAL_FAILURE;
 		auto& proc = *q.getValProc();
 		
-		proc.createImage(q, _width, _height, _format, (VkImageTiling)tiling, _usages, GPU_ONLY, _img, _imgMemory, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout, (VkImageAspectFlags)aspect);
+		proc.createImage(q, q.getCmdPool(), _width, _height, _format, (VkImageTiling)tiling, _usages, GPU_ONLY, _img, _imgMemory, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout, (VkImageAspectFlags)aspect);
 		dbg::recordVkObjectCreation(proc, _img);
 		dbg::recordVkObjectCreation(proc, _imgMemory);
 
@@ -49,7 +49,7 @@ namespace val
 		VkDeviceSize imgSize = width * height * channelCount;
 		VkImageLayout oldLayout = _layout;
 		auto& proc = *q.getValProc();
-		proc.transitionImageLayout(q, _img, _format, _layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		proc.transitionImageLayout(q, q.getCmdPool(),_img, _format, _layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		proc.createBuffer(imgSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
@@ -66,9 +66,9 @@ namespace val
 		memcpy(data, pixels, imgSize);
 		vkUnmapMemory(proc, stagingBufferMemory);
 
-		proc.copyBufferToImage(q, stagingBuffer, _img, width,height, dstOffsetX,dstOffsetY);
+		proc.copyBufferToImage(q, q.getCmdPool(), stagingBuffer, _img, width,height, dstOffsetX,dstOffsetY);
 
-		proc.transitionImageLayout(q, _img, _format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _layout);
+		proc.transitionImageLayout(q, q.getCmdPool(), _img, _format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _layout);
 
 		vkFreeMemory(proc, stagingBufferMemory, nullptr);
 		vkDestroyBuffer(proc, stagingBuffer, nullptr);
@@ -79,7 +79,7 @@ namespace val
 	VAL_RETURN_CODE Image::overwriteFromImage(Queue& q, const VkImage srcImg, const VkFormat srcFormat, VkImageLayout srcLayout, uint16_t width, uint16_t height, uint8_t channelCount, int32_t dstOffsetX, int32_t dstOffsetY, int32_t srcOffsetX, int32_t srcOffsetY)
 	{
 		auto& proc = *q.getValProc();
-		proc.copyImage(q, srcImg, _img, _format, srcFormat, _layout, srcLayout, width, height, dstOffsetX, dstOffsetY, srcOffsetX, srcOffsetY);
+		proc.copyImage(q, q.getCmdPool(), srcImg, _img, _format, srcFormat, _layout, srcLayout, width, height, dstOffsetX, dstOffsetY, srcOffsetX, srcOffsetY);
 
 		return VAL_SUCCESS;
 	}
@@ -98,9 +98,9 @@ namespace val
 		VkDeviceMemory tmpDeviceMem;
 
 		auto& proc = *q.getValProc();
-		proc.createImage(q,newWidth, newHeight, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem,_mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
+		proc.createImage(q, q.getCmdPool(), newWidth, newHeight, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem,_mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
 
-		proc.copyImage(q,_img, tmpImg, _format, _format, _layout, _layout, std::min(_width, newWidth), std::min(_height, newHeight));
+		proc.copyImage(q, q.getCmdPool(), _img, tmpImg, _format, _format, _layout, _layout, std::min(_width, newWidth), std::min(_height, newHeight));
 		
 		_width = newWidth;
 		_height = newHeight;
@@ -142,7 +142,7 @@ namespace val
 
 		other->create(q);
 
-		proc.copyImage(q, _img, other->_img, _format, _format, _layout, _layout, _width, _height);
+		proc.copyImage(q, q.getCmdPool(), _img, other->_img, _format, _format, _layout, _layout, _width, _height);
 	}
 
 
@@ -172,9 +172,9 @@ namespace val
 
 		auto& proc = *q.getValProc();
 
-		proc.createImage(q,_width, _height, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
+		proc.createImage(q, q.getCmdPool(), _width, _height, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
 
-		proc.copyImage(q,_img, tmpImg, _format, _format, _layout, _layout, _width, _height);
+		proc.copyImage(q, q.getCmdPool(), _img, tmpImg, _format, _format, _layout, _layout, _width, _height);
 
 		if (_img) {
 			vkDestroyImage(proc, _img, NULL);
@@ -201,9 +201,9 @@ namespace val
 		VkDeviceMemory tmpDeviceMem;
 
 		auto& proc = *q.getValProc();
-		proc.createImage(q,_width, _height, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
+		proc.createImage(q, q.getCmdPool(), _width, _height, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
 
-		proc.copyImage(q,_img, tmpImg, _format, _format, _layout, _layout, _width, _height);
+		proc.copyImage(q, q.getCmdPool(), _img, tmpImg, _format, _format, _layout, _layout, _width, _height);
 
 		if (_img) {
 			vkDestroyImage(proc, _img, NULL);
@@ -231,9 +231,9 @@ namespace val
 			VkImage tmpImg;
 			VkDeviceMemory tmpDeviceMem;
 
-			proc.createImage(q, _width, _height, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
+			proc.createImage(q, q.getCmdPool(), _width, _height, _format, VK_IMAGE_TILING_LINEAR, _usages, GPU_ONLY, tmpImg, tmpDeviceMem, _mipMapLevel, VK_SAMPLE_COUNT_1_BIT, _layout);
 
-			proc.copyImage(q, _img, tmpImg, _format, f, _layout, _layout, _width, _height);
+			proc.copyImage(q, q.getCmdPool(), _img, tmpImg, _format, f, _layout, _layout, _width, _height);
 
 			if (_img) {
 				vkDestroyImage(proc, _img, NULL);
@@ -261,7 +261,7 @@ namespace val
 		if (_layout = l)
 			return VAL_SUCCESS;
 		if (_img) {
-			proc.transitionImageLayout(q, _img, _format, _layout, l, buffer, _mipMapLevel);
+			proc.transitionImageLayout(q, q.getCmdPool(), _img, _format, _layout, l, buffer, _mipMapLevel);
 		}
 		_layout = l;
 		return VAL_SUCCESS;

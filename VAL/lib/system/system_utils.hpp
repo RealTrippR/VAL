@@ -1,15 +1,15 @@
-/*
-Copyright © 2025 Tripp Robins
+ï»¿/*
+Copyright ï¿½ 2025 Tripp Robins
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the “Software”), to deal in the Software
+software and associated documentation files (the ï¿½Softwareï¿½), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE SOFTWARE IS PROVIDED ï¿½AS ISï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -47,6 +47,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <filesystem>
 #include <math.h>
 
+#include <VAL/lib/system/queueFlags.hpp>
 #include <VAL/lib/system/ImageLayoutTransitionInfo.hpp>
 #include <VAL/lib/debugReporting/debugCallbacks.hpp>
 
@@ -91,7 +92,7 @@ namespace val {
 		DepthBounds = VK_DYNAMIC_STATE_DEPTH_BOUNDS,
 		BlendConstants = VK_DYNAMIC_STATE_BLEND_CONSTANTS,
 		/*Vk 1.3 and up:*/
-		CullMode = VK_DYNAMIC_STATE_CULL_MODE, 
+		CullMode = VK_DYNAMIC_STATE_CULL_MODE,
 		Topology = VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY
 	};
 
@@ -103,12 +104,12 @@ namespace val {
 		FeedbackLoop = VK_DEPENDENCY_FEEDBACK_LOOP_BIT_EXT,
 		QueueFamilyOwnershipTransferUseAllStages = VK_DEPENDENCY_QUEUE_FAMILY_OWNERSHIP_TRANSFER_USE_ALL_STAGES_BIT_KHR
 	};
-	#ifndef DEPENDENCY_FLAGS_DEF_ENUM_BITWISE_OPERATORS
-	#define DEPENDENCY_FLAGS_DEF_ENUM_BITWISE_OPERATORS
-		DEF_ENUM_BITWISE_OPERATORS(DEPENDENCY_FLAGS);
-	#endif
+#ifndef DEPENDENCY_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+#define DEPENDENCY_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(DEPENDENCY_FLAGS);
+#endif
 
-	enum class IMAGE_ASPECT 
+	enum class IMAGE_ASPECT
 	{
 		None = VK_IMAGE_ASPECT_NONE,
 		Color = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -124,11 +125,11 @@ namespace val {
 		MaxEnum = VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM
 	};
 
-	#ifndef IMAGE_ASPECT_DEF_ENUM_BITWISE_OPERATORS
-	#define IMAGE_ASPECT_DEF_ENUM_BITWISE_OPERATORS
-		DEF_ENUM_BITWISE_OPERATORS(IMAGE_ASPECT);
-	#endif
-	enum class ACCESS_FLAGS 
+#ifndef IMAGE_ASPECT_DEF_ENUM_BITWISE_OPERATORS
+#define IMAGE_ASPECT_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(IMAGE_ASPECT);
+#endif
+	enum class ACCESS_FLAGS
 	{
 		None = VK_ACCESS_NONE,
 		IndirectCommandRead = VK_ACCESS_INDIRECT_COMMAND_READ_BIT,
@@ -159,13 +160,13 @@ namespace val {
 		CommandPreprocessRead = VK_ACCESS_COMMAND_PREPROCESS_READ_BIT_NV,
 		CommandPreprocessWrite = VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_NV
 	};
-	#ifndef ACCESS_FLAGS_DEF_ENUM_BITWISE_OPERATORS
-	#define ACCESS_FLAGS_DEF_ENUM_BITWISE_OPERATORS
-		DEF_ENUM_BITWISE_OPERATORS(ACCESS_FLAGS);
-	#endif
+#ifndef ACCESS_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+#define ACCESS_FLAGS_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(ACCESS_FLAGS);
+#endif
 
-	
-	enum class IMAGE_USAGE 
+
+	enum class IMAGE_USAGE
 	{
 		TransferSrc = VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 		TransferDst = VK_IMAGE_USAGE_TRANSFER_DST_BIT,
@@ -175,7 +176,7 @@ namespace val {
 		DepthStencilAttachment = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 		TransientAttachment = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT,
 		InputAttachment = VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-		HostTransfer =VK_IMAGE_USAGE_HOST_TRANSFER_BIT,
+		HostTransfer = VK_IMAGE_USAGE_HOST_TRANSFER_BIT,
 		VideoDecodeDst = VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR,
 		VideoDecodeSrc = VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR,
 		VideoDecodeDpb = VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR,
@@ -194,25 +195,25 @@ namespace val {
 		HostTransferEXT = VK_IMAGE_USAGE_HOST_TRANSFER_BIT_EXT,
 		MaxEnum = VK_IMAGE_USAGE_FLAG_BITS_MAX_ENUM
 	};
-	#ifndef IMAGE_USAGE_DEF_ENUM_BITWISE_OPERATORS
-	#define IMAGE_USAGE_DEF_ENUM_BITWISE_OPERATORS
-		DEF_ENUM_BITWISE_OPERATORS(IMAGE_USAGE);
-	#endif
+#ifndef IMAGE_USAGE_DEF_ENUM_BITWISE_OPERATORS
+#define IMAGE_USAGE_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(IMAGE_USAGE);
+#endif
 
-	enum class IMAGE_TILING 
+	enum class IMAGE_TILING
 	{
-		Optimal =					VK_IMAGE_TILING_OPTIMAL,
-		Linear =					VK_IMAGE_TILING_LINEAR,
-		DrmFormatModifier =			VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT,
-		MaxEnum =					VK_IMAGE_TILING_MAX_ENUM
+		Optimal = VK_IMAGE_TILING_OPTIMAL,
+		Linear = VK_IMAGE_TILING_LINEAR,
+		DrmFormatModifier = VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT,
+		MaxEnum = VK_IMAGE_TILING_MAX_ENUM
 	};
-	#ifndef IMAGE_TILING_DEF_ENUM_BITWISE_OPERATORS
-	#define IMAGE_TILING_DEF_ENUM_BITWISE_OPERATORS
-		DEF_ENUM_BITWISE_OPERATORS(IMAGE_TILING);
-	#endif
+#ifndef IMAGE_TILING_DEF_ENUM_BITWISE_OPERATORS
+#define IMAGE_TILING_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(IMAGE_TILING);
+#endif
 
 
-	enum class IMAGE_LAYOUT 
+	enum class IMAGE_LAYOUT
 	{
 		Undefined = VK_IMAGE_LAYOUT_UNDEFINED,
 		General = VK_IMAGE_LAYOUT_GENERAL,
@@ -243,7 +244,7 @@ namespace val {
 		VideoDecodeSRC = VK_IMAGE_LAYOUT_VIDEO_DECODE_SRC_KHR,
 		VideoDecodeDPB = VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR,
 		// Provided by VK_KHR_shared_presentable_image
-		SharedPresent =	VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR,
+		SharedPresent = VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR,
 		// Provided by VK_KHR_fragment_shading_rate
 		FragmentDensityMap = VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT,
 		// Provided by VK_KHR_video_encode_queue
@@ -258,10 +259,10 @@ namespace val {
 		ZeroInitialized = 1000620000,
 		MaxEnum = 0x7FFFFFFF
 	};
-	#ifndef IMAGE_LAYOUT_DEF_ENUM_BITWISE_OPERATORS
-	#define IMAGE_LAYOUT_DEF_ENUM_BITWISE_OPERATORS
-		DEF_ENUM_BITWISE_OPERATORS(IMAGE_LAYOUT);
-	#endif
+#ifndef IMAGE_LAYOUT_DEF_ENUM_BITWISE_OPERATORS
+#define IMAGE_LAYOUT_DEF_ENUM_BITWISE_OPERATORS
+	DEF_ENUM_BITWISE_OPERATORS(IMAGE_LAYOUT);
+#endif
 
 	enum BUFFER_SPACE : uint8_t {
 		GPU_ONLY = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -325,12 +326,18 @@ namespace val {
 	//bool isDeviceSuitable(VkPhysicalDevice device, std::vector<const char*>& deviceExtensions, VkSurfaceKHR surface);
 
 	//VkSurfaceFormatKHR findSurfaceImageFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VAL_RETURN_CODE allocateCommandBuffers(ValProc& proc, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	VAL_RETURN_CODE allocateCommandBuffers(ValProc& proc, VkCommandPool cmdPool, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-	VAL_RETURN_CODE freeCommandBuffers(ValProc& proc, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount);
+	VkCommandPool createCommandPool(ValProc& proc, uint32_t queueFamily);
+
+	void destroyCommandPool(ValProc& proc, VkCommandPool cmdPool);
+
+	uint32_t getQueueFamily(ValProc& proc, QUEUE_FLAGS q);
+
+	VAL_RETURN_CODE freeCommandBuffers(ValProc& proc, VkCommandPool cmdPool, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount);
 
 	VAL_RETURN_CODE createSemaphores(ValProc& proc, VkSemaphore* semaphores, uint32_t semaphoreCount);
-	
+
 	VAL_RETURN_CODE resetCommandBuffers(VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount);
 
 	VAL_RETURN_CODE resetCommandBuffer(VkCommandBuffer cmdBuffer);
@@ -352,7 +359,7 @@ namespace val {
 
 	VkPhysicalDevice findOptimalPhysicalDevice(ValProc& proc, const PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface);
 
-	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance vkInstance, const PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface, uint32_t* deviceCountOut=NULL);
+	VkPhysicalDevice findOptimalPhysicalDevice(VkInstance vkInstance, const PhysicalDeviceRequirements& requirements, VkSurfaceKHR surface, uint32_t* deviceCountOut = NULL);
 
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 
@@ -361,22 +368,22 @@ namespace val {
 	VkImageView createImageView(VkDevice device, VkImage image, const VkFormat& format, const uint32_t& mipLevels = 1U);
 
 
-	VkImage createTextureImage16BitFromDisk(ValProc* proc, VkQueue q, fs::path imgFilepath, VkFormat* autoFormatOut, stbi_us** pixelsOut,
+	VkImage createTextureImage16BitFromDisk(ValProc* proc, VkCommandPool cmdPool, VkQueue q, fs::path imgFilepath, VkFormat* autoFormatOut, stbi_us** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
 		const BUFFER_SPACE& buffSpace = GPU_ONLY);
 
 
-	VkImage createTextureImage8BitFromMemory(ValProc* proc, VkQueue q, const void* memory, const uint32_t memSize, stbi_uc** pixelsOut,
+	VkImage createTextureImage8BitFromMemory(ValProc* proc, VkCommandPool cmdPool, VkQueue q, const void* memory, const uint32_t memSize, stbi_uc** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
 		const BUFFER_SPACE& buffSpace = GPU_ONLY);
 
-	VkImage createTextureImage8BitFromDisk(ValProc* proc, VkQueue q, fs::path imgFilepath, stbi_uc** pixelsOut,
+	VkImage createTextureImage8BitFromDisk(ValProc* proc, VkCommandPool cmdPool, VkQueue q, fs::path imgFilepath, stbi_uc** pixelsOut,
 		VkDeviceMemory* textureImageMemory, const VkImageLayout layout, const VkFormat format, const VkImageUsageFlagBits additionalUsageFlagBits, const uint32_t mipLevels,
 		int* texWidthOut = NULL, int* texHeightOut = NULL, uint8_t* texChannelsOut = NULL,
 		const BUFFER_SPACE& buffSpace = GPU_ONLY);
-	
+
 
 
 	// returns false if the file cannot be read

@@ -1,15 +1,15 @@
-/*
-Copyright © 2025 Tripp Robins
+ï»¿/*
+Copyright ï¿½ 2025 Tripp Robins
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the “Software”), to deal in the Software
+software and associated documentation files (the ï¿½Softwareï¿½), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE SOFTWARE IS PROVIDED ï¿½AS ISï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -39,7 +39,7 @@ namespace val {
 	{
 		if (_imgMemory) {
 			vkFreeMemory(proc._device, _imgMemory, VK_NULL_HANDLE);
-			dbg::recordVkObjectDestruction(proc._device,_imgMemory);
+			dbg::recordVkObjectDestruction(proc._device, _imgMemory);
 
 			_imgMemory = VK_NULL_HANDLE;
 		}
@@ -74,7 +74,7 @@ namespace val {
 
 		int widthtmp;
 		int heightmp;
-		_img = createTextureImage8BitFromMemory(_proc,q, memory, memorySize, &_pixels, &_imgMemory, _layout, _format,
+		_img = createTextureImage8BitFromMemory(_proc, q.getCmdPool(), q, memory, memorySize, &_pixels, &_imgMemory, _layout, _format,
 			VkImageUsageFlagBits(0), _mipLevels, &widthtmp, &heightmp, &_channels, memspace);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
@@ -102,7 +102,7 @@ namespace val {
 		int widthtmp;
 		int heightmp;
 
-		_img = createTextureImage8BitFromDisk(_proc,q, srcpath.string().c_str(), &_pixels, &_imgMemory, _layout, _format, usages, mipLevels,
+		_img = createTextureImage8BitFromDisk(_proc, q.getCmdPool(), q, srcpath.string().c_str(), &_pixels, &_imgMemory, _layout, _format, usages, mipLevels,
 			&widthtmp, &heightmp, &_channels, memspace);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
@@ -156,7 +156,7 @@ namespace val {
 		_height = height;
 		_format = format;
 		_mipLevels = mipLevels;
-		_proc->createImage(q, width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
+		_proc->createImage(q, q.getCmdPool(), width, height, format, VK_IMAGE_TILING_OPTIMAL, usages, memspace, _img, _imgMemory, mipLevels, VK_SAMPLE_COUNT_1_BIT, _layout);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _img);
 		dbg::recordVkObjectCreation(_proc->getVkLogicalDevice(), _imgMemory);
 
@@ -182,12 +182,12 @@ namespace val {
 #endif // !NDEBUG
 
 
-		
 
-		VkCommandBuffer commandBuffer = _proc->beginSingleTimeCommands();
+
+		VkCommandBuffer commandBuffer = _proc->beginSingleTimeCommands(q.getCmdPool());
 
 		if (_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-			_proc->transitionImageLayout(q, _img, _format, _layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandBuffer, mipLevels);
+			_proc->transitionImageLayout(q, q.getCmdPool(), _img, _format, _layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, commandBuffer, mipLevels);
 		}
 
 		VkImageMemoryBarrier barrier{};
@@ -263,10 +263,10 @@ namespace val {
 			0, nullptr,
 			1, &barrier);
 
-		_proc->endSingleTimeCommands(commandBuffer, q);
+		_proc->endSingleTimeCommands(q.getCmdPool(), commandBuffer, q);
 
-	/*	if (_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-			_proc->transitionImageLayout(_img, _format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _layout, commandBuffer, mipLevels);
-		}*/
+		/*	if (_layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+				_proc->transitionImageLayout(_img, _format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _layout, commandBuffer, mipLevels);
+			}*/
 	}
 }

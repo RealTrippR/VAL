@@ -116,8 +116,12 @@ int main()
 
 	proc.initDevices(deviceRequirements, validationLayers, enableValidationLayers, QUEUE_FLAGS::Graphics);
 
+	VkCommandPool cmdPool = val::createCommandPool(proc, val::getQueueFamily(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Transfer));
+
+	Queue graphicsQueue(proc, cmdPool, QUEUE_FLAGS::Graphics);
+
 	Queue omniQueue;
-	omniQueue.create(proc, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Transfer);
+	omniQueue.create(proc, cmdPool, QUEUE_FLAGS::Graphics | QUEUE_FLAGS::Transfer);
 
 	// Configure and create window
 	WindowProperties windowConfig;
@@ -179,7 +183,7 @@ int main()
 
 
 	/*window.create should be called only after proc.create has been called*/
-	window.create(imageFormat, pipeline.getVkRenderPass());
+	window.create(imageFormat, cmdPool, pipeline.getVkRenderPass());
 
 
 	Texture2D img1(omniQueue, "testImage.jpg", TEXTURE_FORMAT_AUTO, IMAGE_USAGE::Sampled, IMAGE_LAYOUT::ShaderReadOnly);
@@ -221,14 +225,11 @@ int main()
 
 	//////////////////////////////////////////////////////////////
 
-	Queue graphicsQueue(proc, QUEUE_FLAGS::Graphics);
-
-
 	tiny_vector<VkCommandBuffer> cmdBuffers(proc.getFramesInFlight());
-	allocateCommandBuffers(proc, cmdBuffers.data(), cmdBuffers.size());
+	allocateCommandBuffers(proc, cmdPool, cmdBuffers.data(), cmdBuffers.size());
 
 	tiny_vector<VkCommandBuffer> winCmdBuffers(proc.getFramesInFlight());
-	allocateCommandBuffers(proc, winCmdBuffers.data(), winCmdBuffers.size());
+	allocateCommandBuffers(proc, cmdPool, winCmdBuffers.data(), winCmdBuffers.size());
 
 	tiny_vector<VkSemaphore> graphicsSemaphores(proc.getFramesInFlight());
 	createSemaphores(proc, graphicsSemaphores.data(), graphicsSemaphores.size());
@@ -319,9 +320,12 @@ int main()
 	graphicsQueue.waitIdle();
 	destroySemaphores(proc, graphicsSemaphores.data(), graphicsSemaphores.size());
 	destroySemaphores(proc, imgSemaphores.data(), imgSemaphores.size());
-	freeCommandBuffers(proc, cmdBuffers.data(), cmdBuffers.size());
+	freeCommandBuffers(proc, cmdPool, cmdBuffers.data(), cmdBuffers.size());
 
-	freeCommandBuffers(proc, winCmdBuffers.data(), winCmdBuffers.size());
+	freeCommandBuffers(proc, cmdPool, winCmdBuffers.data(), winCmdBuffers.size());
+
+	val::destroyCommandPool(proc, cmdPool);
+
 	glfwTerminate();
 
 	return EXIT_SUCCESS;

@@ -9,7 +9,7 @@ namespace val {
 			throw std::runtime_error("VAL: A BUFFER WITH A USAGE BIT OF CPU_GPU CANNOT BE WRITTEN TO OR READ BY THE CPU!");
 		}
 #endif // !NDEBUG
-		memcpy(proc._SSBO_DataMapped[proc._currentFrame][_index],data,_size);
+		memcpy(proc._SSBO_DataMapped[proc._currentFrame][_index], data, _size);
 	}
 
 	VkBuffer SSBO_Handle::getBuffer(ValProc& proc) {
@@ -45,7 +45,7 @@ namespace val {
 
 		// Copy data from staging buffer to all storage buffers for each frame
 		for (size_t i = 0; i < proc._MAX_FRAMES_IN_FLIGHT; i++) {
-			proc.copyBuffer(q, stagingBuffer, getBuffers(proc)[i], _size);
+			proc.copyBuffer(q, q.getCmdPool(), stagingBuffer, getBuffers(proc)[i], _size);
 		}
 
 		vkDestroyBuffer(proc._device, stagingBuffer, nullptr);

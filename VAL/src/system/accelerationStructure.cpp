@@ -345,7 +345,7 @@ namespace val
 				0x0, (void**)&mappedDataStagingBuff);
 
 			memcpy_s(mappedDataStagingBuff, instanceBuffSize, instancesVK.data(), instanceBuffSize);
-			proc.copyBuffer(q, stagingBuff, _instanceBuff, instanceBuffSize, 0, 0);
+			proc.copyBuffer(q, q.getCmdPool(), stagingBuff, _instanceBuff, instanceBuffSize, 0, 0);
 
 			vkUnmapMemory(proc._device, stagingBuffMem);
 			vkFreeMemory(proc._device, stagingBuffMem, NULL);

@@ -71,7 +71,7 @@ namespace val
 		memcpy(stagingData, data, (size_t)dataSize);
 		vkUnmapMemory(proc._device, stagingBufferMemory);
 
-		proc.copyBuffer(q,stagingBuffer, _buffer, (VkDeviceSize)dataSize, srcOffset, dstOffset);
+		proc.copyBuffer(q, q.getCmdPool(), stagingBuffer, _buffer, (VkDeviceSize)dataSize, srcOffset, dstOffset);
 
 		// cleanup staging buffer
 		vkDestroyBuffer(proc._device, stagingBuffer, VK_NULL_HANDLE);
@@ -92,7 +92,7 @@ namespace val
 		__VAL_DEBUG_ValidateBufferCopy(_size, srcBufferRange, srcOffset, dstOffset);
 #endif // !NDEBUG
 
-		proc.copyBuffer(q,_buffer, srcBuffer._buffer, srcBufferRange, srcOffset, dstOffset);
+		proc.copyBuffer(q, q.getCmdPool(), _buffer, srcBuffer._buffer, srcBufferRange, srcOffset, dstOffset);
 	}
 
 	void Buffer::resize(Queue& q, uint32_t newSize) {
@@ -108,7 +108,7 @@ namespace val
 
 			// create new buffer and copy the old one into it
 			proc.createBuffer(newSize, _usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, tmpBuffer, tmpMem);
-			proc.copyBuffer(q,_buffer, tmpBuffer, _size);
+			proc.copyBuffer(q, q.getCmdPool(), _buffer, tmpBuffer, _size);
 			// destroy the old buffer
 			vkDestroyBuffer(proc._device, _buffer, VK_NULL_HANDLE);
 			vkFreeMemory(proc._device, _memory, VK_NULL_HANDLE);
@@ -164,7 +164,7 @@ namespace val
 			proc.createBuffer(_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | (VkBufferUsageFlags)usages, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, stagingBuffer, stagingMem);
 			if (!stagingBuffer)
 				return VAL_FAILURE;
-			proc.copyBuffer(q,_buffer, stagingBuffer, _size);
+			proc.copyBuffer(q,q.getCmdPool(),_buffer, stagingBuffer, _size);
 
 			vkFreeMemory(proc, _memory, NULL);
 			vkDestroyBuffer(proc, _buffer, NULL);

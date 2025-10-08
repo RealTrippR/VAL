@@ -22,7 +22,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <GLFW/glfw3.h>
 #include <VAL/lib/system/system_utils.hpp>
 #include <VAL/lib/system/VAL_PROC.hpp>
-#include <VAL/lib/system/queueManager.hpp>
 #include <VAL/lib/system/windowProperties.hpp>
 #include <VAL/lib/system/windowCursor.hpp>
 #include <vector> 
@@ -72,11 +71,11 @@ namespace val {
 
 	public:
 
-		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkRenderPass renderPass);
+		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkCommandPool cmdPool, VkRenderPass renderPass);
 
-		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments);
+		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkCommandPool cmdPool, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments);
 
-		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount);
+		VAL_RETURN_CODE create(const VkFormat swapchainFormat, VkCommandPool cmdPool, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount);
 
 		void prep(ValProc& proc, WindowProperties& initProperties, const uint16_t width, const uint16_t height, const char* title, const VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR, GLFWmonitor* monitor = NULL);
 
@@ -150,7 +149,7 @@ namespace val {
 
 		VAL_RETURN_CODE createSwapChainFrameBuffers(const VkImageView* Attachments, const uint32_t attachmentCount, VkRenderPass renderPass, VkDevice logicalDevice);
 
-		void createPresentQueue();
+		void createPresentQueue(VkCommandPool cmdPool);
 
 		void createPresentFence(VkDevice device);
 

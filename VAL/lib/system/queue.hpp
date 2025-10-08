@@ -39,16 +39,17 @@ namespace val
 			create();
 		}
 
-		Queue(ValProc& proc, const QUEUE_FLAGS flags) : _proc(&proc)
+		Queue(ValProc& proc, VkCommandPool cmdPool, const QUEUE_FLAGS flags) : _proc(&proc)
 		{
 			_queueFlags = flags;
+			_cmdPool = cmdPool;
 			create();
 		}
 
-		Queue(ValProc& proc, const VkQueueFlags flags) : _proc(&proc)
+		Queue(ValProc& proc, VkCommandPool cmdPool, const VkQueueFlags flags) : _proc(&proc)
 		{
 			_queueFlags = (QUEUE_FLAGS)flags;
-
+			_cmdPool = cmdPool;
 			create();
 		}
 
@@ -126,7 +127,7 @@ namespace val
 
 		static uint8_t findQueueFamilyOfQueueFlags(QUEUE_FLAGS flag, ValProc* proc, VkSurfaceKHR surface/*optional*/, bool* success/*optional*/);
 
-		VAL_RETURN_CODE create(ValProc& proc, const QUEUE_FLAGS flags, uint16_t idxInFamily=0);
+		VAL_RETURN_CODE create(ValProc& proc, VkCommandPool  cmdPool, const QUEUE_FLAGS flags, uint16_t idxInFamily=0);
 
 		// release allocated objects
 		void destroy();

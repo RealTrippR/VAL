@@ -15,10 +15,10 @@ namespace val {
 		_colorSpace = colorSpace;
 	}
 
-	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass)
+	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkCommandPool cmdPool, VkRenderPass renderPass)
 	{
 		createWindowSurface(_procVAL->_instance);
-		createPresentQueue();
+		createPresentQueue(cmdPool);
 		createPresentFence(_procVAL->getVkLogicalDevice());
 		if (createSwapChain(swapchainFormat) != VAL_SUCCESS)
 			return VAL_FAILURE;
@@ -30,10 +30,10 @@ namespace val {
 	}
 
 	
-	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments)
+	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkCommandPool cmdPool, VkRenderPass renderPass, const tiny_vector<VkImageView>& attachments)
 	{
 		createWindowSurface(_procVAL->_instance);
-		createPresentQueue();
+		createPresentQueue(cmdPool);
 		createPresentFence(_procVAL->getVkLogicalDevice());
 		if (createSwapChain(swapchainFormat) != VAL_SUCCESS)
 			return VAL_FAILURE;
@@ -44,10 +44,10 @@ namespace val {
 		return VAL_SUCCESS;
 	}
 
-	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount)
+	VAL_RETURN_CODE Window::create(const VkFormat swapchainFormat, VkCommandPool cmdPool, VkRenderPass renderPass, const VkImageView* attachments, const uint32_t attachmentCount)
 	{
 		createWindowSurface(_procVAL->_instance);
-		createPresentQueue();
+		createPresentQueue(cmdPool);
 		createPresentFence(_procVAL->getVkLogicalDevice());
 		if (createSwapChain(swapchainFormat) != VK_SUCCESS)
 			return VAL_FAILURE;
@@ -269,9 +269,9 @@ namespace val {
 	}
 
 
-	void Window::createPresentQueue()
+	void Window::createPresentQueue(VkCommandPool cmdPool)
 	{
-		_presentQueue.create(*_procVAL, QUEUE_FLAGS::Graphics);
+		_presentQueue.create(*_procVAL, cmdPool, QUEUE_FLAGS::Graphics);
 	}
 
 

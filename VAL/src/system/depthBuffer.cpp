@@ -5,7 +5,7 @@ namespace val {
 	void DepthBuffer::create(Queue& q, VkExtent2D extent, VkFormat depthFormat, size_t imgViewCount, uint8_t mipLevels, VkSampleCountFlagBits msaaSamples)
 	{
 		auto& proc = *q.getValProc();
-		proc.createImage(q, extent.width, extent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
+		proc.createImage(q, q.getCmdPool(),extent.width, extent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
 			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory, mipLevels, msaaSamples);
 		imgViews.resize((uint32_t)imgViewCount);
 		for (uint32_t i = 0; i < imgViewCount; ++i) {
