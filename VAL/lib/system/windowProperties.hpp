@@ -59,11 +59,11 @@ namespace val {
 			_boolSetMask |= property;
 
 			if (value) {
-				WN_BOOL_PROPERTY flag = static_cast<WN_BOOL_PROPERTY>(1 << uint32_t(property));
+				WN_BOOL_PROPERTY flag = static_cast<WN_BOOL_PROPERTY>(property);
 				_boolValueMask |= flag; //set val
 			}
 			else {
-				WN_BOOL_PROPERTY flag = static_cast<WN_BOOL_PROPERTY>(1 << uint32_t(property));
+				WN_BOOL_PROPERTY flag = static_cast<WN_BOOL_PROPERTY>(property);
 				flag = ~flag;
 				_boolValueMask &= flag;
 			}
@@ -98,32 +98,32 @@ namespace val {
 			glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);      // FORCE VISIBILITY
 
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::Resizable)) {
-				glfwWindowHint(GLFW_RESIZABLE,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::Resizable));
+				bool b = bool(_boolValueMask & WN_BOOL_PROPERTY::Resizable);
+				glfwWindowHint(GLFW_RESIZABLE,b);
 			}
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::Visible)) {
-				glfwWindowHint(GLFW_VISIBLE,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::Visible));
+				bool b = bool(_boolValueMask & WN_BOOL_PROPERTY::Visible);
+				glfwWindowHint(GLFW_VISIBLE, b);
 			}
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::Maximized)) {
-				glfwWindowHint(GLFW_MAXIMIZED,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::Maximized));
+				bool b = bool(_boolValueMask & WN_BOOL_PROPERTY::Maximized);
+				glfwWindowHint(GLFW_MAXIMIZED, b);
 			}
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::CenterCursor)) {
-				glfwWindowHint(GLFW_CENTER_CURSOR,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::CenterCursor));
+				bool b = bool(_boolValueMask & WN_BOOL_PROPERTY::CenterCursor);
+				glfwWindowHint(GLFW_CENTER_CURSOR, b);
 			}
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::ScaleToMonitor)) {
-				glfwWindowHint(GLFW_SCALE_TO_MONITOR,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::ScaleToMonitor));
+				bool b = bool(_boolValueMask & WN_BOOL_PROPERTY::ScaleToMonitor);
+				glfwWindowHint(GLFW_SCALE_TO_MONITOR, b);
 			}
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::ScaleFramebuffer)) {
-				glfwWindowHint(GLFW_SCALE_FRAMEBUFFER,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::ScaleFramebuffer));
+				bool b = bool(_boolValueMask & WN_BOOL_PROPERTY::ScaleFramebuffer);
+				glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, b);
 			}
 			if (bool(_boolSetMask & WN_BOOL_PROPERTY::MousePassthrough)) {
-				glfwWindowHint(GLFW_MOUSE_PASSTHROUGH,
-					bool(_boolValueMask & WN_BOOL_PROPERTY::MousePassthrough));
+				bool b = bool(_boolValueMask & WN_BOOL_PROPERTY::MousePassthrough);
+				glfwWindowHint(GLFW_MOUSE_PASSTHROUGH, b);
 			}
 		}
 	};

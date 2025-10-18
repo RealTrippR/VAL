@@ -367,16 +367,18 @@ namespace val {
 
 
 	void Window::recreateSwapChain(const VkFormat swapchainFormat) {
+		vkDeviceWaitIdle(_procVAL->_device);
+
+		cleanupSwapChain();
+
 		int width = 0, height = 0;
 		glfwGetFramebufferSize(_window, &width, &height);
 		while (width == 0 || height == 0) {
 			glfwGetFramebufferSize(_window, &width, &height);
 			glfwWaitEvents();
 		}
-
-		vkDeviceWaitIdle(_procVAL->_device);
-
-		cleanupSwapChain();
+		_swapChainExtent.width = width;
+		_swapChainExtent.height = height;
 
 		createSwapChain(swapchainFormat);
 		createSwapChainFrameBuffers(_swapChainAttachments, _swapChainAttachmentCount, _swapChainRenderPass, _procVAL->_device);
@@ -466,7 +468,6 @@ namespace val {
 		presentInfo.pImageIndices = &_currentSwapChainImageIndex;
 
 		VkResult result = vkQueuePresentKHR(_presentQueue.getVkQueue(), &presentInfo);
-
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _frameBufferResized) {
 			_frameBufferResized = false;
 			recreateSwapChain(imageFormat);

@@ -328,7 +328,7 @@ namespace val {
 	//VkSurfaceFormatKHR findSurfaceImageFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	VAL_RETURN_CODE allocateCommandBuffers(ValProc& proc, VkCommandPool cmdPool, VkCommandBuffer* cmdBuffers, uint32_t cmdBufferCount, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-	VkCommandPool createCommandPool(ValProc& proc, uint32_t queueFamily);
+	VkCommandPool createCommandPool(ValProc& proc, uint32_t queueFamily, VkCommandPoolCreateFlags flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
 	void destroyCommandPool(ValProc& proc, VkCommandPool cmdPool);
 

@@ -140,6 +140,8 @@ namespace val {
 
 		inline VkSurfaceKHR getVkSurface() const;
 
+		inline GLFWwindow* getGLFWwindow() const;
+
 		inline static void pollEvents() {
 			glfwPollEvents();
 		}

@@ -226,7 +226,7 @@ namespace val {
 
 			if (newMemory)
 			{ // check if alloc succeeded
-				proc.copyBuffer(q, _buffer, newBuffer, _size * sizeof(T), 0u, 0u);
+				proc.copyBuffer(q,q.getCmdPool(), _buffer, newBuffer, _size * sizeof(T), 0u, 0u);
 
 				_memory = newMemory;
 				_buffer = newBuffer;

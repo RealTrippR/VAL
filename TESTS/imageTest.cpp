@@ -130,7 +130,7 @@ int main()
 	window.prep(proc, windowConfig, 800, 800, "Image ____");
 	window.setTitle("Image Test");
 	window.setIcon("testImage.jpg");
-	window.setWindowMode(WN_MODE::WindowedFullscreen);
+	window.setWindowMode(WN_MODE::Windowed);
 
 	Cursor cursor("testImage41x26.jpg", 0, 0);
 	window.setCursor(cursor);
@@ -253,7 +253,8 @@ int main()
 
 	PIPELINE_STAGE waitStages = PIPELINE_STAGE::ColorAttachmentOutput;
 
-	while (!window.shouldClose()) {
+	while (!window.shouldClose()) 
+	{
 		window.pollEvents();
 
 		// Update view information, stored in a UBO
@@ -269,6 +270,8 @@ int main()
 		renderTarget.updatePipeline(pipeline);
 		renderTarget.updateViewport(VkViewport{ 0, 0, (float)window.getSize().width, (float)window.getSize().height, 0.f, 1.f }, 0);
 		renderTarget.updateScissor(VkRect2D{ {0,0}, window.getSize() });
+		renderTarget.setRenderArea(window.getSize());
+
 		renderTarget.updateDescriptorSet(pipeline, descSheet, proc.getCurrentFrame());
 
 		bool usered = true;

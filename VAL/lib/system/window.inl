@@ -68,6 +68,10 @@ namespace val {
 		return _surface;
 	}
 
+	inline GLFWwindow* Window::getGLFWwindow() const {
+		return _window;
+	}
+
 }
 
 #endif
